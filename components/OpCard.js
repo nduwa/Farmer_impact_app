@@ -4,7 +4,13 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { FontAwesome6 } from "@expo/vector-icons";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { Foundation } from "@expo/vector-icons";
-import { Dimensions, Text, TouchableOpacity, View } from "react-native";
+import {
+  Dimensions,
+  Text,
+  TouchableOpacity,
+  View,
+  Platform,
+} from "react-native";
 import { colors } from "../data/colors";
 
 export const OpCard = ({ name }) => {
@@ -22,7 +28,17 @@ export const OpCard = ({ name }) => {
         paddingHorizontal: 1,
         paddingVertical: 10,
         borderRadius: 20,
-        elevation: 8,
+        ...Platform.select({
+          ios: {
+            shadowColor: "black",
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.5,
+            shadowRadius: 4,
+          },
+          android: {
+            elevation: 9,
+          },
+        }),
       }}
     >
       <View

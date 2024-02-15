@@ -1,7 +1,8 @@
 import { StatusBar } from "expo-status-bar";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Dimensions,
+  Platform,
   Image,
   ImageBackground,
   Text,
@@ -14,10 +15,21 @@ import hamburger_IMG from "../assets/hamburger_menu.png";
 import avatar_IMG from "../assets/avatar.png";
 import home_IMG from "../assets/home_banner.jpg";
 import { OpCard } from "../components/OpCard";
+import { SideBar } from "../components/SideBar";
+import { useSelector } from "react-redux";
+import { sidebarActions } from "../redux/SidebarSlice";
 
 export const HomeScreen = ({ navigation }) => {
+  const sidebar = useSelector((state) => state.sidebar);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const screenHeight = Dimensions.get("window").height;
-  const handleClick = () => {};
+  const handleClick = () => {
+    setIsSidebarOpen(true);
+  };
+
+  useEffect(() => {
+    setIsSidebarOpen(sidebar.sidebarStatus);
+  }, [sidebar.sidebarStatus]);
 
   return (
     <View
@@ -28,7 +40,7 @@ export const HomeScreen = ({ navigation }) => {
       }}
       on
     >
-      <StatusBar style={"dark"} />
+      <StatusBar style={isSidebarOpen ? "light" : "dark"} />
       <View
         style={{
           flex: 1,
@@ -92,7 +104,17 @@ export const HomeScreen = ({ navigation }) => {
             height: screenHeight * 0.3,
             borderBottomLeftRadius: 55,
             overflow: "hidden",
-            elevation: 8,
+            ...Platform.select({
+              ios: {
+                shadowColor: "black",
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.5,
+                shadowRadius: 4,
+              },
+              android: {
+                elevation: 8,
+              },
+            }),
           }}
         >
           <ImageBackground
@@ -134,12 +156,22 @@ export const HomeScreen = ({ navigation }) => {
             flexDirection: "row",
             justifyContent: "flex-start",
             flexWrap: "wrap",
-            columnGap:8,
+            columnGap: 8,
             rowGap: 15,
             backgroundColor: colors.bg_variant,
             marginTop: screenHeight * 0.025,
             borderTopRightRadius: 55,
-            elevation: 8,
+            ...Platform.select({
+              ios: {
+                shadowColor: "black",
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.5,
+                shadowRadius: 4,
+              },
+              android: {
+                elevation: 8,
+              },
+            }),
             padding: 20,
           }}
         >
@@ -153,6 +185,7 @@ export const HomeScreen = ({ navigation }) => {
           <OpCard name={"Wet Mill Audit"} />
         </View>
       </View>
+      {isSidebarOpen && <SideBar />}
     </View>
   );
 };

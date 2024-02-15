@@ -7,5 +7,5 @@ export const colors = {
   white: "#efecd4",
   white_a: "rgba(255,255,255,0.5)",
   black: "black",
-  black_a: "rgba(0,0,0,0.3)",
+  black_a: "rgba(0,0,0,0.7)",
 };
