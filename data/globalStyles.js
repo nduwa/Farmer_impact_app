@@ -3,7 +3,7 @@ import { StyleSheet } from "react-native";
 export const globalStyles = StyleSheet.create({
   image: {
     flex: 1,
-    justifyContent: "flex-end",
+    justifyContent: "flex-start",
   },
   imageHome: {
     flex: 1,

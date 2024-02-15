@@ -37,7 +37,13 @@ export const LoginScreen = ({ navigation }) => {
 
   const handleClick = () => {};
 
-  const handleSubmit = () => {};
+  const handleNavigation = (location) => {
+    navigation.navigate(location);
+  };
+
+  const handleSubmit = () => {
+    handleNavigation("Homepage");
+  };
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
