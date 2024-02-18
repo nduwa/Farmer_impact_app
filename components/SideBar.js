@@ -5,18 +5,19 @@ import {
   Easing,
   ImageBackground,
   Platform,
+  ScrollView,
   TouchableOpacity,
   View,
 } from "react-native";
 import { colors } from "../data/colors";
 import { globalStyles } from "../data/globalStyles";
 import { useDispatch, useSelector } from "react-redux";
-import { FontAwesome5 } from "@expo/vector-icons";
 import sidebar_IMG from "../assets/sidebar_banner.jpg";
 
 import { Ionicons } from "@expo/vector-icons";
 import { SideNav } from "./SideNav";
 import { sidebarActions } from "../redux/SidebarSlice";
+import { StationLocation } from "./StationLocation";
 
 export const SideBar = ({ navigation }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -68,13 +69,11 @@ export const SideBar = ({ navigation }) => {
           source={sidebar_IMG}
           resizeMode="cover"
           style={{
-            alignItems: "flex-end",
             justifyContent: "flex-end",
             height: screenHeight * 0.13,
             overflow: "hidden",
             backgroundColor: "red",
             borderBottomLeftRadius: 40,
-            padding: 15,
             ...Platform.select({
               ios: {
                 shadowColor: "black",
@@ -88,17 +87,28 @@ export const SideBar = ({ navigation }) => {
             }),
           }}
         >
-          <TouchableOpacity onPress={handleClick}>
-            <Ionicons name="close-circle-sharp" size={34} color="white" />
-          </TouchableOpacity>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+              paddingHorizontal: 8,
+              marginBottom: screenHeight * 0.01,
+            }}
+          >
+            <StationLocation />
+            <TouchableOpacity onPress={handleClick}>
+              <Ionicons name="close-circle-sharp" size={34} color="white" />
+            </TouchableOpacity>
+          </View>
         </ImageBackground>
         <View
           style={{
             flex: 1,
-            paddingVertical: 10,
-            paddingHorizontal: 20,
-            gap: 20,
+            gap: 8,
             marginTop: screenHeight * 0.03,
+            paddingVertical: 10,
+            paddingHorizontal: 10,
           }}
         >
           <SideNav name={"Sync Data"} />
@@ -109,8 +119,10 @@ export const SideBar = ({ navigation }) => {
           <SideNav name={"Pending Training"} />
           <SideNav name={"SC Daily Journals"} />
           <SideNav name={"CWS Finance"} />
-          <SideNav name={"History"} />
+          <SideNav name={"History"} isActive={true} />
           <SideNav name={"Change Settings"} />
+
+          <SideNav name={"Log out"} isLogOut={true} />
         </View>
       </Animated.View>
     </View>

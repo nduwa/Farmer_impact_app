@@ -18,6 +18,7 @@ import { OpCard } from "../components/OpCard";
 import { SideBar } from "../components/SideBar";
 import { useSelector } from "react-redux";
 import { sidebarActions } from "../redux/SidebarSlice";
+import { StationLocation } from "../components/StationLocation";
 
 export const HomeScreen = ({ navigation }) => {
   const sidebar = useSelector((state) => state.sidebar);
@@ -56,7 +57,25 @@ export const HomeScreen = ({ navigation }) => {
             padding: 10,
           }}
         >
-          <TouchableOpacity onPress={handleClick}>
+          <TouchableOpacity
+            style={{
+              padding: 2,
+              borderRadius: 8,
+              backgroundColor: colors.white,
+              ...Platform.select({
+                ios: {
+                  shadowColor: "black",
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.5,
+                  shadowRadius: 4,
+                },
+                android: {
+                  elevation: 6,
+                },
+              }),
+            }}
+            onPress={handleClick}
+          >
             <Image
               source={hamburger_IMG}
               resizeMode="cover"
@@ -126,28 +145,7 @@ export const HomeScreen = ({ navigation }) => {
               alignItems: "flex-end",
             }}
           >
-            <View
-              style={{
-                alignSelf: "flex-end",
-                alignItems: "center",
-                flexDirection: "row",
-                padding: 10,
-              }}
-            >
-              <Entypo name="location-pin" size={24} color="white" />
-              <Text
-                style={{
-                  fontWeight: "bold",
-                  fontSize: 18,
-                  color: colors.white,
-                  textShadowColor: colors.black,
-                  textShadowOffset: { width: 0, height: 2.5 },
-                  textShadowRadius: 5,
-                }}
-              >
-                Gakenke, Station 7
-              </Text>
-            </View>
+            <StationLocation />
           </ImageBackground>
         </View>
         <View
