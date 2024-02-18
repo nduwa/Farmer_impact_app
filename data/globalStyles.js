@@ -12,13 +12,13 @@ export const globalStyles = StyleSheet.create({
   },
   sidebar: {
     flex: 1,
-    backgroundColor: colors.white,
+    backgroundColor: colors.bg_variant,
     width: sidebarWidth,
   },
   labelNormal: {
     opacity: 1,
     fontWeight: "regular",
-    fontSize: 12,
+    fontSize: screenWidth * 0.035,
     fontWeight: "bold",
     textAlign: "center",
   },

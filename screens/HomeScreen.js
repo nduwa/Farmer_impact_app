@@ -18,11 +18,14 @@ import { OpCard } from "../components/OpCard";
 import { SideBar } from "../components/SideBar";
 import { useSelector } from "react-redux";
 import { sidebarActions } from "../redux/SidebarSlice";
+import { StationLocation } from "../components/StationLocation";
 
 export const HomeScreen = ({ navigation }) => {
   const sidebar = useSelector((state) => state.sidebar);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const screenHeight = Dimensions.get("window").height;
+  const screenWidth = Dimensions.get("window").width;
+
   const handleClick = () => {
     setIsSidebarOpen(true);
   };
@@ -56,7 +59,25 @@ export const HomeScreen = ({ navigation }) => {
             padding: 10,
           }}
         >
-          <TouchableOpacity onPress={handleClick}>
+          <TouchableOpacity
+            style={{
+              padding: 2,
+              borderRadius: 8,
+              backgroundColor: colors.white,
+              ...Platform.select({
+                ios: {
+                  shadowColor: "black",
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.5,
+                  shadowRadius: 4,
+                },
+                android: {
+                  elevation: 6,
+                },
+              }),
+            }}
+            onPress={handleClick}
+          >
             <Image
               source={hamburger_IMG}
               resizeMode="cover"
@@ -77,21 +98,21 @@ export const HomeScreen = ({ navigation }) => {
             <Text
               style={{
                 fontWeight: "900",
-                fontSize: 24,
+                fontSize: screenWidth * 0.07,
                 color: colors.secondary_variant,
               }}
             >
               Hello User
             </Text>
-            <Text style={{ fontSize: 13 }}>Sunday, 27 February 2024</Text>
+            <Text style={{ fontSize: screenWidth * 0.037 }}>Sunday, 27 February 2024</Text>
           </View>
           <TouchableOpacity>
             <Image
               source={avatar_IMG}
               resizeMode="cover"
               style={{
-                height: 35,
-                width: 35,
+                height: screenHeight * 0.05,
+                width: screenHeight * 0.05,
                 borderWidth: 1,
                 borderColor: colors.black,
                 borderRadius: 50,
@@ -126,28 +147,7 @@ export const HomeScreen = ({ navigation }) => {
               alignItems: "flex-end",
             }}
           >
-            <View
-              style={{
-                alignSelf: "flex-end",
-                alignItems: "center",
-                flexDirection: "row",
-                padding: 10,
-              }}
-            >
-              <Entypo name="location-pin" size={24} color="white" />
-              <Text
-                style={{
-                  fontWeight: "bold",
-                  fontSize: 18,
-                  color: colors.white,
-                  textShadowColor: colors.black,
-                  textShadowOffset: { width: 0, height: 2.5 },
-                  textShadowRadius: 5,
-                }}
-              >
-                Gakenke, Station 7
-              </Text>
-            </View>
+            <StationLocation />
           </ImageBackground>
         </View>
         <View
@@ -156,8 +156,8 @@ export const HomeScreen = ({ navigation }) => {
             flexDirection: "row",
             justifyContent: "flex-start",
             flexWrap: "wrap",
-            columnGap: 8,
-            rowGap: 15,
+            columnGap: screenWidth * 0.018,
+            rowGap: screenHeight * 0.02,
             backgroundColor: colors.bg_variant,
             marginTop: screenHeight * 0.025,
             borderTopRightRadius: 55,
@@ -172,7 +172,7 @@ export const HomeScreen = ({ navigation }) => {
                 elevation: 8,
               },
             }),
-            padding: 20,
+            padding: screenWidth * 0.06,
           }}
         >
           <OpCard name={"Register"} />

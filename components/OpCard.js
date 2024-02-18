@@ -26,7 +26,7 @@ export const OpCard = ({ name }) => {
         width: screenWidth * 0.28,
         height: screenWidth * 0.28,
         paddingHorizontal: 1,
-        paddingVertical: 10,
+        paddingVertical: screenHeight * 0.01,
         borderRadius: 20,
         ...Platform.select({
           ios: {
@@ -45,46 +45,68 @@ export const OpCard = ({ name }) => {
         style={{
           justifyContent: "center",
           alignItems: "center",
-          gap: 10,
+          gap: screenWidth * 0.02,
         }}
       >
         {name === "Register" && (
-          <AntDesign name="adduser" size={35} color="black" />
+          <AntDesign name="adduser" size={screenWidth * 0.09} color="black" />
         )}
         {name === "Inspection" && (
           <MaterialCommunityIcons
             name="notebook-check-outline"
-            size={32}
+            size={screenWidth * 0.09}
             color="black"
           />
         )}
         {name === "Update Farmer" && (
-          <FontAwesome6 name="user-pen" size={24} color="black" />
+          <FontAwesome6
+            name="user-pen"
+            size={screenWidth * 0.08}
+            color="black"
+          />
         )}
         {name === "Training" && (
-          <FontAwesome5 name="chalkboard-teacher" size={28} color="black" />
+          <FontAwesome5
+            name="chalkboard-teacher"
+            size={screenWidth * 0.08}
+            color="black"
+          />
         )}
         {name === "Buy Coffee" && (
-          <Foundation name="burst-sale" size={38} color="black" />
+          <Foundation
+            name="burst-sale"
+            size={screenWidth * 0.1}
+            color="black"
+          />
         )}
         {name === "Review Purchases" && (
           <MaterialCommunityIcons
             name="note-search-outline"
-            size={32}
+            size={screenWidth * 0.09}
             color="black"
           />
         )}
         {name === "CWS Finance" && (
-          <FontAwesome6 name="sack-dollar" size={30} color="black" />
+          <FontAwesome6
+            name="sack-dollar"
+            size={screenWidth * 0.09}
+            color="black"
+          />
         )}
         {name === "Wet Mill Audit" && (
           <MaterialCommunityIcons
             name="archive-search-outline"
-            size={28}
+            size={screenWidth * 0.09}
             color="black"
           />
         )}
-        <Text style={{ fontWeight: "500", fontSize: 15, textAlign: "center" }}>
+        <Text
+          style={{
+            fontWeight: "500",
+            fontSize: screenWidth * 0.041,
+            textAlign: "center",
+          }}
+        >
           {name}
         </Text>
       </View>

@@ -24,6 +24,7 @@ export const LoginScreen = ({ navigation }) => {
   const [errorPwd, setErrorPwd] = useState(false);
   const [accurateHeight, setAccurateHeight] = useState(0);
   const screenHeight = Dimensions.get("window").height;
+  const screenWidth = Dimensions.get("window").width;
 
   const calculateHeight = () => {
     setAccurateHeight(0);
@@ -104,7 +105,7 @@ export const LoginScreen = ({ navigation }) => {
                   flex: 1,
                   flexDirection: "column",
                   width: "100%",
-                  padding: 30,
+                  padding: screenHeight * 0.04,
                   backgroundColor: colors.white,
                   borderTopLeftRadius: 35,
                   borderTopRightRadius: 35,
@@ -123,16 +124,26 @@ export const LoginScreen = ({ navigation }) => {
               >
                 <Text
                   style={{
-                    fontSize: 33,
+                    fontSize: screenWidth * 0.09,
                     fontWeight: "bold",
                   }}
                 >
                   Log-in
                 </Text>
                 <Formik>
-                  <View style={{ gap: 18, marginTop: 23 }}>
-                    <View style={{ flexDirection: "column", gap: 13 }}>
-                      <Text style={{ fontWeight: "bold", fontSize: 18 }}>
+                  <View style={{ gap: 18, marginTop: screenHeight * 0.025 }}>
+                    <View
+                      style={{
+                        flexDirection: "column",
+                        gap: screenHeight * 0.02,
+                      }}
+                    >
+                      <Text
+                        style={{
+                          fontWeight: "bold",
+                          fontSize: screenWidth * 0.053,
+                        }}
+                      >
                         User name
                       </Text>
                       <TextInput
@@ -147,7 +158,7 @@ export const LoginScreen = ({ navigation }) => {
                         <Text
                           style={{
                             fontWeight: "regular",
-                            fontSize: 12,
+                            fontSize: screenWidth * 0.035,
                             color: "orange",
                             textAlign: "center",
                           }}
@@ -156,8 +167,18 @@ export const LoginScreen = ({ navigation }) => {
                         </Text>
                       )}
                     </View>
-                    <View style={{ flexDirection: "column", gap: 13 }}>
-                      <Text style={{ fontWeight: "bold", fontSize: 18 }}>
+                    <View
+                      style={{
+                        flexDirection: "column",
+                        gap: screenHeight * 0.02,
+                      }}
+                    >
+                      <Text
+                        style={{
+                          fontWeight: "bold",
+                          fontSize: screenWidth * 0.053,
+                        }}
+                      >
                         Password
                       </Text>
                       <TextInput
@@ -173,7 +194,7 @@ export const LoginScreen = ({ navigation }) => {
                         <Text
                           style={{
                             fontWeight: "regular",
-                            fontSize: 12,
+                            fontSize: screenWidth * 0.035,
                             color: "orange",
                             textAlign: "center",
                           }}
