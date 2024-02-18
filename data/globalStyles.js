@@ -18,7 +18,7 @@ export const globalStyles = StyleSheet.create({
   labelNormal: {
     opacity: 1,
     fontWeight: "regular",
-    fontSize: 12,
+    fontSize: screenWidth * 0.035,
     fontWeight: "bold",
     textAlign: "center",
   },

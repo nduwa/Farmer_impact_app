@@ -98,7 +98,7 @@ export const SideBar = ({ navigation }) => {
           >
             <StationLocation />
             <TouchableOpacity onPress={handleClick}>
-              <Ionicons name="close-circle-sharp" size={34} color="white" />
+              <Ionicons name="close-circle-sharp" size={screenWidth * 0.08} color="white" />
             </TouchableOpacity>
           </View>
         </ImageBackground>

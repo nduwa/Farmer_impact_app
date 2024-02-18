@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, Dimensions } from "react-native";
 import React from "react";
 import { colors } from "../data/colors";
 
@@ -12,6 +12,9 @@ export default function CustomButton({
   bdcolor = colors.primary,
   disabled = false,
 }) {
+  const screenHeight = Dimensions.get("window").height;
+  const screenWidth = Dimensions.get("window").width;
+
   return (
     <TouchableOpacity
       disabled={disabled}
@@ -19,7 +22,7 @@ export default function CustomButton({
         backgroundColor: disabled ? colors.white_a : bg,
         justifyContent: "center",
         alignItems: "center",
-        padding: 6,
+        padding: screenWidth * 0.02,
         borderRadius: 50,
         borderWidth: 1,
         borderColor: bdcolor,
@@ -28,7 +31,13 @@ export default function CustomButton({
       }}
       onPress={onPress}
     >
-      <Text style={{ color: color, fontWeight: "bold", fontSize: 20 }}>
+      <Text
+        style={{
+          color: color,
+          fontWeight: "bold",
+          fontSize: screenWidth * 0.055,
+        }}
+      >
         {text}
       </Text>
     </TouchableOpacity>
