@@ -8,14 +8,26 @@ import { Ionicons } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Entypo } from "@expo/vector-icons";
 import { colors } from "../data/colors";
+import { useNavigation } from "@react-navigation/native";
 
-export const SideNav = ({ name, isLogOut = false, isActive = false }) => {
+export const SideNav = ({
+  name,
+  isLogOut = false,
+  isActive = false,
+  destination = "Homepage", // by default
+}) => {
+  const navigation = useNavigation();
   const giveColor = () => {
     if (isLogOut) return "white";
     if (isActive) return colors.secondary;
   };
+
+  const handleClick = () => {
+    navigation.navigate(destination);
+  };
   return (
     <TouchableOpacity
+      onPress={handleClick}
       style={{
         flexDirection: "row",
         alignItems: "center",

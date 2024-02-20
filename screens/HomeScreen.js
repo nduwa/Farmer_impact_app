@@ -16,12 +16,14 @@ import avatar_IMG from "../assets/avatar.png";
 import home_IMG from "../assets/home_banner.jpg";
 import { OpCard } from "../components/OpCard";
 import { SideBar } from "../components/SideBar";
-import { useSelector } from "react-redux";
-import { sidebarActions } from "../redux/SidebarSlice";
+import { useDispatch, useSelector } from "react-redux";
 import { StationLocation } from "../components/StationLocation";
+import { UserActions } from "../redux/UserSlice";
+// import tokenDecoder from "../helpers/tokenDecoder";
 
 export const HomeScreen = ({ navigation }) => {
   const sidebar = useSelector((state) => state.sidebar);
+  const dispatch = useDispatch();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
@@ -29,10 +31,23 @@ export const HomeScreen = ({ navigation }) => {
   const handleClick = () => {
     setIsSidebarOpen(true);
   };
+  const handleNavigation = (location) => {
+    navigation.navigate(location);
+  };
 
   useEffect(() => {
     setIsSidebarOpen(sidebar.sidebarStatus);
   }, [sidebar.sidebarStatus]);
+
+  // useEffect(() => {
+  //   const userData = tokenDecoder();
+  //   console.log(userData);
+  //   // if (userData) {
+  //   //   dispatch(UserActions.setUserData(userData));
+  //   // } else {
+  //   //   handleNavigation("Login");
+  //   // }
+  // }, []);
 
   return (
     <View
@@ -104,7 +119,9 @@ export const HomeScreen = ({ navigation }) => {
             >
               Hello User
             </Text>
-            <Text style={{ fontSize: screenWidth * 0.037 }}>Sunday, 27 February 2024</Text>
+            <Text style={{ fontSize: screenWidth * 0.037 }}>
+              Sunday, 27 February 2024
+            </Text>
           </View>
           <TouchableOpacity>
             <Image
