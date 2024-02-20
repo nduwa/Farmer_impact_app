@@ -20,6 +20,8 @@ import CustomButton from "../components/CustomButton";
 import { useDispatch, useSelector } from "react-redux";
 import { login } from "../redux/user/loginSlice";
 import { useIsFocused } from "@react-navigation/native";
+import { sidebarActions } from "../redux/SidebarSlice";
+import tokenDecoder from "../helpers/tokenDecoder";
 
 export const LoginScreen = ({ navigation }) => {
   const loginState = useSelector((state) => state.login);
@@ -81,6 +83,21 @@ export const LoginScreen = ({ navigation }) => {
         handleNavigation("Homepage");
     }
   }, [loginState.loading]);
+
+  useEffect(() => {
+    const validatedPreviousLogin = async () => {
+      if (isFocused) {
+        const userData = await tokenDecoder();
+        if (userData) {
+          handleNavigation("Homepage");
+        }
+      }
+    };
+
+    validatedPreviousLogin();
+
+    return () => {};
+  }, [isFocused]);
 
   return (
     <View

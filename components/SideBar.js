@@ -44,7 +44,7 @@ export const SideBar = () => {
     Animated.timing(animation, {
       toValue: isSidebarOpen ? 1 : 0,
       easing: Easing.back(),
-      duration: isSidebarOpen ? 400 : 5,
+      duration: isSidebarOpen ? 200 : 5,
       useNativeDriver: true,
     }).start(() => {
       dispatch(sidebarActions.toggleSidebar());

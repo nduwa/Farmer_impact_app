@@ -9,6 +9,9 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Entypo } from "@expo/vector-icons";
 import { colors } from "../data/colors";
 import { useNavigation } from "@react-navigation/native";
+import { useDispatch } from "react-redux";
+import { sidebarActions } from "../redux/SidebarSlice";
+import * as SecureStore from "expo-secure-store";
 
 export const SideNav = ({
   name,
@@ -17,12 +20,25 @@ export const SideNav = ({
   destination = "Homepage", // by default
 }) => {
   const navigation = useNavigation();
+  const dispatch = useDispatch();
   const giveColor = () => {
     if (isLogOut) return "white";
     if (isActive) return colors.secondary;
   };
 
+  const clearSecureStoreKey = async () => {
+    try {
+      await SecureStore.deleteItemAsync("rtc-token");
+      console.log("Secure store key deleted successfully.");
+    } catch (error) {
+      console.error("Error clearing secure store key:", error);
+    }
+  };
+
   const handleClick = () => {
+    dispatch(sidebarActions.closeSidebar());
+
+    if (isLogOut) clearSecureStoreKey();
     navigation.navigate(destination);
   };
   return (

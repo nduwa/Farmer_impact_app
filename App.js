@@ -16,7 +16,11 @@ export default function App() {
           screenOptions={{ headerShown: false }}
         >
           <Stack.Screen name="Login" component={LoginScreen} />
-          <Stack.Screen name="Homepage" component={HomeScreen} />
+          <Stack.Screen
+            name="Homepage"
+            options={{ unmountOnBlur: true }}
+            component={HomeScreen}
+          />
         </Stack.Navigator>
       </NavigationContainer>
     </Provider>

@@ -1,13 +1,13 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import api from "../axiosInstance";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SecureStore from "expo-secure-store";
 
 export const login = createAsyncThunk("users/login", async (data) => {
   try {
     const response = await api.post(`/user/login?appLogin=1`, data);
     if (response.status === 200) {
       const { token } = response.data;
-      await AsyncStorage.setItem("rtc-token", token);
+      await SecureStore.setItemAsync("rtc-token", token);
     }
     return response.data;
   } catch (err) {

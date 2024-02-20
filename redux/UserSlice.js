@@ -4,18 +4,16 @@ const UserSlice = createSlice({
   name: "user",
   initialState: {
     userData: {},
-    token: "",
+    dataReceived: false,
   },
   reducers: {
     setUserData(state, action) {
-      state.userData = {};
+      state.userData = action.payload;
+      state.dataReceived = true;
     },
     clearUserData(state, action) {
       state.userData = {};
       state.token = "";
-    },
-    setToken(state, action) {
-      state.token = action.payload;
     },
   },
 });
