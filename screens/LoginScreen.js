@@ -22,16 +22,20 @@ import { login } from "../redux/user/loginSlice";
 import { useIsFocused } from "@react-navigation/native";
 import { sidebarActions } from "../redux/SidebarSlice";
 import tokenDecoder from "../helpers/tokenDecoder";
+import * as LocalAuthentication from "expo-local-authentication";
 
 export const LoginScreen = ({ navigation }) => {
   const loginState = useSelector((state) => state.login);
   const dispatch = useDispatch();
   const isFocused = useIsFocused();
+
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
   const [errorName, setErrorName] = useState(false);
   const [errorPwd, setErrorPwd] = useState(false);
   const [accurateHeight, setAccurateHeight] = useState(0);
   const [indicatorVisible, setIndicatorVisibility] = useState(false);
+
+  const [authenticated, setAuthenticated] = useState(false);
 
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
@@ -50,6 +54,32 @@ export const LoginScreen = ({ navigation }) => {
 
   const handleNavigation = (location) => {
     navigation.navigate(location);
+  };
+
+  const checkBiometric = async () => {
+    const compatible =
+      (await LocalAuthentication.hasHardwareAsync()) &&
+      (await LocalAuthentication.isEnrolledAsync());
+    if (compatible) {
+      authenticateUser();
+    }
+  };
+
+  const authenticateUser = async () => {
+    try {
+      const result = await LocalAuthentication.authenticateAsync({
+        promptMessage: "Authenticate with biometrics or PIN",
+        fallbackLabel: "Enter PIN", // This is the label shown if PIN is available
+      });
+      if (result.success) {
+        setAuthenticated(true);
+        handleNavigation("Homepage");
+      } else {
+        setAuthenticated(false);
+      }
+    } catch (error) {
+      console.error("Authentication failed:", error);
+    }
   };
 
   useEffect(() => {
@@ -89,7 +119,7 @@ export const LoginScreen = ({ navigation }) => {
       if (isFocused) {
         const userData = await tokenDecoder();
         if (userData) {
-          handleNavigation("Homepage");
+          checkBiometric();
         }
       }
     };
