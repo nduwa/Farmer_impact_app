@@ -19,7 +19,7 @@ import { SideNav } from "./SideNav";
 import { sidebarActions } from "../redux/SidebarSlice";
 import { StationLocation } from "./StationLocation";
 
-export const SideBar = ({ navigation }) => {
+export const SideBar = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const dispatch = useDispatch();
@@ -44,7 +44,7 @@ export const SideBar = ({ navigation }) => {
     Animated.timing(animation, {
       toValue: isSidebarOpen ? 1 : 0,
       easing: Easing.back(),
-      duration: isSidebarOpen ? 400 : 5,
+      duration: isSidebarOpen ? 200 : 5,
       useNativeDriver: true,
     }).start(() => {
       dispatch(sidebarActions.toggleSidebar());
@@ -98,7 +98,11 @@ export const SideBar = ({ navigation }) => {
           >
             <StationLocation />
             <TouchableOpacity onPress={handleClick}>
-              <Ionicons name="close-circle-sharp" size={screenWidth * 0.08} color="white" />
+              <Ionicons
+                name="close-circle-sharp"
+                size={screenWidth * 0.08}
+                color="white"
+              />
             </TouchableOpacity>
           </View>
         </ImageBackground>
@@ -122,7 +126,11 @@ export const SideBar = ({ navigation }) => {
           <SideNav name={"History"} isActive={true} />
           <SideNav name={"Change Settings"} />
 
-          <SideNav name={"Log out"} isLogOut={true} />
+          <SideNav
+            name={"Log out"}
+            isLogOut={true}
+            destination={"Login"}
+          />
         </View>
       </Animated.View>
     </View>

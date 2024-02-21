@@ -8,31 +8,98 @@ import {
   Text,
   TouchableOpacity,
   View,
+  BackHandler,
+  ToastAndroid,
 } from "react-native";
 import { colors } from "../data/colors";
-import { Entypo } from "@expo/vector-icons";
 import hamburger_IMG from "../assets/hamburger_menu.png";
 import avatar_IMG from "../assets/avatar.png";
 import home_IMG from "../assets/home_banner.jpg";
 import { OpCard } from "../components/OpCard";
 import { SideBar } from "../components/SideBar";
-import { useSelector } from "react-redux";
-import { sidebarActions } from "../redux/SidebarSlice";
+import { useDispatch, useSelector } from "react-redux";
 import { StationLocation } from "../components/StationLocation";
+import { UserActions } from "../redux/UserSlice";
+import * as SecureStore from "expo-secure-store";
+import { sidebarActions } from "../redux/SidebarSlice";
+import { useFocusEffect } from "@react-navigation/native";
 
 export const HomeScreen = ({ navigation }) => {
   const sidebar = useSelector((state) => state.sidebar);
+  const userState = useSelector((state) => state.user);
+  const dispatch = useDispatch();
+  const [today, setToday] = useState("");
+  const [displayName, setDisplayName] = useState("");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const [exitApp, setExitApp] = useState(false);
+
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
 
   const handleClick = () => {
     setIsSidebarOpen(true);
   };
+  const handleNavigation = (location) => {
+    navigation.navigate(location);
+  };
+
+  function formatDate(date) {
+    const options = {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    };
+    return date.toLocaleDateString("en-US", options);
+  }
 
   useEffect(() => {
     setIsSidebarOpen(sidebar.sidebarStatus);
   }, [sidebar.sidebarStatus]);
+
+  useEffect(() => {
+    const initData = async () => {
+      const userName = await SecureStore.getItemAsync("rtc-name-full");
+      if (userName) {
+        setDisplayName(userName.split(" ")[1]);
+      }
+      const currentDate = new Date();
+      setToday(formatDate(currentDate));
+      const unsubscribe = navigation.addListener("blur", () => {
+        if (!navigation.isFocused()) {
+          dispatch(UserActions.clearUserData());
+          dispatch(sidebarActions.closeSidebar());
+          setIsSidebarOpen(false);
+        }
+      });
+
+      return unsubscribe;
+    };
+
+    initData();
+  }, [navigation, userState.dataReceived]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        if (exitApp) {
+          BackHandler.exitApp(); // Exit the app if exitApp is true
+          return true;
+        } else {
+          setExitApp(true); // Set exitApp to true when back button is pressed first time
+          ToastAndroid.show("Tap back again to exit", ToastAndroid.SHORT); // Show toast message
+          setTimeout(() => setExitApp(false), 2000); // Reset exitApp state after 2 seconds
+          return true; // Prevent default behavior (going back)
+        }
+      };
+
+      BackHandler.addEventListener("hardwareBackPress", onBackPress);
+
+      return () =>
+        BackHandler.removeEventListener("hardwareBackPress", onBackPress);
+    }, [exitApp])
+  );
 
   return (
     <View
@@ -102,9 +169,9 @@ export const HomeScreen = ({ navigation }) => {
                 color: colors.secondary_variant,
               }}
             >
-              Hello User
+              Hello {displayName}
             </Text>
-            <Text style={{ fontSize: screenWidth * 0.037 }}>Sunday, 27 February 2024</Text>
+            <Text style={{ fontSize: screenWidth * 0.037 }}>{today}</Text>
           </View>
           <TouchableOpacity>
             <Image

@@ -9,6 +9,9 @@ const SidebarSlice = createSlice({
     toggleSidebar(state, action) {
       state.sidebarStatus = !state.sidebarStatus;
     },
+    closeSidebar(state, action) {
+      state.sidebarStatus = false;
+    },
   },
 });
 

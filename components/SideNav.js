@@ -8,14 +8,43 @@ import { Ionicons } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Entypo } from "@expo/vector-icons";
 import { colors } from "../data/colors";
+import { useNavigation } from "@react-navigation/native";
+import { useDispatch } from "react-redux";
+import { sidebarActions } from "../redux/SidebarSlice";
+import * as SecureStore from "expo-secure-store";
 
-export const SideNav = ({ name, isLogOut = false, isActive = false }) => {
+export const SideNav = ({
+  name,
+  isLogOut = false,
+  isActive = false,
+  destination = "Homepage", // by default
+}) => {
+  const navigation = useNavigation();
+  const dispatch = useDispatch();
   const giveColor = () => {
     if (isLogOut) return "white";
     if (isActive) return colors.secondary;
   };
+
+  const clearSecureStoreKey = async () => {
+    try {
+      await SecureStore.deleteItemAsync("rtc-token");
+      await SecureStore.deleteItemAsync("rtc-Name-full");
+      console.log("Secure store key(s) deleted successfully.");
+    } catch (error) {
+      console.error("Error clearing secure store key:", error);
+    }
+  };
+
+  const handleClick = () => {
+    dispatch(sidebarActions.closeSidebar());
+
+    if (isLogOut) clearSecureStoreKey();
+    navigation.navigate(destination);
+  };
   return (
     <TouchableOpacity
+      onPress={handleClick}
       style={{
         flexDirection: "row",
         alignItems: "center",
