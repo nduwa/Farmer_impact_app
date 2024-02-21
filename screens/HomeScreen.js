@@ -20,7 +20,7 @@ import { SideBar } from "../components/SideBar";
 import { useDispatch, useSelector } from "react-redux";
 import { StationLocation } from "../components/StationLocation";
 import { UserActions } from "../redux/UserSlice";
-import tokenDecoder from "../helpers/tokenDecoder";
+import * as SecureStore from "expo-secure-store";
 import { sidebarActions } from "../redux/SidebarSlice";
 import { useFocusEffect } from "@react-navigation/native";
 
@@ -60,19 +60,17 @@ export const HomeScreen = ({ navigation }) => {
 
   useEffect(() => {
     const initData = async () => {
-      const userData = await tokenDecoder();
-      if (userData) {
-        dispatch(UserActions.setUserData(userData));
-      } else {
-        handleNavigation("Login");
+      const userName = await SecureStore.getItemAsync("rtc-name-full");
+      if (userName) {
+        setDisplayName(userName.split(" ")[1]);
       }
-
+      const currentDate = new Date();
+      setToday(formatDate(currentDate));
       const unsubscribe = navigation.addListener("blur", () => {
         if (!navigation.isFocused()) {
           dispatch(UserActions.clearUserData());
           dispatch(sidebarActions.closeSidebar());
           setIsSidebarOpen(false);
-          console.log(SideBar.sidebarStatus);
         }
       });
 
@@ -80,16 +78,7 @@ export const HomeScreen = ({ navigation }) => {
     };
 
     initData();
-  }, [navigation]);
-
-  useEffect(() => {
-    if (userState.userData) {
-      const user = userState.userData.Name_Full;
-      if (user) setDisplayName(user.split(" ")[1]);
-    }
-    const currentDate = new Date();
-    setToday(formatDate(currentDate));
-  }, [userState.dataReceived]);
+  }, [navigation, userState.dataReceived]);
 
   useFocusEffect(
     React.useCallback(() => {

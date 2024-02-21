@@ -29,7 +29,8 @@ export const SideNav = ({
   const clearSecureStoreKey = async () => {
     try {
       await SecureStore.deleteItemAsync("rtc-token");
-      console.log("Secure store key deleted successfully.");
+      await SecureStore.deleteItemAsync("rtc-Name-full");
+      console.log("Secure store key(s) deleted successfully.");
     } catch (error) {
       console.error("Error clearing secure store key:", error);
     }

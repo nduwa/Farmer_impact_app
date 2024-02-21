@@ -20,9 +20,10 @@ import CustomButton from "../components/CustomButton";
 import { useDispatch, useSelector } from "react-redux";
 import { login } from "../redux/user/loginSlice";
 import { useIsFocused } from "@react-navigation/native";
-import { sidebarActions } from "../redux/SidebarSlice";
+import * as SecureStore from "expo-secure-store";
 import tokenDecoder from "../helpers/tokenDecoder";
 import * as LocalAuthentication from "expo-local-authentication";
+import { UserActions } from "../redux/UserSlice";
 
 export const LoginScreen = ({ navigation }) => {
   const loginState = useSelector((state) => state.login);
@@ -56,6 +57,21 @@ export const LoginScreen = ({ navigation }) => {
     navigation.navigate(location);
   };
 
+  const preLoadUserData = async () => {
+    try {
+      const userData = await tokenDecoder();
+      if (userData) {
+        await SecureStore.setItemAsync("rtc-name-full", userData.Name_Full);
+
+        dispatch(UserActions.setUserData(userData));
+        return true;
+      }
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
+  };
+
   const checkBiometric = async () => {
     const compatible =
       (await LocalAuthentication.hasHardwareAsync()) &&
@@ -73,7 +89,10 @@ export const LoginScreen = ({ navigation }) => {
       });
       if (result.success) {
         setAuthenticated(true);
-        handleNavigation("Homepage");
+        let preFetchedData = preLoadUserData();
+        if (preFetchedData) {
+          handleNavigation("Homepage");
+        }
       } else {
         setAuthenticated(false);
       }
@@ -109,8 +128,12 @@ export const LoginScreen = ({ navigation }) => {
     setIndicatorVisibility(loginState.loading);
 
     if (loginState.response !== null) {
-      if (loginState.response.status === "success")
-        handleNavigation("Homepage");
+      if (loginState.response.status === "success") {
+        let preFetchedData = preLoadUserData();
+        if (preFetchedData) {
+          handleNavigation("Homepage");
+        }
+      }
     }
   }, [loginState.loading]);
 
