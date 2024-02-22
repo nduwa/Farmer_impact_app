@@ -115,7 +115,7 @@ export const SideBar = () => {
             paddingHorizontal: 10,
           }}
         >
-          <SideNav name={"Sync Data"} />
+          <SideNav name={"Sync Data"} destination="Sync" />
           <SideNav name={"Pending Farms"} />
           <SideNav name={"Pending Registrations"} />
           <SideNav name={"Pending Inspections"} />
