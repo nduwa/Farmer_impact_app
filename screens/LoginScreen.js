@@ -23,7 +23,7 @@ import { useIsFocused } from "@react-navigation/native";
 import * as SecureStore from "expo-secure-store";
 import tokenDecoder from "../helpers/tokenDecoder";
 import * as LocalAuthentication from "expo-local-authentication";
-import { UserActions } from "../redux/UserSlice";
+import { UserActions } from "../redux/user/UserSlice";
 
 export const LoginScreen = ({ navigation }) => {
   const loginState = useSelector((state) => state.login);

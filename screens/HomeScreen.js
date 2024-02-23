@@ -19,7 +19,7 @@ import { OpCard } from "../components/OpCard";
 import { SideBar } from "../components/SideBar";
 import { useDispatch, useSelector } from "react-redux";
 import { StationLocation } from "../components/StationLocation";
-import { UserActions } from "../redux/UserSlice";
+import { UserActions } from "../redux/user/UserSlice";
 import * as SecureStore from "expo-secure-store";
 import { sidebarActions } from "../redux/SidebarSlice";
 import { useFocusEffect } from "@react-navigation/native";
