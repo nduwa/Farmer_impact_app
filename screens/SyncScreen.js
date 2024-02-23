@@ -43,7 +43,7 @@ export const SyncScreen = ({ navigation }) => {
     navigation.navigate("Homepage");
   };
   const handleSyncStart = () => {
-    dispatch(sync({ tableName: currentTable }));
+    // dispatch(sync({ tableName: currentTable }));
     setSyncStarted(true);
     setIsSyncing(true);
     setstartSyncModalOpen(false);
@@ -69,6 +69,8 @@ export const SyncScreen = ({ navigation }) => {
         continue;
       } else {
         setCurrentTable(job.table);
+        setCurrentJob(null);
+        setProgress(0);
         return job.table;
       }
     }

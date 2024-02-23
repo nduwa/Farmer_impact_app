@@ -8,4 +8,8 @@ export const colors = {
   white_a: "rgba(255,255,255,0.5)",
   black: "black",
   black_a: "rgba(0,0,0,0.7)",
+  black_letter: "#4e4e4e",
+  thin: "#edd3b4",
+  green_bg: "rgba(0,150,0,0.7)",
+  red_bg: "rgba(160,0,0,0.7)",
 };
