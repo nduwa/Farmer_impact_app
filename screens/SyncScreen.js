@@ -1,17 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { Dimensions, Text, TouchableOpacity, View } from "react-native";
+import * as SecureStore from "expo-secure-store";
+import { AntDesign } from "@expo/vector-icons";
 import { colors } from "../data/colors";
 import { StatusBar } from "expo-status-bar";
-import LottieView from "lottie-react-native";
-import { AntDesign } from "@expo/vector-icons";
 import { SyncItem } from "../components/SyncItem";
 import { SyncButton } from "../components/SyncButton";
-import { SyncModal } from "../components/SyncModal";
-import { dataTodb } from "../helpers/dataTodb";
 import { useDispatch, useSelector } from "react-redux";
+import { dataTodb } from "../helpers/dataTodb";
+import { SyncModal } from "../components/SyncModal";
 import { sync, syncActions } from "../redux/sync/syncSlice";
 
 export const SyncScreen = ({ navigation }) => {
+  const screenHeight = Dimensions.get("window").height;
+  const screenWidth = Dimensions.get("window").width;
   const [progress, setProgress] = useState(0);
   const [currentJob, setCurrentJob] = useState(null);
   const [currentTable, setCurrentTable] = useState(null);
@@ -32,8 +34,6 @@ export const SyncScreen = ({ navigation }) => {
 
   const dispatch = useDispatch();
   const syncState = useSelector((state) => state.sync);
-  const screenHeight = Dimensions.get("window").height;
-  const screenWidth = Dimensions.get("window").width;
 
   const handleExit = () => {
     setIsSyncing(false);
@@ -43,10 +43,13 @@ export const SyncScreen = ({ navigation }) => {
     navigation.navigate("Homepage");
   };
   const handleSyncStart = () => {
-    // dispatch(sync({ tableName: currentTable }));
+
+    setstartSyncModalOpen(false);
+
+    if (!currentTable) return;
+    dispatch(sync({ tableName: currentTable }));
     setSyncStarted(true);
     setIsSyncing(true);
-    setstartSyncModalOpen(false);
   };
   const handleStartProcess = () => {
     setCurrentTable(scheduleNextJob());
@@ -65,7 +68,7 @@ export const SyncScreen = ({ navigation }) => {
 
   const scheduleNextJob = () => {
     for (const job of sycnList) {
-      if (job.status) {
+      if (job.status || job.table === "cells" || job.table === "crops") {
         continue;
       } else {
         setCurrentTable(job.table);
@@ -78,7 +81,7 @@ export const SyncScreen = ({ navigation }) => {
 
   useEffect(() => {
     if (syncState.loading) {
-      setCurrentJob("Connecting...");
+      setCurrentJob("Connecting");
     }
     if (syncState.serverResponded && syncState.response && !syncState.error) {
       dataTodb({
@@ -92,11 +95,42 @@ export const SyncScreen = ({ navigation }) => {
     }
   }, [syncState.loading, syncState.serverResponded]);
 
+  useEffect(
+    () => async () => {
+      if (currentJob === "completed") {
+        let storageKey = `rtc-sync-${currentTable}`;
+        await SecureStore.setItemAsync(storageKey, "1");
+      }
+    },
+    [currentJob]
+  );
+
+  useEffect(() => {
+    const refreshSyncList = async () => {
+      const updatedSyncList = await Promise.all(
+        sycnList.map(async (item) => {
+          const storageKey = `rtc-sync-${item.table}`;
+          const syncValue = await SecureStore.getItemAsync(storageKey);
+          console.log(`${storageKey}: ${syncValue}`);
+          return {
+            table: item.table,
+            status: syncValue === "1",
+          };
+        })
+      );
+
+      setSyncList(updatedSyncList);
+    };
+
+    refreshSyncList();
+  }, []);
+
   return (
     <View
       style={{
         flex: 1,
         backgroundColor: colors.white,
+        maxWidth: screenWidth,
       }}
     >
       <StatusBar style="dark" />
@@ -105,7 +139,7 @@ export const SyncScreen = ({ navigation }) => {
           flexDirection: "row",
           alignItems: "center",
           height: screenHeight * 0.11,
-          backgroundColor: "white",
+          backgroundColor: colors.white,
           paddingTop: screenHeight * 0.042,
           padding: 10,
         }}
@@ -115,7 +149,7 @@ export const SyncScreen = ({ navigation }) => {
           style={{
             alignItems: "center",
             justifyContent: "center",
-            backgroundColor: "white",
+            backgroundColor: colors.white,
             padding: 5,
           }}
         >
@@ -134,68 +168,96 @@ export const SyncScreen = ({ navigation }) => {
       <View
         style={{
           flex: 1,
-          justifyContent: "center",
-          alignItems: "center",
           width: "100%",
-          gap: 45,
         }}
       >
-        {isSyncing && (
-          <LottieView
-            style={{
-              height: screenHeight * 0.16,
-              width: screenHeight * 0.16,
-              alignSelf: "center",
-            }}
-            source={require("../assets/lottie/loader.json")}
-            autoPlay
-            speed={0.8}
-            loop={true}
-            resizeMode="cover"
-          />
-        )}
-        {syncStarted && (
-          <Text style={{ fontWeight: "700" }}>
-            {currentTable} {currentJob}...{progress}%
-          </Text>
-        )}
-        {syncStarted && (
+        <View
+          style={{
+            justifyContent: "center",
+            alignItems: "center",
+            height: screenHeight * 0.35,
+          }}
+        >
           <View
             style={{
-              flexDirection: "column",
-              columnGap: screenHeight * 0.02,
+              justifyContent: "center",
+              alignContent: "center",
+              gap: screenHeight * 0.015,
+              width: screenWidth * 0.7,
+              height: "70%",
+              backgroundColor: colors.white,
+              elevation: 3,
+              borderBottomLeftRadius: screenWidth,
+              borderBottomRightRadius: screenWidth,
             }}
           >
-            <SyncItem name={"Stations"} isDone={sycnList[0].status} />
-            <SyncItem name={"Groups"} isDone={sycnList[1].status} />
-            <SyncItem name={"Farmers"} isDone={sycnList[2].status} />
-            <SyncItem name={"Households"} isDone={sycnList[3].status} />
-            <SyncItem name={"Cells"} isDone={sycnList[4].status} />
-            <SyncItem name={"Training modules"} isDone={sycnList[5].status} />
-            <SyncItem
-              name={"Inspection questions"}
-              isDone={sycnList[6].status}
-            />
-            <SyncItem name={"Farmers crops"} isDone={sycnList[7].status} />
-          </View>
-        )}
+            <View>
+              <Text
+                style={{
+                  textAlign: "center",
+                  fontWeight: "bold",
+                  fontSize: 24,
+                }}
+              >
+                {currentTable?.replace(/^\w/, (c) => c.toUpperCase()) || "N/A"}
+              </Text>
+              <Text
+                style={{ textAlign: "center", fontWeight: "300", fontSize: 12 }}
+              >
+                ... {currentJob || "no activity yet"} ...
+              </Text>
+            </View>
 
-        <SyncButton
-          label={syncStarted ? "Resume" : "Start"}
-          onPress={handleStartProcess}
-          disabled={isSyncing}
-        />
+            {!isSyncing ? (
+              <SyncButton
+                label={syncStarted ? "Resume" : "Start"}
+                onPress={handleStartProcess}
+                disabled={isSyncing}
+              />
+            ) : (
+              <Text
+                style={{
+                  textAlign: "center",
+                  fontWeight: "bold",
+                  fontSize: 40,
+                  color: colors.secondary_variant,
+                }}
+              >
+                {progress}%
+              </Text>
+            )}
+          </View>
+        </View>
+        <View
+          style={{
+            flexDirection: "column",
+            paddingHorizontal: 10,
+            gap: screenHeight * 0.02,
+          }}
+        >
+          <SyncItem name={"Stations"} isDone={sycnList[0].status} />
+          <SyncItem name={"Groups"} isDone={sycnList[1].status} />
+          <SyncItem name={"Farmers"} isDone={sycnList[2].status} />
+          <SyncItem name={"Households"} isDone={sycnList[3].status} />
+          <SyncItem name={"Training modules"} isDone={sycnList[5].status} />
+          <SyncItem name={"Inspection questions"} isDone={sycnList[6].status} />
+        </View>
       </View>
 
       {/* start sync modal */}
       {startSyncModalOpen && (
         <SyncModal
-          label={`Start data sync for ${currentTable}?`}
+          label={
+            currentTable
+              ? `Start data sync for ${currentTable}?`
+              : "Synchronization complete"
+          }
           onYes={handleSyncStart}
           OnNo={handleEndProcess}
         />
       )}
 
+      {/* cancel sync modal */}
       {cancelSyncModalOpen && (
         <SyncModal
           label={

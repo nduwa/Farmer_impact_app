@@ -62,6 +62,7 @@ export const LoginScreen = ({ navigation }) => {
       const userData = await tokenDecoder();
       if (userData) {
         await SecureStore.setItemAsync("rtc-name-full", userData.Name_Full);
+        await SecureStore.setItemAsync("rtc-user-id", userData.__kp_User);
 
         dispatch(UserActions.setUserData(userData));
         return true;

@@ -1,16 +1,46 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import * as SecureStore from "expo-secure-store";
 import api from "../axiosInstance";
 
 export const sync = createAsyncThunk("data/sync", async (data) => {
   try {
     const { tableName } = data;
-    if (!tableName) return;
-    const response = await api.get(`/sync/${tableName}`);
-    if (response.status === 200) {
-      console.log(`Data received for ${tableName}`);
+    let id = null;
+
+    if (tableName === "stations") {
+      id = await SecureStore.getItemAsync("rtc-user-id");
+    } else if (
+      tableName === "groups" ||
+      tableName === "farmers" ||
+      tableName === "households"
+    ) {
+      id = await SecureStore.getItemAsync("rtc-station-id");
     }
 
-    return response.data.allStations;
+    if (!tableName) return;
+
+    let routeString = `/sync/${tableName}${id ? "/" + id : ""}`;
+
+    const response = await api.get(routeString);
+    if (response.status === 200) {
+      console.log(`Data received for ${tableName}`);
+      if (tableName === "stations") {
+        await SecureStore.setItemAsync(
+          "rtc-station-id",
+          response.data.data[0].__kp_Station
+        );
+        await SecureStore.setItemAsync(
+          "rtc-station-location",
+          response.data.data[0].Area_Big
+        );
+        await SecureStore.setItemAsync(
+          "rtc-station-name",
+          response.data.data[0].Name
+        );
+      }
+    }
+
+    return response.data.data;
   } catch (err) {
     const error = err.response.data;
     console.log(`Data retrieval for ${tableName} failed: ${error.message}`);

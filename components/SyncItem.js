@@ -1,32 +1,85 @@
 import React from "react";
 import { AntDesign } from "@expo/vector-icons";
+import { FontAwesome5 } from "@expo/vector-icons";
 import { FontAwesome6 } from "@expo/vector-icons";
 import { MaterialIcons } from "@expo/vector-icons";
-import { Text, View } from "react-native";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Dimensions, Text, View } from "react-native";
 import { colors } from "../data/colors";
 
 export const SyncItem = ({ name, isDone = false }) => {
+  const screenHeight = Dimensions.get("window").height;
+  const screenWidth = Dimensions.get("window").width;
   return (
     <View
       style={{
         flexDirection: "row",
-        width: "95%",
-        justifyContent: "flex-start",
-        gap: 20,
-        paddingHorizontal: 10,
+        gap: screenWidth * 0.04,
+        paddingHorizontal: screenWidth * 0.05,
       }}
     >
-      <FontAwesome6
-        name="house-flag"
-        size={20}
-        color={colors.secondary_variant}
-      />
+      {name === "Stations" && (
+        <FontAwesome6
+          name="house-flag"
+          size={17}
+          color={colors.secondary_variant}
+        />
+      )}
+      {name === "Groups" && (
+        <MaterialIcons
+          name="groups"
+          size={20}
+          color={colors.secondary_variant}
+        />
+      )}
+      {name === "Farmers" && (
+        <FontAwesome6
+          name="people-line"
+          size={16}
+          color={colors.secondary_variant}
+        />
+      )}
+      {name === "Households" && (
+        <MaterialIcons
+          name="other-houses"
+          size={19}
+          color={colors.secondary_variant}
+        />
+      )}
+      {name === "Cells" && (
+        <MaterialCommunityIcons
+          name="hexagon-multiple"
+          size={18}
+          color={colors.secondary_variant}
+        />
+      )}
+      {name === "Training modules" && (
+        <FontAwesome5
+          name="chalkboard-teacher"
+          size={14}
+          color={colors.secondary_variant}
+        />
+      )}
+      {name === "Inspection questions" && (
+        <MaterialCommunityIcons
+          name="frequently-asked-questions"
+          size={17}
+          color={colors.secondary_variant}
+        />
+      )}
+      {name === "Farmers crops" && (
+        <MaterialCommunityIcons
+          name="food-apple-outline"
+          size={17}
+          color={colors.secondary_variant}
+        />
+      )}
       <View
         style={{
           flexDirection: "row",
-          width: "92%",
-          justifyContent: "space-between",
           alignItems: "center",
+          justifyContent: "space-between",
+          width: "90%",
           borderBottomWidth: 1,
           paddingBottom: 8,
           borderBottomColor: colors.thin,
@@ -41,31 +94,17 @@ export const SyncItem = ({ name, isDone = false }) => {
         >
           {name}
         </Text>
-        {isDone ? (
-          <Text
-            style={{
-              fontSize: 9,
-              backgroundColor: colors.green_bg,
-              color: "white",
-              padding: 3,
-              borderRadius: 8,
-            }}
-          >
-            COMPLETED
-          </Text>
-        ) : (
-          <Text
-            style={{
-              fontSize: 9,
-              backgroundColor: colors.red_bg,
-              color: "white",
-              padding: 3,
-              borderRadius: 8,
-            }}
-          >
-            NOT DONE
-          </Text>
-        )}
+        <Text
+          style={{
+            fontSize: 9,
+            backgroundColor: isDone ? colors.green_bg : colors.red_bg,
+            color: "white",
+            padding: 3,
+            borderRadius: 8,
+          }}
+        >
+          {isDone ? "COMPLETED" : "NOT DONE"}
+        </Text>
       </View>
     </View>
   );

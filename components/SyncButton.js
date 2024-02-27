@@ -8,13 +8,17 @@ export const SyncButton = ({ label, onPress, disabled }) => {
       onPress={onPress}
       disabled={disabled}
       style={{
+        alignSelf: "center",
         paddingVertical: 5,
         paddingHorizontal: 18,
         backgroundColor: disabled ? colors.bg_variant : colors.secondary,
-        borderRadius: 4,
+        borderRadius: 20,
+        width: "50%",
       }}
     >
-      <Text style={{ color: "white", fontSize: 18 }}>{label}</Text>
+      <Text style={{ color: "white", fontSize: 18, textAlign: "center" }}>
+        {label}
+      </Text>
     </TouchableOpacity>
   );
 };

@@ -30,6 +30,7 @@ export const HomeScreen = ({ navigation }) => {
   const dispatch = useDispatch();
   const [today, setToday] = useState("");
   const [displayName, setDisplayName] = useState("");
+  const [stationDetails, setStationDetails] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const [exitApp, setExitApp] = useState(false);
@@ -61,6 +62,18 @@ export const HomeScreen = ({ navigation }) => {
   useEffect(() => {
     const initData = async () => {
       const userName = await SecureStore.getItemAsync("rtc-name-full");
+      const stationData = { location: null, name: null };
+
+      stationData.location = await SecureStore.getItemAsync(
+        "rtc-station-location"
+      );
+      stationData.name = await SecureStore.getItemAsync("rtc-station-name");
+
+      if (stationData.location && stationData.name) {
+        console.log(stationData);
+        setStationDetails(stationData);
+      }
+
       if (userName) {
         setDisplayName(userName.split(" ")[1]);
       }
@@ -214,7 +227,7 @@ export const HomeScreen = ({ navigation }) => {
               alignItems: "flex-end",
             }}
           >
-            <StationLocation />
+            {stationDetails && <StationLocation data={stationDetails} />}
           </ImageBackground>
         </View>
         <View
