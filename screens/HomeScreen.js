@@ -56,10 +56,6 @@ export const HomeScreen = ({ navigation }) => {
   }
 
   useEffect(() => {
-    setIsSidebarOpen(sidebar.sidebarStatus);
-  }, [sidebar.sidebarStatus]);
-
-  useEffect(() => {
     const initData = async () => {
       const userName = await SecureStore.getItemAsync("rtc-name-full");
       const stationData = { location: null, name: null };
@@ -70,7 +66,6 @@ export const HomeScreen = ({ navigation }) => {
       stationData.name = await SecureStore.getItemAsync("rtc-station-name");
 
       if (stationData.location && stationData.name) {
-        console.log(stationData);
         setStationDetails(stationData);
       }
 
@@ -265,7 +260,7 @@ export const HomeScreen = ({ navigation }) => {
           <OpCard name={"Wet Mill Audit"} />
         </View>
       </View>
-      {isSidebarOpen && <SideBar />}
+      {isSidebarOpen && <SideBar setIsSidebarOpen={setIsSidebarOpen} />}
     </View>
   );
 };

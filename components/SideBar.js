@@ -5,7 +5,6 @@ import {
   Easing,
   ImageBackground,
   Platform,
-  ScrollView,
   TouchableOpacity,
   TouchableWithoutFeedback,
   View,
@@ -13,46 +12,40 @@ import {
 import * as SecureStore from "expo-secure-store";
 import { colors } from "../data/colors";
 import { globalStyles } from "../data/globalStyles";
-import { useDispatch, useSelector } from "react-redux";
 import sidebar_IMG from "../assets/sidebar_banner.jpg";
 
 import { Ionicons } from "@expo/vector-icons";
 import { SideNav } from "./SideNav";
-import { sidebarActions } from "../redux/SidebarSlice";
 import { StationLocation } from "./StationLocation";
+import { useIsFocused } from "@react-navigation/native";
 
-export const SideBar = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+export const SideBar = ({ setIsSidebarOpen }) => {
   const [stationDetails, setStationDetails] = useState(null);
-
-  const dispatch = useDispatch();
+  const [initClose, setInitClose] = useState(false);
 
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
-  const sidebarWidth = screenWidth * 0.75;
+  const sidebarWidth = screenWidth * 0.745;
   const animation = new Animated.Value(0);
 
   const handleClick = () => {
-    setIsSidebarOpen(false);
+    setInitClose(true);
   };
   const translateX = animation.interpolate({
     inputRange: [0, 1],
-    outputRange: [
-      isSidebarOpen ? -sidebarWidth : 0,
-      isSidebarOpen ? 0 : -sidebarWidth,
-    ],
+    outputRange: [initClose ? 0 : -sidebarWidth, initClose ? -sidebarWidth : 0],
   });
 
   useEffect(() => {
     Animated.timing(animation, {
-      toValue: isSidebarOpen ? 1 : 0,
-      easing: Easing.back(),
-      duration: isSidebarOpen ? 200 : 5,
+      toValue: 1,
+      easing: initClose ? Easing.back() : Easing.linear,
+      duration: 200,
       useNativeDriver: true,
     }).start(() => {
-      dispatch(sidebarActions.toggleSidebar());
+      if (initClose) setIsSidebarOpen(false);
     });
-  }, [isSidebarOpen]);
+  }, [initClose]);
 
   useEffect(() => {
     const initStationDetails = async () => {
@@ -64,7 +57,6 @@ export const SideBar = () => {
       stationData.name = await SecureStore.getItemAsync("rtc-station-name");
 
       if (stationData.location && stationData.name) {
-        console.log(stationData);
         setStationDetails(stationData);
       }
     };
