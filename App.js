@@ -5,6 +5,7 @@ import store from "./redux";
 import { LoginScreen } from "./screens/LoginScreen";
 import { HomeScreen } from "./screens/HomeScreen";
 import { SyncScreen } from "./screens/SyncScreen";
+import { RegisteredFarmerScreen } from "./screens/buyCoffee/RegisteredFarmerScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -26,6 +27,11 @@ export default function App() {
             name="Sync"
             options={{ unmountOnBlur: true }}
             component={SyncScreen}
+          />
+          <Stack.Screen
+            name="Registered_ATP_Farmer"
+            options={{ unmountOnBlur: true }}
+            component={RegisteredFarmerScreen}
           />
         </Stack.Navigator>
       </NavigationContainer>

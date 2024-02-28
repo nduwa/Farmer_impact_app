@@ -13,12 +13,17 @@ import {
 } from "react-native";
 import { colors } from "../data/colors";
 
-export const OpCard = ({ name }) => {
+export const OpCard = ({ name, action }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
 
+  const handlePress = () => {
+    if (name == "Buy Coffee") action(true);
+  };
+
   return (
     <TouchableOpacity
+      onPress={handlePress}
       style={{
         justifyContent: "center",
         alignItems: "center",

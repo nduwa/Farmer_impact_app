@@ -17,7 +17,6 @@ import sidebar_IMG from "../assets/sidebar_banner.jpg";
 import { Ionicons } from "@expo/vector-icons";
 import { SideNav } from "./SideNav";
 import { StationLocation } from "./StationLocation";
-import { useIsFocused } from "@react-navigation/native";
 
 export const SideBar = ({ setIsSidebarOpen }) => {
   const [stationDetails, setStationDetails] = useState(null);
@@ -40,7 +39,7 @@ export const SideBar = ({ setIsSidebarOpen }) => {
     Animated.timing(animation, {
       toValue: 1,
       easing: initClose ? Easing.back() : Easing.linear,
-      duration: 200,
+      duration: 300,
       useNativeDriver: true,
     }).start(() => {
       if (initClose) setIsSidebarOpen(false);

@@ -39,11 +39,13 @@ export const SyncScreen = ({ navigation }) => {
     setIsSyncing(false);
     setSyncStarted(false);
     setstartSyncModalOpen(false);
+    setCurrentJob(null)
+    setCurrentTable(null)
+    setProgress(0)
     dispatch(syncActions.resetSyncState());
     navigation.navigate("Homepage");
   };
   const handleSyncStart = () => {
-
     setstartSyncModalOpen(false);
 
     if (!currentTable) return;
@@ -71,6 +73,7 @@ export const SyncScreen = ({ navigation }) => {
       if (job.status || job.table === "cells" || job.table === "crops") {
         continue;
       } else {
+        setCurrentTable(null);
         setCurrentTable(job.table);
         setCurrentJob(null);
         setProgress(0);

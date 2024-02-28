@@ -1,6 +1,8 @@
 export const colors = {
   bg: "#efecd4",
   bg_variant: "#f8e4c0",
+  bg_variant_x: "#f5f6fb",
+  bg_variant_font: "#a6b0c4",
   primary: "#f69a00",
   secondary: "#610000",
   secondary_variant: "#AD5E00",
@@ -9,6 +11,7 @@ export const colors = {
   black: "black",
   black_a: "rgba(0,0,0,0.7)",
   black_letter: "#4e4e4e",
+  blue_font: "#111b54",
   thin: "#edd3b4",
   green_bg: "rgba(0,150,0,0.7)",
   red_bg: "rgba(160,0,0,0.7)",

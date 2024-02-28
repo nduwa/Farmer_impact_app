@@ -66,7 +66,7 @@ const syncSlice = createSlice({
   extraReducers: (builder) => {
     builder.addCase(sync.pending, (state) => {
       state.loading = true;
-      state.serverResponded = true;
+      state.serverResponded = false;
     });
     builder.addCase(sync.fulfilled, (state, action) => {
       state.loading = false;

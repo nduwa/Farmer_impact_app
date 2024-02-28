@@ -23,6 +23,7 @@ import { UserActions } from "../redux/user/UserSlice";
 import * as SecureStore from "expo-secure-store";
 import { sidebarActions } from "../redux/SidebarSlice";
 import { useFocusEffect } from "@react-navigation/native";
+import { BuyCoffeeModal } from "../components/BuyCoffeeModal";
 
 export const HomeScreen = ({ navigation }) => {
   const sidebar = useSelector((state) => state.sidebar);
@@ -32,6 +33,7 @@ export const HomeScreen = ({ navigation }) => {
   const [displayName, setDisplayName] = useState("");
   const [stationDetails, setStationDetails] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isBuyCoffeeModalOpen, setIsBuyCoffeeModalOpen] = useState(false);
 
   const [exitApp, setExitApp] = useState(false);
 
@@ -118,7 +120,9 @@ export const HomeScreen = ({ navigation }) => {
       }}
       on
     >
-      <StatusBar style={isSidebarOpen ? "light" : "dark"} />
+      <StatusBar
+        style={isSidebarOpen || isBuyCoffeeModalOpen ? "light" : "dark"}
+      />
       <View
         style={{
           flex: 1,
@@ -254,13 +258,16 @@ export const HomeScreen = ({ navigation }) => {
           <OpCard name={"Inspection"} />
           <OpCard name={"Update Farmer"} />
           <OpCard name={"Training"} />
-          <OpCard name={"Buy Coffee"} />
+          <OpCard name={"Buy Coffee"} action={setIsBuyCoffeeModalOpen} />
           <OpCard name={"Review Purchases"} />
           <OpCard name={"CWS Finance"} />
           <OpCard name={"Wet Mill Audit"} />
         </View>
       </View>
       {isSidebarOpen && <SideBar setIsSidebarOpen={setIsSidebarOpen} />}
+      {isBuyCoffeeModalOpen && (
+        <BuyCoffeeModal setIsBuyCoffeeModalOpen={setIsBuyCoffeeModalOpen} />
+      )}
     </View>
   );
 };

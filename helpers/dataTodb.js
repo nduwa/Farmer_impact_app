@@ -213,7 +213,7 @@ const generateBulkValueString = (tableName, totalRows, data) => {
   } else if (tableName === "farmers") {
     let bulkValues = "";
     for (let i = 0; i < data.length; i++) {
-      let name = data[i].Name;
+      let name = data[i].Name || "";
       const sanitizedName = name.replace(/'/g, ""); // names like Jean D'arc will be Jean D arc for sql syntax reasons
       bulkValues += `(
         ${data[i].id},'${data[i].__kp_Farmer}','${data[i]._kf_Group}','${data[i]._kf_Household}','${data[i]._kf_Location}','${data[i]._kf_Supplier}','${data[i]._kf_Station}','${data[i].Year_Birth}','${data[i].Gender}','${data[i].farmerid}','${sanitizedName}','${data[i].National_ID_t}','${data[i].Phone}','${data[i].Position}','${data[i].CAFE_ID}','${data[i].SAN_ID}','${data[i].UTZ_ID}','${data[i].Marital_Status}','${data[i].Reading_Skills}','${data[i].Math_Skills}','${data[i].created_at}','${data[i].created_by}','${data[i].registered_at}','${data[i].updated_at}','${data[i].type}',${data[i].sync_farmers},${data[i].uploaded},'${data[i].uploaded_at}','${data[i].Area_Small}','${data[i].Area_Smallest}',${data[i].Trees},${data[i].Trees_Producing},${data[i].number_of_plots_with_coffee},'${data[i].STP_Weight}','${data[i].education_level}',${data[i].latitude},${data[i].longitude},'${data[i].householdid}',${data[i].seasonal_goal},${data[i].recordid})`;
@@ -224,7 +224,7 @@ const generateBulkValueString = (tableName, totalRows, data) => {
   } else if (tableName === "households") {
     let bulkValues = "";
     for (let i = 0; i < data.length; i++) {
-      const z_Farmer_Primary = data[i].z_Farmer_Primary;
+      const z_Farmer_Primary = data[i].z_Farmer_Primary || "";
       const sanitizedValue = z_Farmer_Primary.replace(/'/g, "");
       bulkValues += `(
         ${data[i].id},'${data[i].__kp_Household}','${data[i]._kf_Group}','${data[i]._kf_Location}','${data[i]._kf_Station}','${data[i]._kf_Supplier}','${data[i].Area_Small}','${data[i].Area_Smallest}','${data[i].householdid}','${sanitizedValue}','${data[i].created_at}','${data[i].type}','${data[i].farmerid}','${data[i].group_id}',${data[i].STP_Weight},'${data[i].number_of_plots_with_coffee}','${data[i].Trees_Producing}','${data[i].Trees}','${data[i].Longitude}','${data[i].Latitude}','${data[i].Children}','${data[i].Childen_gender}','${data[i].Childen_below_18}','${data[i].recordid}','${data[i].status}','${data[i].inspectionId}',${data[i].cafeId})`;
@@ -235,7 +235,7 @@ const generateBulkValueString = (tableName, totalRows, data) => {
   } else if (tableName === "trainingModules") {
     let bulkValues = "";
     for (let i = 0; i < data.length; i++) {
-      const Name_rw = data[i].Name_rw;
+      const Name_rw = data[i].Name_rw || "";
       const sanitizedValue = Name_rw.replace(/'/g, "");
 
       bulkValues += `(
@@ -269,6 +269,7 @@ export const dataTodb = ({
       console.log("data to db: no data provided", syncData);
       return;
     }
+    console.log(tableName);
     const limit = 10; // 10 rows per insert to avoid parser stack overflow
     const totalRows = syncData.length;
     const totalPages = Math.ceil(totalRows / limit); // pagination logic
@@ -313,7 +314,10 @@ export const dataTodb = ({
                 });
               }
             },
-            (_, error) => console.error("Error inserting groups: ", error)
+            (_, error) => {
+              console.error("Error inserting groups: ", error);
+              return;
+            }
           );
         });
       }
@@ -356,8 +360,8 @@ export const dataTodb = ({
               }
             },
             (_, error) => {
-              console.log(data);
               console.error("Error inserting farmers: ", error);
+              return;
             }
           );
         });
@@ -400,7 +404,10 @@ export const dataTodb = ({
                 });
               }
             },
-            (_, error) => console.error("Error inserting households: ", error)
+            (_, error) => {
+              console.error("Error inserting households: ", error);
+              return;
+            }
           );
         });
       }
@@ -444,7 +451,7 @@ export const dataTodb = ({
             },
             (_, error) => {
               console.log("Error inserting stations: ", error);
-              return true;
+              return;
             }
           );
         });
@@ -478,8 +485,8 @@ export const dataTodb = ({
                 setIsSyncing(false);
                 setSyncList((prevSyncList) => {
                   const updatedSyncList = [...prevSyncList];
-                  updatedSyncList[6] = {
-                    ...updatedSyncList[6],
+                  updatedSyncList[5] = {
+                    ...updatedSyncList[5],
                     status: true,
                   };
                   // Return the updated array
@@ -487,7 +494,10 @@ export const dataTodb = ({
                 });
               }
             },
-            (_, error) => console.error("Error inserting training: ", error)
+            (_, error) => {
+              console.error("Error inserting training: ", error);
+              return;
+            }
           );
         });
       }
@@ -520,8 +530,8 @@ export const dataTodb = ({
                 setIsSyncing(false);
                 setSyncList((prevSyncList) => {
                   const updatedSyncList = [...prevSyncList];
-                  updatedSyncList[5] = {
-                    ...updatedSyncList[5],
+                  updatedSyncList[6] = {
+                    ...updatedSyncList[6],
                     status: true,
                   };
                   // Return the updated array
@@ -529,8 +539,10 @@ export const dataTodb = ({
                 });
               }
             },
-            (_, error) =>
-              console.error("Error inserting inspection questions: ", error)
+            (_, error) => {
+              console.error("Error inserting inspection questions: ", error);
+              return;
+            }
           );
         });
       }
