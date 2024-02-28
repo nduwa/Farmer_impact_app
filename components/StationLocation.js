@@ -3,9 +3,10 @@ import { Dimensions, Text, View } from "react-native";
 import { Entypo } from "@expo/vector-icons";
 import { colors } from "../data/colors";
 
-export const StationLocation = () => {
+export const StationLocation = ({ data }) => {
   const screenWidth = Dimensions.get("window").width;
 
+  const { location, name } = data;
   return (
     <View
       style={{
@@ -26,7 +27,7 @@ export const StationLocation = () => {
           textShadowRadius: 5,
         }}
       >
-        Gakenke, Station 7
+        {location}, {name}
       </Text>
     </View>
   );

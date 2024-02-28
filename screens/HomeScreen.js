@@ -19,7 +19,7 @@ import { OpCard } from "../components/OpCard";
 import { SideBar } from "../components/SideBar";
 import { useDispatch, useSelector } from "react-redux";
 import { StationLocation } from "../components/StationLocation";
-import { UserActions } from "../redux/UserSlice";
+import { UserActions } from "../redux/user/UserSlice";
 import * as SecureStore from "expo-secure-store";
 import { sidebarActions } from "../redux/SidebarSlice";
 import { useFocusEffect } from "@react-navigation/native";
@@ -30,6 +30,7 @@ export const HomeScreen = ({ navigation }) => {
   const dispatch = useDispatch();
   const [today, setToday] = useState("");
   const [displayName, setDisplayName] = useState("");
+  const [stationDetails, setStationDetails] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const [exitApp, setExitApp] = useState(false);
@@ -55,12 +56,19 @@ export const HomeScreen = ({ navigation }) => {
   }
 
   useEffect(() => {
-    setIsSidebarOpen(sidebar.sidebarStatus);
-  }, [sidebar.sidebarStatus]);
-
-  useEffect(() => {
     const initData = async () => {
       const userName = await SecureStore.getItemAsync("rtc-name-full");
+      const stationData = { location: null, name: null };
+
+      stationData.location = await SecureStore.getItemAsync(
+        "rtc-station-location"
+      );
+      stationData.name = await SecureStore.getItemAsync("rtc-station-name");
+
+      if (stationData.location && stationData.name) {
+        setStationDetails(stationData);
+      }
+
       if (userName) {
         setDisplayName(userName.split(" ")[1]);
       }
@@ -214,7 +222,7 @@ export const HomeScreen = ({ navigation }) => {
               alignItems: "flex-end",
             }}
           >
-            <StationLocation />
+            {stationDetails && <StationLocation data={stationDetails} />}
           </ImageBackground>
         </View>
         <View
@@ -252,7 +260,7 @@ export const HomeScreen = ({ navigation }) => {
           <OpCard name={"Wet Mill Audit"} />
         </View>
       </View>
-      {isSidebarOpen && <SideBar />}
+      {isSidebarOpen && <SideBar setIsSidebarOpen={setIsSidebarOpen} />}
     </View>
   );
 };

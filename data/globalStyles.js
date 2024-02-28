@@ -3,7 +3,7 @@ import { colors } from "./colors";
 
 const screenWidth = Dimensions.get("window").width;
 
-const sidebarWidth = screenWidth * 0.75;
+const sidebarWidth = screenWidth * 0.745;
 
 export const globalStyles = StyleSheet.create({
   image: {
