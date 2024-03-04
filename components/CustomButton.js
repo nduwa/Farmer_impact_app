@@ -9,6 +9,8 @@ export default function CustomButton({
   width,
   text,
   mt = 0,
+  mb = 0,
+  radius = 50,
   bdcolor = colors.primary,
   disabled = false,
 }) {
@@ -23,10 +25,11 @@ export default function CustomButton({
         justifyContent: "center",
         alignItems: "center",
         padding: screenWidth * 0.02,
-        borderRadius: 50,
+        borderRadius: radius,
         borderWidth: 1,
         borderColor: bdcolor,
         marginTop: mt,
+        marginBottom: mb,
         width: width,
       }}
       onPress={onPress}

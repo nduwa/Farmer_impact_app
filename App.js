@@ -6,6 +6,7 @@ import { LoginScreen } from "./screens/LoginScreen";
 import { HomeScreen } from "./screens/HomeScreen";
 import { SyncScreen } from "./screens/SyncScreen";
 import { RegisteredFarmerScreen } from "./screens/buyCoffee/RegisteredFarmerScreen";
+import { FarmerScreen } from "./screens/buyCoffee/FarmerScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -32,6 +33,11 @@ export default function App() {
             name="Registered_ATP_Farmer"
             options={{ unmountOnBlur: true }}
             component={RegisteredFarmerScreen}
+          />
+          <Stack.Screen
+            name="FarmerScreen"
+            options={{ unmountOnBlur: true }}
+            component={FarmerScreen}
           />
         </Stack.Navigator>
       </NavigationContainer>

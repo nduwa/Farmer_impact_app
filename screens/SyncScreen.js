@@ -39,9 +39,9 @@ export const SyncScreen = ({ navigation }) => {
     setIsSyncing(false);
     setSyncStarted(false);
     setstartSyncModalOpen(false);
-    setCurrentJob(null)
-    setCurrentTable(null)
-    setProgress(0)
+    setCurrentJob(null);
+    setCurrentTable(null);
+    setProgress(0);
     dispatch(syncActions.resetSyncState());
     navigation.navigate("Homepage");
   };
@@ -152,11 +152,12 @@ export const SyncScreen = ({ navigation }) => {
           style={{
             alignItems: "center",
             justifyContent: "center",
+            alignItems: "center",
             backgroundColor: colors.white,
             padding: 5,
           }}
         >
-          <AntDesign name="left" size={30} color="black" />
+          <AntDesign name="left" size={screenWidth * 0.07} color="black" />
         </TouchableOpacity>
         <Text
           style={{

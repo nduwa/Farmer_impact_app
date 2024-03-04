@@ -5,10 +5,15 @@ import { Feather } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { colors } from "../data/colors";
 
-export const BuyCoffeeItem = ({ destination, label }) => {
+export const BuyCoffeeItem = ({
+  destination,
+  label,
+  setIsBuyCoffeeModalOpen,
+}) => {
   const navigation = useNavigation();
 
   const handleNavigation = () => {
+    setIsBuyCoffeeModalOpen(false);
     navigation.navigate(destination);
   };
 

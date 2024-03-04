@@ -2,7 +2,13 @@ import React from "react";
 import { colors } from "../data/colors";
 import { Dimensions, Text, TextInput, View } from "react-native";
 
-export const BuyCoffeeInput = ({ handleChange, handleBlur, values, label }) => {
+export const BuyCoffeeInput = ({
+  handleChange,
+  handleBlur,
+  value,
+  label,
+  radius = 10,
+}) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
 
@@ -27,12 +33,12 @@ export const BuyCoffeeInput = ({ handleChange, handleBlur, values, label }) => {
         placeholderTextColor={colors.black_a}
         onChangeText={handleChange}
         onBlur={handleBlur}
-        value={values.uname}
+        value={value}
         style={{
           borderColor: colors.bg_variant_font,
           backgroundColor: "white",
           borderWidth: 0.3,
-          borderRadius: 10,
+          borderRadius: radius,
           padding: 7,
           fontWeight: "700",
           fontSize: screenWidth * 0.05,

@@ -26,14 +26,15 @@ import { useFocusEffect } from "@react-navigation/native";
 import { BuyCoffeeModal } from "../components/BuyCoffeeModal";
 
 export const HomeScreen = ({ navigation }) => {
-  const sidebar = useSelector((state) => state.sidebar);
   const userState = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const [today, setToday] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [stationDetails, setStationDetails] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [sidebarScrolled, setsideBarScroll] = useState(false);
   const [isBuyCoffeeModalOpen, setIsBuyCoffeeModalOpen] = useState(false);
+  const [columnGapFac, setColumnGapFac] = useState(1);
 
   const [exitApp, setExitApp] = useState(false);
 
@@ -43,8 +44,13 @@ export const HomeScreen = ({ navigation }) => {
   const handleClick = () => {
     setIsSidebarOpen(true);
   };
-  const handleNavigation = (location) => {
-    navigation.navigate(location);
+
+  const calculateFactor = () => {
+    if (screenHeight < 620) {
+      setColumnGapFac(0.06);
+    } else {
+      setColumnGapFac(0.018);
+    }
   };
 
   function formatDate(date) {
@@ -87,6 +93,7 @@ export const HomeScreen = ({ navigation }) => {
       return unsubscribe;
     };
 
+    calculateFactor();
     initData();
   }, [navigation, userState.dataReceived]);
 
@@ -123,6 +130,12 @@ export const HomeScreen = ({ navigation }) => {
       <StatusBar
         style={isSidebarOpen || isBuyCoffeeModalOpen ? "light" : "dark"}
       />
+      {isSidebarOpen && (
+        <SideBar
+          setsideBarScroll={setsideBarScroll}
+          setIsSidebarOpen={setIsSidebarOpen}
+        />
+      )}
       <View
         style={{
           flex: 1,
@@ -235,7 +248,7 @@ export const HomeScreen = ({ navigation }) => {
             flexDirection: "row",
             justifyContent: "flex-start",
             flexWrap: "wrap",
-            columnGap: screenWidth * 0.018,
+            columnGap: screenWidth * columnGapFac,
             rowGap: screenHeight * 0.02,
             backgroundColor: colors.bg_variant,
             marginTop: screenHeight * 0.025,
@@ -264,7 +277,7 @@ export const HomeScreen = ({ navigation }) => {
           <OpCard name={"Wet Mill Audit"} />
         </View>
       </View>
-      {isSidebarOpen && <SideBar setIsSidebarOpen={setIsSidebarOpen} />}
+
       {isBuyCoffeeModalOpen && (
         <BuyCoffeeModal setIsBuyCoffeeModalOpen={setIsBuyCoffeeModalOpen} />
       )}

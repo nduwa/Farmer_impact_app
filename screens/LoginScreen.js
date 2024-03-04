@@ -206,14 +206,17 @@ export const LoginScreen = ({ navigation }) => {
                   }),
                 }}
               >
-                <Text
-                  style={{
-                    fontSize: screenWidth * 0.09,
-                    fontWeight: "bold",
-                  }}
-                >
-                  Log-in
-                </Text>
+                {!isKeyboardActive && (
+                  <Text
+                    style={{
+                      fontSize: screenWidth * 0.09,
+                      fontWeight: "bold",
+                    }}
+                  >
+                    Log-in
+                  </Text>
+                )}
+
                 <Formik
                   initialValues={{
                     uname: "",

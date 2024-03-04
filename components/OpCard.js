@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { AntDesign } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { FontAwesome6 } from "@expo/vector-icons";
@@ -17,9 +17,23 @@ export const OpCard = ({ name, action }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
 
+  const [factor, setFactor] = useState(1);
+
   const handlePress = () => {
     if (name == "Buy Coffee") action(true);
   };
+
+  const calculateFactor = () => {
+    if (screenHeight < 620) {
+      setFactor(0.25);
+    } else {
+      setFactor(0.28);
+    }
+  };
+
+  useEffect(() => {
+    calculateFactor();
+  }, []);
 
   return (
     <TouchableOpacity
@@ -28,8 +42,8 @@ export const OpCard = ({ name, action }) => {
         justifyContent: "center",
         alignItems: "center",
         backgroundColor: colors.white,
-        width: screenWidth * 0.28,
-        height: screenWidth * 0.28,
+        width: screenWidth * factor,
+        height: screenWidth * factor,
         paddingHorizontal: 1,
         paddingVertical: screenHeight * 0.01,
         borderRadius: 20,

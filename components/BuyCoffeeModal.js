@@ -84,10 +84,12 @@ export const BuyCoffeeModal = ({ setIsBuyCoffeeModalOpen }) => {
 
           <View style={{ flex: 1, gap: 16 }}>
             <BuyCoffeeItem
-              destination={"Registered_ATP_Farmer"}
+              setIsBuyCoffeeModalOpen={setIsBuyCoffeeModalOpen}
+              destination={"FarmerScreen"}
               label={"Registered ATP Farmer"}
             />
             <BuyCoffeeItem
+              setIsBuyCoffeeModalOpen={setIsBuyCoffeeModalOpen}
               destination={"Unregistered_ATP_Farmer"}
               label={"Unregistered ATP Farmer"}
             />
