@@ -14,13 +14,20 @@ import { AntDesign } from "@expo/vector-icons";
 import { Feather } from "@expo/vector-icons";
 import { Formik } from "formik";
 import { FarmerCard } from "../../components/FarmerCard";
+import { GroupCard } from "../../components/GroupCard";
+import { GroupsModal } from "../../components/GroupsModal";
 
 export const FarmerScreen = () => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
 
+  const [groupsModalOpen, setGroupsModalOpen] = useState(true);
+
   const navigation = useNavigation();
 
+  const toggleGroupsModal = () => {
+    setGroupsModalOpen(true);
+  };
   const handleBackButton = () => {
     navigation.navigate("Homepage");
   };
@@ -29,17 +36,19 @@ export const FarmerScreen = () => {
     <View
       style={{
         flex: 1,
-        backgroundColor: colors.bg_variant_x,
+        backgroundColor: colors.bg_variant,
         maxWidth: screenWidth,
       }}
     >
       <StatusBar style="dark" />
+      {groupsModalOpen && <GroupsModal setModalOpen={setGroupsModalOpen} />}
+
       <View
         style={{
           flexDirection: "row",
           alignItems: "center",
           height: screenHeight * 0.11,
-          backgroundColor: colors.bg_variant_x,
+          backgroundColor: colors.white,
           paddingTop: screenHeight * 0.042,
           padding: 10,
           elevation: 5,
@@ -84,9 +93,10 @@ export const FarmerScreen = () => {
             height: screenHeight * 0.1,
           }}
         >
-          <View
+          <TouchableOpacity
+            onPress={toggleGroupsModal}
             style={{
-              backgroundColor: "white",
+              backgroundColor: colors.white_variant,
               alignItems: "center",
               justifyContent: "center",
               borderRadius: 8,
@@ -96,13 +106,13 @@ export const FarmerScreen = () => {
             }}
           >
             <Text style={{ fontWeight: "600" }}>Group 1</Text>
-          </View>
+          </TouchableOpacity>
           <View
             style={{
               flexDirection: "row",
               justifyContent: "center",
               alignItems: "center",
-              backgroundColor: "white",
+              backgroundColor: colors.white_variant,
               marginVertical: 12,
               paddingHorizontal: 12,
               paddingVertical: 4,
@@ -134,7 +144,7 @@ export const FarmerScreen = () => {
                     onBlur={handleBlur}
                     value={values.uname}
                     style={{
-                      backgroundColor: "white",
+                      backgroundColor: colors.white_variant,
                       padding: 5,
                       fontWeight: "700",
                       fontSize: screenWidth * 0.05,
@@ -144,14 +154,16 @@ export const FarmerScreen = () => {
                 </View>
               )}
             </Formik>
-            <Feather name="x" size={24} color={colors.black_a} />
+            <TouchableOpacity>
+              <Feather name="x" size={24} color={colors.black_a} />
+            </TouchableOpacity>
           </View>
         </View>
         <View
           style={{
             flex: 1,
             width: "100%",
-            backgroundColor: "white",
+            backgroundColor: colors.white,
             borderRadius: 15,
             padding: 8,
             elevation: 6,

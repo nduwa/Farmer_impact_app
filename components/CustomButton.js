@@ -11,6 +11,7 @@ export default function CustomButton({
   mt = 0,
   mb = 0,
   radius = 50,
+  paddingRatio = 0.02,
   bdcolor = colors.primary,
   disabled = false,
 }) {
@@ -24,7 +25,7 @@ export default function CustomButton({
         backgroundColor: disabled ? colors.white_a : bg,
         justifyContent: "center",
         alignItems: "center",
-        padding: screenWidth * 0.02,
+        padding: screenWidth * paddingRatio,
         borderRadius: radius,
         borderWidth: 1,
         borderColor: bdcolor,

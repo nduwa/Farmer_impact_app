@@ -146,17 +146,12 @@ export const SideBar = ({ setsideBarScroll, setIsSidebarOpen }) => {
               <SideNav name={"Pending Inspections"} />
               <SideNav name={"Pending Children"} />
               <SideNav name={"Pending Training"} />
-              <SideNav name={"SC Daily Journals"} />
+              <SideNav
+                name={"SC Daily Journals"}
+                destination="ScDailyJournal"
+              />
               <SideNav name={"CWS Finance"} />
-              <SideNav name={"History"} isActive={true} />
-              <SideNav name={"Change Settings"} />
-              <SideNav name={"Change Settings"} />
-              <SideNav name={"Change Settings"} />
-              <SideNav name={"Change Settings"} />
-              <SideNav name={"Change Settings"} />
-              <SideNav name={"Change Settings"} />
-              <SideNav name={"Change Settings"} />
-              <SideNav name={"Change Settings"} />
+              <SideNav name={"History"}/>
               <SideNav name={"Change Settings"} />
 
               <SideNav name={"Log out"} isLogOut={true} destination={"Login"} />

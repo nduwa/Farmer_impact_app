@@ -23,7 +23,7 @@ export const BuyCoffeeInput = ({
         style={{
           fontWeight: "400",
           fontSize: screenWidth * 0.04,
-          color: colors.bg_variant_font,
+          color: colors.black,
           marginLeft: screenWidth * 0.02,
         }}
       >
@@ -36,13 +36,13 @@ export const BuyCoffeeInput = ({
         value={value}
         style={{
           borderColor: colors.bg_variant_font,
-          backgroundColor: "white",
+          backgroundColor: colors.white_variant,
           borderWidth: 0.3,
           borderRadius: radius,
           padding: 7,
           fontWeight: "700",
           fontSize: screenWidth * 0.05,
-          color: colors.blue_font,
+          color: colors.black_letter,
         }}
       />
     </View>

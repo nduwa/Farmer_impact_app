@@ -4,13 +4,13 @@ import { colors } from "../data/colors";
 import { AntDesign } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 
-export const FarmerCard = ({ data }) => {
+export const ScRecordItem = ({ data }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const navigation = useNavigation();
 
   const handleNavigation = () => {
-    navigation.navigate("Registered_ATP_Farmer");
+    navigation.navigate("ScDailySummary");
   };
 
   return (
@@ -21,7 +21,7 @@ export const FarmerCard = ({ data }) => {
         alignContent: "center",
         justifyContent: "space-between",
         width: "100%",
-        backgroundColor: colors.white_variant,
+        backgroundColor: colors.white,
         borderRadius: screenHeight * 0.015,
         padding: screenWidth * 0.03,
         elevation: 3,
@@ -29,17 +29,25 @@ export const FarmerCard = ({ data }) => {
     >
       <View style={{ gap: screenHeight * 0.008 }}>
         <Text style={{ fontSize: screenWidth * 0.05, fontWeight: "600" }}>
-          {data.name}
+          {data.date}
         </Text>
         <Text
-          style={{ fontSize: screenWidth * 0.035, color: colors.black_letter }}
+          style={{
+            fontSize: screenWidth * 0.04,
+            fontWeight: "500",
+            color: colors.black_letter,
+          }}
         >
-          ID: {data.id}
+          Records: {data.records}
         </Text>
         <Text
-          style={{ fontSize: screenWidth * 0.035, color: colors.black_letter }}
+          style={{
+            fontSize: screenWidth * 0.04,
+            fontWeight: "500",
+            color: colors.black_letter,
+          }}
         >
-          Date of birth: {data.date_birth}
+          Weight: {data.weight}
         </Text>
       </View>
       <View

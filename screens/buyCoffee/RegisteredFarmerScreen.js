@@ -33,7 +33,6 @@ export const RegisteredFarmerScreen = () => {
     <View
       style={{
         flex: 1,
-        backgroundColor: colors.bg_variant_x,
         maxWidth: screenWidth,
       }}
     >
@@ -44,7 +43,7 @@ export const RegisteredFarmerScreen = () => {
           flexDirection: "row",
           alignItems: "center",
           height: screenHeight * 0.11,
-          backgroundColor: colors.bg_variant_x,
+          backgroundColor: colors.white,
           paddingTop: screenHeight * 0.042,
           padding: 10,
           elevation: 5,
@@ -71,7 +70,7 @@ export const RegisteredFarmerScreen = () => {
           Registered ATP Farmer
         </Text>
       </View>
-      <View style={{ backgroundColor: colors.bg_variant_x }}>
+      <View style={{ backgroundColor: colors.bg_variant }}>
         <Formik
           initialValues={{
             farmerID: "",
@@ -119,7 +118,7 @@ export const RegisteredFarmerScreen = () => {
                 <View
                   style={{
                     width: "95%",
-                    backgroundColor: colors.bg_variant_x,
+                    backgroundColor: colors.white,
                     elevation: 2,
                     borderRadius: 15,
                     marginTop: screenHeight * 0.025,
@@ -183,7 +182,7 @@ export const RegisteredFarmerScreen = () => {
                 <View
                   style={{
                     width: "95%",
-                    backgroundColor: colors.bg_variant_x,
+                    backgroundColor: colors.white,
                     elevation: 2,
                     borderRadius: 15,
                     paddingHorizontal: screenWidth * 0.04,
@@ -195,7 +194,7 @@ export const RegisteredFarmerScreen = () => {
                     style={{
                       fontWeight: "400",
                       fontSize: screenWidth * 0.05,
-                      color: colors.bg_variant_font,
+                      color: colors.secondary,
                       marginLeft: screenWidth * 0.02,
                     }}
                   >
@@ -205,7 +204,7 @@ export const RegisteredFarmerScreen = () => {
                     containerStyle={{ marginBottom: 10, gap: 5 }}
                     selected={current}
                     onSelected={(value) => setCurrent(value)}
-                    radioBackground={colors.blue_font}
+                    radioBackground={colors.black}
                   >
                     <RadioButtonItem
                       value="test2"
@@ -215,7 +214,7 @@ export const RegisteredFarmerScreen = () => {
                             fontWeight: "600",
                             fontSize: 16,
                             marginLeft: 8,
-                            color: colors.blue_font,
+                            color: colors.black,
                           }}
                         >
                           Cafe Practices Provisional
@@ -230,7 +229,7 @@ export const RegisteredFarmerScreen = () => {
                             fontWeight: "600",
                             fontSize: 16,
                             marginLeft: 8,
-                            color: colors.blue_font,
+                            color: colors.black,
                           }}
                         >
                           Rainforest Alliance
@@ -245,7 +244,7 @@ export const RegisteredFarmerScreen = () => {
                             fontWeight: "600",
                             fontSize: 16,
                             marginLeft: 8,
-                            color: colors.blue_font,
+                            color: colors.black,
                           }}
                         >
                           Not Certified
@@ -259,7 +258,7 @@ export const RegisteredFarmerScreen = () => {
                 <View
                   style={{
                     width: "95%",
-                    backgroundColor: colors.bg_variant_x,
+                    backgroundColor: colors.white,
                     elevation: 2,
                     borderRadius: 15,
                     paddingHorizontal: screenWidth * 0.04,
@@ -271,7 +270,7 @@ export const RegisteredFarmerScreen = () => {
                     style={{
                       fontWeight: "400",
                       fontSize: screenWidth * 0.05,
-                      color: colors.bg_variant_font,
+                      color: colors.secondary,
                       marginLeft: screenWidth * 0.02,
                     }}
                   >
@@ -281,7 +280,7 @@ export const RegisteredFarmerScreen = () => {
                     containerStyle={{ marginBottom: 10, gap: 5 }}
                     selected={current}
                     onSelected={(value) => setCurrent(value)}
-                    radioBackground={colors.blue_font}
+                    radioBackground={colors.black}
                   >
                     <RadioButtonItem
                       value="test2"
@@ -291,7 +290,7 @@ export const RegisteredFarmerScreen = () => {
                             fontWeight: "600",
                             fontSize: 16,
                             marginLeft: 8,
-                            color: colors.blue_font,
+                            color: colors.black,
                           }}
                         >
                           Cherry
@@ -306,7 +305,7 @@ export const RegisteredFarmerScreen = () => {
                             fontWeight: "600",
                             fontSize: 16,
                             marginLeft: 8,
-                            color: colors.blue_font,
+                            color: colors.black,
                           }}
                         >
                           Parchment
@@ -321,7 +320,7 @@ export const RegisteredFarmerScreen = () => {
                   style={{
                     justifyContent: "space-between",
                     width: "95%",
-                    backgroundColor: colors.bg_variant_x,
+                    backgroundColor: colors.white,
                     elevation: 2,
                     borderRadius: 15,
                     paddingHorizontal: screenWidth * 0.04,
@@ -333,7 +332,7 @@ export const RegisteredFarmerScreen = () => {
                     style={{
                       fontWeight: "400",
                       fontSize: screenWidth * 0.05,
-                      color: colors.bg_variant_font,
+                      color: colors.secondary,
                       marginLeft: screenWidth * 0.02,
                     }}
                   >
@@ -416,7 +415,7 @@ export const RegisteredFarmerScreen = () => {
                 <View
                   style={{
                     width: "95%",
-                    backgroundColor: colors.bg_variant_x,
+                    backgroundColor: colors.white,
                     elevation: 2,
                     borderRadius: 15,
                     paddingHorizontal: screenWidth * 0.04,
@@ -428,7 +427,7 @@ export const RegisteredFarmerScreen = () => {
                     style={{
                       fontWeight: "400",
                       fontSize: screenWidth * 0.05,
-                      color: colors.bg_variant_font,
+                      color: colors.secondary,
                       marginLeft: screenWidth * 0.02,
                     }}
                   >
@@ -452,7 +451,7 @@ export const RegisteredFarmerScreen = () => {
                   />
                 </View>
                 <CustomButton
-                  bg={colors.blue_font}
+                  bg={colors.secondary}
                   color={"white"}
                   width="95%"
                   text="Confirm Purchase"

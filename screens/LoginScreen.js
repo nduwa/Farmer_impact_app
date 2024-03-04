@@ -1,5 +1,5 @@
 import { StatusBar } from "expo-status-bar";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Dimensions,
   ImageBackground,
@@ -40,6 +40,8 @@ export const LoginScreen = ({ navigation }) => {
 
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
+
+  const pwdInput = useRef();
 
   const calculateHeight = () => {
     setAccurateHeight(0);
@@ -253,6 +255,11 @@ export const LoginScreen = ({ navigation }) => {
                           onChangeText={handleChange("uname")}
                           onBlur={handleBlur("uname")}
                           value={values.uname}
+                          returnKeyType="next"
+                          onSubmitEditing={() => {
+                            pwdInput.current.focus();
+                          }}
+                          blurOnSubmit={false}
                           style={{
                             borderBottomColor: colors.black_a,
                             borderBottomWidth: 1.5,
@@ -288,6 +295,8 @@ export const LoginScreen = ({ navigation }) => {
                         <TextInput
                           placeholder="********"
                           secureTextEntry={true}
+                          ref={pwdInput}
+                          returnKeyType="done"
                           placeholderTextColor={colors.black_a}
                           onChangeText={handleChange("password")}
                           onBlur={handleBlur("password")}
