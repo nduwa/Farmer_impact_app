@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Dimensions,
+  FlatList,
   ScrollView,
   Text,
   TouchableOpacity,
@@ -10,14 +11,13 @@ import { GroupCard } from "./GroupCard";
 import { colors } from "../data/colors";
 import { Ionicons } from "@expo/vector-icons";
 
-export const GroupsModal = ({ setModalOpen }) => {
+export const GroupsModal = ({ setModalOpen, data }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
 
   const handleClick = () => {
     setModalOpen(false);
   };
-
   return (
     <View
       style={{
@@ -64,7 +64,7 @@ export const GroupsModal = ({ setModalOpen }) => {
           </TouchableOpacity>
         </View>
 
-        <ScrollView
+        <FlatList
           style={{
             width: "100%",
             marginTop: screenHeight * 0.015,
@@ -73,32 +73,15 @@ export const GroupsModal = ({ setModalOpen }) => {
             marginBottom: 25,
             padding: screenWidth * 0.03,
           }}
-        >
-          <GroupCard />
-          <GroupCard />
-          <GroupCard />
-          <GroupCard />
-          <GroupCard />
-          <GroupCard />
-          <GroupCard />
-          <GroupCard />
-          <GroupCard />
-          <GroupCard />
-          <GroupCard />
-          <GroupCard />
-          <GroupCard />
-          <GroupCard />
-          <GroupCard />
-          <GroupCard />
-          <GroupCard />
-          <GroupCard />
-          <GroupCard />
-          <GroupCard />
-          <GroupCard />
-          <GroupCard />
-          <GroupCard />
-          <GroupCard />
-        </ScrollView>
+          data={data}
+          renderItem={({ item }) => (
+            <GroupCard
+              groupID={item.ID_GROUP.trim()}
+              groupName={item.Name.trim() || null}
+            />
+          )}
+          keyExtractor={(item) => item.id}
+        />
       </View>
     </View>
   );

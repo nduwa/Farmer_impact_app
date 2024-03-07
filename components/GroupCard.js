@@ -1,9 +1,9 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Dimensions, Text, TouchableOpacity } from "react-native";
 import { colors } from "../data/colors";
 import { AntDesign } from "@expo/vector-icons";
 
-export const GroupCard = () => {
+export const GroupCard = ({ groupID, groupName = null }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
 
@@ -14,7 +14,7 @@ export const GroupCard = () => {
         justifyContent: "space-between",
         alignItems: "center",
         backgroundColor: colors.white_variant,
-        padding: screenWidth * 0.015,
+        padding: screenWidth * 0.02,
         borderRadius: 10,
         marginBottom: screenHeight * 0.009,
         elevation: 3,
@@ -22,10 +22,10 @@ export const GroupCard = () => {
     >
       <Text
         style={{
-          fontSize: screenHeight * 0.03,
+          fontSize: screenHeight * 0.02,
         }}
       >
-        Group 1
+        {`${groupID} ${groupName || "[No group name]"}`}
       </Text>
       <AntDesign name="right" size={screenHeight * 0.02} color="black" />
     </TouchableOpacity>

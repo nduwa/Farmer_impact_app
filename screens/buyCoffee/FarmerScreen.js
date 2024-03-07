@@ -1,27 +1,32 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { colors } from "../../data/colors";
 import {
   Dimensions,
+  FlatList,
   ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
+import * as SecureStore from "expo-secure-store";
 import { useNavigation } from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
 import { AntDesign } from "@expo/vector-icons";
 import { Feather } from "@expo/vector-icons";
 import { Formik } from "formik";
 import { FarmerCard } from "../../components/FarmerCard";
-import { GroupCard } from "../../components/GroupCard";
 import { GroupsModal } from "../../components/GroupsModal";
+import { retrieveDBdata } from "../../helpers/retrieveDBdata";
 
 export const FarmerScreen = () => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
 
-  const [groupsModalOpen, setGroupsModalOpen] = useState(true);
+  const [groups, setGroups] = useState([]);
+  const [farmers, setFarmers] = useState([]);
+  const [groupsModalOpen, setGroupsModalOpen] = useState(false);
+  const [activeGroup, setActiveGroup] = useState([]);
 
   const navigation = useNavigation();
 
@@ -32,6 +37,38 @@ export const FarmerScreen = () => {
     navigation.navigate("Homepage");
   };
 
+  useEffect(() => {
+    if (groups.length > 0) {
+      setActiveGroup(groups[0]);
+    }
+  }, [groups.length]);
+
+  useEffect(() => {
+    if (activeGroup.id) {
+      retrieveDBdata({
+        tableName: "rtc_farmers",
+        stationId: activeGroup._kf_Station,
+        groupID: activeGroup.__kp_Group,
+        setData: setFarmers,
+      });
+    }
+  }, [activeGroup]);
+  useEffect(() => {
+    const fetchData = async () => {
+      const stationId = await SecureStore.getItemAsync("rtc-station-id");
+      console.log(stationId);
+      if (stationId) {
+        retrieveDBdata({
+          tableName: "rtc_groups",
+          stationId,
+          setData: setGroups,
+        });
+      }
+    };
+
+    fetchData();
+  }, []);
+
   return (
     <View
       style={{
@@ -41,7 +78,9 @@ export const FarmerScreen = () => {
       }}
     >
       <StatusBar style="dark" />
-      {groupsModalOpen && <GroupsModal setModalOpen={setGroupsModalOpen} />}
+      {groupsModalOpen && (
+        <GroupsModal data={groups} setModalOpen={setGroupsModalOpen} />
+      )}
 
       <View
         style={{
@@ -100,12 +139,15 @@ export const FarmerScreen = () => {
               alignItems: "center",
               justifyContent: "center",
               borderRadius: 8,
-              height: "55%",
-              padding: 8,
+              height: "62%",
+              paddingVertical: screenWidth * 0.013,
+              paddingHorizontal: screenWidth * 0.03,
               elevation: 6,
             }}
           >
-            <Text style={{ fontWeight: "600" }}>Group 1</Text>
+            <Text style={{ fontWeight: "600" }}>
+              {activeGroup.ID_GROUP || "loading.."}
+            </Text>
           </TouchableOpacity>
           <View
             style={{
@@ -169,58 +211,27 @@ export const FarmerScreen = () => {
             elevation: 6,
           }}
         >
-          <ScrollView
-            contentContainerStyle={{
-              padding: 5,
-              gap: 15,
-            }}
-          >
-            <FarmerCard
-              data={{ id: "F40746A", name: "Karake Eric", date_birth: "1983" }}
+          {farmers.length > 0 ? (
+            <FlatList
+              contentContainerStyle={{
+                padding: 5,
+                gap: 15,
+              }}
+              data={farmers}
+              renderItem={({ item }) => (
+                <FarmerCard
+                  data={{
+                    id: item.farmerid,
+                    name: item.Name,
+                    date_birth: item.Year_Birth,
+                  }}
+                />
+              )}
+              keyExtractor={(item) => item.id}
             />
-            <FarmerCard
-              data={{ id: "F40746A", name: "Karake Eric", date_birth: "1983" }}
-            />
-            <FarmerCard
-              data={{ id: "F40746A", name: "Karake Eric", date_birth: "1983" }}
-            />
-            <FarmerCard
-              data={{ id: "F40746A", name: "Karake Eric", date_birth: "1983" }}
-            />
-            <FarmerCard
-              data={{ id: "F40746A", name: "Karake Eric", date_birth: "1983" }}
-            />
-            <FarmerCard
-              data={{ id: "F40746A", name: "Karake Eric", date_birth: "1983" }}
-            />
-            <FarmerCard
-              data={{ id: "F40746A", name: "Karake Eric", date_birth: "1983" }}
-            />
-            <FarmerCard
-              data={{ id: "F40746A", name: "Karake Eric", date_birth: "1983" }}
-            />
-            <FarmerCard
-              data={{ id: "F40746A", name: "Karake Eric", date_birth: "1983" }}
-            />
-            <FarmerCard
-              data={{ id: "F40746A", name: "Karake Eric", date_birth: "1983" }}
-            />
-            <FarmerCard
-              data={{ id: "F40746A", name: "Karake Eric", date_birth: "1983" }}
-            />
-            <FarmerCard
-              data={{ id: "F40746A", name: "Karake Eric", date_birth: "1983" }}
-            />
-            <FarmerCard
-              data={{ id: "F40746A", name: "Karake Eric", date_birth: "1983" }}
-            />
-            <FarmerCard
-              data={{ id: "F40746A", name: "Karake Eric", date_birth: "1983" }}
-            />
-            <FarmerCard
-              data={{ id: "F40746A", name: "Karake Eric", date_birth: "1983" }}
-            />
-          </ScrollView>
+          ) : (
+            <Text style={{ textAlign: "center" }}>No farmers found</Text>
+          )}
         </View>
       </View>
     </View>
