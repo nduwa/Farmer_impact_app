@@ -1,5 +1,6 @@
 import React from "react";
 import { AntDesign } from "@expo/vector-icons";
+import { FontAwesome } from "@expo/vector-icons";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { FontAwesome6 } from "@expo/vector-icons";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -70,6 +71,20 @@ export const SyncItem = ({ name, isDone = false }) => {
       {name === "Farmers crops" && (
         <MaterialCommunityIcons
           name="food-apple-outline"
+          size={17}
+          color={colors.secondary_variant}
+        />
+      )}
+      {name === "Suppliers" && (
+        <MaterialCommunityIcons
+          name="truck"
+          size={17}
+          color={colors.secondary_variant}
+        />
+      )}
+      {name === "Seasons" && (
+        <FontAwesome
+          name="calendar"
           size={17}
           color={colors.secondary_variant}
         />

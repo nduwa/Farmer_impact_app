@@ -62,9 +62,21 @@ export const LoginScreen = ({ navigation }) => {
   const preLoadUserData = async () => {
     try {
       const userData = await tokenDecoder();
+
       if (userData) {
-        await SecureStore.setItemAsync("rtc-name-full", userData.Name_Full);
-        await SecureStore.setItemAsync("rtc-user-id", userData.__kp_User);
+        await SecureStore.setItemAsync(
+          "rtc-name-full",
+          userData.user.Name_Full
+        );
+        await SecureStore.setItemAsync("rtc-user-id", userData.user.__kp_User);
+        await SecureStore.setItemAsync(
+          "rtc-user-staff-id",
+          userData.staff.userID
+        );
+        await SecureStore.setItemAsync(
+          "rtc-user-staff-kf",
+          userData.staff.__kp_Staff
+        );
 
         dispatch(UserActions.setUserData(userData));
         return true;

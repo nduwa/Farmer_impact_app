@@ -29,7 +29,15 @@ export const SideNav = ({
   const clearSecureStoreKey = async () => {
     try {
       await SecureStore.deleteItemAsync("rtc-token");
-      await SecureStore.deleteItemAsync("rtc-Name-full");
+      await SecureStore.deleteItemAsync("rtc-name-full");
+      await SecureStore.deleteItemAsync("rtc-user-staff-id");
+      await SecureStore.deleteItemAsync("rtc-sync-stations");
+      await SecureStore.deleteItemAsync("rtc-sync-groups");
+      await SecureStore.deleteItemAsync("rtc-sync-farmers");
+      await SecureStore.deleteItemAsync("rtc-sync-households");
+      await SecureStore.deleteItemAsync("rtc-sync-trainingModules");
+      await SecureStore.deleteItemAsync("rtc-sync-inspectionQuestions");
+
       console.log("Secure store key(s) deleted successfully.");
     } catch (error) {
       console.error("Error clearing secure store key:", error);
@@ -40,6 +48,7 @@ export const SideNav = ({
     dispatch(sidebarActions.closeSidebar());
 
     if (isLogOut) clearSecureStoreKey();
+
     navigation.navigate(destination);
   };
   return (

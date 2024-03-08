@@ -7,7 +7,7 @@ const tokenDecoder = async () => {
     const token = await SecureStore.getItemAsync("rtc-token");
 
     const decoded = JSON.parse(decode(token.split(".")[1]));
-    const payload = decoded.user;
+    const payload = decoded;
     if (Date.now() >= decoded.exp * 1000) {
       return false;
     }

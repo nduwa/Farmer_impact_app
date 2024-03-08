@@ -1,6 +1,6 @@
 import * as SQLite from "expo-sqlite";
 
-const db = SQLite.openDatabase("DB_farmerim_rtc3.db");
+const db = SQLite.openDatabase(process.env.DB_NAME);
 
 export const retrieveDBdata = ({
   stationId = null,
@@ -14,6 +14,8 @@ export const retrieveDBdata = ({
     query = `SELECT * FROM ${tableName} WHERE _kf_Station='${stationId}'`;
   } else if (tableName === "rtc_farmers") {
     query = `SELECT * FROM ${tableName} WHERE _kf_Station='${stationId}' AND _kf_Group='${groupID}'`;
+  } else if (tableName === "rtc_supplier") {
+    query = `SELECT * FROM ${tableName}`;
   }
 
   console.log(query);

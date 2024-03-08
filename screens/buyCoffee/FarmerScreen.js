@@ -27,8 +27,22 @@ export const FarmerScreen = () => {
   const [farmers, setFarmers] = useState([]);
   const [groupsModalOpen, setGroupsModalOpen] = useState(false);
   const [activeGroup, setActiveGroup] = useState([]);
+  const [selectedGroup, setSelectedGroup] = useState(null);
+  const [searchResults, setSearchResults] = useState([]);
 
   const navigation = useNavigation();
+
+  const handleSearch = (text) => {
+    if (text !== "") {
+      const results = farmers.filter((item) =>
+        item.Name.toLowerCase().includes(text.toLowerCase())
+      );
+      setSearchResults(results);
+    } else {
+      console.log("hehe");
+      setSearchResults([]);
+    }
+  };
 
   const toggleGroupsModal = () => {
     setGroupsModalOpen(true);
@@ -53,6 +67,25 @@ export const FarmerScreen = () => {
       });
     }
   }, [activeGroup]);
+
+  const displayData = searchResults.length > 0 ? searchResults : farmers;
+
+  useEffect(() => {
+    const fetchFarmers = () => {
+      retrieveDBdata({
+        tableName: "rtc_farmers",
+        stationId: selectedGroup._kf_Station,
+        groupID: selectedGroup.__kp_Group,
+        setData: setFarmers,
+      });
+    };
+
+    if (selectedGroup) {
+      setActiveGroup(selectedGroup);
+      fetchFarmers();
+    }
+  }, [selectedGroup]);
+
   useEffect(() => {
     const fetchData = async () => {
       const stationId = await SecureStore.getItemAsync("rtc-station-id");
@@ -79,7 +112,11 @@ export const FarmerScreen = () => {
     >
       <StatusBar style="dark" />
       {groupsModalOpen && (
-        <GroupsModal data={groups} setModalOpen={setGroupsModalOpen} />
+        <GroupsModal
+          setGroupChoice={setSelectedGroup}
+          data={groups}
+          setModalOpen={setGroupsModalOpen}
+        />
       )}
 
       <View
@@ -151,9 +188,6 @@ export const FarmerScreen = () => {
           </TouchableOpacity>
           <View
             style={{
-              flexDirection: "row",
-              justifyContent: "center",
-              alignItems: "center",
               backgroundColor: colors.white_variant,
               marginVertical: 12,
               paddingHorizontal: 12,
@@ -163,42 +197,58 @@ export const FarmerScreen = () => {
               elevation: 6,
             }}
           >
-            <AntDesign name="search1" size={24} color={colors.black_a} />
             <Formik
               initialValues={{
-                uname: "",
-                password: "",
+                search: "",
               }}
-              onSubmit={async (values) => {
-                dispatch(
-                  login({
-                    Name_User: values.uname,
-                    password: values.password,
-                  })
-                );
-              }}
+              onSubmit={async (values) => {}}
             >
-              {({ handleChange, handleBlur, handleSubmit, values }) => (
-                <View style={{ width: "80%" }}>
+              {({
+                handleChange,
+                handleBlur,
+                handleSubmit,
+                setFieldValue,
+                values,
+              }) => (
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    gap: screenWidth * 0.01,
+                    alignItems: "center",
+                    width: "80%",
+                  }}
+                >
+                  <AntDesign name="search1" size={24} color={colors.black_a} />
+
                   <TextInput
                     placeholderTextColor={colors.black_a}
-                    onChangeText={handleChange}
-                    onBlur={handleBlur}
-                    value={values.uname}
+                    onChangeText={(text) => {
+                      handleChange("search")(text);
+                      handleSearch(text);
+                    }}
+                    onBlur={handleBlur("search")}
+                    value={values.search}
                     style={{
                       backgroundColor: colors.white_variant,
                       padding: 5,
                       fontWeight: "700",
                       fontSize: screenWidth * 0.05,
-                      color: colors.blue_font,
+                      color: colors.secondary_variant,
+                      width: "100%",
                     }}
                   />
+                  <TouchableOpacity
+                    onPress={() => {
+                      setFieldValue("search", "");
+                      setSearchResults([]);
+                    }}
+                  >
+                    <Feather name="x" size={24} color={colors.black_a} />
+                  </TouchableOpacity>
                 </View>
               )}
             </Formik>
-            <TouchableOpacity>
-              <Feather name="x" size={24} color={colors.black_a} />
-            </TouchableOpacity>
           </View>
         </View>
         <View
@@ -217,16 +267,8 @@ export const FarmerScreen = () => {
                 padding: 5,
                 gap: 15,
               }}
-              data={farmers}
-              renderItem={({ item }) => (
-                <FarmerCard
-                  data={{
-                    id: item.farmerid,
-                    name: item.Name,
-                    date_birth: item.Year_Birth,
-                  }}
-                />
-              )}
+              data={displayData}
+              renderItem={({ item }) => <FarmerCard data={item} />}
               keyExtractor={(item) => item.id}
             />
           ) : (

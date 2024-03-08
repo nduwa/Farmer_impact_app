@@ -12,7 +12,8 @@ export const sync = createAsyncThunk("data/sync", async (data) => {
     } else if (
       tableName === "groups" ||
       tableName === "farmers" ||
-      tableName === "households"
+      tableName === "households" ||
+      tableName === "suppliers"
     ) {
       id = await SecureStore.getItemAsync("rtc-station-id");
     }
@@ -37,6 +38,24 @@ export const sync = createAsyncThunk("data/sync", async (data) => {
           "rtc-station-name",
           response.data.data[0].Name
         );
+      } else if (tableName === "suppliers") {
+        await SecureStore.setItemAsync(
+          "rtc-supplier-id",
+          response.data.data[0].__kp_Supplier
+        );
+      } else if (tableName === "seasons") {
+        await SecureStore.setItemAsync(
+          "rtc-seasons-id",
+          response.data.data[0].__kp_Season
+        );
+
+        await SecureStore.setItemAsync(
+          "rtc-seasons-label",
+          response.data.data[0].Label_Short
+        );
+
+        let zYear = response.data.data[0].z_Year;
+        await SecureStore.setItemAsync("rtc-seasons-year", zYear.toString());
       }
     }
 

@@ -7,6 +7,7 @@ export const BuyCoffeeInput = ({
   handleBlur,
   value,
   label,
+  active = true,
   radius = 10,
 }) => {
   const screenHeight = Dimensions.get("window").height;
@@ -34,15 +35,16 @@ export const BuyCoffeeInput = ({
         onChangeText={handleChange}
         onBlur={handleBlur}
         value={value}
+        editable={active}
         style={{
           borderColor: colors.bg_variant_font,
           backgroundColor: colors.white_variant,
           borderWidth: 0.3,
           borderRadius: radius,
           padding: 7,
-          fontWeight: "700",
+          fontWeight: "500",
           fontSize: screenWidth * 0.05,
-          color: colors.black_letter,
+          color: colors.blue_font,
         }}
       />
     </View>

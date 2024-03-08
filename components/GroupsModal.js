@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Dimensions,
   FlatList,
@@ -11,13 +11,29 @@ import { GroupCard } from "./GroupCard";
 import { colors } from "../data/colors";
 import { Ionicons } from "@expo/vector-icons";
 
-export const GroupsModal = ({ setModalOpen, data }) => {
+export const GroupsModal = ({ setModalOpen, data, setGroupChoice }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
 
+  const [selectedGroupID, setSelectedGroupID] = useState(null);
+  const [fetching, setFetching] = useState(false);
+
+  const handleGroupSelection = () => {
+    setFetching(true);
+    for (const group of data) {
+      if (group.__kp_Group === selectedGroupID) {
+        setGroupChoice(group);
+        setModalOpen(false);
+      }
+    }
+  };
   const handleClick = () => {
     setModalOpen(false);
   };
+
+  useEffect(() => {
+    if (selectedGroupID) handleGroupSelection();
+  }, [selectedGroupID]);
   return (
     <View
       style={{
@@ -28,6 +44,7 @@ export const GroupsModal = ({ setModalOpen, data }) => {
         alignItems: "center",
         backgroundColor: colors.black_a,
         zIndex: 10,
+        pointerEvents: fetching ? "none" : "auto",
       }}
     >
       <View
@@ -76,8 +93,11 @@ export const GroupsModal = ({ setModalOpen, data }) => {
           data={data}
           renderItem={({ item }) => (
             <GroupCard
+              setGroupChoice={setSelectedGroupID}
               groupID={item.ID_GROUP.trim()}
               groupName={item.Name.trim() || null}
+              groupKpID={item.__kp_Group}
+              setModalOpen={setModalOpen}
             />
           )}
           keyExtractor={(item) => item.id}

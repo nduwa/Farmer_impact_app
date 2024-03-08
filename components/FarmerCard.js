@@ -10,7 +10,7 @@ export const FarmerCard = ({ data }) => {
   const navigation = useNavigation();
 
   const handleNavigation = () => {
-    navigation.navigate("Registered_ATP_Farmer");
+    navigation.navigate("Registered_ATP_Farmer", { data });
   };
 
   return (
@@ -29,17 +29,17 @@ export const FarmerCard = ({ data }) => {
     >
       <View style={{ gap: screenHeight * 0.008 }}>
         <Text style={{ fontSize: screenWidth * 0.05, fontWeight: "600" }}>
-          {data.name}
+          {data.Name}
         </Text>
         <Text
           style={{ fontSize: screenWidth * 0.035, color: colors.black_letter }}
         >
-          ID: {data.id}
+          ID: {data.farmerid}
         </Text>
         <Text
           style={{ fontSize: screenWidth * 0.035, color: colors.black_letter }}
         >
-          Date of birth: {data.date_birth}
+          Date of birth: {data.Year_Birth}
         </Text>
       </View>
       <View

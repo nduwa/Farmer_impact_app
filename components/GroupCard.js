@@ -3,12 +3,23 @@ import { Dimensions, Text, TouchableOpacity } from "react-native";
 import { colors } from "../data/colors";
 import { AntDesign } from "@expo/vector-icons";
 
-export const GroupCard = ({ groupID, groupName = null }) => {
+export const GroupCard = ({
+  groupID,
+  groupKpID,
+  groupName = null,
+  setGroupChoice,
+  setModalOpen,
+}) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
 
+  const handleClick = () => {
+    setGroupChoice(groupKpID);
+  };
+
   return (
     <TouchableOpacity
+      onPress={handleClick}
       style={{
         flexDirection: "row",
         justifyContent: "space-between",

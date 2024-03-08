@@ -10,6 +10,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { dataTodb } from "../helpers/dataTodb";
 import { SyncModal } from "../components/SyncModal";
 import { sync, syncActions } from "../redux/sync/syncSlice";
+import { checkTableExistence } from "../helpers/checkTableExistence";
 
 export const SyncScreen = ({ navigation }) => {
   const screenHeight = Dimensions.get("window").height;
@@ -30,6 +31,8 @@ export const SyncScreen = ({ navigation }) => {
     { table: "trainingModules", status: false },
     { table: "inspectionQuestions", status: false },
     { table: "crops", status: false },
+    { table: "suppliers", status: false },
+    { table: "seasons", status: false },
   ]);
 
   const dispatch = useDispatch();
@@ -110,19 +113,27 @@ export const SyncScreen = ({ navigation }) => {
 
   useEffect(() => {
     const refreshSyncList = async () => {
-      const updatedSyncList = await Promise.all(
-        sycnList.map(async (item) => {
-          const storageKey = `rtc-sync-${item.table}`;
-          const syncValue = await SecureStore.getItemAsync(storageKey);
-          console.log(`${storageKey}: ${syncValue}`);
-          return {
-            table: item.table,
-            status: syncValue === "1",
-          };
-        })
-      );
+      try {
+        const tableExistenceResults = await checkTableExistence();
 
-      setSyncList(updatedSyncList);
+        if (tableExistenceResults) {
+          const updatedSyncList = await Promise.all(
+            sycnList.map(async (item) => {
+              const storageKey = `rtc-sync-${item.table}`;
+              const syncValue = await SecureStore.getItemAsync(storageKey);
+              console.log(`${storageKey}: ${syncValue}`);
+              return {
+                table: item.table,
+                status: syncValue === "1",
+              };
+            })
+          );
+
+          setSyncList(updatedSyncList);
+        }
+      } catch (error) {
+        console.error("Error: ", error);
+      }
     };
 
     refreshSyncList();
@@ -245,6 +256,8 @@ export const SyncScreen = ({ navigation }) => {
           <SyncItem name={"Households"} isDone={sycnList[3].status} />
           <SyncItem name={"Training modules"} isDone={sycnList[5].status} />
           <SyncItem name={"Inspection questions"} isDone={sycnList[6].status} />
+          <SyncItem name={"Suppliers"} isDone={sycnList[8].status} />
+          <SyncItem name={"Seasons"} isDone={sycnList[9].status} />
         </View>
       </View>
 
