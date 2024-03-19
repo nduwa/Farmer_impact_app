@@ -89,7 +89,7 @@ export const FarmerScreen = () => {
   useEffect(() => {
     const fetchData = async () => {
       const stationId = await SecureStore.getItemAsync("rtc-station-id");
-      console.log(stationId);
+
       if (stationId) {
         retrieveDBdata({
           tableName: "rtc_groups",

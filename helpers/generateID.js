@@ -14,7 +14,7 @@ export const generateID = ({ type, staffId = null, supplierId = null }) => {
     } else if (type === "site_day_lot") {
       if (!staffId) return;
       id = `SCJ${staffId}${twoDigitYear}${twoDigitDay}${twoDigitMonth}`;
-    } else if (type === "cherry_lot_id") {
+        } else if (type === "cherry_lot_id") {
       if (!supplierId) return;
       id = `${twoDigitYear}${supplierId}CH${twoDigitDay}${twoDigitMonth}`;
     } else if (type === "parchment_lot_id") {

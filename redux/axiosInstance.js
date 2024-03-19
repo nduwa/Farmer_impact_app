@@ -1,7 +1,7 @@
 import axios from "axios";
 import { API_URL } from "@env";
 
-const URL="https://a179-196-12-131-214.ngrok-free.app";
+const URL = "https://33f7-41-186-41-97.ngrok-free.app";
 // Create a new Axios instance
 const api = axios.create({
   baseURL: `${URL}`,

@@ -37,6 +37,14 @@ export const SideNav = ({
       await SecureStore.deleteItemAsync("rtc-sync-households");
       await SecureStore.deleteItemAsync("rtc-sync-trainingModules");
       await SecureStore.deleteItemAsync("rtc-sync-inspectionQuestions");
+      await SecureStore.deleteItemAsync("rtc-user-id");
+      await SecureStore.deleteItemAsync("rtc-station-id");
+      await SecureStore.deleteItemAsync("rtc-station-location");
+      await SecureStore.deleteItemAsync("rtc-station-name");
+      await SecureStore.deleteItemAsync("rtc-supplier-id");
+      await SecureStore.deleteItemAsync("rtc-seasons-id");
+      await SecureStore.deleteItemAsync("rtc-seasons-label");
+      await SecureStore.deleteItemAsync("rtc-seasons-year");
 
       console.log("Secure store key(s) deleted successfully.");
     } catch (error) {

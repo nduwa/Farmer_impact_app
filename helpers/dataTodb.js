@@ -1,9 +1,11 @@
 import React from "react";
 import * as SQLite from "expo-sqlite";
 import { SyncQueries } from "../data/SyncQueries";
+import { DB_NAME } from "@env";
+
 
 // Open or create the database
-const db = SQLite.openDatabase(process.env.DB_NAME);
+const db = SQLite.openDatabase(DB_NAME);
 
 db.transaction((tx) => {
   // groups
@@ -37,7 +39,7 @@ db.transaction((tx) => {
     (_, error) => console.error(`Error creating rtc_groups table:`, error)
   );
 
-  //   farmers
+  // farmers
   tx.executeSql(
     `CREATE TABLE IF NOT EXISTS rtc_farmers (
         id int(11) NOT NULL UNIQUE,
@@ -209,7 +211,7 @@ db.transaction((tx) => {
       uploaded int(11) NOT NULL,
       uploaded_at datetime NOT NULL DEFAULT '0000-00-00',
       site_day_lot varchar(45) NOT NULL,
-      paper_receipt varchar(45) NOT NULL,
+      paper_receipt varchar(45) NOT NULL UNIQUE,
       certified int(11) NOT NULL,
       edited int(11) NOT NULL,
       cash_paid double NOT NULL,
@@ -358,9 +360,14 @@ const generateBulkValueString = (tableName, totalRows, data) => {
     return bulkValues;
   } else if (tableName === "transactions") {
     let bulkValues = "";
+
     for (let i = 0; i < data.length; i++) {
-      bulkValues += `(
-        ${data[i].id},'${data[i].created_at}','${data[i].farmerid}','${data[i].farmername}','${data[i].coffee_type}','${data[i].kilograms}','${data[i].unitprice}','${data[i].lotnumber}','${data[i].transaction_date}','${data[i].certification}','${data[i]._kf_Staff}','${data[i]._kf_Station}','${data[i]._kf_Supplier}','${data[i].uploaded}','${data[i].uploaded_at}','${data[i].site_day_lot}','${data[i].paper_receipt}','${data[i].certified}','${data[i].edited}','${data[i].cash_paid}','${data[i].cherry_lot_id}','${data[i].parchment_lot_id}','${data[i].traceable}','${data[i].total_mobile_money_payment}','${data[i].bad_unit_price}','${data[i].bad_kilograms}','${data[i].bad_cherry_lot_id}','${data[i].bad_parch_lot_id}','${data[i]._kf_Season}')`;
+      const isoDate = data[i].transaction_date;
+      const formattedDateString = isoDate
+        .replace("T", " ")
+        .replace(/\.\d{3}Z$/, "");
+
+      bulkValues += `('${formattedDateString}','${data[i].farmerid}','${data[i].farmername}','${data[i].coffee_type}','${data[i].kilograms}','${data[i].unitprice}','${data[i].lotnumber}','${formattedDateString}','${data[i].certification}','${data[i]._kf_Staff}','${data[i]._kf_Station}','${data[i]._kf_Supplier}','${data[i].uploaded}','${data[i].uploaded_at}','${data[i].site_day_lot}','${data[i].paper_receipt}','${data[i].certified}','${data[i].edited}','${data[i].cash_paid}','${data[i].cherry_lot_id}','${data[i].parchment_lot_id}','${data[i].traceable}','${data[i].total_mobile_money_payment}','${data[i].bad_unit_price}','${data[i].bad_kilograms}','${data[i].bad_cherry_lot_id}','${data[i].bad_parch_lot_id}','${data[i]._kf_Season}')`;
       if (i < data.length - 1) bulkValues += ",";
     }
 
@@ -379,14 +386,13 @@ const generateBulkValueString = (tableName, totalRows, data) => {
 
 export const dataTodb = ({
   tableName,
-  setProgress,
-  setCurrentJob,
+  setProgress = null,
+  setCurrentJob = null,
   syncData,
-  setIsSyncing,
-  setSyncList,
+  setIsSyncing = null,
+  setSyncList = null,
 }) => {
   try {
-
     if (!syncData) {
       console.log("data to db: no data provided", syncData);
       return;
@@ -421,19 +427,23 @@ export const dataTodb = ({
               let jobString =
                 progress < 100 ? `data batch ${page} completed` : "completed";
 
-              setProgress(+progress.toFixed(2));
-              setCurrentJob(jobString);
-              if (progress >= 100) {
-                setIsSyncing(false);
-                setSyncList((prevSyncList) => {
-                  const updatedSyncList = [...prevSyncList];
-                  updatedSyncList[1] = {
-                    ...updatedSyncList[1],
-                    status: true,
-                  };
-                  // Return the updated array
-                  return updatedSyncList;
-                });
+              if (setProgress) setProgress(+progress.toFixed(2));
+
+              if (setCurrentJob) setCurrentJob(jobString);
+
+              if (setIsSyncing && setSyncList) {
+                if (progress >= 100) {
+                  setIsSyncing(false);
+                  setSyncList((prevSyncList) => {
+                    const updatedSyncList = [...prevSyncList];
+                    updatedSyncList[1] = {
+                      ...updatedSyncList[1],
+                      status: true,
+                    };
+                    // Return the updated array
+                    return updatedSyncList;
+                  });
+                }
               }
             },
             (_, error) => {
@@ -466,19 +476,22 @@ export const dataTodb = ({
               let jobString =
                 progress < 100 ? `data batch ${page} completed` : "completed";
 
-              setProgress(+progress.toFixed(2));
-              setCurrentJob(jobString);
-              if (progress >= 100) {
-                setIsSyncing(false);
-                setSyncList((prevSyncList) => {
-                  const updatedSyncList = [...prevSyncList];
-                  updatedSyncList[2] = {
-                    ...updatedSyncList[2],
-                    status: true,
-                  };
-                  // Return the updated array
-                  return updatedSyncList;
-                });
+              if (setProgress) setProgress(+progress.toFixed(2));
+              if (setCurrentJob) setCurrentJob(jobString);
+
+              if (setIsSyncing && setSyncList) {
+                if (progress >= 100) {
+                  setIsSyncing(false);
+                  setSyncList((prevSyncList) => {
+                    const updatedSyncList = [...prevSyncList];
+                    updatedSyncList[2] = {
+                      ...updatedSyncList[2],
+                      status: true,
+                    };
+                    // Return the updated array
+                    return updatedSyncList;
+                  });
+                }
               }
             },
             (_, error) => {
@@ -511,19 +524,22 @@ export const dataTodb = ({
               let jobString =
                 progress < 100 ? `data batch ${page} completed` : "completed";
 
-              setProgress(+progress.toFixed(2));
-              setCurrentJob(jobString);
-              if (progress >= 100) {
-                setIsSyncing(false);
-                setSyncList((prevSyncList) => {
-                  const updatedSyncList = [...prevSyncList];
-                  updatedSyncList[3] = {
-                    ...updatedSyncList[3],
-                    status: true,
-                  };
-                  // Return the updated array
-                  return updatedSyncList;
-                });
+              if (setProgress) setProgress(+progress.toFixed(2));
+              if (setCurrentJob) setCurrentJob(jobString);
+
+              if (setIsSyncing && setSyncList) {
+                if (progress >= 100) {
+                  setIsSyncing(false);
+                  setSyncList((prevSyncList) => {
+                    const updatedSyncList = [...prevSyncList];
+                    updatedSyncList[3] = {
+                      ...updatedSyncList[3],
+                      status: true,
+                    };
+                    // Return the updated array
+                    return updatedSyncList;
+                  });
+                }
               }
             },
             (_, error) => {
@@ -556,19 +572,22 @@ export const dataTodb = ({
               let jobString =
                 progress < 100 ? `data batch ${page} completed` : "completed";
 
-              setProgress(+progress.toFixed(2));
-              setCurrentJob(jobString);
-              if (progress >= 100) {
-                setIsSyncing(false);
-                setSyncList((prevSyncList) => {
-                  const updatedSyncList = [...prevSyncList];
-                  updatedSyncList[0] = {
-                    ...updatedSyncList[0],
-                    status: true,
-                  };
-                  // Return the updated array
-                  return updatedSyncList;
-                });
+              if (setProgress) setProgress(+progress.toFixed(2));
+              if (setCurrentJob) setCurrentJob(jobString);
+
+              if (setIsSyncing && setSyncList) {
+                if (progress >= 100) {
+                  setIsSyncing(false);
+                  setSyncList((prevSyncList) => {
+                    const updatedSyncList = [...prevSyncList];
+                    updatedSyncList[0] = {
+                      ...updatedSyncList[0],
+                      status: true,
+                    };
+                    // Return the updated array
+                    return updatedSyncList;
+                  });
+                }
               }
             },
             (_, error) => {
@@ -601,19 +620,22 @@ export const dataTodb = ({
               let jobString =
                 progress < 100 ? `data batch ${page} completed` : "completed";
 
-              setProgress(+progress.toFixed(2));
-              setCurrentJob(jobString);
-              if (progress >= 100) {
-                setIsSyncing(false);
-                setSyncList((prevSyncList) => {
-                  const updatedSyncList = [...prevSyncList];
-                  updatedSyncList[5] = {
-                    ...updatedSyncList[5],
-                    status: true,
-                  };
-                  // Return the updated array
-                  return updatedSyncList;
-                });
+              if (setProgress) setProgress(+progress.toFixed(2));
+              if (setCurrentJob) setCurrentJob(jobString);
+
+              if (setIsSyncing && setSyncList) {
+                if (progress >= 100) {
+                  setIsSyncing(false);
+                  setSyncList((prevSyncList) => {
+                    const updatedSyncList = [...prevSyncList];
+                    updatedSyncList[5] = {
+                      ...updatedSyncList[5],
+                      status: true,
+                    };
+                    // Return the updated array
+                    return updatedSyncList;
+                  });
+                }
               }
             },
             (_, error) => {
@@ -646,19 +668,22 @@ export const dataTodb = ({
               let jobString =
                 progress < 100 ? `data batch ${page} completed` : "completed";
 
-              setProgress(+progress.toFixed(2));
-              setCurrentJob(jobString);
-              if (progress >= 100) {
-                setIsSyncing(false);
-                setSyncList((prevSyncList) => {
-                  const updatedSyncList = [...prevSyncList];
-                  updatedSyncList[6] = {
-                    ...updatedSyncList[6],
-                    status: true,
-                  };
-                  // Return the updated array
-                  return updatedSyncList;
-                });
+              if (setProgress) setProgress(+progress.toFixed(2));
+              if (setCurrentJob) setCurrentJob(jobString);
+
+              if (setIsSyncing && setSyncList) {
+                if (progress >= 100) {
+                  setIsSyncing(false);
+                  setSyncList((prevSyncList) => {
+                    const updatedSyncList = [...prevSyncList];
+                    updatedSyncList[6] = {
+                      ...updatedSyncList[6],
+                      status: true,
+                    };
+                    // Return the updated array
+                    return updatedSyncList;
+                  });
+                }
               }
             },
             (_, error) => {
@@ -691,23 +716,26 @@ export const dataTodb = ({
               let jobString =
                 progress < 100 ? `data batch ${page} completed` : "completed";
 
-              setProgress(+progress.toFixed(2));
-              setCurrentJob(jobString);
-              if (progress >= 100) {
-                setIsSyncing(false);
-                setSyncList((prevSyncList) => {
-                  const updatedSyncList = [...prevSyncList];
-                  updatedSyncList[8] = {
-                    ...updatedSyncList[8],
-                    status: true,
-                  };
-                  // Return the updated array
-                  return updatedSyncList;
-                });
+              if (setProgress) setProgress(+progress.toFixed(2));
+              if (setCurrentJob) setCurrentJob(jobString);
+
+              if (setIsSyncing && setSyncList) {
+                if (progress >= 100) {
+                  setIsSyncing(false);
+                  setSyncList((prevSyncList) => {
+                    const updatedSyncList = [...prevSyncList];
+                    updatedSyncList[8] = {
+                      ...updatedSyncList[8],
+                      status: true,
+                    };
+                    // Return the updated array
+                    return updatedSyncList;
+                  });
+                }
               }
             },
             (_, error) => {
-              console.log("Error inserting stations: ", error);
+              console.log("Error inserting suppliers: ", error);
               return;
             }
           );
@@ -726,36 +754,27 @@ export const dataTodb = ({
 
         let bulkValues = generateBulkValueString(tableName, totalRows, data);
 
-        db.transaction((tx) => {
-          tx.executeSql(
+        db.transactionAsync((tx) => {
+          tx.executeSqlAsync(
             `${SyncQueries.RTC_TRANSACTIONS} ${bulkValues}`,
-            [],
-            () => {
+            []
+          )
+            .then((result) => {
               insertedRows += activeRows;
               const progress = (insertedRows / totalRows) * 100;
-              let jobString =
-                progress < 100 ? `data batch ${page} completed` : "completed";
 
-              setProgress(+progress.toFixed(2));
-              setCurrentJob(jobString);
-              if (progress >= 100) {
-                setIsSyncing(false);
-                setSyncList((prevSyncList) => {
-                  const updatedSyncList = [...prevSyncList];
-                  updatedSyncList[8] = {
-                    ...updatedSyncList[8],
-                    status: true,
-                  };
-                  // Return the updated array
-                  return updatedSyncList;
-                });
-              }
-            },
-            (_, error) => {
-              console.log("Error inserting stations: ", error);
+              let jobString =
+                progress < 100 ? `Saving Transaction...` : "Transaction saved!";
+
+              if (setCurrentJob) setCurrentJob(jobString);
+
+              console.log("Transaction saved!");
+            })
+            .catch((error) => {
+              console.log("Error inserting transactions: ", error);
+              if (setCurrentJob) setCurrentJob("failed");
               return;
-            }
-          );
+            });
         });
       }
     } else if (tableName === "seasons") {
@@ -781,19 +800,22 @@ export const dataTodb = ({
               let jobString =
                 progress < 100 ? `data batch ${page} completed` : "completed";
 
-              setProgress(+progress.toFixed(2));
-              setCurrentJob(jobString);
-              if (progress >= 100) {
-                setIsSyncing(false);
-                setSyncList((prevSyncList) => {
-                  const updatedSyncList = [...prevSyncList];
-                  updatedSyncList[9] = {
-                    ...updatedSyncList[9],
-                    status: true,
-                  };
-                  // Return the updated array
-                  return updatedSyncList;
-                });
+              if (setProgress) setProgress(+progress.toFixed(2));
+              if (setCurrentJob) setCurrentJob(jobString);
+
+              if (setIsSyncing && setSyncList) {
+                if (progress >= 100) {
+                  setIsSyncing(false);
+                  setSyncList((prevSyncList) => {
+                    const updatedSyncList = [...prevSyncList];
+                    updatedSyncList[9] = {
+                      ...updatedSyncList[9],
+                      status: true,
+                    };
+                    // Return the updated array
+                    return updatedSyncList;
+                  });
+                }
               }
             },
             (_, error) => {

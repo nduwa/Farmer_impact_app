@@ -12,7 +12,7 @@ export const SyncQueries = {
   RTC_INSPECTIONQNS:
     "INSERT OR REPLACE INTO inspection_questions(id,updated_at,__kp_Evaluation,evaluation_id,evaluation_mode,Eng_phrase,Kiny_phrase,award,priority,_kf_Course,Answer,status) VALUES",
   RTC_TRANSACTIONS:
-    "INSERT OR REPLACE INTO rtc_transactions(id,created_at,farmerid,farmername,coffee_type,kilograms,unitprice,lotnumber,transaction_date,certification,_kf_Staff,_kf_Station,_kf_Supplier,uploaded,uploaded_at,site_day_lot,paper_receipt,certified,edited,cash_paid,cherry_lot_id,parchment_lot_id,traceable,total_mobile_money_payment,bad_unit_price,bad_kilograms,bad_cherry_lot_id,bad_parch_lot_id,_kf_Season) VALUES",
+    "INSERT OR REPLACE INTO rtc_transactions(created_at,farmerid,farmername,coffee_type,kilograms,unitprice,lotnumber,transaction_date,certification,_kf_Staff,_kf_Station,_kf_Supplier,uploaded,uploaded_at,site_day_lot,paper_receipt,certified,edited,cash_paid,cherry_lot_id,parchment_lot_id,traceable,total_mobile_money_payment,bad_unit_price,bad_kilograms,bad_cherry_lot_id,bad_parch_lot_id,_kf_Season) VALUES",
   RTC_SUPPLIER:
     "INSERT INTO rtc_supplier (id, _kf_Quality, _kf_Type, __kp_Supplier, _kf_Location, _kf_User_g, Area_Big, Area_Biggest, Area_Medium, Area_Small, Area_Smallest, Certification, Name, Status, Ratio_CP, Relationship, Report, Supplier_ID_t, created_at, z_recCreateTimestamp, z_recModifyTimestamp, _kf_User, _kf_Season, deleted) VALUES",
   RTC_SEASONS:

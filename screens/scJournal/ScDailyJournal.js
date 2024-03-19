@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { colors } from "../../data/colors";
 import { useNavigation } from "@react-navigation/native";
 import {
@@ -11,15 +11,37 @@ import {
 import { StatusBar } from "expo-status-bar";
 import { AntDesign } from "@expo/vector-icons";
 import { ScRecordItem } from "../../components/ScRecordItem";
+import { retrieveDBdata } from "../../helpers/retrieveDBdata";
 
 export const ScJournal = () => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const navigation = useNavigation();
 
+  const [journals, setJournals] = useState([]);
+
   const handleBackButton = () => {
     navigation.navigate("Homepage");
   };
+
+  useEffect(() => {
+    if (journals.length > 0) {
+      console.log(journals);
+    }
+  }, [journals.length]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      retrieveDBdata({
+        tableName: "rtc_transactions",
+        setData: setJournals,
+        queryArg:
+          "SELECT site_day_lot,transaction_date,kilograms,bad_kilograms FROM rtc_transactions",
+      });
+    };
+
+    fetchData();
+  }, []);
   return (
     <View
       style={{

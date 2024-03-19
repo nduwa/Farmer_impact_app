@@ -1,20 +1,27 @@
 import * as SQLite from "expo-sqlite";
+import { DB_NAME } from "@env";
 
-const db = SQLite.openDatabase(process.env.DB_NAME);
+const db = SQLite.openDatabase(DB_NAME);
 
 export const retrieveDBdata = ({
   stationId = null,
   groupID = null,
+  queryArg = null,
   tableName,
   setData,
 }) => {
   let query = "";
 
   if (tableName === "rtc_groups") {
-    query = `SELECT * FROM ${tableName} WHERE _kf_Station='${stationId}'`;
+    query =
+      queryArg || `SELECT * FROM ${tableName} WHERE _kf_Station='${stationId}'`;
   } else if (tableName === "rtc_farmers") {
-    query = `SELECT * FROM ${tableName} WHERE _kf_Station='${stationId}' AND _kf_Group='${groupID}'`;
+    query =
+      queryArg ||
+      `SELECT * FROM ${tableName} WHERE _kf_Station='${stationId}' AND _kf_Group='${groupID}'`;
   } else if (tableName === "rtc_supplier") {
+    query = queryArg || `SELECT * FROM ${tableName}`;
+  } else if (tableName === "rtc_transactions") {
     query = `SELECT * FROM ${tableName}`;
   }
 

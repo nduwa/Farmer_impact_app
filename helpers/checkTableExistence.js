@@ -48,7 +48,7 @@ export const checkTableExistence = async () => {
       }
     }
 
-    console.log("Table existence check results: DONE");
+    console.log("Table existence check: DONE");
 
     const tableData = await Promise.all(
       results.map(async (result) => {
@@ -63,6 +63,8 @@ export const checkTableExistence = async () => {
                 [],
                 (_, { rows }) => {
                   data = rows._array;
+                  console.log(`${result.table.name}: `, data);
+
                   resolve({
                     table: result.table.storageKey,
                     dataExists: data.length > 0,

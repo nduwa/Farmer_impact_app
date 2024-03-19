@@ -8,6 +8,7 @@ import {
   ScrollView,
   Text,
   TextInput,
+  ToastAndroid,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -22,6 +23,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import * as SecureStore from "expo-secure-store";
 import { generateID } from "../../helpers/generateID";
 import { retrieveDBdata } from "../../helpers/retrieveDBdata";
+import { dataTodb } from "../../helpers/dataTodb";
 
 export const RegisteredFarmerScreen = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
@@ -33,6 +35,7 @@ export const RegisteredFarmerScreen = ({ route }) => {
   const [indicatorVisible, setIndicatorVisibility] = useState(false);
   const [date, setDate] = useState(new Date());
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
+  const [currentJob, setCurrentJob] = useState(null);
 
   const [staffId, setStaffId] = useState(null);
   const [staffKf, setStaffKf] = useState(null);
@@ -94,13 +97,13 @@ export const RegisteredFarmerScreen = ({ route }) => {
         parchment_lot_id,
         bad_cherry_lot_id,
         bad_parch_lot_id,
-        created_at: transactionData.transactionDate,
+        created_at: transactionData.transactionDate.toISOString(),
         farmerid: transactionData.farmerID,
         farmername: transactionData.farmerName,
         coffee_type: transactionData.coffeeType,
         kilograms: transactionData.kgGood,
         unitprice: transactionData.priceGood,
-        transaction_date: transactionData.transactionDate,
+        transaction_date: transactionData.transactionDate.toISOString(),
         certification: transactionData.certificationType,
         _kf_Staff: staffKf,
         _kf_Station: stationId,
@@ -119,7 +122,11 @@ export const RegisteredFarmerScreen = ({ route }) => {
         _kf_Season: seasonId,
       };
 
-      console.log(data);
+      dataTodb({
+        tableName: "transactions",
+        syncData: [data],
+        setCurrentJob: setCurrentJob,
+      });
     } catch (error) {
       console.log(error);
     }
@@ -147,6 +154,12 @@ export const RegisteredFarmerScreen = ({ route }) => {
   }, [isKeyboardActive]);
 
   useEffect(() => {
+    if (currentJob) {
+      ToastAndroid.show(currentJob, ToastAndroid.SHORT);
+    }
+  }, [currentJob]);
+
+  useEffect(() => {
     const fetchIds = async () => {
       let staffID = await SecureStore.getItemAsync("rtc-user-staff-id");
       let staffKF = await SecureStore.getItemAsync("rtc-user-staff-kf");
@@ -162,7 +175,6 @@ export const RegisteredFarmerScreen = ({ route }) => {
         });
       }
 
-      console.log(seasonID);
       setStaffId(staffID);
       setStaffKf(staffKF);
       setStationId(stationID);
@@ -223,11 +235,11 @@ export const RegisteredFarmerScreen = ({ route }) => {
             transactionDate: date,
             certificationType: currentCertificationType,
             coffeeType: currentCoffeeType,
-            kgGood: "",
-            priceGood: "",
+            kgGood: "0",
+            priceGood: "0",
             totalGood: "",
-            kgBad: "",
-            priceBad: "",
+            kgBad: "0",
+            priceBad: "0",
             totalBad: "",
             cashTotal: "",
             cashTotalMobile: "",
