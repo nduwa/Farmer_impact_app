@@ -18,7 +18,7 @@ import { colors } from "../data/colors";
 import { Formik } from "formik";
 import CustomButton from "../components/CustomButton";
 import { useDispatch, useSelector } from "react-redux";
-import { login } from "../redux/user/loginSlice";
+import { login, loginActions } from "../redux/user/loginSlice";
 import { useIsFocused } from "@react-navigation/native";
 import * as SecureStore from "expo-secure-store";
 import tokenDecoder from "../helpers/tokenDecoder";
@@ -35,6 +35,7 @@ export const LoginScreen = ({ navigation }) => {
   const [errorPwd, setErrorPwd] = useState(false);
   const [accurateHeight, setAccurateHeight] = useState(0);
   const [indicatorVisible, setIndicatorVisibility] = useState(false);
+  const [forwardData, setForwardData] = useState({ nameFull: false });
 
   const [authenticated, setAuthenticated] = useState(false);
 
@@ -55,8 +56,8 @@ export const LoginScreen = ({ navigation }) => {
 
   const handleClick = () => {};
 
-  const handleNavigation = (location) => {
-    navigation.navigate(location);
+  const handleNavigation = (location, data) => {
+    navigation.navigate(location, { data });
   };
 
   const preLoadUserData = async () => {
@@ -77,6 +78,18 @@ export const LoginScreen = ({ navigation }) => {
           "rtc-user-staff-kf",
           userData.staff.__kp_Staff
         );
+        await SecureStore.setItemAsync(
+          "rtc-station-id",
+          userData.staff._kf_Station
+        );
+
+        setForwardData({
+          nameFull: userData.user.Name_Full,
+          userId: userData.user.__kp_User,
+          staffId: userData.staff.userID,
+          staffKf: userData.staff.__kp_Staff,
+          stationId: userData.staff._kf_Station,
+        });
 
         dispatch(UserActions.setUserData(userData));
         return true;
@@ -105,11 +118,12 @@ export const LoginScreen = ({ navigation }) => {
       if (result.success) {
         setAuthenticated(true);
         let preFetchedData = preLoadUserData();
-        if (preFetchedData) {
-          handleNavigation("Homepage");
+        if (preFetchedData && forwardData.nameFull) {
+          handleNavigation("Homepage", forwardData);
         }
       } else {
         setAuthenticated(false);
+        console.log(forwardData);
       }
     } catch (error) {
       console.error("Authentication failed:", error);
@@ -142,15 +156,24 @@ export const LoginScreen = ({ navigation }) => {
   useEffect(() => {
     setIndicatorVisibility(loginState.loading);
 
-    if (loginState.response !== null) {
-      if (loginState.response.status === "success") {
-        let preFetchedData = preLoadUserData();
-        if (preFetchedData) {
-          handleNavigation("Homepage");
+    if (isFocused) {
+      if (loginState.response !== null) {
+        if (loginState.response.status === "success") {
+          let preFetchedData = preLoadUserData();
+          if (preFetchedData && forwardData.nameFull) {
+            handleNavigation("Homepage", forwardData);
+          } else {
+            console.log(forwardData);
+          }
         }
       }
     }
-  }, [loginState.loading]);
+
+    return () => {
+      setForwardData({ nameFull: false });
+      loginActions.resetLoginState();
+    };
+  }, [loginState.loading, forwardData.nameFull]);
 
   useEffect(() => {
     const validatedPreviousLogin = async () => {

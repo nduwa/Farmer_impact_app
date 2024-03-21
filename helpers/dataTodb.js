@@ -3,7 +3,6 @@ import * as SQLite from "expo-sqlite";
 import { SyncQueries } from "../data/SyncQueries";
 import { DB_NAME } from "@env";
 
-
 // Open or create the database
 const db = SQLite.openDatabase(DB_NAME);
 

@@ -22,12 +22,15 @@ import { StationLocation } from "../components/StationLocation";
 import { UserActions } from "../redux/user/UserSlice";
 import * as SecureStore from "expo-secure-store";
 import { sidebarActions } from "../redux/SidebarSlice";
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { BuyCoffeeModal } from "../components/BuyCoffeeModal";
+import { detectNewUser } from "../helpers/detectNewUser";
+import { initializeLsKeys } from "../helpers/initializeLsKeys";
 
-export const HomeScreen = ({ navigation }) => {
+export const HomeScreen = ({ route }) => {
   const userState = useSelector((state) => state.user);
   const dispatch = useDispatch();
+  const navigation = useNavigation();
   const [today, setToday] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [stationDetails, setStationDetails] = useState(null);
@@ -40,6 +43,8 @@ export const HomeScreen = ({ navigation }) => {
 
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
+
+  const { data = null } = route.params;
 
   const handleClick = () => {
     setIsSidebarOpen(true);
@@ -65,7 +70,9 @@ export const HomeScreen = ({ navigation }) => {
 
   useEffect(() => {
     const initData = async () => {
-      const userName = await SecureStore.getItemAsync("rtc-name-full");
+      const userName = data?.nameFull
+        ? data?.nameFull
+        : await SecureStore.getItemAsync("rtc-name-full");
       const stationData = { location: null, name: null };
 
       stationData.location = await SecureStore.getItemAsync(
@@ -80,6 +87,7 @@ export const HomeScreen = ({ navigation }) => {
       if (userName) {
         setDisplayName(userName.split(" ")[1]);
       }
+
       const currentDate = new Date();
       setToday(formatDate(currentDate));
       const unsubscribe = navigation.addListener("blur", () => {
@@ -92,9 +100,24 @@ export const HomeScreen = ({ navigation }) => {
 
       return unsubscribe;
     };
+    const newUserDetection = async () => {
+      detectNewUser({ newStationId: data?.stationId })
+        .then((isNewUser) => {
+          if (isNewUser) {
+            console.log("new user");
+          } else {
+            console.log("old user");
+            initializeLsKeys({ stationId: data?.stationId, setStationDetails });
+          }
+        })
+        .catch((error) => {
+          console.error("Error detecting new user:", error);
+        });
+    };
 
     calculateFactor();
     initData();
+    newUserDetection();
   }, [navigation, userState.dataReceived]);
 
   useFocusEffect(

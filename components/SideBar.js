@@ -18,10 +18,12 @@ import sidebar_IMG from "../assets/sidebar_banner.jpg";
 import { Ionicons } from "@expo/vector-icons";
 import { SideNav } from "./SideNav";
 import { StationLocation } from "./StationLocation";
+import { useIsFocused } from "@react-navigation/native";
 
 export const SideBar = ({ setsideBarScroll, setIsSidebarOpen }) => {
   const [stationDetails, setStationDetails] = useState(null);
   const [initClose, setInitClose] = useState(false);
+  const isFocused = useIsFocused();
 
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
@@ -61,9 +63,10 @@ export const SideBar = ({ setsideBarScroll, setIsSidebarOpen }) => {
         setStationDetails(stationData);
       }
     };
-
-    initStationDetails();
-  }, []);
+    if (isFocused) {
+      initStationDetails();
+    }
+  }, [isFocused]);
 
   return (
     <TouchableWithoutFeedback onPress={handleClick}>
@@ -151,7 +154,7 @@ export const SideBar = ({ setsideBarScroll, setIsSidebarOpen }) => {
                 destination="ScDailyJournal"
               />
               <SideNav name={"CWS Finance"} />
-              <SideNav name={"History"}/>
+              <SideNav name={"History"} />
               <SideNav name={"Change Settings"} />
 
               <SideNav name={"Log out"} isLogOut={true} destination={"Login"} />

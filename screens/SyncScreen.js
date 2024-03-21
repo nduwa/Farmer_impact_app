@@ -20,6 +20,11 @@ export const SyncScreen = ({ navigation }) => {
   const [currentTable, setCurrentTable] = useState(null);
   const [startSyncModalOpen, setstartSyncModalOpen] = useState(false);
   const [cancelSyncModalOpen, setcancelSyncModalOpen] = useState(false);
+  const [restartSyncModal, setRestartSyncModal] = useState({
+    open: false,
+    table: null,
+  });
+
   const [syncStarted, setSyncStarted] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [sycnList, setSyncList] = useState([
@@ -42,17 +47,32 @@ export const SyncScreen = ({ navigation }) => {
     setIsSyncing(false);
     setSyncStarted(false);
     setstartSyncModalOpen(false);
+    setcancelSyncModalOpen(false);
+    setRestartSyncModal({ open: false, table: null });
     setCurrentJob(null);
     setCurrentTable(null);
     setProgress(0);
     dispatch(syncActions.resetSyncState());
-    navigation.navigate("Homepage");
+    navigation.navigate("Homepage", { data: null });
   };
   const handleSyncStart = () => {
     setstartSyncModalOpen(false);
 
     if (!currentTable) return;
     dispatch(sync({ tableName: currentTable }));
+    setSyncStarted(true);
+    setIsSyncing(true);
+  };
+  const handleSyncRestart = () => {
+    setRestartSyncModal((prevState) => ({
+      ...prevState,
+      open: false,
+    }));
+
+    if (restartSyncModal.table == null) return;
+    let restartTable = sycnList[restartSyncModal.table].table;
+    setCurrentTable(restartTable);
+    dispatch(sync({ tableName: restartTable }));
     setSyncStarted(true);
     setIsSyncing(true);
   };
@@ -67,7 +87,7 @@ export const SyncScreen = ({ navigation }) => {
     if (isSyncing) {
       setcancelSyncModalOpen(true);
     } else {
-      navigation.navigate("Homepage");
+      navigation.navigate("Homepage", { data: null });
     }
   };
 
@@ -250,14 +270,54 @@ export const SyncScreen = ({ navigation }) => {
             gap: screenHeight * 0.02,
           }}
         >
-          <SyncItem name={"Stations"} isDone={sycnList[0].status} />
-          <SyncItem name={"Groups"} isDone={sycnList[1].status} />
-          <SyncItem name={"Farmers"} isDone={sycnList[2].status} />
-          <SyncItem name={"Households"} isDone={sycnList[3].status} />
-          <SyncItem name={"Training modules"} isDone={sycnList[5].status} />
-          <SyncItem name={"Inspection questions"} isDone={sycnList[6].status} />
-          <SyncItem name={"Suppliers"} isDone={sycnList[8].status} />
-          <SyncItem name={"Seasons"} isDone={sycnList[9].status} />
+          <SyncItem
+            name={"Stations"}
+            setRestartTable={setRestartSyncModal}
+            isDone={sycnList[0].status}
+            tableIndex={0}
+          />
+          <SyncItem
+            name={"Groups"}
+            setRestartTable={setRestartSyncModal}
+            isDone={sycnList[1].status}
+            tableIndex={1}
+          />
+          <SyncItem
+            name={"Farmers"}
+            setRestartTable={setRestartSyncModal}
+            isDone={sycnList[2].status}
+            tableIndex={2}
+          />
+          <SyncItem
+            name={"Households"}
+            setRestartTable={setRestartSyncModal}
+            isDone={sycnList[3].status}
+            tableIndex={3}
+          />
+          <SyncItem
+            name={"Training modules"}
+            setRestartTable={setRestartSyncModal}
+            isDone={sycnList[5].status}
+            tableIndex={5}
+          />
+          <SyncItem
+            name={"Inspection questions"}
+            setRestartTable={setRestartSyncModal}
+            isDone={sycnList[6].status}
+            tableIndex={6}
+          />
+          <SyncItem
+            name={"Suppliers"}
+            setRestartTable={setRestartSyncModal}
+            isDone={sycnList[8].status}
+            tableIndex={8}
+          />
+          <SyncItem
+            name={"Seasons"}
+            setRestartTable={setRestartSyncModal}
+            isDone={sycnList[9].status}
+            tableIndex={9}
+          />
         </View>
       </View>
 
@@ -282,6 +342,22 @@ export const SyncScreen = ({ navigation }) => {
           }
           onYes={handleExit}
           OnNo={() => setcancelSyncModalOpen(false)}
+        />
+      )}
+
+      {/* restart sync modal */}
+      {restartSyncModal.open && (
+        <SyncModal
+          label={`Do you want to restart synchronisation for ${
+            sycnList[restartSyncModal.table].table
+          }`}
+          onYes={handleSyncRestart}
+          OnNo={() =>
+            setRestartSyncModal((prevState) => ({
+              ...prevState,
+              open: false,
+            }))
+          }
         />
       )}
     </View>

@@ -5,6 +5,7 @@ import * as SecureStore from "expo-secure-store";
 export const login = createAsyncThunk("users/login", async (data) => {
   try {
     const response = await api.post(`/user/login?appLogin=1`, data);
+
     if (response.status === 200) {
       const { token } = response.data;
       await SecureStore.setItemAsync("rtc-token", token);
@@ -22,6 +23,13 @@ const loginSlice = createSlice({
     response: null,
     loading: false,
     error: null,
+  },
+  reducers: {
+    resetLoginState(state, action) {
+      state.response = null;
+      state.loading = false;
+      state.error = null;
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(login.pending, (state) => {

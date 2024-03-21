@@ -26,7 +26,7 @@ export const UnregisteredFarmerScreen = () => {
   const navigation = useNavigation();
 
   const handleBackButton = () => {
-    navigation.navigate("Homepage");
+    navigation.navigate("Homepage", { data: null });
   };
 
   return (

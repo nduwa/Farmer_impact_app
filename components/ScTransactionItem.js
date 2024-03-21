@@ -4,7 +4,20 @@ import { colors } from "../data/colors";
 import { ScTransactionRow } from "./ScTransactionRow";
 import CustomButton from "./CustomButton";
 
-export const ScTransactionItem = () => {
+export const ScTransactionItem = ({
+  lotnumber,
+  farmerId,
+  farmerNames = "",
+  kgsGood,
+  priceGood,
+  kgsBad,
+  priceBad,
+  trDate,
+  cashTotal,
+  coffeeVal,
+  coffeeType = "Cherry",
+  recordid = "1004587",
+}) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
 
@@ -32,7 +45,7 @@ export const ScTransactionItem = () => {
           marginBottom: screenHeight * 0.015,
         }}
       >
-        FTR2419582610
+        {lotnumber}
       </Text>
       <View
         style={{
@@ -49,7 +62,7 @@ export const ScTransactionItem = () => {
           marginVertical: screenHeight * 0.006,
         }}
       >
-        1004645
+        {recordid || 0}
       </Text>
       <View
         style={{
@@ -66,7 +79,7 @@ export const ScTransactionItem = () => {
           marginVertical: screenHeight * 0.006,
         }}
       >
-        F40746A / KARAKE ERIC
+        {farmerId.toUpperCase()} / {farmerNames.toUpperCase()}
       </Text>
       <View
         style={{
@@ -84,8 +97,8 @@ export const ScTransactionItem = () => {
           marginTop: screenHeight * 0.01,
         }}
       >
-        <ScTransactionRow header={"Kgs(good)"} data={58} />
-        <ScTransactionRow header={"Price/Kg"} data={120} />
+        <ScTransactionRow header={"Kgs(good)"} data={kgsGood} />
+        <ScTransactionRow header={"Price/Kg"} data={priceGood} />
       </View>
       <View
         style={{
@@ -96,8 +109,8 @@ export const ScTransactionItem = () => {
           marginTop: screenHeight * 0.01,
         }}
       >
-        <ScTransactionRow header={"Floaters Kgs"} data={23} />
-        <ScTransactionRow header={"Price/Kg"} data={15} />
+        <ScTransactionRow header={"Floaters Kgs"} data={kgsBad} />
+        <ScTransactionRow header={"Price/Kg"} data={priceBad} />
       </View>
       <View
         style={{
@@ -108,8 +121,11 @@ export const ScTransactionItem = () => {
           marginTop: screenHeight * 0.01,
         }}
       >
-        <ScTransactionRow header={"Coffee Type"} data={23} />
-        <ScTransactionRow header={"Amount Paid"} data={7305.0} />
+        <ScTransactionRow header={"Coffee Type"} data={coffeeType} />
+        <ScTransactionRow
+          header={"Amount Paid"}
+          data={`RWF ${cashTotal.toLocaleString()}`}
+        />
       </View>
       <View
         style={{
@@ -120,8 +136,11 @@ export const ScTransactionItem = () => {
           marginTop: screenHeight * 0.01,
         }}
       >
-        <ScTransactionRow header={"Coffee Value"} data={6960} />
-        <ScTransactionRow header={"Transaction Date"} data={"19/02/2024"} />
+        <ScTransactionRow
+          header={"Coffee Value"}
+          data={`RWF ${coffeeVal.toLocaleString()}`}
+        />
+        <ScTransactionRow header={"Transaction Date"} data={trDate} />
       </View>
       <View
         style={{

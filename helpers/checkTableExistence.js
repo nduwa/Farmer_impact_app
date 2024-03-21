@@ -1,7 +1,8 @@
 import * as SecureStore from "expo-secure-store";
 import * as SQLite from "expo-sqlite";
+import { DB_NAME } from "@env";
 
-const db = SQLite.openDatabase(process.env.DB_NAME);
+const db = SQLite.openDatabase(DB_NAME);
 
 export const checkTableExistence = async () => {
   try {
@@ -63,8 +64,6 @@ export const checkTableExistence = async () => {
                 [],
                 (_, { rows }) => {
                   data = rows._array;
-                  console.log(`${result.table.name}: `, data);
-
                   resolve({
                     table: result.table.storageKey,
                     dataExists: data.length > 0,

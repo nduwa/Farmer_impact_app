@@ -3,7 +3,7 @@ import { colors } from "../../data/colors";
 import { useNavigation } from "@react-navigation/native";
 import {
   Dimensions,
-  ScrollView,
+  FlatList,
   Text,
   TouchableOpacity,
   View,
@@ -21,14 +21,16 @@ export const ScJournal = () => {
   const [journals, setJournals] = useState([]);
 
   const handleBackButton = () => {
-    navigation.navigate("Homepage");
+    navigation.navigate("Homepage", { data: null });
   };
 
-  useEffect(() => {
-    if (journals.length > 0) {
-      console.log(journals);
-    }
-  }, [journals.length]);
+  const dateExtraction = (str) => {
+    let year = `20${str.substring(8, 10)}`;
+    let month = str.substring(12);
+    let day = str.substring(10, 12);
+
+    return `${day}/${month}/${year}`;
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -36,7 +38,7 @@ export const ScJournal = () => {
         tableName: "rtc_transactions",
         setData: setJournals,
         queryArg:
-          "SELECT site_day_lot,transaction_date,kilograms,bad_kilograms FROM rtc_transactions",
+          "SELECT site_day_lot,SUM(kilograms) AS kgsGood,SUM(bad_kilograms) AS kgsBad, COUNT(*) AS recordCount FROM rtc_transactions GROUP BY site_day_lot ORDER BY site_day_lot;",
       });
     };
 
@@ -83,14 +85,23 @@ export const ScJournal = () => {
           Site Collector Daily Journal
         </Text>
       </View>
-      <ScrollView contentContainerStyle={{ padding: 12, gap: 9 }}>
-        <ScRecordItem
-          data={{ date: "19/02/2024", records: "5", weight: "58 Kg(s)" }}
+      {journals.length > 0 && (
+        <FlatList
+          contentContainerStyle={{ padding: 12, gap: 9 }}
+          data={journals}
+          renderItem={({ item }) => (
+            <ScRecordItem
+              data={{
+                date: dateExtraction(item.site_day_lot),
+                records: item.recordCount,
+                weight: item.kgsGood + item.kgsBad,
+                site_day_lot: item.site_day_lot,
+              }}
+            />
+          )}
+          keyExtractor={(item) => journals.indexOf(item)}
         />
-        <ScRecordItem
-          data={{ date: "04/03/2024", records: "2", weight: "18 Kg(s)" }}
-        />
-      </ScrollView>
+      )}
     </View>
   );
 };

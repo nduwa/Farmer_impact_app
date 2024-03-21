@@ -10,7 +10,7 @@ export const ScRecordItem = ({ data }) => {
   const navigation = useNavigation();
 
   const handleNavigation = () => {
-    navigation.navigate("ScDailySummary");
+    navigation.navigate("ScDailySummary", { data });
   };
 
   return (
@@ -47,7 +47,7 @@ export const ScRecordItem = ({ data }) => {
             color: colors.black_letter,
           }}
         >
-          Weight: {data.weight}
+          Weight: {data.weight} Kg(s)
         </Text>
       </View>
       <View

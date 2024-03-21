@@ -48,7 +48,7 @@ export const FarmerScreen = () => {
     setGroupsModalOpen(true);
   };
   const handleBackButton = () => {
-    navigation.navigate("Homepage");
+    navigation.navigate("Homepage", { data: null });
   };
 
   useEffect(() => {

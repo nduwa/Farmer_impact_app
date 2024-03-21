@@ -22,7 +22,7 @@ export const retrieveDBdata = ({
   } else if (tableName === "rtc_supplier") {
     query = queryArg || `SELECT * FROM ${tableName}`;
   } else if (tableName === "rtc_transactions") {
-    query = `SELECT * FROM ${tableName}`;
+    query = queryArg || `SELECT * FROM ${tableName}`;
   }
 
   console.log(query);

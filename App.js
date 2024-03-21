@@ -21,7 +21,11 @@ export default function App() {
           initialRouteName="Login"
           screenOptions={{ headerShown: false }}
         >
-          <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen
+            name="Login"
+            options={{ unmountOnBlur: true }}
+            component={LoginScreen}
+          />
           <Stack.Screen
             name="Homepage"
             options={{ unmountOnBlur: true }}
