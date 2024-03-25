@@ -1,13 +1,10 @@
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useState } from "react";
 import {
-  Button,
   Dimensions,
   Keyboard,
-  SafeAreaView,
   ScrollView,
   Text,
-  TextInput,
   ToastAndroid,
   TouchableOpacity,
   View,

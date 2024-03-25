@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import {
   Dimensions,
   FlatList,
-  ScrollView,
+  ToastAndroid,
   Text,
   TouchableOpacity,
   View,
@@ -16,6 +16,8 @@ import { ScSummaryItem } from "../../components/ScSummaryItem";
 import CustomButton from "../../components/CustomButton";
 import { ScTransactionItem } from "../../components/ScTransactionItem";
 import { retrieveDBdataAsync } from "../../helpers/retrieveDBdataAsync";
+import { deleteDBdataAsync } from "../../helpers/deleteDBdataAsync";
+import { SyncModal } from "../../components/SyncModal";
 
 export const ScJournalsSummary = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
@@ -25,12 +27,16 @@ export const ScJournalsSummary = ({ route }) => {
 
   const [indicatorVisible, setIndicatorVisibility] = useState(false);
   const [folded, setFolded] = useState(true);
+  const [deleteModal, setDeleteModal] = useState({ open: false, id: null });
+  const [currentJob, setCurrentJob] = useState(null);
 
-  const [journalData, setJournalData] = useState(null);
+  const [journalData, setJournalData] = useState([]);
   const [certifiedAll, setCertifiedAll] = useState(0);
   const [unCertifiedAll, setUnCertifiedAll] = useState(0);
   const [floatersAll, setFloatersAll] = useState(0);
   const [cashAll, setCashAll] = useState(0);
+  const [dateAll, setDateAll] = useState(null);
+  const [recordsAll, setRecordsAll] = useState(0);
 
   const { data = null } = route.params;
 
@@ -49,6 +55,82 @@ export const ScJournalsSummary = ({ route }) => {
 
   const handleSubmit = () => {};
 
+  const handleCloseDeleteModal = () => {
+    setDeleteModal((prevState) => ({
+      ...prevState,
+      open: false,
+    }));
+  };
+
+  const removeDeletedTransaction = (id) => {
+    const allTransactions = journalData.filter(
+      (item) => item.paper_receipt !== id
+    );
+
+    setJournalData(allTransactions);
+
+    setSummaryData(allTransactions);
+  };
+
+  const deleteTransaction = async () => {
+    deleteDBdataAsync({
+      tableName: "rtc_transactions",
+      id: deleteModal.id,
+    })
+      .then((result) => {
+        if (result.success) {
+          removeDeletedTransaction(result.deletedTransaction);
+          handleCloseDeleteModal();
+          setCurrentJob("Transaction deleted");
+        } else {
+          handleCloseDeleteModal();
+          setCurrentJob("Deletion failed");
+        }
+      })
+      .catch((error) => {
+        console.log("Error deleting the transaction ", error);
+        handleCloseDeleteModal();
+        setCurrentJob("Deletion failed");
+      });
+  };
+
+  const setSummaryData = (transactions) => {
+    let totalCash = 0;
+    let uncertified = 0;
+    let certified = 0;
+    let floaters = 0;
+
+    for (const tr of transactions) {
+      if (tr.certified === 1) {
+        let kgs = parseFloat(tr.kilograms) || 0;
+        certified += kgs;
+      } else if (tr.certified === 0) {
+        let kgs = parseFloat(tr.kilograms) || 0;
+        uncertified += kgs;
+      }
+      let kgs = parseFloat(tr.bad_kilograms) || 0;
+      floaters += kgs;
+
+      const cashPaid = parseFloat(tr.cash_paid) || 0;
+      const mobilePayment = parseFloat(tr.total_mobile_money_payment) || 0;
+
+      totalCash += cashPaid + mobilePayment;
+    }
+
+    setRecordsAll(transactions.length);
+    setDateAll(data?.date);
+    setCertifiedAll(certified);
+    setUnCertifiedAll(uncertified);
+    setFloatersAll(floaters);
+    setCashAll(totalCash);
+  };
+
+  useEffect(() => {
+    if (currentJob) {
+      ToastAndroid.show(currentJob, ToastAndroid.SHORT);
+    }
+  }, [currentJob]);
+
   useEffect(() => {
     const fetchData = async () => {
       let transactions = [];
@@ -56,35 +138,10 @@ export const ScJournalsSummary = ({ route }) => {
         tableName: "rtc_transactions",
         filterValue: data.site_day_lot,
       })
-        .then((data) => {
-          transactions = [...transactions, ...data];
+        .then((result) => {
+          transactions = [...transactions, ...result];
           setJournalData(transactions);
-          let totalCash = 0;
-          let uncertified = 0;
-          let certified = 0;
-          let floaters = 0;
-
-          for (const tr of transactions) {
-            if (tr.certified === 1) {
-              let kgs = parseFloat(tr.kilograms) || 0;
-              certified += kgs;
-            } else if (tr.certified === 0) {
-              let kgs = parseFloat(tr.kilograms) || 0;
-              uncertified += kgs;
-            }
-            let kgs = parseFloat(tr.bad_kilograms) || 0;
-            floaters += kgs;
-
-            const cashPaid = parseFloat(tr.cash_paid) || 0;
-            const mobilePayment =
-              parseFloat(tr.total_mobile_money_payment) || 0;
-
-            totalCash += cashPaid + mobilePayment;
-          }
-          setCertifiedAll(certified);
-          setUnCertifiedAll(uncertified);
-          setFloatersAll(floaters);
-          setCashAll(totalCash);
+          setSummaryData(transactions);
         })
         .catch((error) => {
           console.log("Error getting transactions for this journal: ", error);
@@ -160,7 +217,7 @@ export const ScJournalsSummary = ({ route }) => {
             style={{ flexDirection: "row", justifyContent: "space-between" }}
           >
             <Text style={{ fontSize: screenWidth * 0.05, fontWeight: "600" }}>
-              Summary - {data?.date}
+              Summary - {dateAll}
             </Text>
             {folded ? (
               <TouchableOpacity onPress={toggleFold}>
@@ -189,8 +246,8 @@ export const ScJournalsSummary = ({ route }) => {
                 justifyContent: "center",
               }}
             >
-              <ScSummaryItem header={"Date"} label={data?.date} />
-              <ScSummaryItem header={"Transactions"} label={data?.records} />
+              <ScSummaryItem header={"Date"} label={dateAll} />
+              <ScSummaryItem header={"Transactions"} label={recordsAll} />
               <ScSummaryItem
                 header={"Certified"}
                 label={`${certifiedAll} Kg(s)`}
@@ -243,11 +300,20 @@ export const ScJournalsSummary = ({ route }) => {
               farmerNames={item.farmername}
               lotnumber={item.lotnumber}
               coffeeVal={item.kilograms * item.unitprice}
+              deleteFn={setDeleteModal}
+              receiptId={item.paper_receipt}
             />
           )}
           keyExtractor={(item) => item.paper_receipt}
         />
       </View>
+      {deleteModal.open && (
+        <SyncModal
+          label={`Do you want to delete this transaction?`}
+          onYes={deleteTransaction}
+          OnNo={handleCloseDeleteModal}
+        />
+      )}
     </View>
   );
 };

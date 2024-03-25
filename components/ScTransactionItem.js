@@ -6,6 +6,7 @@ import CustomButton from "./CustomButton";
 
 export const ScTransactionItem = ({
   lotnumber,
+  receiptId,
   farmerId,
   farmerNames = "",
   kgsGood,
@@ -17,12 +18,16 @@ export const ScTransactionItem = ({
   coffeeVal,
   coffeeType = "Cherry",
   recordid = "1004587",
+  deleteFn,
 }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
 
   const [indicatorVisible, setIndicatorVisibility] = useState(false);
   const handleSubmit = () => {};
+  const handleDelete = () => {
+    deleteFn({ open: true, id: receiptId });
+  };
 
   return (
     <View
@@ -175,7 +180,7 @@ export const ScTransactionItem = ({
           radius={7}
           paddingRatio={0.01}
           disabled={indicatorVisible}
-          onPress={handleSubmit}
+          onPress={handleDelete}
         />
       </View>
     </View>

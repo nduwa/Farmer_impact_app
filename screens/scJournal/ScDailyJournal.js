@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { colors } from "../../data/colors";
-import { useNavigation } from "@react-navigation/native";
+import {
+  useFocusEffect,
+  useIsFocused,
+  useNavigation,
+} from "@react-navigation/native";
 import {
   Dimensions,
   FlatList,
@@ -17,6 +21,7 @@ export const ScJournal = () => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const navigation = useNavigation();
+  const isFocused = useIsFocused();
 
   const [journals, setJournals] = useState([]);
 
@@ -32,18 +37,23 @@ export const ScJournal = () => {
     return `${day}/${month}/${year}`;
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      retrieveDBdata({
-        tableName: "rtc_transactions",
-        setData: setJournals,
-        queryArg:
-          "SELECT site_day_lot,SUM(kilograms) AS kgsGood,SUM(bad_kilograms) AS kgsBad, COUNT(*) AS recordCount FROM rtc_transactions GROUP BY site_day_lot ORDER BY site_day_lot;",
-      });
-    };
+  useFocusEffect(
+    React.useCallback(() => {
+      const fetchData = async () => {
+        retrieveDBdata({
+          tableName: "rtc_transactions",
+          setData: setJournals,
+          queryArg:
+            "SELECT site_day_lot,SUM(kilograms) AS kgsGood,SUM(bad_kilograms) AS kgsBad, COUNT(*) AS recordCount FROM rtc_transactions GROUP BY site_day_lot ORDER BY site_day_lot;",
+        });
+      };
 
-    fetchData();
-  }, []);
+      fetchData();
+      return () => {
+        // Cleanup code if needed
+      };
+    }, [])
+  );
   return (
     <View
       style={{
