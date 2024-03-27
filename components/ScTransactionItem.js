@@ -3,6 +3,7 @@ import { Dimensions, Text, View } from "react-native";
 import { colors } from "../data/colors";
 import { ScTransactionRow } from "./ScTransactionRow";
 import CustomButton from "./CustomButton";
+import { useNavigation } from "@react-navigation/native";
 
 export const ScTransactionItem = ({
   lotnumber,
@@ -16,15 +17,21 @@ export const ScTransactionItem = ({
   trDate,
   cashTotal,
   coffeeVal,
-  coffeeType = "Cherry",
-  recordid = "1004587",
+  coffeeType,
   deleteFn,
+  routeData,
 }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
+  const navigation = useNavigation();
 
   const [indicatorVisible, setIndicatorVisibility] = useState(false);
-  const handleSubmit = () => {};
+  const handleEdit = () => {
+    let newData = { receiptId };
+    navigation.replace("EditTransaction", {
+      data: { ...routeData, ...newData },
+    });
+  };
   const handleDelete = () => {
     deleteFn({ open: true, id: receiptId });
   };
@@ -67,7 +74,7 @@ export const ScTransactionItem = ({
           marginVertical: screenHeight * 0.006,
         }}
       >
-        {recordid || 0}
+        {`RECEIPT / ${receiptId}`}
       </Text>
       <View
         style={{
@@ -167,7 +174,7 @@ export const ScTransactionItem = ({
           radius={7}
           paddingRatio={0.01}
           disabled={indicatorVisible}
-          onPress={handleSubmit}
+          onPress={handleEdit}
         />
         <CustomButton
           bg={colors.secondary}

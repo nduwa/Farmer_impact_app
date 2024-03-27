@@ -10,6 +10,7 @@ import { FarmerScreen } from "./screens/buyCoffee/FarmerScreen";
 import { UnregisteredFarmerScreen } from "./screens/buyCoffee/UnregisteredFarmerScreen";
 import { ScJournal } from "./screens/scJournal/ScDailyJournal";
 import { ScJournalsSummary } from "./screens/scJournal/ScJournalsSummary";
+import { EditTransactionScreen } from "./screens/scJournal/EditTransactionScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -56,11 +57,15 @@ export default function App() {
             options={{ unmountOnBlur: true }}
             component={ScJournal}
           />
-
           <Stack.Screen
             name="ScDailySummary"
             options={{ unmountOnBlur: true }}
             component={ScJournalsSummary}
+          />
+          <Stack.Screen
+            name="EditTransaction"
+            options={{ unmountOnBlur: true }}
+            component={EditTransactionScreen}
           />
         </Stack.Navigator>
       </NavigationContainer>

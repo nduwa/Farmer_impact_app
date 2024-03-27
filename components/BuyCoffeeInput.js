@@ -7,6 +7,7 @@ export const BuyCoffeeInput = ({
   handleBlur,
   value,
   label,
+  error = false,
   active = true,
   radius = 10,
 }) => {
@@ -37,9 +38,9 @@ export const BuyCoffeeInput = ({
         value={value}
         editable={active}
         style={{
-          borderColor: colors.bg_variant_font,
+          borderColor: error ? "red" : colors.bg_variant_font,
           backgroundColor: colors.white_variant,
-          borderWidth: 0.3,
+          borderWidth: error ? 1 : 0.3,
           borderRadius: radius,
           padding: 7,
           fontWeight: "500",

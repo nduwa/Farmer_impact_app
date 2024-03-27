@@ -8,7 +8,7 @@ import {
   View,
 } from "react-native";
 import { colors } from "../../data/colors";
-import { useIsFocused, useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useIsFocused, useNavigation } from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
 import { AntDesign } from "@expo/vector-icons";
 import { FontAwesome5 } from "@expo/vector-icons";
@@ -131,28 +131,30 @@ export const ScJournalsSummary = ({ route }) => {
     }
   }, [currentJob]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      let transactions = [];
-      retrieveDBdataAsync({
-        tableName: "rtc_transactions",
-        filterValue: data.site_day_lot,
-      })
-        .then((result) => {
-          transactions = [...transactions, ...result];
-          setJournalData(transactions);
-          setSummaryData(transactions);
+  useFocusEffect(
+    React.useCallback(() => {
+      const fetchData = async () => {
+        let transactions = [];
+        retrieveDBdataAsync({
+          tableName: "rtc_transactions",
+          filterValue: data.site_day_lot,
         })
-        .catch((error) => {
-          console.log("Error getting transactions for this journal: ", error);
-        });
-    };
-    if (isFocused) {
-      fetchData();
-    }
+          .then((result) => {
+            transactions = [...transactions, ...result];
+            setJournalData(transactions);
+            setSummaryData(transactions);
+          })
+          .catch((error) => {
+            console.log("Error getting transactions for this journal: ", error);
+          });
+      };
 
-    return () => {};
-  }, []);
+      fetchData();
+      return () => {
+        // Cleanup code if needed
+      };
+    }, [])
+  );
   return (
     <View
       style={{
@@ -300,8 +302,10 @@ export const ScJournalsSummary = ({ route }) => {
               farmerNames={item.farmername}
               lotnumber={item.lotnumber}
               coffeeVal={item.kilograms * item.unitprice}
+              coffeeType={item.coffee_type}
               deleteFn={setDeleteModal}
               receiptId={item.paper_receipt}
+              routeData={data}
             />
           )}
           keyExtractor={(item) => item.paper_receipt}

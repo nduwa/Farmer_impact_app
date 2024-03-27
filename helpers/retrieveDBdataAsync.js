@@ -6,7 +6,9 @@ const db = SQLite.openDatabase(DB_NAME);
 export const retrieveDBdataAsync = ({
   stationId = null,
   filterValue = null,
-  tableName,
+  filterCol = "site_day_lot",
+  tableName = null,
+  customQuery = null,
 }) => {
   let query = "";
 
@@ -20,8 +22,13 @@ export const retrieveDBdataAsync = ({
     query =
       "SELECT supplier.* FROM rtc_station AS station INNER JOIN rtc_supplier AS supplier ON station._kf_Supplier = supplier.__kp_Supplier;";
   } else if (tableName === "rtc_transactions") {
-    query = `SELECT * FROM rtc_transactions WHERE site_day_lot='${filterValue}';`;
+    query = `SELECT * FROM rtc_transactions WHERE ${filterCol}='${filterValue}';`;
+  } else if (tableName === "rtc_households") {
+    query = `SELECT households.* FROM rtc_farmers AS farmers JOIN rtc_households AS households ON farmers._kf_Household = households.__kp_Household WHERE farmers.farmerid = '${filterValue}';`;
   }
+
+  if (customQuery) query = customQuery;
+
   return new Promise((resolve, reject) => {
     db.transaction(
       (tx) => {

@@ -21,6 +21,8 @@ import * as SecureStore from "expo-secure-store";
 import { generateID } from "../../helpers/generateID";
 import { retrieveDBdata } from "../../helpers/retrieveDBdata";
 import { dataTodb } from "../../helpers/dataTodb";
+import { validateTransaction } from "../../helpers/validateTransaction";
+import { retrieveDBdataAsync } from "../../helpers/retrieveDBdataAsync";
 
 export const RegisteredFarmerScreen = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
@@ -33,6 +35,13 @@ export const RegisteredFarmerScreen = ({ route }) => {
   const [date, setDate] = useState(new Date());
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
   const [currentJob, setCurrentJob] = useState(null);
+  const [validationError, setValidationError] = useState({
+    message: null,
+    type: null,
+    inputBox: null,
+  });
+  const [transValidated, setTransValidate] = useState(false);
+  const [allReceipts, setAllReceipts] = useState([]);
 
   const [staffId, setStaffId] = useState(null);
   const [staffKf, setStaffKf] = useState(null);
@@ -40,6 +49,9 @@ export const RegisteredFarmerScreen = ({ route }) => {
   const [userName, setUserName] = useState(null);
   const [stationId, setStationId] = useState(null);
   const [supplierData, setSupplierData] = useState(null);
+  const [submitData, setSubmitData] = useState(null);
+  const [farmerSeasonTransactions, setFarmerSeasonTransactions] = useState(0);
+  const [farmerSeasonWeight, setFarmerSeasonWeight] = useState(0);
 
   const onChange = (event, selectedDate) => {
     const currentDate = selectedDate;
@@ -66,6 +78,51 @@ export const RegisteredFarmerScreen = ({ route }) => {
     showMode("date");
   };
 
+  const validateInputs = (values) => {
+    if (
+      !values.farmerID ||
+      values.farmerID === "" ||
+      !values.farmerName ||
+      values.farmerName === "" ||
+      !values.receiptNumber ||
+      values.receiptNumber === "" ||
+      !values.transactionDate ||
+      values.transactionDate === "" ||
+      !values.certificationType ||
+      values.certificationType === "" ||
+      !values.coffeeType ||
+      values.coffeeType === "" ||
+      !values.cashTotal ||
+      values.cashTotal === "" ||
+      !values.cashTotalMobile ||
+      values.cashTotalMobile === ""
+    ) {
+      setValidationError({
+        type: "emptyOrInvalidData",
+        message: "Invalid inputs detected",
+        inputBox: null,
+      });
+      setCurrentJob("Invalid inputs detected");
+      return false;
+    }
+
+    let foundReceipt = allReceipts.find(
+      (item) => item.paper_receipt === values.receiptNumber
+    );
+
+    if (foundReceipt) {
+      setValidationError({
+        type: "duplicateReceipt",
+        message: "The receipt number is already used",
+        inputBox: "receiptNumber",
+      });
+      setCurrentJob("The receipt number is already used");
+      return false;
+    }
+
+    return true;
+  };
+
   const submitTransaction = async (transactionData) => {
     try {
       let lotnumber = generateID({ type: "lotnumber", staffId });
@@ -87,7 +144,7 @@ export const RegisteredFarmerScreen = ({ route }) => {
         supplierId: supplierData[0].Supplier_ID_t,
       });
 
-      let data = {
+      let formData = {
         lotnumber,
         site_day_lot,
         cherry_lot_id,
@@ -119,15 +176,34 @@ export const RegisteredFarmerScreen = ({ route }) => {
         _kf_Season: seasonId,
       };
 
-      dataTodb({
-        tableName: "transactions",
-        syncData: [data],
-        setCurrentJob: setCurrentJob,
-      });
+      setSubmitData(formData);
+      setValidationError({ message: null, type: null });
+
+      if (validateInputs(transactionData)) {
+        validateTransaction({
+          farmerid: formData.farmerid,
+          kgsBad: formData.bad_kilograms,
+          kgsGood: formData.kilograms,
+          currentSeasonWeight: farmerSeasonWeight,
+          setValid: setTransValidate,
+          setCurrentJob,
+          setError: setValidationError,
+        });
+      }
     } catch (error) {
       console.log(error);
     }
   };
+
+  useEffect(() => {
+    if (transValidated) {
+      dataTodb({
+        tableName: "transactions",
+        syncData: [submitData],
+        setCurrentJob: setCurrentJob,
+      });
+    }
+  }, [transValidated]);
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
@@ -157,6 +233,27 @@ export const RegisteredFarmerScreen = ({ route }) => {
   }, [currentJob]);
 
   useEffect(() => {
+    if (allReceipts.length > 0) {
+      console.log(allReceipts);
+    }
+  }, [allReceipts.length]);
+
+  useEffect(() => {
+    if (farmerSeasonTransactions.length > 0) {
+      let weight = 0;
+      let subtotal = 0;
+      for (const item of farmerSeasonTransactions) {
+        let weight1 = parseFloat(item.kilograms) || 0;
+        let weight2 = parseFloat(item.bad_kilograms) || 0;
+        subtotal = weight1 + weight2;
+        weight += subtotal;
+      }
+
+      setFarmerSeasonWeight(weight);
+    }
+  }, [farmerSeasonTransactions.length]);
+
+  useEffect(() => {
     const fetchIds = async () => {
       let staffID = await SecureStore.getItemAsync("rtc-user-staff-id");
       let staffKF = await SecureStore.getItemAsync("rtc-user-staff-kf");
@@ -171,6 +268,20 @@ export const RegisteredFarmerScreen = ({ route }) => {
           setData: setSupplierData,
         });
       }
+
+      if (seasonID) {
+        retrieveDBdata({
+          tableName: "rtc_transactions",
+          queryArg: `SELECT kilograms,bad_kilograms FROM rtc_transactions WHERE farmerid='${data.farmerid}' AND _kf_Season='${seasonID}'`,
+          setData: setFarmerSeasonTransactions,
+        });
+      }
+
+      retrieveDBdata({
+        tableName: "rtc_transactions",
+        setData: setAllReceipts,
+        queryArg: "SELECT paper_receipt FROM rtc_transactions",
+      });
 
       setStaffId(staffID);
       setStaffKf(staffKF);
@@ -238,8 +349,8 @@ export const RegisteredFarmerScreen = ({ route }) => {
             kgBad: "0",
             priceBad: "0",
             totalBad: "",
-            cashTotal: "",
-            cashTotalMobile: "",
+            cashTotal: "0",
+            cashTotalMobile: "0",
           }}
           onSubmit={async (values) => {
             submitTransaction(values);
@@ -314,6 +425,7 @@ export const RegisteredFarmerScreen = ({ route }) => {
                     handleBlur={handleBlur("receiptNumber")}
                     label={"Receipt Number"}
                     value={values.receiptNumber}
+                    error={validationError.inputBox === "receiptNumber"}
                   />
                   <View
                     style={{
@@ -377,6 +489,7 @@ export const RegisteredFarmerScreen = ({ route }) => {
                       {show && (
                         <DateTimePicker
                           testID="dateTimePicker"
+                          maximumDate={new Date()}
                           value={date}
                           mode={mode}
                           is24Hour={true}
@@ -709,6 +822,45 @@ export const RegisteredFarmerScreen = ({ route }) => {
                     value={values.cashTotalMobile}
                   />
                 </View>
+
+                {/* validation error */}
+                {validationError.message && (
+                  <View
+                    style={{
+                      width: "95%",
+                      backgroundColor: colors.white_variant,
+                      elevation: 2,
+                      borderWidth: 0.7,
+                      borderColor: "red",
+                      borderRadius: 15,
+                      paddingHorizontal: screenWidth * 0.04,
+                      paddingVertical: screenHeight * 0.03,
+                      gap: screenHeight * 0.01,
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontWeight: "400",
+                        fontSize: screenWidth * 0.05,
+                        color: colors.secondary,
+                        marginLeft: screenWidth * 0.02,
+                      }}
+                    >
+                      Validation Error
+                    </Text>
+                    <Text
+                      style={{
+                        fontWeight: "400",
+                        fontSize: screenWidth * 0.04,
+                        color: colors.black_letter,
+                        marginLeft: screenWidth * 0.02,
+                      }}
+                    >
+                      {validationError.message}
+                    </Text>
+                  </View>
+                )}
+
                 <CustomButton
                   bg={colors.secondary}
                   color={"white"}

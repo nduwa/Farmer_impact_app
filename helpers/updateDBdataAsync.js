@@ -3,10 +3,9 @@ import { DB_NAME } from "@env";
 
 const db = SQLite.openDatabase(DB_NAME);
 
-export const deleteDBdataAsync = ({ tableName, id, customQuery = null }) => {
-  let query = `DELETE FROM ${tableName} WHERE paper_receipt=${id}`;
+export const updateDBdataAsync = ({ id, query }) => {
+  if (!query || !id) return;
 
-  console.log(query)
   return new Promise((resolve, reject) => {
     db.transaction(
       (tx) => {
@@ -15,7 +14,7 @@ export const deleteDBdataAsync = ({ tableName, id, customQuery = null }) => {
           [],
           (_, result) => {
             if (result.rowsAffected > 0 || result.rows.length > 0) {
-              resolve({ success: true, deletedTransaction: id });
+              resolve({ success: true, updatedRecord: id });
             } else {
               resolve({ success: false });
             }
