@@ -267,6 +267,7 @@ export const FarmerScreen = () => {
                 padding: 5,
                 gap: 15,
               }}
+              initialNumToRender={12}
               data={displayData}
               renderItem={({ item }) => <FarmerCard data={item} />}
               keyExtractor={(item) => item.id}

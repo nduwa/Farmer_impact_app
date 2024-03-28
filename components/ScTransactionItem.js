@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React, { memo, useState } from "react";
 import { Dimensions, Text, View } from "react-native";
 import { colors } from "../data/colors";
 import { ScTransactionRow } from "./ScTransactionRow";
 import CustomButton from "./CustomButton";
 import { useNavigation } from "@react-navigation/native";
 
-export const ScTransactionItem = ({
+const ScTransactionItem = ({
   lotnumber,
   receiptId,
   farmerId,
@@ -20,12 +20,12 @@ export const ScTransactionItem = ({
   coffeeType,
   deleteFn,
   routeData,
+  inActive = false,
 }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const navigation = useNavigation();
 
-  const [indicatorVisible, setIndicatorVisibility] = useState(false);
   const handleEdit = () => {
     let newData = { receiptId };
     navigation.replace("EditTransaction", {
@@ -173,7 +173,7 @@ export const ScTransactionItem = ({
           mb={8}
           radius={7}
           paddingRatio={0.01}
-          disabled={indicatorVisible}
+          disabled={inActive}
           onPress={handleEdit}
         />
         <CustomButton
@@ -186,10 +186,12 @@ export const ScTransactionItem = ({
           mb={8}
           radius={7}
           paddingRatio={0.01}
-          disabled={indicatorVisible}
+          disabled={inActive}
           onPress={handleDelete}
         />
       </View>
     </View>
   );
 };
+
+export default memo(ScTransactionItem);

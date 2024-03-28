@@ -1,11 +1,11 @@
 import { StatusBar } from "expo-status-bar";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Dimensions,
-  SafeAreaView,
+  Keyboard,
   ScrollView,
   Text,
-  TextInput,
+  ToastAndroid,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -16,18 +16,244 @@ import { BuyCoffeeInput } from "../../components/BuyCoffeeInput";
 import RadioButtonGroup, { RadioButtonItem } from "expo-radio-button";
 import { useNavigation } from "@react-navigation/native";
 import CustomButton from "../../components/CustomButton";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import * as SecureStore from "expo-secure-store";
+import { generateID } from "../../helpers/generateID";
+import { retrieveDBdata } from "../../helpers/retrieveDBdata";
+import { dataTodb } from "../../helpers/dataTodb";
 
-export const UnregisteredFarmerScreen = () => {
+export const UnRegisteredFarmerScreen = () => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
-  const [current, setCurrent] = useState("test");
+
+  const [currentCertificationType, setCurrentCertificationType] =
+    useState("NC");
+  const [currentCoffeeType, setCurrentCoffeeType] = useState("Cherry");
   const [indicatorVisible, setIndicatorVisibility] = useState(false);
+  const [date, setDate] = useState(new Date());
+  const [isKeyboardActive, setIsKeyboardActive] = useState(false);
+  const [currentJob, setCurrentJob] = useState(null);
+  const [validationError, setValidationError] = useState({
+    message: null,
+    type: null,
+    inputBox: null,
+  });
+  const [transValidated, setTransValidate] = useState(false);
+  const [allReceipts, setAllReceipts] = useState([]);
+
+  const [staffId, setStaffId] = useState(null);
+  const [staffKf, setStaffKf] = useState(null);
+  const [seasonId, setSeasonId] = useState(null);
+  const [userName, setUserName] = useState(null);
+  const [stationId, setStationId] = useState(null);
+  const [supplierData, setSupplierData] = useState(null);
+  const [submitData, setSubmitData] = useState(null);
+
+  const onChange = (event, selectedDate) => {
+    const currentDate = selectedDate;
+    setShow(false);
+    setDate(currentDate);
+  };
 
   const navigation = useNavigation();
 
   const handleBackButton = () => {
     navigation.navigate("Homepage", { data: null });
   };
+
+  const [mode, setMode] = useState("date");
+  const [show, setShow] = useState(false);
+
+  const showMode = (currentMode) => {
+    setShow(true);
+    setMode(currentMode);
+  };
+
+  const showDatepicker = () => {
+    showMode("date");
+  };
+
+  const validateInputs = (values) => {
+    if (
+      !values.farmerName ||
+      values.farmerName === "" ||
+      !values.receiptNumber ||
+      values.receiptNumber === "" ||
+      !values.transactionDate ||
+      values.transactionDate === "" ||
+      !values.certificationType ||
+      values.certificationType === "" ||
+      !values.coffeeType ||
+      values.coffeeType === "" ||
+      !values.cashTotal ||
+      values.cashTotal === "" ||
+      !values.cashTotalMobile ||
+      values.cashTotalMobile === ""
+    ) {
+      setValidationError({
+        type: "emptyOrInvalidData",
+        message: "Invalid inputs detected",
+        inputBox: null,
+      });
+      setCurrentJob("Invalid inputs detected");
+      return false;
+    }
+
+    let foundReceipt = allReceipts.find(
+      (item) => item.paper_receipt === values.receiptNumber
+    );
+
+    if (foundReceipt) {
+      setValidationError({
+        type: "duplicateReceipt",
+        message: "The receipt number is already used",
+        inputBox: "receiptNumber",
+      });
+      setCurrentJob("The receipt number is already used");
+      return false;
+    }
+
+    return true;
+  };
+
+  const submitTransaction = async (transactionData) => {
+    try {
+      let lotnumber = generateID({ type: "lotnumber", staffId });
+      let site_day_lot = generateID({ type: "site_day_lot", staffId });
+      let cherry_lot_id = generateID({
+        type: "cherry_lot_id",
+        supplierId: supplierData[0].Supplier_ID_t,
+      });
+      let parchment_lot_id = generateID({
+        type: "parchment_lot_id",
+        supplierId: supplierData[0].Supplier_ID_t,
+      });
+      let bad_cherry_lot_id = generateID({
+        type: "bad_cherry_lot_id",
+        supplierId: supplierData[0].Supplier_ID_t,
+      });
+      let bad_parch_lot_id = generateID({
+        type: "bad_parch_lot_id",
+        supplierId: supplierData[0].Supplier_ID_t,
+      });
+
+      let formData = {
+        lotnumber,
+        site_day_lot,
+        cherry_lot_id,
+        parchment_lot_id,
+        bad_cherry_lot_id,
+        bad_parch_lot_id,
+        created_at: transactionData.transactionDate.toISOString(),
+        farmerid: "",
+        farmername: transactionData.farmerName,
+        coffee_type: transactionData.coffeeType,
+        kilograms: transactionData.kgGood,
+        unitprice: transactionData.priceGood,
+        transaction_date: transactionData.transactionDate.toISOString(),
+        certification: transactionData.certificationType,
+        _kf_Staff: staffKf,
+        _kf_Station: stationId,
+        _kf_Supplier: supplierData[0].__kp_Supplier,
+        uploaded: 0,
+        uploaded_at: "0000-00-00",
+        paper_receipt: transactionData.receiptNumber,
+        certified: transactionData.certificationType === "NC" ? 0 : 1,
+        edited: 0,
+        cash_paid: transactionData.cashTotal,
+        traceable: 0,
+        total_mobile_money_payment: transactionData.cashTotalMobile,
+        bad_unit_price: transactionData.priceBad,
+        bad_kilograms: transactionData.kgBad,
+        _kf_Season: seasonId,
+      };
+
+      setSubmitData(formData);
+      setValidationError({ message: null, type: null });
+
+      if (validateInputs(transactionData)) {
+        setTransValidate(true);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    if (transValidated) {
+      dataTodb({
+        tableName: "transactions",
+        syncData: [submitData],
+        setCurrentJob: setCurrentJob,
+      });
+    }
+  }, [transValidated]);
+
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      "keyboardDidShow",
+      () => {
+        setIsKeyboardActive(true);
+      }
+    );
+
+    const keyboardDidHideListener = Keyboard.addListener(
+      "keyboardDidHide",
+      () => {
+        setIsKeyboardActive(false);
+      }
+    );
+
+    return () => {
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
+    };
+  }, [isKeyboardActive]);
+
+  useEffect(() => {
+    if (currentJob) {
+      ToastAndroid.show(currentJob, ToastAndroid.SHORT);
+    }
+    if (currentJob === "Transaction saved!") {
+      let usedReceipts = allReceipts;
+      let newReceipt = submitData.paper_receipt;
+
+      usedReceipts.push({ paper_receipt: newReceipt });
+      setAllReceipts(usedReceipts);
+    }
+  }, [currentJob]);
+
+  useEffect(() => {
+    const fetchIds = async () => {
+      let staffID = await SecureStore.getItemAsync("rtc-user-staff-id");
+      let staffKF = await SecureStore.getItemAsync("rtc-user-staff-kf");
+      let stationID = await SecureStore.getItemAsync("rtc-station-id");
+      let names = await SecureStore.getItemAsync("rtc-name-full");
+      let seasonID = await SecureStore.getItemAsync("rtc-seasons-id");
+
+      if (stationID) {
+        retrieveDBdata({
+          stationId,
+          tableName: "rtc_supplier",
+          setData: setSupplierData,
+        });
+      }
+
+      retrieveDBdata({
+        tableName: "rtc_transactions",
+        setData: setAllReceipts,
+        queryArg: "SELECT paper_receipt FROM rtc_transactions",
+      });
+
+      setStaffId(staffID);
+      setStaffKf(staffKF);
+      setStationId(stationID);
+      setUserName(names);
+      setSeasonId(seasonID);
+    };
+
+    fetchIds();
+  }, []);
 
   return (
     <View
@@ -67,7 +293,7 @@ export const UnregisteredFarmerScreen = () => {
             marginLeft: screenWidth * 0.12,
           }}
         >
-          Unregistered ATP Farmer
+          Non-Registered ATP Farmer
         </Text>
       </View>
       <View style={{ backgroundColor: colors.bg_variant }}>
@@ -75,17 +301,29 @@ export const UnregisteredFarmerScreen = () => {
           initialValues={{
             farmerName: "",
             receiptNumber: "",
-            transactionDate: "",
-            kgGood: "",
-            priceGood: "",
-            kgBad: "",
-            priceBad: "",
-            cashTotal: "",
-            cashTotalMobile: "",
+            transactionDate: date,
+            certificationType: currentCertificationType,
+            coffeeType: currentCoffeeType,
+            kgGood: "0",
+            priceGood: "0",
+            totalGood: "",
+            kgBad: "0",
+            priceBad: "0",
+            totalBad: "",
+            cashTotal: "0",
+            cashTotalMobile: "0",
           }}
-          onSubmit={async (values) => {}}
+          onSubmit={async (values) => {
+            submitTransaction(values);
+          }}
         >
-          {({ handleChange, handleBlur, handleSubmit, values }) => (
+          {({
+            handleChange,
+            setFieldValue,
+            handleBlur,
+            handleSubmit,
+            values,
+          }) => (
             <View
               style={{
                 gap: 18,
@@ -116,12 +354,23 @@ export const UnregisteredFarmerScreen = () => {
                     gap: screenHeight * 0.01,
                   }}
                 >
+                  <Text
+                    style={{
+                      fontWeight: "400",
+                      fontSize: screenWidth * 0.05,
+                      color: colors.secondary,
+                      marginLeft: screenWidth * 0.02,
+                    }}
+                  >
+                    Confirm Purchase
+                  </Text>
                   <BuyCoffeeInput
                     values={values}
                     handleChange={handleChange("farmerName")}
                     handleBlur={handleBlur("farmerName")}
                     label={"Farmer Name"}
                     value={values.farmerName}
+                    active={true}
                   />
                   <BuyCoffeeInput
                     values={values}
@@ -129,14 +378,79 @@ export const UnregisteredFarmerScreen = () => {
                     handleBlur={handleBlur("receiptNumber")}
                     label={"Receipt Number"}
                     value={values.receiptNumber}
+                    error={validationError.inputBox === "receiptNumber"}
                   />
-                  <BuyCoffeeInput
-                    values={values}
-                    handleChange={handleChange("transactionDate")}
-                    handleBlur={handleBlur("transactionDate")}
-                    label={"Transaction Date"}
-                    value={values.transactionDate}
-                  />
+                  <View
+                    style={{
+                      gap: screenHeight * 0.01,
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontWeight: "400",
+                        fontSize: screenWidth * 0.04,
+                        color: colors.black,
+                        marginLeft: screenWidth * 0.02,
+                      }}
+                    >
+                      Transaction Date
+                    </Text>
+                    <View
+                      style={{
+                        flexDirection: "row-reverse",
+                        alignItems: "center",
+                        gap: screenWidth * 0.02,
+                        width: "100%",
+                      }}
+                    >
+                      <TouchableOpacity
+                        style={{
+                          padding: screenWidth * 0.02,
+                          borderRadius: 7,
+                          backgroundColor: colors.white_variant,
+                          elevation: 4,
+                        }}
+                        onPress={showDatepicker}
+                      >
+                        <AntDesign
+                          name="calendar"
+                          size={screenWidth * 0.06}
+                          color="black"
+                        />
+                      </TouchableOpacity>
+                      <Text
+                        style={{
+                          borderWidth: 0.3,
+                          borderRadius: 8,
+                          borderColor: colors.bg_variant_font,
+                          backgroundColor: colors.white_a,
+                          paddingHorizontal: 7,
+                          paddingVertical: 7,
+                          width: screenWidth * 0.745,
+                          fontWeight: "500",
+                          fontSize: screenWidth * 0.05,
+                          color: colors.blue_font,
+                        }}
+                      >
+                        {date.toLocaleString("en-US", {
+                          weekday: "long",
+                          day: "numeric",
+                          month: "long",
+                          year: "numeric",
+                        })}
+                      </Text>
+                      {show && (
+                        <DateTimePicker
+                          testID="dateTimePicker"
+                          maximumDate={new Date()}
+                          value={date}
+                          mode={mode}
+                          is24Hour={true}
+                          onChange={onChange}
+                        />
+                      )}
+                    </View>
+                  </View>
                 </View>
 
                 {/* Certification type */}
@@ -163,12 +477,12 @@ export const UnregisteredFarmerScreen = () => {
                   </Text>
                   <RadioButtonGroup
                     containerStyle={{ marginBottom: 10, gap: 5 }}
-                    selected={current}
-                    onSelected={(value) => setCurrent(value)}
-                    radioBackground={colors.black}
+                    selected={currentCertificationType}
+                    onSelected={(value) => setCurrentCertificationType(value)}
+                    radioBackground={colors.blue_font}
                   >
                     <RadioButtonItem
-                      value="test2"
+                      value="CP"
                       label={
                         <Text
                           style={{
@@ -178,12 +492,12 @@ export const UnregisteredFarmerScreen = () => {
                             color: colors.black,
                           }}
                         >
-                          Cafe Practices Provisional
+                          Cafe Practices
                         </Text>
                       }
                     />
                     <RadioButtonItem
-                      value="test"
+                      value="RA"
                       label={
                         <Text
                           style={{
@@ -198,7 +512,7 @@ export const UnregisteredFarmerScreen = () => {
                       }
                     />
                     <RadioButtonItem
-                      value="test3"
+                      value="NC"
                       label={
                         <Text
                           style={{
@@ -239,12 +553,12 @@ export const UnregisteredFarmerScreen = () => {
                   </Text>
                   <RadioButtonGroup
                     containerStyle={{ marginBottom: 10, gap: 5 }}
-                    selected={current}
-                    onSelected={(value) => setCurrent(value)}
-                    radioBackground={colors.black}
+                    selected={currentCoffeeType}
+                    onSelected={(value) => setCurrentCoffeeType(value)}
+                    radioBackground={colors.blue_font}
                   >
                     <RadioButtonItem
-                      value="test2"
+                      value="Cherry"
                       label={
                         <Text
                           style={{
@@ -259,7 +573,7 @@ export const UnregisteredFarmerScreen = () => {
                       }
                     />
                     <RadioButtonItem
-                      value="test"
+                      value="Parchment"
                       label={
                         <Text
                           style={{
@@ -314,7 +628,19 @@ export const UnregisteredFarmerScreen = () => {
                     >
                       <BuyCoffeeInput
                         values={values}
-                        handleChange={handleChange("kgGood")}
+                        handleChange={(text) => {
+                          handleChange("kgGood")(text);
+                          let input = parseFloat(text) || 0;
+                          let totalPrice =
+                            input * parseFloat(values.priceGood) || 0;
+
+                          setFieldValue("totalGood", totalPrice);
+
+                          let totalCash =
+                            parseFloat(totalPrice) +
+                            parseFloat(+values.totalBad);
+                          setFieldValue("cashTotal", totalCash.toFixed(2));
+                        }}
                         handleBlur={handleBlur("kgGood")}
                         label={"Kgs(Good)"}
                         radius={4}
@@ -330,8 +656,20 @@ export const UnregisteredFarmerScreen = () => {
                       />
                       <BuyCoffeeInput
                         values={values}
-                        handleChange={handleChange("kgsBad")}
-                        handleBlur={handleBlur("kgsBad")}
+                        handleChange={(text) => {
+                          handleChange("kgBad")(text);
+                          let input = parseFloat(text) || 0;
+                          let totalPrice =
+                            input * parseFloat(values.priceBad) || 0;
+
+                          setFieldValue("totalBad", totalPrice);
+
+                          let totalCash =
+                            parseFloat(totalPrice) +
+                            parseFloat(+values.totalGood);
+                          setFieldValue("cashTotal", totalCash.toFixed(2));
+                        }}
+                        handleBlur={handleBlur("kgBad")}
                         label={"Kgs(Bad)"}
                         radius={4}
                         value={values.kgBad}
@@ -346,7 +684,20 @@ export const UnregisteredFarmerScreen = () => {
                     >
                       <BuyCoffeeInput
                         values={values}
-                        handleChange={handleChange("priceGood")}
+                        handleChange={(text) => {
+                          handleChange("priceGood")(text);
+                          let input = parseFloat(text) || 0;
+                          let totalPrice =
+                            input * parseFloat(values.kgGood) || 0;
+
+                          setFieldValue("totalGood", totalPrice);
+
+                          let totalCash =
+                            parseFloat(totalPrice) +
+                            parseFloat(+values.totalBad);
+
+                          setFieldValue("cashTotal", totalCash.toFixed(2));
+                        }}
                         handleBlur={handleBlur("priceGood")}
                         label={"Price/Kg"}
                         radius={4}
@@ -362,7 +713,19 @@ export const UnregisteredFarmerScreen = () => {
                       />
                       <BuyCoffeeInput
                         values={values}
-                        handleChange={handleChange("priceBad")}
+                        handleChange={(text) => {
+                          handleChange("priceBad")(text);
+                          let input = parseFloat(text) || 0;
+                          let totalPrice =
+                            input * parseFloat(values.kgBad) || 0;
+
+                          setFieldValue("totalBad", totalPrice);
+                          let totalCash =
+                            parseFloat(totalPrice) +
+                            parseFloat(+values.totalGood);
+
+                          setFieldValue("cashTotal", totalCash.toFixed(2));
+                        }}
                         handleBlur={handleBlur("priceBad")}
                         label={"Price/Kg"}
                         radius={4}
@@ -400,6 +763,7 @@ export const UnregisteredFarmerScreen = () => {
                     handleBlur={handleBlur("cashTotal")}
                     label={"Total Cash Paid"}
                     radius={4}
+                    active={false}
                     value={values.cashTotal}
                   />
                   <BuyCoffeeInput
@@ -411,14 +775,55 @@ export const UnregisteredFarmerScreen = () => {
                     value={values.cashTotalMobile}
                   />
                 </View>
+
+                {/* validation error */}
+                {validationError.message && (
+                  <View
+                    style={{
+                      width: "95%",
+                      backgroundColor: colors.white_variant,
+                      elevation: 2,
+                      borderWidth: 0.7,
+                      borderColor: "red",
+                      borderRadius: 15,
+                      paddingHorizontal: screenWidth * 0.04,
+                      paddingVertical: screenHeight * 0.03,
+                      gap: screenHeight * 0.01,
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontWeight: "400",
+                        fontSize: screenWidth * 0.05,
+                        color: colors.secondary,
+                        marginLeft: screenWidth * 0.02,
+                      }}
+                    >
+                      Validation Error
+                    </Text>
+                    <Text
+                      style={{
+                        fontWeight: "400",
+                        fontSize: screenWidth * 0.04,
+                        color: colors.black_letter,
+                        marginLeft: screenWidth * 0.02,
+                      }}
+                    >
+                      {validationError.message}
+                    </Text>
+                  </View>
+                )}
+
                 <CustomButton
                   bg={colors.secondary}
                   color={"white"}
                   width="95%"
                   text="Confirm Purchase"
                   bdcolor="transparent"
-                  mt={8}
-                  mb={8}
+                  mt={screenHeight * 0.017}
+                  mb={
+                    isKeyboardActive ? screenHeight * 0.04 : screenHeight * 0.03
+                  }
                   radius={10}
                   disabled={indicatorVisible}
                   onPress={handleSubmit}

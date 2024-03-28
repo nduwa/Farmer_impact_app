@@ -12,8 +12,7 @@ export const login = createAsyncThunk("users/login", async (data) => {
     }
     return response.data;
   } catch (err) {
-    const error = err.response.data;
-    console.log(`Login failed: ${error.message}`);
+    console.log(`Login failed: ${err}`);
   }
 });
 

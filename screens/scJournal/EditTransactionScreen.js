@@ -112,8 +112,7 @@ export const EditTransactionScreen = ({ route }) => {
         kilograms: transactionData.kgGood,
         unitprice: transactionData.priceGood,
         certification: currentCertificationType,
-        certified:
-          transactionData.certificationType === "not certified" ? 0 : 1,
+        certified: transactionData.certificationType === "NC" ? 0 : 1,
         edited: 1,
         cash_paid: transactionData.cashTotal,
         total_mobile_money_payment: transactionData.cashTotalMobile,
@@ -227,11 +226,14 @@ export const EditTransactionScreen = ({ route }) => {
               })
             );
 
-            retrieveDBdata({
-              tableName: "rtc_transactions",
-              queryArg: `SELECT kilograms,bad_kilograms FROM rtc_transactions WHERE farmerid='${transaction.farmerid}' AND _kf_Season='${transaction._kf_Season}'`,
-              setData: setFarmerSeasonTransactions,
-            });
+            if (transaction.farmerid !== "") {// skip this process if the farmer is not registered
+              // retrieve all other transactions this season by this farmer except the current one we're updating
+              retrieveDBdata({
+                tableName: "rtc_transactions",
+                queryArg: `SELECT kilograms,bad_kilograms FROM rtc_transactions WHERE farmerid='${transaction.farmerid}' AND paper_receipt!='${transaction.paper_receipt}' AND _kf_Season='${transaction._kf_Season}'`,
+                setData: setFarmerSeasonTransactions,
+              });
+            }
           })
           .catch((error) => {
             console.log("Error loading data for this transaction: ", error);
@@ -287,11 +289,14 @@ export const EditTransactionScreen = ({ route }) => {
           Edit Transaction
         </Text>
       </View>
-      {currentTransactionData.farmerid && (
+      {currentTransactionData.farmername && (
         <View style={{ backgroundColor: colors.bg_variant }}>
           <Formik
             initialValues={{
-              farmerID: currentTransactionData.farmerid,
+              farmerID:
+                currentTransactionData.farmerid === ""
+                  ? "[NOT REGISTERED]"
+                  : currentTransactionData.farmerid,
               farmerName: currentTransactionData.farmername,
               receiptNumber: currentTransactionData.paper_receipt,
               transactionDate: currentTransactionData.transaction_date,
@@ -483,7 +488,7 @@ export const EditTransactionScreen = ({ route }) => {
                       radioBackground={colors.blue_font}
                     >
                       <RadioButtonItem
-                        value="Cafe Practices"
+                        value="CP"
                         label={
                           <Text
                             style={{
@@ -498,7 +503,7 @@ export const EditTransactionScreen = ({ route }) => {
                         }
                       />
                       <RadioButtonItem
-                        value="Rainforest Alliance"
+                        value="RA"
                         label={
                           <Text
                             style={{
@@ -513,7 +518,7 @@ export const EditTransactionScreen = ({ route }) => {
                         }
                       />
                       <RadioButtonItem
-                        value="not certified"
+                        value="NC"
                         label={
                           <Text
                             style={{

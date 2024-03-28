@@ -86,6 +86,7 @@ export const GroupsModal = ({ setModalOpen, data, setGroupChoice }) => {
             width: "100%",
             marginTop: screenHeight * 0.015,
           }}
+          initialNumToRender={15}
           contentContainerStyle={{
             marginBottom: 25,
             padding: screenWidth * 0.03,

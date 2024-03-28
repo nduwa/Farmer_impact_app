@@ -11,6 +11,11 @@ export const validateTransaction = async ({
   setError,
 }) => {
   try {
+    if (farmerid === "") {
+      setValid(true);
+      return;
+    }
+
     let maxWeight = 0;
     let trees = 0;
     let weight1 = parseFloat(kgsBad) || 0;

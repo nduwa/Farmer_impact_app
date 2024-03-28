@@ -69,6 +69,10 @@ export const LoginScreen = ({ navigation }) => {
           "rtc-name-full",
           userData.user.Name_Full
         );
+        await SecureStore.setItemAsync(
+          "rtc-user-name",
+          userData.user.Name_User
+        );
         await SecureStore.setItemAsync("rtc-user-id", userData.user.__kp_User);
         await SecureStore.setItemAsync(
           "rtc-user-staff-id",

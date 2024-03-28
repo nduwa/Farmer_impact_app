@@ -7,7 +7,7 @@ import { HomeScreen } from "./screens/HomeScreen";
 import { SyncScreen } from "./screens/SyncScreen";
 import { RegisteredFarmerScreen } from "./screens/buyCoffee/RegisteredFarmerScreen";
 import { FarmerScreen } from "./screens/buyCoffee/FarmerScreen";
-import { UnregisteredFarmerScreen } from "./screens/buyCoffee/UnregisteredFarmerScreen";
+import { UnRegisteredFarmerScreen } from "./screens/buyCoffee/UnregisteredFarmerScreen";
 import { ScJournal } from "./screens/scJournal/ScDailyJournal";
 import { ScJournalsSummary } from "./screens/scJournal/ScJournalsSummary";
 import { EditTransactionScreen } from "./screens/scJournal/EditTransactionScreen";
@@ -45,7 +45,7 @@ export default function App() {
           <Stack.Screen
             name="Unregistered_ATP_Farmer"
             options={{ unmountOnBlur: true }}
-            component={UnregisteredFarmerScreen}
+            component={UnRegisteredFarmerScreen}
           />
           <Stack.Screen
             name="FarmerScreen"

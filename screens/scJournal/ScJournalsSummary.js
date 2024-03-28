@@ -8,35 +8,50 @@ import {
   View,
 } from "react-native";
 import { colors } from "../../data/colors";
-import { useFocusEffect, useIsFocused, useNavigation } from "@react-navigation/native";
+import {
+  useFocusEffect,
+  useIsFocused,
+  useNavigation,
+} from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
 import { AntDesign } from "@expo/vector-icons";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { ScSummaryItem } from "../../components/ScSummaryItem";
 import CustomButton from "../../components/CustomButton";
-import { ScTransactionItem } from "../../components/ScTransactionItem";
+import ScTransactionItem from "../../components/ScTransactionItem";
 import { retrieveDBdataAsync } from "../../helpers/retrieveDBdataAsync";
 import { deleteDBdataAsync } from "../../helpers/deleteDBdataAsync";
 import { SyncModal } from "../../components/SyncModal";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  journalActions,
+  scJournalSubmission,
+} from "../../redux/journal/JournalSlice";
+import { updateDBdata } from "../../helpers/updateDBdata";
+import * as SecureStore from "expo-secure-store";
 
 export const ScJournalsSummary = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const navigation = useNavigation();
-  const isFocused = useIsFocused();
+  const dispatch = useDispatch();
+  const JournalState = useSelector((state) => state.journal);
 
   const [indicatorVisible, setIndicatorVisibility] = useState(false);
   const [folded, setFolded] = useState(true);
   const [deleteModal, setDeleteModal] = useState({ open: false, id: null });
   const [currentJob, setCurrentJob] = useState(null);
+  const [journalUploaded, setJournalUploaded] = useState(false);
 
   const [journalData, setJournalData] = useState([]);
+  const [journalDataUploadable, setJournalDataUploadable] = useState([]);
   const [certifiedAll, setCertifiedAll] = useState(0);
   const [unCertifiedAll, setUnCertifiedAll] = useState(0);
   const [floatersAll, setFloatersAll] = useState(0);
   const [cashAll, setCashAll] = useState(0);
   const [dateAll, setDateAll] = useState(null);
   const [recordsAll, setRecordsAll] = useState(0);
+  const [userName, setUserName] = useState("");
 
   const { data = null } = route.params;
 
@@ -53,7 +68,22 @@ export const ScJournalsSummary = ({ route }) => {
     navigation.navigate("ScDailyJournal");
   };
 
-  const handleSubmit = () => {};
+  const handleSubmitJournal = () => {
+    const journalId = data.site_day_lot;
+    const currentDate = new Date();
+    const twoDigitYear = currentDate.getFullYear().toString().slice(-2);
+    const twoDigitMonth = ("0" + (currentDate.getMonth() + 1)).slice(-2);
+    const twoDigitDay = ("0" + currentDate.getDate()).slice(-2);
+    let DayLotNumber = `${twoDigitDay}${twoDigitMonth}${twoDigitYear}`;
+
+    dispatch(
+      scJournalSubmission({
+        journalId,
+        transactions: journalDataUploadable,
+        additional: { username: userName, password: "", DayLotNumber },
+      })
+    );
+  };
 
   const handleCloseDeleteModal = () => {
     setDeleteModal((prevState) => ({
@@ -126,8 +156,60 @@ export const ScJournalsSummary = ({ route }) => {
   };
 
   useEffect(() => {
+    if (journalData.length > 0) {
+      let uploadableTransactions = [];
+      for (const tr of journalData) {
+        if (tr.uploaded === 0) {
+          uploadableTransactions.push(tr);
+        }
+      }
+      if (uploadableTransactions.length === 0) {
+        setJournalUploaded(true);
+      }
+      setJournalDataUploadable(uploadableTransactions);
+    }
+  }, [journalData.length]);
+
+  useEffect(() => {
+    if (JournalState.serverResponded) {
+      const uploadDate = new Date();
+      let journalId = data.site_day_lot;
+
+      updateDBdata({
+        msgNo: "Submitting failed",
+        msgYes: "Journal Submitted",
+        setCurrentJob,
+        query: `UPDATE rtc_transactions SET uploaded=1, uploaded_at='${uploadDate}' WHERE site_day_lot='${journalId}'`,
+      });
+    }
+  }, [JournalState.serverResponded]);
+
+  useEffect(() => {
+    setIndicatorVisibility(JournalState.loading);
+  }, [JournalState.loading]);
+
+  useEffect(() => {
     if (currentJob) {
       ToastAndroid.show(currentJob, ToastAndroid.SHORT);
+    }
+    if (currentJob === "Journal Submitted") {
+      let newJournalData = journalData;
+      let uploadableData = journalDataUploadable;
+      for (const tr of newJournalData) {
+        for (const item of journalDataUploadable) {
+          if (tr.paper_receipt === item.paper_receipt) {
+            tr.uploaded = 1;
+            let newUploadable = uploadableData.filter(
+              (item) => item.paper_receipt !== tr.paper_receipt
+            );
+            uploadableData = newUploadable;
+          }
+        }
+      }
+
+      setJournalUploaded(uploadableData.length < 1);
+      setJournalDataUploadable(uploadableData);
+      setJournalData(newJournalData);
     }
   }, [currentJob]);
 
@@ -135,6 +217,9 @@ export const ScJournalsSummary = ({ route }) => {
     React.useCallback(() => {
       const fetchData = async () => {
         let transactions = [];
+        let uName = await SecureStore.getItemAsync("rtc-user-name");
+
+        setUserName(uName);
         retrieveDBdataAsync({
           tableName: "rtc_transactions",
           filterValue: data.site_day_lot,
@@ -151,7 +236,9 @@ export const ScJournalsSummary = ({ route }) => {
 
       fetchData();
       return () => {
-        // Cleanup code if needed
+        setJournalDataUploadable([]);
+        setJournalUploaded(false);
+        dispatch(journalActions.resetJournalState());
       };
     }, [])
   );
@@ -262,6 +349,9 @@ export const ScJournalsSummary = ({ route }) => {
                 header={"Floaters"}
                 label={`${floatersAll} Kg(s)`}
               />
+              {journalUploaded && (
+                <ScSummaryItem header={"Status"} label={"uploaded"} />
+              )}
               <ScSummaryItem
                 header={"Total Payment"}
                 label={`RWF ${cashAll.toLocaleString()}`}
@@ -271,19 +361,20 @@ export const ScJournalsSummary = ({ route }) => {
                 bg={colors.secondary}
                 color={"white"}
                 width="100%"
-                text="Submmit Journal"
+                text="Submit Journal"
                 bdcolor="transparent"
                 mt={8}
                 mb={8}
                 radius={10}
-                disabled={indicatorVisible}
-                onPress={handleSubmit}
+                disabled={indicatorVisible || journalUploaded}
+                onPress={handleSubmitJournal}
               />
             </View>
           )}
         </View>
         <FlatList
           onScroll={handleScroll}
+          initialNumToRender={5}
           contentContainerStyle={{
             width: "100%",
             padding: 5,
@@ -298,7 +389,7 @@ export const ScJournalsSummary = ({ route }) => {
               priceBad={item.bad_unit_price}
               trDate={data?.date}
               cashTotal={item.cash_paid + item.total_mobile_money_payment}
-              farmerId={item.farmerid}
+              farmerId={item.farmerid === "" ? "FARMER" : item.farmerid}
               farmerNames={item.farmername}
               lotnumber={item.lotnumber}
               coffeeVal={item.kilograms * item.unitprice}
@@ -306,6 +397,7 @@ export const ScJournalsSummary = ({ route }) => {
               deleteFn={setDeleteModal}
               receiptId={item.paper_receipt}
               routeData={data}
+              inActive={item.uploaded === 1}
             />
           )}
           keyExtractor={(item) => item.paper_receipt}

@@ -99,6 +99,7 @@ export const ScJournal = () => {
         <FlatList
           contentContainerStyle={{ padding: 12, gap: 9 }}
           data={journals}
+          initialNumToRender={10}
           renderItem={({ item }) => (
             <ScRecordItem
               data={{

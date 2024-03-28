@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Dimensions, Text, TouchableOpacity, View } from "react-native";
+import {
+  Dimensions,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import * as SecureStore from "expo-secure-store";
 import { AntDesign } from "@expo/vector-icons";
 import { colors } from "../data/colors";
@@ -208,9 +214,9 @@ export const SyncScreen = ({ navigation }) => {
       >
         <View
           style={{
-            justifyContent: "center",
             alignItems: "center",
-            height: screenHeight * 0.35,
+            justifyContent: "center",
+            marginVertical: screenHeight * 0.02,
           }}
         >
           <View
@@ -219,7 +225,7 @@ export const SyncScreen = ({ navigation }) => {
               alignContent: "center",
               gap: screenHeight * 0.015,
               width: screenWidth * 0.7,
-              height: "70%",
+              height: screenHeight * 0.25,
               backgroundColor: colors.white,
               elevation: 3,
               borderBottomLeftRadius: screenWidth,
@@ -263,62 +269,64 @@ export const SyncScreen = ({ navigation }) => {
             )}
           </View>
         </View>
-        <View
-          style={{
-            flexDirection: "column",
-            paddingHorizontal: 10,
-            gap: screenHeight * 0.02,
-          }}
-        >
-          <SyncItem
-            name={"Stations"}
-            setRestartTable={setRestartSyncModal}
-            isDone={sycnList[0].status}
-            tableIndex={0}
-          />
-          <SyncItem
-            name={"Groups"}
-            setRestartTable={setRestartSyncModal}
-            isDone={sycnList[1].status}
-            tableIndex={1}
-          />
-          <SyncItem
-            name={"Farmers"}
-            setRestartTable={setRestartSyncModal}
-            isDone={sycnList[2].status}
-            tableIndex={2}
-          />
-          <SyncItem
-            name={"Households"}
-            setRestartTable={setRestartSyncModal}
-            isDone={sycnList[3].status}
-            tableIndex={3}
-          />
-          <SyncItem
-            name={"Training modules"}
-            setRestartTable={setRestartSyncModal}
-            isDone={sycnList[5].status}
-            tableIndex={5}
-          />
-          <SyncItem
-            name={"Inspection questions"}
-            setRestartTable={setRestartSyncModal}
-            isDone={sycnList[6].status}
-            tableIndex={6}
-          />
-          <SyncItem
-            name={"Suppliers"}
-            setRestartTable={setRestartSyncModal}
-            isDone={sycnList[8].status}
-            tableIndex={8}
-          />
-          <SyncItem
-            name={"Seasons"}
-            setRestartTable={setRestartSyncModal}
-            isDone={sycnList[9].status}
-            tableIndex={9}
-          />
-        </View>
+        <ScrollView>
+          <View
+            style={{
+              flexDirection: "column",
+              paddingHorizontal: screenWidth * 0.019,
+              gap: screenHeight * 0.02,
+            }}
+          >
+            <SyncItem
+              name={"Stations"}
+              setRestartTable={setRestartSyncModal}
+              isDone={sycnList[0].status}
+              tableIndex={0}
+            />
+            <SyncItem
+              name={"Groups"}
+              setRestartTable={setRestartSyncModal}
+              isDone={sycnList[1].status}
+              tableIndex={1}
+            />
+            <SyncItem
+              name={"Farmers"}
+              setRestartTable={setRestartSyncModal}
+              isDone={sycnList[2].status}
+              tableIndex={2}
+            />
+            <SyncItem
+              name={"Households"}
+              setRestartTable={setRestartSyncModal}
+              isDone={sycnList[3].status}
+              tableIndex={3}
+            />
+            <SyncItem
+              name={"Training modules"}
+              setRestartTable={setRestartSyncModal}
+              isDone={sycnList[5].status}
+              tableIndex={5}
+            />
+            <SyncItem
+              name={"Inspection questions"}
+              setRestartTable={setRestartSyncModal}
+              isDone={sycnList[6].status}
+              tableIndex={6}
+            />
+            <SyncItem
+              name={"Suppliers"}
+              setRestartTable={setRestartSyncModal}
+              isDone={sycnList[8].status}
+              tableIndex={8}
+            />
+            <SyncItem
+              name={"Seasons"}
+              setRestartTable={setRestartSyncModal}
+              isDone={sycnList[9].status}
+              tableIndex={9}
+            />
+          </View>
+        </ScrollView>
       </View>
 
       {/* start sync modal */}

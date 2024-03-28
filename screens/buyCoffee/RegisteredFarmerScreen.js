@@ -29,7 +29,7 @@ export const RegisteredFarmerScreen = ({ route }) => {
   const screenWidth = Dimensions.get("window").width;
 
   const [currentCertificationType, setCurrentCertificationType] =
-    useState("Cafe Practices");
+    useState("CP");
   const [currentCoffeeType, setCurrentCoffeeType] = useState("Cherry");
   const [indicatorVisible, setIndicatorVisibility] = useState(false);
   const [date, setDate] = useState(new Date());
@@ -166,7 +166,7 @@ export const RegisteredFarmerScreen = ({ route }) => {
         uploaded_at: "0000-00-00",
         paper_receipt: transactionData.receiptNumber,
         certified:
-          transactionData.certificationType === "not certified" ? 0 : 1,
+          transactionData.certificationType === "NC" ? 0 : 1,
         edited: 0,
         cash_paid: transactionData.cashTotal,
         traceable: 1,
@@ -230,13 +230,14 @@ export const RegisteredFarmerScreen = ({ route }) => {
     if (currentJob) {
       ToastAndroid.show(currentJob, ToastAndroid.SHORT);
     }
-  }, [currentJob]);
+    if (currentJob === "Transaction saved!") {
+      let usedReceipts = allReceipts;
+      let newReceipt = submitData.paper_receipt;
 
-  useEffect(() => {
-    if (allReceipts.length > 0) {
-      console.log(allReceipts);
+      usedReceipts.push({ paper_receipt: newReceipt });
+      setAllReceipts(usedReceipts);
     }
-  }, [allReceipts.length]);
+  }, [currentJob]);
 
   useEffect(() => {
     if (farmerSeasonTransactions.length > 0) {
@@ -529,7 +530,7 @@ export const RegisteredFarmerScreen = ({ route }) => {
                     radioBackground={colors.blue_font}
                   >
                     <RadioButtonItem
-                      value="Cafe Practices"
+                      value="CP"
                       label={
                         <Text
                           style={{
@@ -544,7 +545,7 @@ export const RegisteredFarmerScreen = ({ route }) => {
                       }
                     />
                     <RadioButtonItem
-                      value="Rainforest Alliance"
+                      value="RA"
                       label={
                         <Text
                           style={{
@@ -559,7 +560,7 @@ export const RegisteredFarmerScreen = ({ route }) => {
                       }
                     />
                     <RadioButtonItem
-                      value="not certified"
+                      value="NC"
                       label={
                         <Text
                           style={{

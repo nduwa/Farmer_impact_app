@@ -3,6 +3,7 @@ import UserSlice from "./user/UserSlice";
 import SidebarSlice from "./SidebarSlice";
 import loginSlice from "./user/loginSlice";
 import syncSlice from "./sync/syncSlice";
+import JournalSlice from "./journal/JournalSlice";
 
 const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ const store = configureStore({
     sidebar: SidebarSlice.reducer,
     login: loginSlice.reducer,
     sync: syncSlice.reducer,
+    journal: JournalSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

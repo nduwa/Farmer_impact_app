@@ -110,7 +110,7 @@ export const SyncItem = ({
           justifyContent: "space-between",
           width: "93%",
           borderBottomWidth: 1,
-          paddingBottom: 8,
+          paddingBottom: screenHeight* 0.018,
           borderBottomColor: colors.thin,
         }}
       >
