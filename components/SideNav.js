@@ -59,7 +59,7 @@ export const SideNav = ({
 
     if (isLogOut) clearSecureStoreKey();
 
-    navigation.navigate(destination);
+    navigation.navigate(destination, { data: null });
   };
   return (
     <TouchableOpacity

@@ -25,6 +25,8 @@ import * as SecureStore from "expo-secure-store";
 import tokenDecoder from "../helpers/tokenDecoder";
 import * as LocalAuthentication from "expo-local-authentication";
 import { UserActions } from "../redux/user/UserSlice";
+import { AntDesign } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 
 export const LoginScreen = ({ navigation }) => {
   const loginState = useSelector((state) => state.login);
@@ -32,6 +34,7 @@ export const LoginScreen = ({ navigation }) => {
   const isFocused = useIsFocused();
   const formRef = useRef(null);
 
+  const [pwdVisible, setPwdVisible] = useState(false);
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
   const [errorName, setErrorName] = useState(false);
   const [errorPwd, setErrorPwd] = useState(false);
@@ -152,6 +155,10 @@ export const LoginScreen = ({ navigation }) => {
 
   const displayToast = (msg) => {
     ToastAndroid.show(msg, ToastAndroid.SHORT);
+  };
+
+  const handleHidepwd = () => {
+    setPwdVisible(!pwdVisible);
   };
 
   useEffect(() => {
@@ -383,20 +390,40 @@ export const LoginScreen = ({ navigation }) => {
                         >
                           Password
                         </Text>
-                        <TextInput
-                          placeholder="********"
-                          secureTextEntry={true}
-                          ref={pwdInput}
-                          returnKeyType="done"
-                          placeholderTextColor={colors.black_a}
-                          onChangeText={handleChange("password")}
-                          onBlur={handleBlur("password")}
-                          value={values.password}
-                          style={{
-                            borderBottomColor: colors.black_a,
-                            borderBottomWidth: 1.5,
-                          }}
-                        />
+                        <View>
+                          <TextInput
+                            placeholder="********"
+                            secureTextEntry={!pwdVisible}
+                            ref={pwdInput}
+                            returnKeyType="done"
+                            placeholderTextColor={colors.black_a}
+                            onChangeText={handleChange("password")}
+                            onBlur={handleBlur("password")}
+                            value={values.password}
+                            style={{
+                              borderBottomColor: colors.black_a,
+                              borderBottomWidth: 1.5,
+                            }}
+                          />
+                          <TouchableOpacity
+                            onPress={handleHidepwd}
+                            style={{
+                              position: "absolute",
+                              marginLeft: screenWidth * 0.75,
+                            }}
+                          >
+                            {pwdVisible ? (
+                              <Ionicons
+                                name="eye-off"
+                                size={24}
+                                color="black"
+                              />
+                            ) : (
+                              <AntDesign name="eye" size={24} color="black" />
+                            )}
+                          </TouchableOpacity>
+                        </View>
+
                         {errorPwd && (
                           <Text
                             style={{
@@ -409,11 +436,7 @@ export const LoginScreen = ({ navigation }) => {
                           </Text>
                         )}
                       </View>
-                      <TouchableOpacity onPress={handleClick}>
-                        <Text style={globalStyles.labelNormal}>
-                          Forgot Password?
-                        </Text>
-                      </TouchableOpacity>
+
                       <CustomButton
                         bg={colors.black}
                         color={colors.white}

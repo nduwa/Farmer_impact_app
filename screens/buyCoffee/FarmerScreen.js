@@ -136,7 +136,7 @@ export const FarmerScreen = () => {
             alignItems: "center",
             justifyContent: "center",
             backgroundColor: "transparent",
-            padding: 5,
+            padding: screenWidth * 0.005,
           }}
         >
           <AntDesign name="left" size={screenWidth * 0.07} color="black" />
@@ -145,7 +145,7 @@ export const FarmerScreen = () => {
           style={{
             fontWeight: "700",
             fontSize: 19,
-            marginLeft: screenWidth * 0.12,
+            marginLeft: screenWidth * 0.16,
           }}
         >
           Registered ATP Farmer

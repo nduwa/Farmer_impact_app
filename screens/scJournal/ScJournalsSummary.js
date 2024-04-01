@@ -268,7 +268,7 @@ export const ScJournalsSummary = ({ route }) => {
             alignItems: "center",
             justifyContent: "center",
             backgroundColor: "transparent",
-            padding: 5,
+            padding: screenWidth * 0.005,
           }}
         >
           <AntDesign name="left" size={screenWidth * 0.07} color="black" />

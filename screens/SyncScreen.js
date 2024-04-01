@@ -18,7 +18,7 @@ import { SyncModal } from "../components/SyncModal";
 import { sync, syncActions } from "../redux/sync/syncSlice";
 import { checkTableExistence } from "../helpers/checkTableExistence";
 
-export const SyncScreen = ({ navigation }) => {
+export const SyncScreen = ({ navigation, route }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const [progress, setProgress] = useState(0);
@@ -48,6 +48,8 @@ export const SyncScreen = ({ navigation }) => {
 
   const dispatch = useDispatch();
   const syncState = useSelector((state) => state.sync);
+
+  const { data = null } = route.params;
 
   const handleExit = () => {
     setIsSyncing(false);
@@ -140,6 +142,10 @@ export const SyncScreen = ({ navigation }) => {
   useEffect(() => {
     const refreshSyncList = async () => {
       try {
+        if (data?.newUser) {
+          return;
+        }
+
         const tableExistenceResults = await checkTableExistence();
 
         if (tableExistenceResults) {
@@ -191,7 +197,7 @@ export const SyncScreen = ({ navigation }) => {
             justifyContent: "center",
             alignItems: "center",
             backgroundColor: colors.white,
-            padding: 5,
+            padding: screenWidth * 0.005,
           }}
         >
           <AntDesign name="left" size={screenWidth * 0.07} color="black" />
@@ -200,7 +206,7 @@ export const SyncScreen = ({ navigation }) => {
           style={{
             fontWeight: "700",
             fontSize: 19,
-            marginLeft: screenWidth * 0.12,
+            marginLeft: screenWidth * 0.17,
           }}
         >
           Data Synchronization

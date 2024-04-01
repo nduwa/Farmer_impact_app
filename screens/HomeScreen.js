@@ -26,6 +26,7 @@ import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { BuyCoffeeModal } from "../components/BuyCoffeeModal";
 import { detectNewUser } from "../helpers/detectNewUser";
 import { initializeLsKeys } from "../helpers/initializeLsKeys";
+import { SyncModal } from "../components/SyncModal";
 
 export const HomeScreen = ({ route }) => {
   const userState = useSelector((state) => state.user);
@@ -38,6 +39,8 @@ export const HomeScreen = ({ route }) => {
   const [sidebarScrolled, setsideBarScroll] = useState(false);
   const [isBuyCoffeeModalOpen, setIsBuyCoffeeModalOpen] = useState(false);
   const [columnGapFac, setColumnGapFac] = useState(1);
+  const [rowGapFac, setRowGapFac] = useState(1);
+  const [newUserModalOpen, setNewUserModalOpen] = useState(false);
 
   const [exitApp, setExitApp] = useState(false);
 
@@ -50,11 +53,21 @@ export const HomeScreen = ({ route }) => {
     setIsSidebarOpen(true);
   };
 
+  const handleSync = () => {
+    navigation.navigate("Sync", { data: { newUser: true } });
+  };
+
+  const handleSyncModal = () => {
+    setNewUserModalOpen(false);
+  };
+
   const calculateFactor = () => {
     if (screenHeight < 620) {
       setColumnGapFac(0.06);
+      setRowGapFac(0.01);
     } else {
       setColumnGapFac(0.018);
+      setRowGapFac(0.016);
     }
   };
 
@@ -104,7 +117,7 @@ export const HomeScreen = ({ route }) => {
       detectNewUser({ newStationId: data?.stationId })
         .then((isNewUser) => {
           if (isNewUser) {
-            console.log("new user");
+            // setNewUserModalOpen(true);
           } else {
             console.log("old user");
             initializeLsKeys({ stationId: data?.stationId, setStationDetails });
@@ -272,7 +285,7 @@ export const HomeScreen = ({ route }) => {
             justifyContent: "flex-start",
             flexWrap: "wrap",
             columnGap: screenWidth * columnGapFac,
-            rowGap: screenHeight * 0.02,
+            rowGap: screenHeight * rowGapFac,
             backgroundColor: colors.bg_variant,
             marginTop: screenHeight * 0.025,
             borderTopRightRadius: 55,
@@ -287,7 +300,7 @@ export const HomeScreen = ({ route }) => {
                 elevation: 8,
               },
             }),
-            padding: screenWidth * 0.06,
+            padding: screenWidth * 0.05,
           }}
         >
           <OpCard name={"Register"} />
@@ -303,6 +316,17 @@ export const HomeScreen = ({ route }) => {
 
       {isBuyCoffeeModalOpen && (
         <BuyCoffeeModal setIsBuyCoffeeModalOpen={setIsBuyCoffeeModalOpen} />
+      )}
+
+      {/* new user modal */}
+      {newUserModalOpen && (
+        <SyncModal
+          label={`First login? you need to perform data synchronization now`}
+          onYes={handleSync}
+          OnNo={handleSyncModal}
+          labelYes="Ok"
+          labelNo="No, maybe later"
+        />
       )}
     </View>
   );
