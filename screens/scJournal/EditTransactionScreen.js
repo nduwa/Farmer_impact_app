@@ -120,6 +120,13 @@ export const EditTransactionScreen = ({ route }) => {
         bad_kilograms: transactionData.kgBad,
       };
 
+      let priceGood = parseFloat(editedData.unitprice) || 0;
+      let priceBad = parseFloat(editedData.bad_unit_price) || 0;
+
+      // if price/kg is 0, then it makes sense to set the kgs to 0
+      if (priceGood < 1) editedData.kilograms = 0;
+      if (priceBad < 1) editedData.bad_kilograms = 0;
+
       setValidationError({ message: null, type: null });
 
       if (validateInputs(transactionData)) {
@@ -226,7 +233,8 @@ export const EditTransactionScreen = ({ route }) => {
               })
             );
 
-            if (transaction.farmerid !== "") {// skip this process if the farmer is not registered
+            if (transaction.farmerid !== "") {
+              // skip this process if the farmer is not registered
               // retrieve all other transactions this season by this farmer except the current one we're updating
               retrieveDBdata({
                 tableName: "rtc_transactions",

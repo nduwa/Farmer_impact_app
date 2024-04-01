@@ -165,8 +165,7 @@ export const RegisteredFarmerScreen = ({ route }) => {
         uploaded: 0,
         uploaded_at: "0000-00-00",
         paper_receipt: transactionData.receiptNumber,
-        certified:
-          transactionData.certificationType === "NC" ? 0 : 1,
+        certified: transactionData.certificationType === "NC" ? 0 : 1,
         edited: 0,
         cash_paid: transactionData.cashTotal,
         traceable: 1,
@@ -175,6 +174,13 @@ export const RegisteredFarmerScreen = ({ route }) => {
         bad_kilograms: transactionData.kgBad,
         _kf_Season: seasonId,
       };
+
+      let priceGood = parseFloat(formData.unitprice) || 0;
+      let priceBad = parseFloat(formData.bad_unit_price) || 0;
+
+      // if price/kg is 0, then it makes sense to set the kgs to 0
+      if (priceGood < 1) formData.kilograms = 0;
+      if (priceBad < 1) formData.bad_kilograms = 0;
 
       setSubmitData(formData);
       setValidationError({ message: null, type: null });

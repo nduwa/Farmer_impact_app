@@ -13,6 +13,7 @@ export const login = createAsyncThunk("users/login", async (data) => {
     return response.data;
   } catch (err) {
     console.log(`Login failed: ${err}`);
+    throw err;
   }
 });
 
@@ -22,12 +23,14 @@ const loginSlice = createSlice({
     response: null,
     loading: false,
     error: null,
+    serverResponded: false,
   },
   reducers: {
     resetLoginState(state, action) {
       state.response = null;
       state.loading = false;
       state.error = null;
+      state.serverResponded = false;
     },
   },
   extraReducers: (builder) => {
@@ -38,10 +41,13 @@ const loginSlice = createSlice({
       state.loading = false;
       state.response = { ...action.payload };
       state.error = null;
+      state.serverResponded = true;
     });
     builder.addCase(login.rejected, (state, action) => {
       state.loading = false;
-      state.error = action.error;
+      state.error = { ...action.error };
+      state.response = null;
+      state.serverResponded = true;
     });
   },
 });
