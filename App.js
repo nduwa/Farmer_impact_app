@@ -5,6 +5,12 @@ import store from "./redux";
 import { LoginScreen } from "./screens/LoginScreen";
 import { HomeScreen } from "./screens/HomeScreen";
 import { SyncScreen } from "./screens/SyncScreen";
+import { RegisteredFarmerScreen } from "./screens/buyCoffee/RegisteredFarmerScreen";
+import { FarmerScreen } from "./screens/buyCoffee/FarmerScreen";
+import { UnRegisteredFarmerScreen } from "./screens/buyCoffee/UnregisteredFarmerScreen";
+import { ScJournal } from "./screens/scJournal/ScDailyJournal";
+import { ScJournalsSummary } from "./screens/scJournal/ScJournalsSummary";
+import { EditTransactionScreen } from "./screens/scJournal/EditTransactionScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -16,7 +22,11 @@ export default function App() {
           initialRouteName="Login"
           screenOptions={{ headerShown: false }}
         >
-          <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen
+            name="Login"
+            options={{ unmountOnBlur: true }}
+            component={LoginScreen}
+          />
           <Stack.Screen
             name="Homepage"
             options={{ unmountOnBlur: true }}
@@ -26,6 +36,36 @@ export default function App() {
             name="Sync"
             options={{ unmountOnBlur: true }}
             component={SyncScreen}
+          />
+          <Stack.Screen
+            name="Registered_ATP_Farmer"
+            options={{ unmountOnBlur: true }}
+            component={RegisteredFarmerScreen}
+          />
+          <Stack.Screen
+            name="Unregistered_ATP_Farmer"
+            options={{ unmountOnBlur: true }}
+            component={UnRegisteredFarmerScreen}
+          />
+          <Stack.Screen
+            name="FarmerScreen"
+            options={{ unmountOnBlur: true }}
+            component={FarmerScreen}
+          />
+          <Stack.Screen
+            name="ScDailyJournal"
+            options={{ unmountOnBlur: true }}
+            component={ScJournal}
+          />
+          <Stack.Screen
+            name="ScDailySummary"
+            options={{ unmountOnBlur: true }}
+            component={ScJournalsSummary}
+          />
+          <Stack.Screen
+            name="EditTransaction"
+            options={{ unmountOnBlur: true }}
+            component={EditTransactionScreen}
           />
         </Stack.Navigator>
       </NavigationContainer>

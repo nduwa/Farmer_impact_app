@@ -29,7 +29,25 @@ export const SideNav = ({
   const clearSecureStoreKey = async () => {
     try {
       await SecureStore.deleteItemAsync("rtc-token");
-      await SecureStore.deleteItemAsync("rtc-Name-full");
+      await SecureStore.deleteItemAsync("rtc-name-full");
+      await SecureStore.deleteItemAsync("rtc-user-staff-id");
+      await SecureStore.deleteItemAsync("rtc-sync-stations");
+      await SecureStore.deleteItemAsync("rtc-sync-groups");
+      await SecureStore.deleteItemAsync("rtc-sync-farmers");
+      await SecureStore.deleteItemAsync("rtc-sync-households");
+      await SecureStore.deleteItemAsync("rtc-sync-trainingModules");
+      await SecureStore.deleteItemAsync("rtc-sync-inspectionQuestions");
+      await SecureStore.deleteItemAsync("rtc-user-id");
+      await SecureStore.deleteItemAsync("rtc-user-staff-kf");
+      await SecureStore.deleteItemAsync("rtc-station-id");
+      await SecureStore.deleteItemAsync("rtc-station-location");
+      await SecureStore.deleteItemAsync("rtc-station-name");
+      await SecureStore.deleteItemAsync("rtc-supplier-id");
+      await SecureStore.deleteItemAsync("rtc-seasons-id");
+      await SecureStore.deleteItemAsync("rtc-seasons-label");
+      await SecureStore.deleteItemAsync("rtc-seasons-year");
+      await SecureStore.deleteItemAsync("rtc-user-name");
+
       console.log("Secure store key(s) deleted successfully.");
     } catch (error) {
       console.error("Error clearing secure store key:", error);
@@ -40,7 +58,8 @@ export const SideNav = ({
     dispatch(sidebarActions.closeSidebar());
 
     if (isLogOut) clearSecureStoreKey();
-    navigation.navigate(destination);
+
+    navigation.navigate(destination, { data: null });
   };
   return (
     <TouchableOpacity

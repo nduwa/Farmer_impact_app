@@ -5,6 +5,7 @@ import {
   Easing,
   ImageBackground,
   Platform,
+  ScrollView,
   TouchableOpacity,
   TouchableWithoutFeedback,
   View,
@@ -19,9 +20,10 @@ import { SideNav } from "./SideNav";
 import { StationLocation } from "./StationLocation";
 import { useIsFocused } from "@react-navigation/native";
 
-export const SideBar = ({ setIsSidebarOpen }) => {
+export const SideBar = ({ setsideBarScroll, setIsSidebarOpen }) => {
   const [stationDetails, setStationDetails] = useState(null);
   const [initClose, setInitClose] = useState(false);
+  const isFocused = useIsFocused();
 
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
@@ -31,6 +33,7 @@ export const SideBar = ({ setIsSidebarOpen }) => {
   const handleClick = () => {
     setInitClose(true);
   };
+
   const translateX = animation.interpolate({
     inputRange: [0, 1],
     outputRange: [initClose ? 0 : -sidebarWidth, initClose ? -sidebarWidth : 0],
@@ -40,7 +43,7 @@ export const SideBar = ({ setIsSidebarOpen }) => {
     Animated.timing(animation, {
       toValue: 1,
       easing: initClose ? Easing.back() : Easing.linear,
-      duration: 200,
+      duration: 300,
       useNativeDriver: true,
     }).start(() => {
       if (initClose) setIsSidebarOpen(false);
@@ -60,16 +63,16 @@ export const SideBar = ({ setIsSidebarOpen }) => {
         setStationDetails(stationData);
       }
     };
-
-    initStationDetails();
-  }, []);
+    if (isFocused) {
+      initStationDetails();
+    }
+  }, [isFocused]);
 
   return (
     <TouchableWithoutFeedback onPress={handleClick}>
       <View
         style={{
-          flex: 1,
-          position: "absolute",
+          flexGrow: 1,
           width: "100%",
           height: "100%",
           backgroundColor: colors.black_a,
@@ -86,7 +89,7 @@ export const SideBar = ({ setIsSidebarOpen }) => {
               justifyContent: "flex-end",
               height: screenHeight * 0.13,
               overflow: "hidden",
-              backgroundColor: "red",
+              backgroundColor: "transparent",
               borderBottomLeftRadius: 40,
               ...Platform.select({
                 ios: {
@@ -131,28 +134,32 @@ export const SideBar = ({ setIsSidebarOpen }) => {
               </TouchableOpacity>
             </View>
           </ImageBackground>
-          <View
-            style={{
-              flex: 1,
-              gap: 8,
-              marginTop: screenHeight * 0.03,
-              paddingVertical: 10,
-              paddingHorizontal: 10,
-            }}
-          >
-            <SideNav name={"Sync Data"} destination="Sync" />
-            <SideNav name={"Pending Farms"} />
-            <SideNav name={"Pending Registrations"} />
-            <SideNav name={"Pending Inspections"} />
-            <SideNav name={"Pending Children"} />
-            <SideNav name={"Pending Training"} />
-            <SideNav name={"SC Daily Journals"} />
-            <SideNav name={"CWS Finance"} />
-            <SideNav name={"History"} isActive={true} />
-            <SideNav name={"Change Settings"} />
+          <ScrollView>
+            <View
+              style={{
+                gap: 8,
+                // marginTop: screenHeight * 0.03,
+                paddingVertical: 20,
+                paddingHorizontal: 15,
+              }}
+            >
+              <SideNav name={"Sync Data"} destination="Sync" />
+              <SideNav name={"Pending Farms"} />
+              <SideNav name={"Pending Registrations"} />
+              <SideNav name={"Pending Inspections"} />
+              <SideNav name={"Pending Children"} />
+              <SideNav name={"Pending Training"} />
+              <SideNav
+                name={"SC Daily Journals"}
+                destination="ScDailyJournal"
+              />
+              <SideNav name={"CWS Finance"} />
+              <SideNav name={"History"} />
+              <SideNav name={"Change Settings"} />
 
-            <SideNav name={"Log out"} isLogOut={true} destination={"Login"} />
-          </View>
+              <SideNav name={"Log out"} isLogOut={true} destination={"Login"} />
+            </View>
+          </ScrollView>
         </Animated.View>
       </View>
     </TouchableWithoutFeedback>

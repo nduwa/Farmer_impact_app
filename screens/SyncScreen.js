@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Dimensions, Text, TouchableOpacity, View } from "react-native";
+import {
+  Dimensions,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import * as SecureStore from "expo-secure-store";
 import { AntDesign } from "@expo/vector-icons";
 import { colors } from "../data/colors";
@@ -10,8 +16,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { dataTodb } from "../helpers/dataTodb";
 import { SyncModal } from "../components/SyncModal";
 import { sync, syncActions } from "../redux/sync/syncSlice";
+import { checkTableExistence } from "../helpers/checkTableExistence";
 
-export const SyncScreen = ({ navigation }) => {
+export const SyncScreen = ({ navigation, route }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const [progress, setProgress] = useState(0);
@@ -19,6 +26,11 @@ export const SyncScreen = ({ navigation }) => {
   const [currentTable, setCurrentTable] = useState(null);
   const [startSyncModalOpen, setstartSyncModalOpen] = useState(false);
   const [cancelSyncModalOpen, setcancelSyncModalOpen] = useState(false);
+  const [restartSyncModal, setRestartSyncModal] = useState({
+    open: false,
+    table: null,
+  });
+
   const [syncStarted, setSyncStarted] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [sycnList, setSyncList] = useState([
@@ -30,24 +42,45 @@ export const SyncScreen = ({ navigation }) => {
     { table: "trainingModules", status: false },
     { table: "inspectionQuestions", status: false },
     { table: "crops", status: false },
+    { table: "suppliers", status: false },
+    { table: "seasons", status: false },
   ]);
 
   const dispatch = useDispatch();
   const syncState = useSelector((state) => state.sync);
 
+  const { data = null } = route.params;
+
   const handleExit = () => {
     setIsSyncing(false);
     setSyncStarted(false);
     setstartSyncModalOpen(false);
+    setcancelSyncModalOpen(false);
+    setRestartSyncModal({ open: false, table: null });
+    setCurrentJob(null);
+    setCurrentTable(null);
+    setProgress(0);
     dispatch(syncActions.resetSyncState());
-    navigation.navigate("Homepage");
+    navigation.navigate("Homepage", { data: null });
   };
   const handleSyncStart = () => {
-
     setstartSyncModalOpen(false);
 
     if (!currentTable) return;
     dispatch(sync({ tableName: currentTable }));
+    setSyncStarted(true);
+    setIsSyncing(true);
+  };
+  const handleSyncRestart = () => {
+    setRestartSyncModal((prevState) => ({
+      ...prevState,
+      open: false,
+    }));
+
+    if (restartSyncModal.table == null) return;
+    let restartTable = sycnList[restartSyncModal.table].table;
+    setCurrentTable(restartTable);
+    dispatch(sync({ tableName: restartTable }));
     setSyncStarted(true);
     setIsSyncing(true);
   };
@@ -62,7 +95,7 @@ export const SyncScreen = ({ navigation }) => {
     if (isSyncing) {
       setcancelSyncModalOpen(true);
     } else {
-      navigation.navigate("Homepage");
+      navigation.navigate("Homepage", { data: null });
     }
   };
 
@@ -71,6 +104,7 @@ export const SyncScreen = ({ navigation }) => {
       if (job.status || job.table === "cells" || job.table === "crops") {
         continue;
       } else {
+        setCurrentTable(null);
         setCurrentTable(job.table);
         setCurrentJob(null);
         setProgress(0);
@@ -107,19 +141,31 @@ export const SyncScreen = ({ navigation }) => {
 
   useEffect(() => {
     const refreshSyncList = async () => {
-      const updatedSyncList = await Promise.all(
-        sycnList.map(async (item) => {
-          const storageKey = `rtc-sync-${item.table}`;
-          const syncValue = await SecureStore.getItemAsync(storageKey);
-          console.log(`${storageKey}: ${syncValue}`);
-          return {
-            table: item.table,
-            status: syncValue === "1",
-          };
-        })
-      );
+      try {
+        if (data?.newUser) {
+          return;
+        }
 
-      setSyncList(updatedSyncList);
+        const tableExistenceResults = await checkTableExistence();
+
+        if (tableExistenceResults) {
+          const updatedSyncList = await Promise.all(
+            sycnList.map(async (item) => {
+              const storageKey = `rtc-sync-${item.table}`;
+              const syncValue = await SecureStore.getItemAsync(storageKey);
+              console.log(`${storageKey}: ${syncValue}`);
+              return {
+                table: item.table,
+                status: syncValue === "1",
+              };
+            })
+          );
+
+          setSyncList(updatedSyncList);
+        }
+      } catch (error) {
+        console.error("Error: ", error);
+      }
     };
 
     refreshSyncList();
@@ -149,17 +195,18 @@ export const SyncScreen = ({ navigation }) => {
           style={{
             alignItems: "center",
             justifyContent: "center",
+            alignItems: "center",
             backgroundColor: colors.white,
-            padding: 5,
+            padding: screenWidth * 0.005,
           }}
         >
-          <AntDesign name="left" size={30} color="black" />
+          <AntDesign name="left" size={screenWidth * 0.07} color="black" />
         </TouchableOpacity>
         <Text
           style={{
             fontWeight: "700",
             fontSize: 19,
-            marginLeft: screenWidth * 0.12,
+            marginLeft: screenWidth * 0.17,
           }}
         >
           Data Synchronization
@@ -173,9 +220,9 @@ export const SyncScreen = ({ navigation }) => {
       >
         <View
           style={{
-            justifyContent: "center",
             alignItems: "center",
-            height: screenHeight * 0.35,
+            justifyContent: "center",
+            marginVertical: screenHeight * 0.02,
           }}
         >
           <View
@@ -184,7 +231,7 @@ export const SyncScreen = ({ navigation }) => {
               alignContent: "center",
               gap: screenHeight * 0.015,
               width: screenWidth * 0.7,
-              height: "70%",
+              height: screenHeight * 0.25,
               backgroundColor: colors.white,
               elevation: 3,
               borderBottomLeftRadius: screenWidth,
@@ -228,20 +275,64 @@ export const SyncScreen = ({ navigation }) => {
             )}
           </View>
         </View>
-        <View
-          style={{
-            flexDirection: "column",
-            paddingHorizontal: 10,
-            gap: screenHeight * 0.02,
-          }}
-        >
-          <SyncItem name={"Stations"} isDone={sycnList[0].status} />
-          <SyncItem name={"Groups"} isDone={sycnList[1].status} />
-          <SyncItem name={"Farmers"} isDone={sycnList[2].status} />
-          <SyncItem name={"Households"} isDone={sycnList[3].status} />
-          <SyncItem name={"Training modules"} isDone={sycnList[5].status} />
-          <SyncItem name={"Inspection questions"} isDone={sycnList[6].status} />
-        </View>
+        <ScrollView>
+          <View
+            style={{
+              flexDirection: "column",
+              paddingHorizontal: screenWidth * 0.019,
+              gap: screenHeight * 0.02,
+            }}
+          >
+            <SyncItem
+              name={"Stations"}
+              setRestartTable={setRestartSyncModal}
+              isDone={sycnList[0].status}
+              tableIndex={0}
+            />
+            <SyncItem
+              name={"Groups"}
+              setRestartTable={setRestartSyncModal}
+              isDone={sycnList[1].status}
+              tableIndex={1}
+            />
+            <SyncItem
+              name={"Farmers"}
+              setRestartTable={setRestartSyncModal}
+              isDone={sycnList[2].status}
+              tableIndex={2}
+            />
+            <SyncItem
+              name={"Households"}
+              setRestartTable={setRestartSyncModal}
+              isDone={sycnList[3].status}
+              tableIndex={3}
+            />
+            <SyncItem
+              name={"Training modules"}
+              setRestartTable={setRestartSyncModal}
+              isDone={sycnList[5].status}
+              tableIndex={5}
+            />
+            <SyncItem
+              name={"Inspection questions"}
+              setRestartTable={setRestartSyncModal}
+              isDone={sycnList[6].status}
+              tableIndex={6}
+            />
+            <SyncItem
+              name={"Suppliers"}
+              setRestartTable={setRestartSyncModal}
+              isDone={sycnList[8].status}
+              tableIndex={8}
+            />
+            <SyncItem
+              name={"Seasons"}
+              setRestartTable={setRestartSyncModal}
+              isDone={sycnList[9].status}
+              tableIndex={9}
+            />
+          </View>
+        </ScrollView>
       </View>
 
       {/* start sync modal */}
@@ -265,6 +356,22 @@ export const SyncScreen = ({ navigation }) => {
           }
           onYes={handleExit}
           OnNo={() => setcancelSyncModalOpen(false)}
+        />
+      )}
+
+      {/* restart sync modal */}
+      {restartSyncModal.open && (
+        <SyncModal
+          label={`Do you want to restart synchronisation for ${
+            sycnList[restartSyncModal.table].table
+          }`}
+          onYes={handleSyncRestart}
+          OnNo={() =>
+            setRestartSyncModal((prevState) => ({
+              ...prevState,
+              open: false,
+            }))
+          }
         />
       )}
     </View>

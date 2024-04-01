@@ -22,27 +22,53 @@ import { StationLocation } from "../components/StationLocation";
 import { UserActions } from "../redux/user/UserSlice";
 import * as SecureStore from "expo-secure-store";
 import { sidebarActions } from "../redux/SidebarSlice";
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import { BuyCoffeeModal } from "../components/BuyCoffeeModal";
+import { detectNewUser } from "../helpers/detectNewUser";
+import { initializeLsKeys } from "../helpers/initializeLsKeys";
+import { SyncModal } from "../components/SyncModal";
 
-export const HomeScreen = ({ navigation }) => {
-  const sidebar = useSelector((state) => state.sidebar);
+export const HomeScreen = ({ route }) => {
   const userState = useSelector((state) => state.user);
   const dispatch = useDispatch();
+  const navigation = useNavigation();
   const [today, setToday] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [stationDetails, setStationDetails] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [sidebarScrolled, setsideBarScroll] = useState(false);
+  const [isBuyCoffeeModalOpen, setIsBuyCoffeeModalOpen] = useState(false);
+  const [columnGapFac, setColumnGapFac] = useState(1);
+  const [rowGapFac, setRowGapFac] = useState(1);
+  const [newUserModalOpen, setNewUserModalOpen] = useState(false);
 
   const [exitApp, setExitApp] = useState(false);
 
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
 
+  const { data = null } = route.params;
+
   const handleClick = () => {
     setIsSidebarOpen(true);
   };
-  const handleNavigation = (location) => {
-    navigation.navigate(location);
+
+  const handleSync = () => {
+    navigation.navigate("Sync", { data: { newUser: true } });
+  };
+
+  const handleSyncModal = () => {
+    setNewUserModalOpen(false);
+  };
+
+  const calculateFactor = () => {
+    if (screenHeight < 620) {
+      setColumnGapFac(0.06);
+      setRowGapFac(0.01);
+    } else {
+      setColumnGapFac(0.018);
+      setRowGapFac(0.016);
+    }
   };
 
   function formatDate(date) {
@@ -57,7 +83,9 @@ export const HomeScreen = ({ navigation }) => {
 
   useEffect(() => {
     const initData = async () => {
-      const userName = await SecureStore.getItemAsync("rtc-name-full");
+      const userName = data?.nameFull
+        ? data?.nameFull
+        : await SecureStore.getItemAsync("rtc-name-full");
       const stationData = { location: null, name: null };
 
       stationData.location = await SecureStore.getItemAsync(
@@ -72,6 +100,7 @@ export const HomeScreen = ({ navigation }) => {
       if (userName) {
         setDisplayName(userName.split(" ")[1]);
       }
+
       const currentDate = new Date();
       setToday(formatDate(currentDate));
       const unsubscribe = navigation.addListener("blur", () => {
@@ -84,8 +113,24 @@ export const HomeScreen = ({ navigation }) => {
 
       return unsubscribe;
     };
+    const newUserDetection = async () => {
+      detectNewUser({ newStationId: data?.stationId })
+        .then((isNewUser) => {
+          if (isNewUser) {
+            // setNewUserModalOpen(true);
+          } else {
+            console.log("old user");
+            initializeLsKeys({ stationId: data?.stationId, setStationDetails });
+          }
+        })
+        .catch((error) => {
+          console.error("Error detecting new user:", error);
+        });
+    };
 
+    calculateFactor();
     initData();
+    newUserDetection();
   }, [navigation, userState.dataReceived]);
 
   useFocusEffect(
@@ -118,7 +163,15 @@ export const HomeScreen = ({ navigation }) => {
       }}
       on
     >
-      <StatusBar style={isSidebarOpen ? "light" : "dark"} />
+      <StatusBar
+        style={isSidebarOpen || isBuyCoffeeModalOpen ? "light" : "dark"}
+      />
+      {isSidebarOpen && (
+        <SideBar
+          setsideBarScroll={setsideBarScroll}
+          setIsSidebarOpen={setIsSidebarOpen}
+        />
+      )}
       <View
         style={{
           flex: 1,
@@ -231,8 +284,8 @@ export const HomeScreen = ({ navigation }) => {
             flexDirection: "row",
             justifyContent: "flex-start",
             flexWrap: "wrap",
-            columnGap: screenWidth * 0.018,
-            rowGap: screenHeight * 0.02,
+            columnGap: screenWidth * columnGapFac,
+            rowGap: screenHeight * rowGapFac,
             backgroundColor: colors.bg_variant,
             marginTop: screenHeight * 0.025,
             borderTopRightRadius: 55,
@@ -247,20 +300,34 @@ export const HomeScreen = ({ navigation }) => {
                 elevation: 8,
               },
             }),
-            padding: screenWidth * 0.06,
+            padding: screenWidth * 0.05,
           }}
         >
           <OpCard name={"Register"} />
           <OpCard name={"Inspection"} />
           <OpCard name={"Update Farmer"} />
           <OpCard name={"Training"} />
-          <OpCard name={"Buy Coffee"} />
+          <OpCard name={"Buy Coffee"} action={setIsBuyCoffeeModalOpen} />
           <OpCard name={"Review Purchases"} />
           <OpCard name={"CWS Finance"} />
           <OpCard name={"Wet Mill Audit"} />
         </View>
       </View>
-      {isSidebarOpen && <SideBar setIsSidebarOpen={setIsSidebarOpen} />}
+
+      {isBuyCoffeeModalOpen && (
+        <BuyCoffeeModal setIsBuyCoffeeModalOpen={setIsBuyCoffeeModalOpen} />
+      )}
+
+      {/* new user modal */}
+      {newUserModalOpen && (
+        <SyncModal
+          label={`First login? you need to perform data synchronization now`}
+          onYes={handleSync}
+          OnNo={handleSyncModal}
+          labelYes="Ok"
+          labelNo="No, maybe later"
+        />
+      )}
     </View>
   );
 };

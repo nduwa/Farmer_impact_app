@@ -1,10 +1,9 @@
 import axios from "axios";
 import { API_URL } from "@env";
 
-const URL="https://99a9-196-12-131-214.ngrok-free.app";
 // Create a new Axios instance
 const api = axios.create({
-  baseURL: `${URL}`,
+  baseURL: `${API_URL}`,
 });
 
 // Add a request interceptor
@@ -32,7 +31,6 @@ api.interceptors.response.use(
 
       if (status === 404) {
         console.log("Server Error: The requested resource is not available");
-        // window.location.href = '/error404'; //Replace with the desired URL
       } else if (status === 401) {
         console.log("Server Error: Unauthorised request");
       } else if (status === 500) {

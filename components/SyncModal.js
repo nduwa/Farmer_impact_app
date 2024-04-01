@@ -2,7 +2,13 @@ import React from "react";
 import { Dimensions, Text, TouchableOpacity, View } from "react-native";
 import { colors } from "../data/colors";
 
-export const SyncModal = ({ label, onYes, OnNo }) => {
+export const SyncModal = ({
+  label,
+  onYes,
+  OnNo,
+  labelYes = "Ok",
+  labelNo = "Cancel",
+}) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
 
@@ -48,7 +54,7 @@ export const SyncModal = ({ label, onYes, OnNo }) => {
               borderRadius: 3,
             }}
           >
-            <Text style={{ color: "white", fontSize: 14 }}>Ok</Text>
+            <Text style={{ color: "white", fontSize: 14 }}>{labelYes}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={OnNo}
@@ -59,7 +65,7 @@ export const SyncModal = ({ label, onYes, OnNo }) => {
               borderRadius: 3,
             }}
           >
-            <Text style={{ color: "white", fontSize: 14 }}>Cancel</Text>
+            <Text style={{ color: "white", fontSize: 14 }}>{labelNo}</Text>
           </TouchableOpacity>
         </View>
       </View>

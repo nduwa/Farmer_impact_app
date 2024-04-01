@@ -1,5 +1,5 @@
 import { StatusBar } from "expo-status-bar";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Dimensions,
   ImageBackground,
@@ -8,6 +8,7 @@ import {
   Platform,
   Text,
   TextInput,
+  ToastAndroid,
   TouchableOpacity,
   TouchableWithoutFeedback,
   View,
@@ -18,28 +19,36 @@ import { colors } from "../data/colors";
 import { Formik } from "formik";
 import CustomButton from "../components/CustomButton";
 import { useDispatch, useSelector } from "react-redux";
-import { login } from "../redux/user/loginSlice";
-import { useIsFocused } from "@react-navigation/native";
+import { login, loginActions } from "../redux/user/loginSlice";
+import { useFocusEffect, useIsFocused } from "@react-navigation/native";
 import * as SecureStore from "expo-secure-store";
 import tokenDecoder from "../helpers/tokenDecoder";
 import * as LocalAuthentication from "expo-local-authentication";
 import { UserActions } from "../redux/user/UserSlice";
+import { AntDesign } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 
 export const LoginScreen = ({ navigation }) => {
   const loginState = useSelector((state) => state.login);
   const dispatch = useDispatch();
   const isFocused = useIsFocused();
+  const formRef = useRef(null);
 
+  const [pwdVisible, setPwdVisible] = useState(false);
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
   const [errorName, setErrorName] = useState(false);
   const [errorPwd, setErrorPwd] = useState(false);
   const [accurateHeight, setAccurateHeight] = useState(0);
   const [indicatorVisible, setIndicatorVisibility] = useState(false);
+  const [forwardData, setForwardData] = useState({ nameFull: false });
+  const [userDataPreloaded, setUserDataPreloaded] = useState(false);
 
   const [authenticated, setAuthenticated] = useState(false);
 
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
+
+  const pwdInput = useRef();
 
   const calculateHeight = () => {
     setAccurateHeight(0);
@@ -53,24 +62,49 @@ export const LoginScreen = ({ navigation }) => {
 
   const handleClick = () => {};
 
-  const handleNavigation = (location) => {
-    navigation.navigate(location);
-  };
-
   const preLoadUserData = async () => {
-    try {
-      const userData = await tokenDecoder();
-      if (userData) {
-        await SecureStore.setItemAsync("rtc-name-full", userData.Name_Full);
-        await SecureStore.setItemAsync("rtc-user-id", userData.__kp_User);
+    await tokenDecoder()
+      .then(async (userData) => {
+        if (userData) {
+          await SecureStore.setItemAsync(
+            "rtc-name-full",
+            userData.user.Name_Full
+          );
+          await SecureStore.setItemAsync(
+            "rtc-user-name",
+            userData.user.Name_User
+          );
+          await SecureStore.setItemAsync(
+            "rtc-user-id",
+            userData.user.__kp_User
+          );
+          await SecureStore.setItemAsync(
+            "rtc-user-staff-id",
+            userData.staff.userID
+          );
+          await SecureStore.setItemAsync(
+            "rtc-user-staff-kf",
+            userData.staff.__kp_Staff
+          );
+          await SecureStore.setItemAsync(
+            "rtc-station-id",
+            userData.staff._kf_Station
+          );
 
-        dispatch(UserActions.setUserData(userData));
-        return true;
-      }
-    } catch (error) {
-      console.log(error);
-      return false;
-    }
+          setForwardData({
+            nameFull: userData.user.Name_Full,
+            userId: userData.user.__kp_User,
+            staffId: userData.staff.userID,
+            staffKf: userData.staff.__kp_Staff,
+            stationId: userData.staff._kf_Station,
+          });
+
+          setUserDataPreloaded(true);
+
+          dispatch(UserActions.setUserData(userData));
+        }
+      })
+      .catch((error) => console.log(error));
   };
 
   const checkBiometric = async () => {
@@ -79,7 +113,13 @@ export const LoginScreen = ({ navigation }) => {
       (await LocalAuthentication.isEnrolledAsync());
     if (compatible) {
       authenticateUser();
+    } else {
+      console.log("not compatible");
     }
+  };
+
+  const handleNavigation = (location, data) => {
+    navigation.navigate(location, { data });
   };
 
   const authenticateUser = async () => {
@@ -90,16 +130,35 @@ export const LoginScreen = ({ navigation }) => {
       });
       if (result.success) {
         setAuthenticated(true);
-        let preFetchedData = preLoadUserData();
-        if (preFetchedData) {
-          handleNavigation("Homepage");
-        }
+        finalizeLogin();
       } else {
         setAuthenticated(false);
       }
     } catch (error) {
       console.error("Authentication failed:", error);
     }
+  };
+
+  const finalizeLogin = async () => {
+    await preLoadUserData();
+  };
+
+  const validateInputs = (inputData) => {
+    let regexName = /^[a-zA-Z0-9_-]+$/;
+    let regexPwd = /^.{8,}$/;
+
+    setErrorName(!regexName.test(inputData.name));
+    setErrorPwd(!regexPwd.test(inputData.pwd));
+
+    return regexName.test(inputData.name) && regexPwd.test(inputData.pwd);
+  };
+
+  const displayToast = (msg) => {
+    ToastAndroid.show(msg, ToastAndroid.SHORT);
+  };
+
+  const handleHidepwd = () => {
+    setPwdVisible(!pwdVisible);
   };
 
   useEffect(() => {
@@ -127,31 +186,65 @@ export const LoginScreen = ({ navigation }) => {
 
   useEffect(() => {
     setIndicatorVisibility(loginState.loading);
-
-    if (loginState.response !== null) {
-      if (loginState.response.status === "success") {
-        let preFetchedData = preLoadUserData();
-        if (preFetchedData) {
-          handleNavigation("Homepage");
+    if (isFocused) {
+      if (loginState.response !== null) {
+        if (loginState.response.status === "success") {
+          setAuthenticated(true);
+          finalizeLogin();
         }
       }
     }
   }, [loginState.loading]);
 
   useEffect(() => {
-    const validatedPreviousLogin = async () => {
-      if (isFocused) {
+    if (userDataPreloaded) {
+      if (forwardData.nameFull) {
+        handleNavigation("Homepage", forwardData);
+      }
+    }
+  }, [userDataPreloaded]);
+
+  useEffect(() => {
+    if (loginState.serverResponded) {
+      const loginError = loginState.error;
+      if (loginError) {
+        if (loginError?.code === "ERR_BAD_REQUEST") {
+          displayToast("wrong username or password");
+          dispatch(loginActions.resetLoginState());
+        }
+      }
+    }
+  }, [loginState.serverResponded]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const validatedPreviousLogin = async () => {
         const userData = await tokenDecoder();
         if (userData) {
           checkBiometric();
+        } else {
+          console.log("no previous user data");
         }
-      }
-    };
+      };
 
-    validatedPreviousLogin();
+      validatedPreviousLogin();
+      return () => {
+        if (formRef.current) {
+          formRef.current.setValues({
+            uname: "",
+            password: "",
+          });
+        }
 
-    return () => {};
-  }, [isFocused]);
+        setErrorName(false);
+        setErrorPwd(false);
+        setForwardData({ nameFull: false });
+        setAuthenticated(false);
+        setUserDataPreloaded(false);
+        dispatch(loginActions.resetLoginState());
+      };
+    }, [])
+  );
 
   return (
     <View
@@ -206,26 +299,37 @@ export const LoginScreen = ({ navigation }) => {
                   }),
                 }}
               >
-                <Text
-                  style={{
-                    fontSize: screenWidth * 0.09,
-                    fontWeight: "bold",
-                  }}
-                >
-                  Log-in
-                </Text>
+                {!isKeyboardActive && (
+                  <Text
+                    style={{
+                      fontSize: screenWidth * 0.09,
+                      fontWeight: "bold",
+                    }}
+                  >
+                    Log-in
+                  </Text>
+                )}
+
                 <Formik
                   initialValues={{
                     uname: "",
                     password: "",
                   }}
+                  innerRef={formRef}
                   onSubmit={async (values) => {
-                    dispatch(
-                      login({
-                        Name_User: values.uname,
-                        password: values.password,
+                    if (
+                      validateInputs({
+                        name: values.uname,
+                        pwd: values.password,
                       })
-                    );
+                    ) {
+                      dispatch(
+                        login({
+                          Name_User: values.uname,
+                          password: values.password,
+                        })
+                      );
+                    }
                   }}
                 >
                   {({ handleChange, handleBlur, handleSubmit, values }) => (
@@ -250,6 +354,11 @@ export const LoginScreen = ({ navigation }) => {
                           onChangeText={handleChange("uname")}
                           onBlur={handleBlur("uname")}
                           value={values.uname}
+                          returnKeyType="next"
+                          onSubmitEditing={() => {
+                            pwdInput.current.focus();
+                          }}
+                          blurOnSubmit={false}
                           style={{
                             borderBottomColor: colors.black_a,
                             borderBottomWidth: 1.5,
@@ -260,11 +369,10 @@ export const LoginScreen = ({ navigation }) => {
                             style={{
                               fontWeight: "regular",
                               fontSize: screenWidth * 0.035,
-                              color: "orange",
-                              textAlign: "center",
+                              color: colors.secondary,
                             }}
                           >
-                            *user name is required
+                            *Invalid user name
                           </Text>
                         )}
                       </View>
@@ -282,36 +390,53 @@ export const LoginScreen = ({ navigation }) => {
                         >
                           Password
                         </Text>
-                        <TextInput
-                          placeholder="********"
-                          secureTextEntry={true}
-                          placeholderTextColor={colors.black_a}
-                          onChangeText={handleChange("password")}
-                          onBlur={handleBlur("password")}
-                          value={values.password}
-                          style={{
-                            borderBottomColor: colors.black_a,
-                            borderBottomWidth: 1.5,
-                          }}
-                        />
+                        <View>
+                          <TextInput
+                            placeholder="********"
+                            secureTextEntry={!pwdVisible}
+                            ref={pwdInput}
+                            returnKeyType="done"
+                            placeholderTextColor={colors.black_a}
+                            onChangeText={handleChange("password")}
+                            onBlur={handleBlur("password")}
+                            value={values.password}
+                            style={{
+                              borderBottomColor: colors.black_a,
+                              borderBottomWidth: 1.5,
+                            }}
+                          />
+                          <TouchableOpacity
+                            onPress={handleHidepwd}
+                            style={{
+                              position: "absolute",
+                              marginLeft: screenWidth * 0.75,
+                            }}
+                          >
+                            {pwdVisible ? (
+                              <Ionicons
+                                name="eye-off"
+                                size={24}
+                                color="black"
+                              />
+                            ) : (
+                              <AntDesign name="eye" size={24} color="black" />
+                            )}
+                          </TouchableOpacity>
+                        </View>
+
                         {errorPwd && (
                           <Text
                             style={{
                               fontWeight: "regular",
                               fontSize: screenWidth * 0.035,
-                              color: "orange",
-                              textAlign: "center",
+                              color: colors.secondary,
                             }}
                           >
-                            *Password is required
+                            *Invalid password
                           </Text>
                         )}
                       </View>
-                      <TouchableOpacity onPress={handleClick}>
-                        <Text style={globalStyles.labelNormal}>
-                          Forgot Password?
-                        </Text>
-                      </TouchableOpacity>
+
                       <CustomButton
                         bg={colors.black}
                         color={colors.white}

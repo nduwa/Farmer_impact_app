@@ -1,15 +1,30 @@
 import React from "react";
-import { AntDesign } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
+import { FontAwesome } from "@expo/vector-icons";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { FontAwesome6 } from "@expo/vector-icons";
 import { MaterialIcons } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { Dimensions, Text, View } from "react-native";
+import { Dimensions, Text, TouchableOpacity, View } from "react-native";
 import { colors } from "../data/colors";
 
-export const SyncItem = ({ name, isDone = false }) => {
+export const SyncItem = ({
+  name,
+  isDone = false,
+  setRestartTable = null,
+  tableIndex = null,
+}) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
+
+  handleRestart = (table) => {
+    if (setRestartTable) {
+      setRestartTable({
+        open: true,
+        table,
+      });
+    }
+  };
   return (
     <View
       style={{
@@ -74,14 +89,28 @@ export const SyncItem = ({ name, isDone = false }) => {
           color={colors.secondary_variant}
         />
       )}
+      {name === "Suppliers" && (
+        <MaterialCommunityIcons
+          name="truck"
+          size={17}
+          color={colors.secondary_variant}
+        />
+      )}
+      {name === "Seasons" && (
+        <FontAwesome
+          name="calendar"
+          size={17}
+          color={colors.secondary_variant}
+        />
+      )}
       <View
         style={{
           flexDirection: "row",
           alignItems: "center",
           justifyContent: "space-between",
-          width: "90%",
+          width: "93%",
           borderBottomWidth: 1,
-          paddingBottom: 8,
+          paddingBottom: screenHeight* 0.018,
           borderBottomColor: colors.thin,
         }}
       >
@@ -94,17 +123,37 @@ export const SyncItem = ({ name, isDone = false }) => {
         >
           {name}
         </Text>
-        <Text
+        <View
           style={{
-            fontSize: 9,
-            backgroundColor: isDone ? colors.green_bg : colors.red_bg,
-            color: "white",
-            padding: 3,
-            borderRadius: 8,
+            flexDirection: "row",
+            justifyContent: "center",
+            alignItems: "center",
+            gap: screenWidth * 0.04,
           }}
         >
-          {isDone ? "COMPLETED" : "NOT DONE"}
-        </Text>
+          <TouchableOpacity
+            onPress={() => handleRestart(tableIndex)}
+            style={{
+              backgroundColor: colors.white_variant,
+              borderRadius: screenWidth * 0.05,
+              padding: screenWidth * 0.0065,
+              elevation: 3,
+            }}
+          >
+            <Ionicons name="reload" size={screenWidth * 0.05} color="black" />
+          </TouchableOpacity>
+          <Text
+            style={{
+              fontSize: 9,
+              backgroundColor: isDone ? colors.green_bg : colors.red_bg,
+              color: "white",
+              padding: 3,
+              borderRadius: 8,
+            }}
+          >
+            {isDone ? "COMPLETED" : "NOT DONE"}
+          </Text>
+        </View>
       </View>
     </View>
   );
