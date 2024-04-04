@@ -304,7 +304,7 @@ export const HomeScreen = ({ route }) => {
           }}
         >
           <OpCard name={"Register"} />
-          <OpCard name={"Inspection"} />
+          <OpCard name={"Inspection"} destination={"chooseInspection"} />
           <OpCard name={"Update Farmer"} />
           <OpCard name={"Training"} />
           <OpCard name={"Buy Coffee"} action={setIsBuyCoffeeModalOpen} />

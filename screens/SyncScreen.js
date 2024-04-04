@@ -184,10 +184,12 @@ export const SyncScreen = ({ navigation, route }) => {
         style={{
           flexDirection: "row",
           alignItems: "center",
+          justifyContent: "space-between",
           height: screenHeight * 0.11,
           backgroundColor: colors.white,
           paddingTop: screenHeight * 0.042,
           padding: 10,
+          elevation: 5,
         }}
       >
         <TouchableOpacity
@@ -195,8 +197,7 @@ export const SyncScreen = ({ navigation, route }) => {
           style={{
             alignItems: "center",
             justifyContent: "center",
-            alignItems: "center",
-            backgroundColor: colors.white,
+            backgroundColor: "transparent",
             padding: screenWidth * 0.005,
           }}
         >
@@ -206,11 +207,13 @@ export const SyncScreen = ({ navigation, route }) => {
           style={{
             fontWeight: "700",
             fontSize: 19,
-            marginLeft: screenWidth * 0.17,
           }}
         >
           Data Synchronization
         </Text>
+        <View
+          style={{ width: screenWidth * 0.07, backgroundColor: "transparent" }}
+        />
       </View>
       <View
         style={{

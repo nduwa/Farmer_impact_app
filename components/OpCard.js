@@ -12,15 +12,18 @@ import {
   Platform,
 } from "react-native";
 import { colors } from "../data/colors";
+import { useNavigation } from "@react-navigation/native";
 
-export const OpCard = ({ name, action }) => {
+export const OpCard = ({ name, action, destination = null }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
+  const navigation = useNavigation();
 
   const [factor, setFactor] = useState(1);
 
   const handlePress = () => {
     if (name == "Buy Coffee") action(true);
+    if (destination) navigation.navigate(destination);
   };
 
   const calculateFactor = () => {

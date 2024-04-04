@@ -13,6 +13,7 @@ export default function CustomButton({
   radius = 50,
   paddingRatio = 0.02,
   bdcolor = colors.primary,
+  fontSizeRatio=0.055,
   disabled = false,
 }) {
   const screenHeight = Dimensions.get("window").height;
@@ -39,7 +40,7 @@ export default function CustomButton({
         style={{
           color: color,
           fontWeight: "bold",
-          fontSize: screenWidth * 0.055,
+          fontSize: screenWidth * fontSizeRatio,
         }}
       >
         {text}

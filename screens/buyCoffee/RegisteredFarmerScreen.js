@@ -22,7 +22,6 @@ import { generateID } from "../../helpers/generateID";
 import { retrieveDBdata } from "../../helpers/retrieveDBdata";
 import { dataTodb } from "../../helpers/dataTodb";
 import { validateTransaction } from "../../helpers/validateTransaction";
-import { retrieveDBdataAsync } from "../../helpers/retrieveDBdataAsync";
 
 export const RegisteredFarmerScreen = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
@@ -313,6 +312,7 @@ export const RegisteredFarmerScreen = ({ route }) => {
         style={{
           flexDirection: "row",
           alignItems: "center",
+          justifyContent: "space-between",
           height: screenHeight * 0.11,
           backgroundColor: colors.white,
           paddingTop: screenHeight * 0.042,
@@ -326,7 +326,7 @@ export const RegisteredFarmerScreen = ({ route }) => {
             alignItems: "center",
             justifyContent: "center",
             backgroundColor: "transparent",
-            padding: 5,
+            padding: screenWidth * 0.005,
           }}
         >
           <AntDesign name="left" size={screenWidth * 0.07} color="black" />
@@ -335,11 +335,13 @@ export const RegisteredFarmerScreen = ({ route }) => {
           style={{
             fontWeight: "700",
             fontSize: 19,
-            marginLeft: screenWidth * 0.12,
           }}
         >
           Registered ATP Farmer
         </Text>
+        <View
+          style={{ width: screenWidth * 0.07, backgroundColor: "transparent" }}
+        />
       </View>
       <View style={{ backgroundColor: colors.bg_variant }}>
         <Formik

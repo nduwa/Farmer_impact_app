@@ -67,6 +67,7 @@ export const ScJournal = () => {
         style={{
           flexDirection: "row",
           alignItems: "center",
+          justifyContent: "space-between",
           height: screenHeight * 0.11,
           backgroundColor: colors.white,
           paddingTop: screenHeight * 0.042,
@@ -89,11 +90,13 @@ export const ScJournal = () => {
           style={{
             fontWeight: "700",
             fontSize: 19,
-            marginLeft: screenWidth * 0.12,
           }}
         >
           Site Collector Daily Journal
         </Text>
+        <View
+          style={{ width: screenWidth * 0.07, backgroundColor: "transparent" }}
+        />
       </View>
       {journals.length > 0 && (
         <FlatList
