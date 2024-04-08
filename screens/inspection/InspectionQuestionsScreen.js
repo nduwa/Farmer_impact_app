@@ -10,9 +10,10 @@ import { colors } from "../../data/colors";
 import { AntDesign } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
-import { InspectionQuestion } from "../../components/InspectionQuestion";
+import InspectionQuestion from "../../components/InspectionQuestion";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { SyncModal } from "../../components/SyncModal";
+import { retrieveDBdataAsync } from "../../helpers/retrieveDBdataAsync";
 
 export const InspectionQuestionsScreen = ({ route }) => {
   const screenWidth = Dimensions.get("window").width;
@@ -22,6 +23,7 @@ export const InspectionQuestionsScreen = ({ route }) => {
   const { data } = route.params;
 
   const [submitModalOpen, setSubmitModalOpen] = useState(false);
+  const [questions, setQuestions] = useState([]);
 
   const handleBackButton = () => {
     navigation.navigate("inspectionFarmer", {
@@ -34,7 +36,38 @@ export const InspectionQuestionsScreen = ({ route }) => {
     setSubmitModalOpen(false);
   };
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    if (questions.length > 0) {
+      console.log("hehe");
+    }
+  }, [questions]);
+
+  useEffect(() => {
+    let inspectionStr = "";
+
+    if (data.inspectionType.toLowerCase().includes("generic"))
+      inspectionStr = "Generic";
+    else if (data.inspectionType.toLowerCase().includes("special"))
+      inspectionStr = "Special";
+    else if (data.inspectionType.toLowerCase().includes("cafe"))
+      inspectionStr = "CAFE";
+    else if (data.inspectionType.toLowerCase().includes("rfa"))
+      inspectionStr = "RFA";
+
+    if (inspectionStr === "") return;
+    retrieveDBdataAsync({
+      filterCol: "evaluation_mode",
+      filterValue: inspectionStr,
+      tableName: "inspection_questions",
+    })
+      .then((results) => {
+        if (results.length > 0) {
+          console.log(results[0]);
+          setQuestions(results);
+        }
+      })
+      .catch((err) => console.log(err));
+  }, []);
   return (
     <View
       style={{
@@ -100,18 +133,19 @@ export const InspectionQuestionsScreen = ({ route }) => {
               padding: screenHeight * 0.01,
               gap: screenHeight * 0.001,
             }}
-            data={["1", "2", "3", "4", "5"]}
+            data={questions}
             initialNumToRender={10}
             renderItem={({ item, index }) => (
               <InspectionQuestion
                 data={{
                   type: data.inspectionType,
-                  question: "Do they apply inorganic fertilizers?",
+                  question: item.Kiny_phrase,
                   index,
+                  language: "kiny",
                 }}
               />
             )}
-            keyExtractor={(item) => item}
+            keyExtractor={(item) => item.__kp_Evaluation}
           />
         </View>
       </View>

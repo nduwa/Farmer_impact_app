@@ -34,7 +34,11 @@ export const HomeScreen = ({ route }) => {
   const navigation = useNavigation();
   const [today, setToday] = useState("");
   const [displayName, setDisplayName] = useState("");
-  const [stationDetails, setStationDetails] = useState(null);
+  const [stationDetails, setStationDetails] = useState({
+    location: null,
+    name: null,
+    id: null,
+  });
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [sidebarScrolled, setsideBarScroll] = useState(false);
   const [isBuyCoffeeModalOpen, setIsBuyCoffeeModalOpen] = useState(false);
@@ -108,15 +112,28 @@ export const HomeScreen = ({ route }) => {
         const userName = data?.nameFull
           ? data?.nameFull
           : await SecureStore.getItemAsync("rtc-name-full");
-        const stationData = { location: null, name: null };
+        const stationData = { location: null, name: null, id: null };
 
         stationData.location = await SecureStore.getItemAsync(
           "rtc-station-location"
         );
         stationData.name = await SecureStore.getItemAsync("rtc-station-name");
+        stationData.id =
+          userState.userData.staff._kf_Station ||
+          (await SecureStore.getItemAsync("rtc-station-id"));
 
         if (stationData.location && stationData.name) {
-          setStationDetails(stationData);
+          setStationDetails((prevState) => ({
+            ...prevState,
+            location: stationData.location,
+            name: stationData.name,
+          }));
+        }
+        if (stationData.id) {
+          setStationDetails((prevState) => ({
+            ...prevState,
+            id: stationData.id,
+          }));
         }
 
         if (userName) {
@@ -127,7 +144,6 @@ export const HomeScreen = ({ route }) => {
         setToday(formatDate(currentDate));
         const unsubscribe = navigation.addListener("blur", () => {
           if (!navigation.isFocused()) {
-            dispatch(UserActions.clearUserData());
             dispatch(sidebarActions.closeSidebar());
             setIsSidebarOpen(false);
           }
@@ -136,14 +152,15 @@ export const HomeScreen = ({ route }) => {
         return unsubscribe;
       };
       const newUserDetection = async () => {
-        detectNewUser({ newStationId: data?.stationId })
+        let stationId = userState.userData.staff._kf_Station;
+        detectNewUser({ newStationId: data?.stationId || stationId })
           .then((isNewUser) => {
             if (isNewUser && !userState.checkedForNewUser) {
               setNewUserModalOpen(true);
             } else {
               console.log("old user");
               initializeLsKeys({
-                stationId: data?.stationId,
+                stationId: data?.stationId || stationId,
                 setStationDetails,
               }); // init local storage data
             }
@@ -287,7 +304,7 @@ export const HomeScreen = ({ route }) => {
               alignItems: "flex-end",
             }}
           >
-            {stationDetails && <StationLocation data={stationDetails} />}
+            {stationDetails.name && <StationLocation data={stationDetails} />}
           </ImageBackground>
         </View>
         <View

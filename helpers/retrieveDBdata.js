@@ -23,6 +23,9 @@ export const retrieveDBdata = ({
     query = queryArg || `SELECT * FROM ${tableName}`;
   } else if (tableName === "rtc_transactions") {
     query = queryArg || `SELECT * FROM ${tableName}`;
+  } else if (tableName === "rtc_households") {
+    query =
+      queryArg || `SELECT * FROM ${tableName} WHERE group_id='${groupID}'`;
   }
 
   console.log(query);

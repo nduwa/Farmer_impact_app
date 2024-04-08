@@ -1,10 +1,10 @@
 import RadioButtonGroup, { RadioButtonItem } from "expo-radio-button";
-import React, { useEffect, useState } from "react";
+import React, { memo, useEffect, useState } from "react";
 import { Dimensions, FlatList, Text, View } from "react-native";
 import { colors } from "../data/colors";
 import { useFocusEffect } from "@react-navigation/native";
 
-export const InspectionQuestion = ({ data }) => {
+const InspectionQuestion = ({ data }) => {
   const screenWidth = Dimensions.get("window").width;
   const screenHeight = Dimensions.get("window").height;
 
@@ -16,9 +16,9 @@ export const InspectionQuestion = ({ data }) => {
       let multipleChoices = [];
       if (data.type === "Generic Inspection") {
         multipleChoices = [
-          { label: "Yes", value: "yes" },
-          { label: "No", value: "no" },
-          { label: "N/A", value: "n/a" },
+          { label: data.language === "eng" ? "Yes" : "Yego", value: "yes" },
+          { label: data.language === "eng" ? "No" : "Oya", value: "no" },
+          // { label: "N/A", value: "n/a" },
         ];
       } else if (data.type === "Advanced Inspection") {
         multipleChoices = [
@@ -79,6 +79,7 @@ export const InspectionQuestion = ({ data }) => {
           >
             {choices.map((item) => (
               <RadioButtonItem
+                key={item.value}
                 value={item.value}
                 label={
                   <Text
@@ -100,3 +101,5 @@ export const InspectionQuestion = ({ data }) => {
     </View>
   );
 };
+
+export default memo(InspectionQuestion);

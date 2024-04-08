@@ -49,6 +49,7 @@ export const SideNav = ({
       await SecureStore.deleteItemAsync("rtc-seasons-year");
       await SecureStore.deleteItemAsync("rtc-user-name");
 
+      dispatch(UserActions.clearUserData());
       dispatch(UserActions.setCheckedForNewUser(false));
 
       console.log("Secure store key(s) deleted successfully.");

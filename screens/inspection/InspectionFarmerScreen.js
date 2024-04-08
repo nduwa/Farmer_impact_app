@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import * as SecureStore from "expo-secure-store";
 import { colors } from "../../data/colors";
 import { useNavigation } from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
@@ -14,15 +15,23 @@ import { AntDesign } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import { Formik } from "formik";
 import { Feather } from "@expo/vector-icons";
-import { FarmerInspectionCard } from "../../components/FarmerInspectionCard";
+import FarmerInspectionCard from "../../components/FarmerInspectionCard";
 import { UpdateChildrenModal } from "../../components/UpdateChildrenModal";
+import { retrieveDBdata } from "../../helpers/retrieveDBdata";
+import { GroupsModal } from "../../components/GroupsModal";
 
 export const InspectionFarmerScreen = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const navigation = useNavigation();
 
+  const [farmers, setFarmers] = useState([]);
+  const [farmersXhouseholdsData, setFarmersXhouseholdsData] = useState([]); // each farmer info is merged with their corresponding household data
+  const [groups, setGroups] = useState([]);
+  const [households, setHouseholds] = useState([]);
+  const [selectedGroup, setSelectedGroup] = useState(null);
   const [searchResults, setSearchResults] = useState([]);
+  const [displayData, setDisplayData] = useState([]);
   const [groupsModalOpen, setGroupsModalOpen] = useState(false);
   const [activeGroup, setActiveGroup] = useState([]);
   const [childrenModal, setChildrenModal] = useState({
@@ -40,7 +49,118 @@ export const InspectionFarmerScreen = ({ route }) => {
     navigation.replace("chooseInspection");
   };
 
-  const handleSearch = (text) => {};
+  const handleSearch = (text) => {
+    if (text !== "") {
+      text = text.toLowerCase();
+      const results = farmersXhouseholdsData.filter((item) => {
+        return Object.values(item).some((value) => {
+          return String(value).toLowerCase().includes(text);
+        });
+      });
+
+      setSearchResults(results);
+    } else {
+      setSearchResults([]);
+    }
+  };
+
+  const formatDisplayStr = (text) => {
+    return text === "" ? "0" : text;
+  };
+
+  useEffect(() => {
+    let data =
+      searchResults.length > 0 ? searchResults : farmersXhouseholdsData;
+
+    setDisplayData(data);
+  }, [farmersXhouseholdsData, searchResults]);
+
+  useEffect(() => {
+    const fetchFarmers = () => {
+      retrieveDBdata({
+        tableName: "rtc_farmers",
+        stationId: selectedGroup._kf_Station,
+        groupID: selectedGroup.__kp_Group,
+        setData: setFarmers,
+      });
+    };
+
+    if (selectedGroup) {
+      setActiveGroup(selectedGroup);
+      fetchFarmers();
+    }
+  }, [selectedGroup]);
+
+  useEffect(() => {
+    if (households.length > 0) {
+      let thisGroupFarmers = farmers;
+      let newFarmersData = [];
+      for (const farmer of thisGroupFarmers) {
+        let extendedFarmerData = {};
+        let farmerHouseholdData = households.filter(
+          (item) => item.farmerid === farmer.farmerid
+        );
+        if (farmerHouseholdData && farmerHouseholdData.length > 0) {
+          let neededHouseholdInfo = {
+            prodTrees: formatDisplayStr(farmerHouseholdData[0].Trees_Producing),
+            totalTrees: formatDisplayStr(farmerHouseholdData[0].Trees),
+            cell: formatDisplayStr(farmerHouseholdData[0].Area_Small),
+            village: formatDisplayStr(farmerHouseholdData[0].Area_Smallest),
+            children: formatDisplayStr(farmerHouseholdData[0].Children),
+          };
+          extendedFarmerData = { ...farmer, ...neededHouseholdInfo };
+          newFarmersData.push(extendedFarmerData);
+        }
+      }
+
+      setFarmersXhouseholdsData(newFarmersData);
+    }
+  }, [households]);
+
+  useEffect(() => {
+    if (farmers.length > 0) {
+      if (activeGroup.id) {
+        retrieveDBdata({
+          tableName: "rtc_households",
+          groupID: activeGroup.ID_GROUP,
+          setData: setHouseholds,
+        });
+      }
+    }
+  }, [farmers]);
+
+  useEffect(() => {
+    if (activeGroup.id) {
+      retrieveDBdata({
+        tableName: "rtc_farmers",
+        stationId: activeGroup._kf_Station,
+        groupID: activeGroup.__kp_Group,
+        setData: setFarmers,
+      });
+    }
+  }, [activeGroup]);
+
+  useEffect(() => {
+    if (groups.length > 0) {
+      setActiveGroup(groups[0]);
+    }
+  }, [groups.length]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const stationId = await SecureStore.getItemAsync("rtc-station-id");
+
+      if (stationId) {
+        retrieveDBdata({
+          tableName: "rtc_groups",
+          stationId,
+          setData: setGroups,
+        });
+      }
+    };
+
+    fetchData();
+  }, []);
 
   return (
     <View
@@ -51,6 +171,13 @@ export const InspectionFarmerScreen = ({ route }) => {
       }}
     >
       <StatusBar style="dark" />
+      {groupsModalOpen && (
+        <GroupsModal
+          setGroupChoice={setSelectedGroup}
+          data={groups}
+          setModalOpen={setGroupsModalOpen}
+        />
+      )}
       <View
         style={{
           flexDirection: "row",
@@ -185,24 +312,24 @@ export const InspectionFarmerScreen = ({ route }) => {
             padding: screenHeight * 0.01,
             gap: screenHeight * 0.02,
           }}
-          data={["1", "2", "3", "4", "5"]}
+          data={displayData}
           initialNumToRender={10}
           renderItem={({ item }) => (
             <FarmerInspectionCard
               data={{
-                farmerName: "Twagirayezu Baltazar",
-                farmerId: "F51489A",
-                cell: "KIBIBI",
-                village: "Rwezamenyo",
-                prodTrees: 245,
-                totTress: 245,
-                children: 0,
+                farmerName: item.Name,
+                farmerId: item.farmerid,
+                cell: item.cell,
+                village: item.village,
+                prodTrees: item.prodTrees,
+                totTrees: item.totalTrees,
+                children: item.children,
                 destination: data,
               }}
               setModal={setChildrenModal}
             />
           )}
-          keyExtractor={(item, index) => index}
+          keyExtractor={(item) => item.id}
         />
       </View>
       {childrenModal.open && (

@@ -39,7 +39,6 @@ export const FarmerScreen = () => {
       );
       setSearchResults(results);
     } else {
-      console.log("hehe");
       setSearchResults([]);
     }
   };

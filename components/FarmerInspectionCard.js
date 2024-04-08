@@ -3,9 +3,9 @@ import { colors } from "../data/colors";
 import { FarmerInfoItem } from "./FarmerInfoItem";
 import CustomButton from "./CustomButton";
 import { useNavigation } from "@react-navigation/native";
-import { useEffect } from "react";
+import { memo } from "react";
 
-export const FarmerInspectionCard = ({ data, setModal }) => {
+const FarmerInspectionCard = ({ data, setModal }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const navigation = useNavigation();
@@ -99,8 +99,8 @@ export const FarmerInspectionCard = ({ data, setModal }) => {
             justifyContent: "space-between",
           }}
         >
-          <FarmerInfoItem label={"Productive Trees"} info={"245"} />
-          <FarmerInfoItem label={"Total Trees"} info={"245"} />
+          <FarmerInfoItem label={"Productive Trees"} info={data.prodTrees} />
+          <FarmerInfoItem label={"Total Trees"} info={data.totTrees} />
         </View>
       </View>
       <View
@@ -144,3 +144,5 @@ export const FarmerInspectionCard = ({ data, setModal }) => {
     </View>
   );
 };
+
+export default memo(FarmerInspectionCard);

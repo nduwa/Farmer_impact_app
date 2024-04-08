@@ -174,7 +174,7 @@ db.transaction((tx) => {
     `CREATE TABLE IF NOT EXISTS inspection_questions (
       id int(11) NOT NULL,
       updated_at datetime NOT NULL,
-      __kp_Evaluation varchar(100) NOT NULL,
+      __kp_Evaluation varchar(100) NOT NULL UNIQUE,
       evaluation_id varchar(45) NOT NULL,
       evaluation_mode varchar(45) NOT NULL,
       Eng_phrase text NOT NULL,
@@ -342,8 +342,14 @@ const generateBulkValueString = (tableName, totalRows, data) => {
   } else if (tableName === "inspectionQuestions") {
     let bulkValues = "";
     for (let i = 0; i < data.length; i++) {
+      let kinyStr = data[i].Kiny_phrase || "";
+      let engStr = data[i].Eng_phrase || "";
+
+      const sanitizedKinyStr = kinyStr.replace(/'/g, "");
+      const sanitizedEngStr = engStr.replace(/'/g, "");
+
       bulkValues += `(
-        ${data[i].id},'${data[i].updated_at}','${data[i].__kp_Evaluation}','${data[i].evaluation_id}','${data[i].evaluation_mode}','${data[i].Eng_phrase}','${data[i].Kiny_phrase}','${data[i].award}','${data[i].priority}','${data[i]._kf_Course}','${data[i].Answer}','${data[i].status}')`;
+        ${data[i].id},'${data[i].updated_at}','${data[i].__kp_Evaluation}','${data[i].evaluation_id}','${data[i].evaluation_mode}','${sanitizedEngStr}','${sanitizedKinyStr}','${data[i].award}','${data[i].priority}','${data[i]._kf_Course}','${data[i].Answer}','${data[i].status}')`;
       if (i < data.length - 1) bulkValues += ",";
     }
 
@@ -383,6 +389,14 @@ const generateBulkValueString = (tableName, totalRows, data) => {
   }
 };
 
+const cleanInspectionQns = (data) => {
+  let passedData = data.filter(
+    (item) => item.Kiny_phrase.length > 0 && item.Eng_phrase.length > 0
+  );
+
+  return passedData;
+};
+
 export const dataTodb = ({
   tableName,
   setProgress = null,
@@ -395,6 +409,10 @@ export const dataTodb = ({
     if (!syncData) {
       console.log("data to db: no data provided", syncData);
       return;
+    }
+
+    if (tableName === "inspectionQuestions") {
+      syncData = cleanInspectionQns(syncData);
     }
 
     const limit = 10; // 10 rows per insert to avoid parser stack overflow
