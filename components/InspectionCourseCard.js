@@ -8,6 +8,12 @@ export const InspectionCourseCard = ({ data }) => {
   const screenWidth = Dimensions.get("window").width;
   const navigation = useNavigation();
 
+  const handlePress = () => {
+    navigation.navigate("inspectionQuestions", {
+      data: { inspectionType: data.destination },
+    });
+  };
+
   return (
     <TouchableOpacity
       style={{

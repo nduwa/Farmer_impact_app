@@ -3,6 +3,7 @@ import {
   Dimensions,
   ScrollView,
   Text,
+  ToastAndroid,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -95,7 +96,7 @@ export const SyncScreen = ({ navigation, route }) => {
     if (isSyncing) {
       setcancelSyncModalOpen(true);
     } else {
-      navigation.navigate("Homepage", { data: null });
+      navigation.replace("Homepage", { data: null });
     }
   };
 
@@ -113,6 +114,10 @@ export const SyncScreen = ({ navigation, route }) => {
     }
   };
 
+  const displayToast = (msg) => {
+    ToastAndroid.show(msg, ToastAndroid.SHORT);
+  };
+
   useEffect(() => {
     if (syncState.loading) {
       setCurrentJob("Connecting");
@@ -126,6 +131,11 @@ export const SyncScreen = ({ navigation, route }) => {
         setIsSyncing: setIsSyncing,
         setSyncList: setSyncList,
       });
+    }
+    if (syncState.error) {
+      setCurrentJob("Error");
+      displayToast(`Error fetching data for ${currentTable}`);
+      setIsSyncing(false);
     }
   }, [syncState.loading, syncState.serverResponded]);
 

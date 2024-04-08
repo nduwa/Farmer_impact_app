@@ -63,6 +63,7 @@ export const sync = createAsyncThunk("data/sync", async (data) => {
   } catch (err) {
     const error = err.response.data;
     console.log(`Data retrieval for ${tableName} failed: ${error.message}`);
+    throw err;
   }
 });
 
@@ -95,7 +96,8 @@ const syncSlice = createSlice({
     });
     builder.addCase(sync.rejected, (state, action) => {
       state.loading = false;
-      state.error = action.error;
+      state.error = { ...action.error };
+      state.response = null;
       state.serverResponded = true;
     });
   },

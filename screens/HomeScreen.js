@@ -54,7 +54,7 @@ export const HomeScreen = ({ route }) => {
   };
 
   const handleSync = () => {
-    navigation.navigate("Sync", { data: { newUser: true } });
+    navigation.replace("Sync", { data: { newUser: true } });
   };
 
   const handleSyncModal = () => {
@@ -81,58 +81,6 @@ export const HomeScreen = ({ route }) => {
     return date.toLocaleDateString("en-US", options);
   }
 
-  useEffect(() => {
-    const initData = async () => {
-      const userName = data?.nameFull
-        ? data?.nameFull
-        : await SecureStore.getItemAsync("rtc-name-full");
-      const stationData = { location: null, name: null };
-
-      stationData.location = await SecureStore.getItemAsync(
-        "rtc-station-location"
-      );
-      stationData.name = await SecureStore.getItemAsync("rtc-station-name");
-
-      if (stationData.location && stationData.name) {
-        setStationDetails(stationData);
-      }
-
-      if (userName) {
-        setDisplayName(userName.split(" ")[1]);
-      }
-
-      const currentDate = new Date();
-      setToday(formatDate(currentDate));
-      const unsubscribe = navigation.addListener("blur", () => {
-        if (!navigation.isFocused()) {
-          dispatch(UserActions.clearUserData());
-          dispatch(sidebarActions.closeSidebar());
-          setIsSidebarOpen(false);
-        }
-      });
-
-      return unsubscribe;
-    };
-    const newUserDetection = async () => {
-      detectNewUser({ newStationId: data?.stationId })
-        .then((isNewUser) => {
-          if (isNewUser) {
-            // setNewUserModalOpen(true);
-          } else {
-            console.log("old user");
-            initializeLsKeys({ stationId: data?.stationId, setStationDetails });
-          }
-        })
-        .catch((error) => {
-          console.error("Error detecting new user:", error);
-        });
-    };
-
-    calculateFactor();
-    initData();
-    newUserDetection();
-  }, [navigation, userState.dataReceived]);
-
   useFocusEffect(
     React.useCallback(() => {
       const onBackPress = () => {
@@ -152,6 +100,70 @@ export const HomeScreen = ({ route }) => {
       return () =>
         BackHandler.removeEventListener("hardwareBackPress", onBackPress);
     }, [exitApp])
+  );
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const initData = async () => {
+        const userName = data?.nameFull
+          ? data?.nameFull
+          : await SecureStore.getItemAsync("rtc-name-full");
+        const stationData = { location: null, name: null };
+
+        stationData.location = await SecureStore.getItemAsync(
+          "rtc-station-location"
+        );
+        stationData.name = await SecureStore.getItemAsync("rtc-station-name");
+
+        if (stationData.location && stationData.name) {
+          setStationDetails(stationData);
+        }
+
+        if (userName) {
+          setDisplayName(userName.split(" ")[1]);
+        }
+
+        const currentDate = new Date();
+        setToday(formatDate(currentDate));
+        const unsubscribe = navigation.addListener("blur", () => {
+          if (!navigation.isFocused()) {
+            dispatch(UserActions.clearUserData());
+            dispatch(sidebarActions.closeSidebar());
+            setIsSidebarOpen(false);
+          }
+        });
+
+        return unsubscribe;
+      };
+      const newUserDetection = async () => {
+        detectNewUser({ newStationId: data?.stationId })
+          .then((isNewUser) => {
+            if (isNewUser && !userState.checkedForNewUser) {
+              setNewUserModalOpen(true);
+            } else {
+              console.log("old user");
+              initializeLsKeys({
+                stationId: data?.stationId,
+                setStationDetails,
+              }); // init local storage data
+            }
+          })
+          .catch((error) => {
+            console.error("Error detecting new user:", error);
+          });
+
+        dispatch(UserActions.setCheckedForNewUser(true));
+      };
+
+      calculateFactor();
+      initData();
+      newUserDetection();
+
+      return () => {
+        setNewUserModalOpen(false);
+        dispatch(UserActions.setCheckedForNewUser(true));
+      };
+    }, [navigation, userState.dataReceived])
   );
 
   return (

@@ -30,9 +30,11 @@ export const ScJournal = () => {
   };
 
   const dateExtraction = (str) => {
-    let year = `20${str.substring(8, 10)}`;
-    let month = str.substring(12);
-    let day = str.substring(10, 12);
+    let substr = str.substring(str.length - 6);
+
+    let year = `20${substr.substring(0, 2)}`;
+    let month = substr.substring(4);
+    let day = substr.substring(2, 4);
 
     return `${day}/${month}/${year}`;
   };

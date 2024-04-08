@@ -85,6 +85,7 @@ export const InspectionCoursesScreen = ({ route }) => {
               data={{
                 label: "Erosion Control",
                 code: "C05",
+                destination: data.inspectionType,
               }}
             />
           )}

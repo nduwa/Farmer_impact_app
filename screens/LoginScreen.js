@@ -144,13 +144,16 @@ export const LoginScreen = ({ navigation }) => {
   };
 
   const validateInputs = (inputData) => {
+    let name = inputData.name.replace(/\s+/g, " ").trim();
+    let pwd = inputData.pwd.replace(/\s+/g, " ").trim();
+
     let regexName = /^[a-zA-Z0-9_-]+$/;
-    let regexPwd = /^.{8,}$/;
+    let regexPwd = /^.{3,}$/;
 
-    setErrorName(!regexName.test(inputData.name));
-    setErrorPwd(!regexPwd.test(inputData.pwd));
+    setErrorName(!regexName.test(name));
+    setErrorPwd(!regexPwd.test(pwd));
 
-    return regexName.test(inputData.name) && regexPwd.test(inputData.pwd);
+    return regexName.test(name) && regexPwd.test(pwd);
   };
 
   const displayToast = (msg) => {
