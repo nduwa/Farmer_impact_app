@@ -4,48 +4,51 @@ import { Dimensions, FlatList, Text, View } from "react-native";
 import { colors } from "../data/colors";
 import { useFocusEffect } from "@react-navigation/native";
 
-const InspectionQuestion = ({ data }) => {
+const InspectionQuestion = ({ data, question, setQnAnswer }) => {
   const screenWidth = Dimensions.get("window").width;
   const screenHeight = Dimensions.get("window").height;
 
   const [answer, setAnswer] = useState("");
   const [choices, setChoices] = useState([]);
 
+  const removeDuplicates = (items) => {
+    return [...new Set(items)];
+  };
+
+  const handleAnswer = (value) => {
+    console.log(value);
+    setAnswer(value);
+    setQnAnswer({ id: question.id, answer: value });
+  };
+
   useFocusEffect(
     React.useCallback(() => {
       let multipleChoices = [];
-      if (data.type === "Generic Inspection") {
-        multipleChoices = [
-          { label: data.language === "eng" ? "Yes" : "Yego", value: "yes" },
-          { label: data.language === "eng" ? "No" : "Oya", value: "no" },
-          // { label: "N/A", value: "n/a" },
-        ];
-      } else if (data.type === "Advanced Inspection") {
-        multipleChoices = [
-          { label: "Compliance", value: "compliance" },
-          { label: "Non compliance", value: "non-compliance" },
-          { label: "Not applicable", value: "n/a" },
-        ];
-      } else if (data.type === "Special Inspection") {
-        multipleChoices = [
-          { label: "Compliance", value: "compliance" },
-          { label: "Non compliance", value: "non-compliance" },
-          { label: "Not applicable", value: "n/a" },
-        ];
-      } else if (data.type === "Cafe Inspection") {
-        multipleChoices = [
-          { label: "Compliance", value: "compliance" },
-          { label: "Non compliance", value: "non-compliance" },
-          { label: "Not applicable", value: "n/a" },
-        ];
-      } else if (data.type === "RFA Inspection") {
-        multipleChoices = [
-          { label: "Compliance", value: "compliance" },
-          { label: "Non compliance", value: "non-compliance" },
-          { label: "Not applicable", value: "n/a" },
-        ];
+      let labels = [];
+      let ids = [];
+      let allChoices = "";
+      let allIDs = "";
+
+      if (data.language === "kiny") {
+        allChoices = question?.answers_kiny;
+      } else {
+        allChoices = question?.answers_eng;
       }
-      setChoices(multipleChoices);
+      allIDs = question?.answers_ids;
+
+      labels = removeDuplicates(allChoices.split(","));
+      ids = removeDuplicates(allIDs.split(","));
+
+      for (const label of labels) {
+        let obj = {
+          label,
+          id: ids[labels.indexOf(label)],
+        };
+
+        multipleChoices.push(obj);
+      }
+
+      multipleChoices = setChoices(multipleChoices);
       return () => {
         // Cleanup code if needed
       };
@@ -63,7 +66,8 @@ const InspectionQuestion = ({ data }) => {
       }}
     >
       <Text style={{ fontSize: screenHeight * 0.022, fontWeight: "500" }}>
-        {data.index + 1}. {data.question}
+        {data.index + 1}.{" "}
+        {data.language === "kiny" ? question.Kiny_phrase : question.Eng_phrase}
       </Text>
       <View
         style={{
@@ -74,13 +78,13 @@ const InspectionQuestion = ({ data }) => {
           <RadioButtonGroup
             containerStyle={{ marginBottom: 10, gap: 7 }}
             selected={answer}
-            onSelected={(value) => setAnswer(value)}
+            onSelected={(value) => handleAnswer(value)}
             radioBackground={colors.secondary}
           >
             {choices.map((item) => (
               <RadioButtonItem
-                key={item.value}
-                value={item.value}
+                key={item.id}
+                value={item.id}
                 label={
                   <Text
                     style={{

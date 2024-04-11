@@ -16,13 +16,21 @@ const FarmerInspectionCard = ({ data, setModal }) => {
   const handleNewInspection = () => {
     if (data.destination === "Advanced Inspection") {
       navigation.navigate("inspectionCourses", {
-        data: { inspectionType: data.destination },
+        data: {
+          inspectionType: data.destination,
+          farmerId: data.farmerId,
+          farmerName: data.farmerName,
+        },
       });
       return;
     }
 
     navigation.navigate("inspectionQuestions", {
-      data: { inspectionType: data.destination },
+      data: {
+        inspectionType: data.destination,
+        farmerId: data.farmerId,
+        farmerName: data.farmerName,
+      },
     });
   };
 

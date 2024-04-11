@@ -24,9 +24,11 @@ import { useFocusEffect, useIsFocused } from "@react-navigation/native";
 import * as SecureStore from "expo-secure-store";
 import tokenDecoder from "../helpers/tokenDecoder";
 import * as LocalAuthentication from "expo-local-authentication";
+import * as Location from "expo-location";
 import { UserActions } from "../redux/user/UserSlice";
 import { AntDesign } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
+import { deleteDBdataAsync } from "../helpers/deleteDBdataAsync";
 
 export const LoginScreen = ({ navigation }) => {
   const loginState = useSelector((state) => state.login);
@@ -230,7 +232,31 @@ export const LoginScreen = ({ navigation }) => {
         }
       };
 
+      const getLocation = async () => {
+        let { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== "granted") {
+          displayToast("Permission to access location was denied");
+          return;
+        }
+
+        let location = await Location.getCurrentPositionAsync({});
+
+        dispatch(UserActions.setUserLocation(location));
+      };
+
       validatedPreviousLogin();
+      getLocation();
+
+      // deleteDBdataAsync({
+      //   tableName: "inspection_questions",
+      //   id: 1,
+      //   customQuery: "DELETE FROM inspection_answers",
+      // })
+      //   .then((result) => {
+      //     console.log(result);
+      //   })
+      //   .catch((err) => console.log(err));
+
       return () => {
         if (formRef.current) {
           formRef.current.setValues({

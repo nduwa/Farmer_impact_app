@@ -17,4 +17,10 @@ export const SyncQueries = {
     "INSERT OR REPLACE INTO rtc_supplier (id, _kf_Quality, _kf_Type, __kp_Supplier, _kf_Location, _kf_User_g, Area_Big, Area_Biggest, Area_Medium, Area_Small, Area_Smallest, Certification, Name, Status, Ratio_CP, Relationship, Report, Supplier_ID_t, created_at, z_recCreateTimestamp, z_recModifyTimestamp, _kf_User, _kf_Season, deleted) VALUES",
   RTC_SEASONS:
     "INSERT OR REPLACE INTO rtc_seasons (id, __kp_Season, _kf_Location, End_d, Label, Start_d, z_recCreateAccountName, z_recCreateTimestamp, z_recModifyAccountName, DefaultState, z_Year, Label_Short, z_recModifyTimestamp, Location) VALUES",
+  RTC_INSPECTION_ANS:
+    "INSERT OR REPLACE INTO inspection_answers (id,created_at,Eng_answer,Kiny_answer,question_id,priority,status,created_by,score,__kp_Option,_kf_Evaluation) VALUES",
+  RTC_INSPECTION_RESP:
+    "INSERT OR REPLACE INTO inspection_responses (id, created_at, rtc_inspections_id, inspection_answer_id, deleted, __kp_InspectionLog) VALUES",
+  RTC_INSPECTIONS:
+    "INSERT INTO rtc_inspections (id, created_at, Score_n, _kf_Course, _kf_Household, __kp_Inspection, _kf_Station, _kf_Supplier, created_by, inspection_at, uploaded, uploaded_at, longitude, latitude) VALUES",
 };

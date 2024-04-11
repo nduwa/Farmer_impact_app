@@ -6,6 +6,7 @@ const UserSlice = createSlice({
     userData: null,
     dataReceived: false,
     checkedForNewUser: false,
+    location: null,
   },
   reducers: {
     setUserData(state, action) {
@@ -14,6 +15,9 @@ const UserSlice = createSlice({
     },
     setCheckedForNewUser(state, action) {
       state.checkedForNewUser = action.payload;
+    },
+    setUserLocation(state, action) {
+      state.location = action.payload;
     },
     clearUserData(state, action) {
       state.userData = {};

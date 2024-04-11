@@ -103,6 +103,13 @@ export const SyncItem = ({
           color={colors.secondary_variant}
         />
       )}
+      {name === "Inspection answers" && (
+        <MaterialCommunityIcons
+          name="book-open-page-variant"
+          size={17}
+          color={colors.secondary_variant}
+        />
+      )}
       <View
         style={{
           flexDirection: "row",
@@ -110,7 +117,7 @@ export const SyncItem = ({
           justifyContent: "space-between",
           width: "93%",
           borderBottomWidth: 1,
-          paddingBottom: screenHeight* 0.018,
+          paddingBottom: screenHeight * 0.018,
           borderBottomColor: colors.thin,
         }}
       >

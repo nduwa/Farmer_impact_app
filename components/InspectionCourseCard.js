@@ -10,12 +10,18 @@ export const InspectionCourseCard = ({ data }) => {
 
   const handlePress = () => {
     navigation.navigate("inspectionQuestions", {
-      data: { inspectionType: data.destination },
+      data: {
+        inspectionType: data.destination,
+        courseId: data.id,
+        farmerId: data.farmerId,
+        farmerName: data.farmerName,
+      },
     });
   };
 
   return (
     <TouchableOpacity
+      onPress={handlePress}
       style={{
         flexDirection: "row",
         justifyContent: "space-between",
@@ -26,7 +32,13 @@ export const InspectionCourseCard = ({ data }) => {
       }}
     >
       <View>
-        <Text style={{ fontSize: screenHeight * 0.025, fontWeight: "500" }}>
+        <Text
+          style={{
+            fontSize: screenHeight * 0.025,
+            fontWeight: "500",
+            maxWidth: screenWidth * 0.8,
+          }}
+        >
           {data.label}
         </Text>
         <Text style={{ color: colors.black_letter }}>{data.code}</Text>

@@ -42,6 +42,7 @@ export const SyncScreen = ({ navigation, route }) => {
     { table: "cells", status: false },
     { table: "trainingModules", status: false },
     { table: "inspectionQuestions", status: false },
+    { table: "inspectionAnswers", status: false },
     { table: "crops", status: false },
     { table: "suppliers", status: false },
     { table: "seasons", status: false },
@@ -333,16 +334,22 @@ export const SyncScreen = ({ navigation, route }) => {
               tableIndex={6}
             />
             <SyncItem
+              name={"Inspection answers"}
+              setRestartTable={setRestartSyncModal}
+              isDone={sycnList[7].status}
+              tableIndex={7}
+            />
+            <SyncItem
               name={"Suppliers"}
               setRestartTable={setRestartSyncModal}
-              isDone={sycnList[8].status}
-              tableIndex={8}
+              isDone={sycnList[9].status}
+              tableIndex={9}
             />
             <SyncItem
               name={"Seasons"}
               setRestartTable={setRestartSyncModal}
-              isDone={sycnList[9].status}
-              tableIndex={9}
+              isDone={sycnList[10].status}
+              tableIndex={10}
             />
           </View>
         </ScrollView>

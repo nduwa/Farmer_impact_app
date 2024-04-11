@@ -1,4 +1,4 @@
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import {
   Dimensions,
   FlatList,
@@ -10,19 +10,70 @@ import {
 import { colors } from "../../data/colors";
 import { AntDesign } from "@expo/vector-icons";
 import { InspectionCourseCard } from "../../components/InspectionCourseCard";
+import React, { useEffect, useState } from "react";
+import { retrieveDBdataAsync } from "../../helpers/retrieveDBdataAsync";
 
 export const InspectionCoursesScreen = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const navigation = useNavigation();
-
   const { data } = route.params;
+
+  const [courses, setCourses] = useState([]);
+  const [language, setLanguage] = useState("kiny");
 
   const handleBackButton = () => {
     navigation.navigate("inspectionFarmer", {
       data: data.inspectionType,
     });
   };
+
+  const handleCourseLabel = (item) => {
+    let str =
+      language === "kiny"
+        ? item.Name_rw
+        : language === "eng"
+        ? item.Name
+        : item.Name_fr;
+
+    if (str.length < 1) {
+      if (item.Name.length > 0) str = item.Name;
+      if (item.Name_rw.length > 0) str = item.Name_rw;
+      if (item.Name_fr.length > 0) str = item.Name_fr;
+    }
+
+    return str;
+  };
+
+  useEffect(() => {
+    if (courses.length > 0) {
+      console.log("All courses retrieved");
+    }
+  }, [courses.length]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const fetchData = async () => {
+        retrieveDBdataAsync({
+          tableName: "trainingModules",
+        })
+          .then((results) => {
+            if (results.length > 0) {
+              let allCourses = results.filter(
+                (item) => item.__kp_Course.length > 0
+              );
+              setCourses(allCourses);
+            }
+          })
+          .catch((err) => console.log(err));
+      };
+
+      fetchData();
+      return () => {
+        // Cleanup code if needed
+      };
+    }, [route.params.data])
+  );
 
   return (
     <View
@@ -78,18 +129,21 @@ export const InspectionCoursesScreen = ({ route }) => {
             padding: screenWidth * 0.02,
             gap: screenHeight * 0.01,
           }}
-          data={["1", "2", "3", "4", "5"]}
+          data={courses}
           initialNumToRender={10}
           renderItem={({ item }) => (
             <InspectionCourseCard
               data={{
-                label: "Erosion Control",
-                code: "C05",
+                label: handleCourseLabel(item),
+                code: item.ID_COURSE,
+                id: item.__kp_Course,
                 destination: data.inspectionType,
+                farmerId: data.farmerId,
+                farmerName: data.farmerName,
               }}
             />
           )}
-          keyExtractor={(item, index) => index}
+          keyExtractor={(item) => item.__kp_Course}
         />
       </View>
     </View>

@@ -3,6 +3,7 @@ import {
   FlatList,
   StatusBar,
   Text,
+  ToastAndroid,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -14,6 +15,8 @@ import InspectionQuestion from "../../components/InspectionQuestion";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { SyncModal } from "../../components/SyncModal";
 import { retrieveDBdataAsync } from "../../helpers/retrieveDBdataAsync";
+import { InspectionHoverSubmitBtn } from "../../components/InspectionHoverSubmitBtn";
+import { InspectionHoverPrevBtn } from "../../components/InspectionHoverPrevBtn";
 
 export const InspectionQuestionsScreen = ({ route }) => {
   const screenWidth = Dimensions.get("window").width;
@@ -23,27 +26,109 @@ export const InspectionQuestionsScreen = ({ route }) => {
   const { data } = route.params;
 
   const [submitModalOpen, setSubmitModalOpen] = useState(false);
+  const [exitModalOpen, setExitModalOpen] = useState(false);
+  const [answers, setAnswers] = useState([]);
   const [questions, setQuestions] = useState([]);
+  const [language, setLanguage] = useState("kiny");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [limit, setLimit] = useState(40);
+  const [qnStart, setQnStart] = useState(0);
+  const [qnEnd, setQnEnd] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [displayQuestions, setDisplayQuestions] = useState([]);
 
   const handleBackButton = () => {
-    navigation.navigate("inspectionFarmer", {
-      data: data.inspectionType,
-    });
+    if (answers.length > 0 && !exitModalOpen) {
+      setExitModalOpen(true);
+      return;
+    }
+    if (data?.inspectionType?.toLowerCase().includes("advanced")) {
+      navigation.navigate("inspectionCourses", {
+        data: {
+          inspectionType: data.inspectionType,
+          farmerId: data.farmerId,
+          farmerName: data.farmerName,
+        },
+      });
+    } else {
+      navigation.navigate("inspectionFarmer", {
+        data: data.inspectionType,
+      });
+    }
   };
 
   const handleSubmit = () => {};
+  const handlePress = () => {
+    if (currentPage >= totalPages) {
+      setSubmitModalOpen(true);
+    } else {
+      let current = currentPage;
+      let newpg = (current % totalPages) + 1; // a % b statement restricts value a from ever getting bigger than b.... :)
+      setCurrentPage(newpg);
+    }
+  };
+
+  const handlePrevPg = () => {
+    let newpg = currentPage - 1;
+    let newpg_fitted = newpg % totalPages; // fitted in the range 0 -> max page
+    setCurrentPage(newpg_fitted);
+  };
+
   const handleClose = () => {
     setSubmitModalOpen(false);
   };
 
+  const displayToast = (msg) => {
+    ToastAndroid.show(msg, ToastAndroid.SHORT);
+  };
+
+  const handleQnsPagination = () => {
+    const totalQns = questions.length;
+    const pages = Math.ceil(totalQns / limit);
+    setTotalPages(pages);
+
+    let start = (currentPage - 1) * limit;
+    let end = start + limit;
+
+    setQnStart(start);
+    setQnEnd(end);
+
+    let currentQns = questions.slice(start, end);
+
+    setDisplayQuestions(currentQns);
+
+    if (pages > 0) displayToast(`Page ${currentPage} of ${pages} loaded`);
+  };
+
+  const handleAnswer = (newAnswer) => {
+    setAnswers([...answers, newAnswer]);
+  };
+
+  useEffect(() => {
+    if (answers.length > 0) {
+      console.log("hehe ", answers);
+    }
+  }, [answers.length]);
+
+  useEffect(() => {
+    handleQnsPagination();
+  }, [currentPage]);
+
+  useEffect(() => {
+    if (displayQuestions.length > 0) {
+      console.log("all questions loaded");
+    }
+  }, [displayQuestions.length]);
+
   useEffect(() => {
     if (questions.length > 0) {
-      console.log("hehe");
+      handleQnsPagination();
     }
   }, [questions]);
 
   useEffect(() => {
     let inspectionStr = "";
+    let query = null;
 
     if (data.inspectionType.toLowerCase().includes("generic"))
       inspectionStr = "Generic";
@@ -53,21 +138,39 @@ export const InspectionQuestionsScreen = ({ route }) => {
       inspectionStr = "CAFE";
     else if (data.inspectionType.toLowerCase().includes("rfa"))
       inspectionStr = "RFA";
+    else if (data.inspectionType.toLowerCase().includes("advanced"))
+      inspectionStr = "Advanced";
 
     if (inspectionStr === "") return;
-    retrieveDBdataAsync({
-      filterCol: "evaluation_mode",
-      filterValue: inspectionStr,
-      tableName: "inspection_questions",
-    })
-      .then((results) => {
-        if (results.length > 0) {
-          console.log(results[0]);
-          setQuestions(results);
-        }
+
+    if (inspectionStr === "Advanced" && data.courseId) {
+      retrieveDBdataAsync({
+        filterCol: "_kf_course",
+        filterValue: data.courseId,
+        tableName: "inspection_questions",
       })
-      .catch((err) => console.log(err));
+        .then((results) => {
+          if (results.length > 0) {
+            setQuestions(results);
+          }
+        })
+        .catch((err) => console.log(err));
+    } else {
+      retrieveDBdataAsync({
+        filterCol: "evaluation_mode",
+        filterValue: inspectionStr,
+        tableName: "inspection_questions",
+        customQuery: query,
+      })
+        .then((results) => {
+          if (results.length > 0) {
+            setQuestions(results);
+          }
+        })
+        .catch((err) => console.log(err));
+    }
   }, []);
+
   return (
     <View
       style={{
@@ -124,7 +227,7 @@ export const InspectionQuestionsScreen = ({ route }) => {
           }}
         >
           <Text style={{ fontSize: screenHeight * 0.02, fontWeight: "700" }}>
-            F51489A / TWAGIRAYEZU BALTAZAR
+            {data.farmerId} / {data.farmerName}
           </Text>
         </View>
         <View style={{ flex: 1 }}>
@@ -133,48 +236,47 @@ export const InspectionQuestionsScreen = ({ route }) => {
               padding: screenHeight * 0.01,
               gap: screenHeight * 0.001,
             }}
-            data={questions}
+            data={displayQuestions}
             initialNumToRender={10}
             renderItem={({ item, index }) => (
               <InspectionQuestion
                 data={{
                   type: data.inspectionType,
-                  question: item.Kiny_phrase,
-                  index,
-                  language: "kiny",
+                  question: item,
+                  index: qnStart + index,
+                  language,
                 }}
+                question={item}
+                setQnAnswer={handleAnswer}
               />
             )}
-            keyExtractor={(item) => item.__kp_Evaluation}
+            keyExtractor={(item) => item.id}
           />
         </View>
       </View>
-      <TouchableOpacity
-        style={{
-          position: "absolute",
-          backgroundColor: colors.secondary,
-          borderColor: colors.white,
-          borderWidth: screenHeight * 0.003,
-          borderRadius: screenWidth * 0.5,
-          padding: screenHeight * 0.018,
-          marginTop: screenHeight * 0.85,
-          marginLeft: screenWidth * 0.8,
-          elevation: 4,
-        }}
-        onPress={() => setSubmitModalOpen(true)}
-      >
-        <MaterialCommunityIcons
-          name="folder-check"
-          size={35}
-          color={colors.white}
-        />
-      </TouchableOpacity>
+      {currentPage > 1 && <InspectionHoverPrevBtn handlePress={handlePrevPg} />}
+      <InspectionHoverSubmitBtn
+        handlePress={handlePress}
+        currentPage={currentPage}
+        totalPages={totalPages}
+      />
 
       {submitModalOpen && (
         <SyncModal
           label={`Are you sure you want to submit inspection now?`}
           onYes={handleSubmit}
           OnNo={handleClose}
+        />
+      )}
+
+      {/* exit modal */}
+      {exitModalOpen && (
+        <SyncModal
+          label={
+            "You haven't submitted the inspection, unsubmitted answers can not be recovered. are you sure?"
+          }
+          onYes={handleBackButton}
+          OnNo={() => setExitModalOpen(false)}
         />
       )}
     </View>
