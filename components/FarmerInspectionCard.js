@@ -3,7 +3,7 @@ import { colors } from "../data/colors";
 import { FarmerInfoItem } from "./FarmerInfoItem";
 import CustomButton from "./CustomButton";
 import { useNavigation } from "@react-navigation/native";
-import { memo } from "react";
+import { memo, useEffect } from "react";
 
 const FarmerInspectionCard = ({ data, setModal }) => {
   const screenHeight = Dimensions.get("window").height;
@@ -20,6 +20,7 @@ const FarmerInspectionCard = ({ data, setModal }) => {
           inspectionType: data.destination,
           farmerId: data.farmerId,
           farmerName: data.farmerName,
+          householdId: data.householdKey,
         },
       });
       return;
@@ -30,9 +31,11 @@ const FarmerInspectionCard = ({ data, setModal }) => {
         inspectionType: data.destination,
         farmerId: data.farmerId,
         farmerName: data.farmerName,
+        householdId: data.householdKey,
       },
     });
   };
+
 
   return (
     <View

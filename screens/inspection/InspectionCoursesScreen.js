@@ -140,6 +140,7 @@ export const InspectionCoursesScreen = ({ route }) => {
                 destination: data.inspectionType,
                 farmerId: data.farmerId,
                 farmerName: data.farmerName,
+                householdId: data.householdId,
               }}
             />
           )}

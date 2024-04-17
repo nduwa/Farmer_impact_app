@@ -1,4 +1,3 @@
-import React from "react";
 import * as SQLite from "expo-sqlite";
 import { SyncQueries } from "../data/SyncQueries";
 import { DB_NAME } from "@env";
@@ -215,7 +214,7 @@ db.transaction((tx) => {
   //inspection responses
   tx.executeSql(
     `CREATE TABLE IF NOT EXISTS inspection_responses (
-      id int(11) NOT NULL UNIQUE,
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
       created_at datetime NOT NULL,
       rtc_inspections_id int(11) NOT NULL,
       inspection_answer_id int(11) NOT NULL,
@@ -231,7 +230,7 @@ db.transaction((tx) => {
   //inspections
   tx.executeSql(
     `CREATE TABLE IF NOT EXISTS rtc_inspections (
-      id int(11) NOT NULL UNIQUE,
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
       created_at datetime NOT NULL,
       Score_n varchar(45) NOT NULL,
       _kf_Course varchar(100) NOT NULL,
@@ -346,7 +345,12 @@ db.transaction((tx) => {
   );
 });
 
-const generateBulkValueString = (tableName, totalRows, data) => {
+const generateBulkValueString = (
+  tableName,
+  totalRows,
+  data,
+  extraVal = null
+) => {
   if (tableName === "stations") {
     let bulkValues = "";
     for (let i = 0; i < data.length; i++) {
@@ -430,7 +434,7 @@ const generateBulkValueString = (tableName, totalRows, data) => {
     let bulkValues = "";
     for (let i = 0; i < data.length; i++) {
       bulkValues += `(
-        ${data[i].id},'${data[i].created_at}','${data[i].Score_n}','${data[i]._kf_Course}','${data[i]._kf_Household}','${data[i].__kp_Inspection}','${data[i]._kf_Station}','${data[i]._kf_Supplier}','${data[i].created_by}','${data[i].inspection_at}','${data[i].uploaded}','${data[i].uploaded_at}',,'${data[i].longitude}','${data[i].latitude}')`;
+        '${data[i].created_at}','${data[i].Score_n}','${data[i]._kf_Course}','${extraVal}','${data[i].__kp_Inspection}','${data[i]._kf_Station}','${data[i]._kf_Supplier}','${data[i].created_by}','${data[i].inspection_at}','${data[i].uploaded}','${data[i].uploaded_at}','${data[i].longitude}','${data[i].latitude}')`;
       if (i < data.length - 1) bulkValues += ",";
     }
 
@@ -438,8 +442,7 @@ const generateBulkValueString = (tableName, totalRows, data) => {
   } else if (tableName === "inspectionResponses") {
     let bulkValues = "";
     for (let i = 0; i < data.length; i++) {
-      bulkValues += `(
-        ${data[i].id},'${data[i].created_at}','${data[i].rtc_inspections_id}','${data[i].inspection_answer_id}','${data[i].deleted}','${data[i].__kp_InspectionLog}')`;
+      bulkValues += `('${data[i].created_at}','${extraVal}','${data[i].inspection_answer_id}','${data[i].deleted}','${data[i].__kp_InspectionLog}')`;
       if (i < data.length - 1) bulkValues += ",";
     }
 
@@ -499,6 +502,8 @@ export const dataTodb = ({
   syncData,
   setIsSyncing = null,
   setSyncList = null,
+  setInsertId = null,
+  extraVal = null,
 }) => {
   try {
     if (!syncData) {
@@ -868,7 +873,12 @@ export const dataTodb = ({
         ); /* on the last page when the rows aren't 10, it won't throw array index errors because of how slice() handles last index parameter */
         let activeRows = data.length;
 
-        let bulkValues = generateBulkValueString(tableName, totalRows, data);
+        let bulkValues = generateBulkValueString(
+          tableName,
+          totalRows,
+          data,
+          extraVal
+        );
 
         db.transaction((tx) => {
           tx.executeSql(
@@ -898,17 +908,25 @@ export const dataTodb = ({
         ); /* on the last page when the rows aren't 10, it won't throw array index errors because of how slice() handles last index parameter */
         let activeRows = data.length;
 
-        let bulkValues = generateBulkValueString(tableName, totalRows, data);
+        let bulkValues = generateBulkValueString(
+          tableName,
+          totalRows,
+          data,
+          extraVal
+        );
 
         db.transaction((tx) => {
           tx.executeSql(
             `${SyncQueries.RTC_INSPECTIONS} ${bulkValues}`,
             [],
-            () => {
+            (_, result) => {
               insertedRows += activeRows;
               const progress = (insertedRows / totalRows) * 100;
 
-              if (progress >= 100) setCurrentJob("Inspection submitted");
+              if (progress >= 100) {
+                setCurrentJob("Inspection submitted");
+                setInsertId && setInsertId(result.insertId);
+              }
             },
             (_, error) => {
               console.error("Error inserting inspections: ", error);

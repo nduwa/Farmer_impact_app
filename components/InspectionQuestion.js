@@ -16,7 +16,6 @@ const InspectionQuestion = ({ data, question, setQnAnswer }) => {
   };
 
   const handleAnswer = (value) => {
-    console.log(value);
     setAnswer(value);
     setQnAnswer({ id: question.id, answer: value });
   };

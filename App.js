@@ -15,6 +15,7 @@ import { ChooseInspectionScreen } from "./screens/inspection/ChooseInspectionScr
 import { InspectionFarmerScreen } from "./screens/inspection/InspectionFarmerScreen";
 import { InspectionQuestionsScreen } from "./screens/inspection/InspectionQuestionsScreen";
 import { InspectionCoursesScreen } from "./screens/inspection/InspectionCoursesScreen";
+import { InspectionsScreen } from "./screens/inspection/InspectionsScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -90,6 +91,11 @@ export default function App() {
             name="inspectionCourses"
             options={{ unmountOnBlur: true }}
             component={InspectionCoursesScreen}
+          />
+          <Stack.Screen
+            name="InspectionsScreen"
+            options={{ unmountOnBlur: true }}
+            component={InspectionsScreen}
           />
         </Stack.Navigator>
       </NavigationContainer>

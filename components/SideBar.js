@@ -146,7 +146,10 @@ export const SideBar = ({ setsideBarScroll, setIsSidebarOpen }) => {
               <SideNav name={"Sync Data"} destination="Sync" />
               <SideNav name={"Pending Farms"} />
               <SideNav name={"Pending Registrations"} />
-              <SideNav name={"Pending Inspections"} />
+              <SideNav
+                name={"Pending Inspections"}
+                destination="InspectionsScreen"
+              />
               <SideNav name={"Pending Children"} />
               <SideNav name={"Pending Training"} />
               <SideNav

@@ -114,7 +114,7 @@ export const SideNav = ({
       {name === "Pending Inspections" && (
         <Foundation
           name="page-search"
-          size={24}
+          size={29}
           color={isActive ? colors.secondary : colors.black_a}
         />
       )}

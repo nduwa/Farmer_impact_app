@@ -4,23 +4,26 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 export const InspectionHoverSubmitBtn = ({
   handlePress,
-  currentPage,
-  totalPages,
+  currentPage = null,
+  totalPages = null,
+  active = true,
 }) => {
   const screenWidth = Dimensions.get("window").width;
   const screenHeight = Dimensions.get("window").height;
 
   return (
     <TouchableOpacity
+      disabled={!active}
       style={{
         position: "absolute",
-        backgroundColor: colors.secondary,
+        backgroundColor: active ? colors.secondary : colors.black_letter,
         borderColor: colors.white,
         borderWidth: screenHeight * 0.003,
         borderRadius: screenWidth * 0.5,
         padding: screenHeight * 0.018,
         marginTop: screenHeight * 0.85,
         marginLeft: screenWidth * 0.8,
+        opacity: active ? 1 : 0.4,
         elevation: 4,
       }}
       onPress={handlePress}

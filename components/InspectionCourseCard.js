@@ -15,6 +15,7 @@ export const InspectionCourseCard = ({ data }) => {
         courseId: data.id,
         farmerId: data.farmerId,
         farmerName: data.farmerName,
+        householdId: data.householdId,
       },
     });
   };

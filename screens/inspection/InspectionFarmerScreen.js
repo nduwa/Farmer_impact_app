@@ -107,6 +107,7 @@ export const InspectionFarmerScreen = ({ route }) => {
             cell: formatDisplayStr(farmerHouseholdData[0].Area_Small),
             village: formatDisplayStr(farmerHouseholdData[0].Area_Smallest),
             children: formatDisplayStr(farmerHouseholdData[0].Children),
+            householdId: farmerHouseholdData[0].__kp_Household,
           };
           extendedFarmerData = { ...farmer, ...neededHouseholdInfo };
           newFarmersData.push(extendedFarmerData);
@@ -319,6 +320,7 @@ export const InspectionFarmerScreen = ({ route }) => {
               data={{
                 farmerName: item.Name,
                 farmerId: item.farmerid,
+                householdKey: item._kf_Household,
                 cell: item.cell,
                 village: item.village,
                 prodTrees: item.prodTrees,

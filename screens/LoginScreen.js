@@ -29,6 +29,7 @@ import { UserActions } from "../redux/user/UserSlice";
 import { AntDesign } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
 import { deleteDBdataAsync } from "../helpers/deleteDBdataAsync";
+import { dropTableAsync } from "../helpers/dropTableAsync";
 
 export const LoginScreen = ({ navigation }) => {
   const loginState = useSelector((state) => state.login);
@@ -166,6 +167,10 @@ export const LoginScreen = ({ navigation }) => {
     setPwdVisible(!pwdVisible);
   };
 
+  ///////////////////////////////////RESETTING THE APP DATABASE - FOR DEVELOPMENT PURPOSES ONLY/////////////////////////////////
+
+  /////////////////////////////////CAUTION///////////////////////////////////
+
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
       "keyboardDidShow",
@@ -244,18 +249,30 @@ export const LoginScreen = ({ navigation }) => {
         dispatch(UserActions.setUserLocation(location));
       };
 
+      const wipeData = async (tableName, type) => {
+        if (type === "drop") {
+          dropTableAsync({ tableName })
+            .then((result) => console.log("reset: ", result))
+            .catch((error) => console.log(error));
+        } else if (type === "clean") {
+          deleteDBdataAsync({
+            tableName,
+            id: 1,
+            customQuery: `SELECT * FROM ${tableName};`,
+          })
+            .then((result) => {
+              console.log(result);
+            })
+            .catch((err) => console.log(err));
+        }
+      };
+
       validatedPreviousLogin();
       getLocation();
 
-      // deleteDBdataAsync({
-      //   tableName: "inspection_questions",
-      //   id: 1,
-      //   customQuery: "DELETE FROM inspection_answers",
-      // })
-      //   .then((result) => {
-      //     console.log(result);
-      //   })
-      //   .catch((err) => console.log(err));
+      //////////////////////// RESETTING THE APP DATABASE - FOR DEVELOPMENT PURPOSES ONLY ///////////////////////
+      // wipeData("rtc_inspections", "clean");
+      //////////////////////////////// CAUTION //////////////////////////////////////////////////////////////////
 
       return () => {
         if (formRef.current) {

@@ -17,16 +17,25 @@ import { SyncModal } from "../../components/SyncModal";
 import { retrieveDBdataAsync } from "../../helpers/retrieveDBdataAsync";
 import { InspectionHoverSubmitBtn } from "../../components/InspectionHoverSubmitBtn";
 import { InspectionHoverPrevBtn } from "../../components/InspectionHoverPrevBtn";
+import { dataTodb } from "../../helpers/dataTodb";
+import { useDispatch, useSelector } from "react-redux";
 
 export const InspectionQuestionsScreen = ({ route }) => {
   const screenWidth = Dimensions.get("window").width;
   const screenHeight = Dimensions.get("window").height;
   const navigation = useNavigation();
+  const dispatch = useDispatch();
+
+  const userData = useSelector((state) => state.user);
 
   const { data } = route.params;
 
   const [submitModalOpen, setSubmitModalOpen] = useState(false);
-  const [exitModalOpen, setExitModalOpen] = useState(false);
+  const [exitModal, setExitModal] = useState({ open: false, label: "" });
+  const [validationModal, setvalidationModal] = useState({
+    open: false,
+    label: "",
+  });
   const [answers, setAnswers] = useState([]);
   const [questions, setQuestions] = useState([]);
   const [language, setLanguage] = useState("kiny");
@@ -36,10 +45,19 @@ export const InspectionQuestionsScreen = ({ route }) => {
   const [qnEnd, setQnEnd] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [displayQuestions, setDisplayQuestions] = useState([]);
+  const [currentJob, setCurrentJob] = useState("");
+  const [insertedInspection, setInsertedInspection] = useState();
+  const [submitted, setSubmitted] = useState(false);
+
+  const [info, setInfo] = useState({});
 
   const handleBackButton = () => {
-    if (answers.length > 0 && !exitModalOpen) {
-      setExitModalOpen(true);
+    if (!submitted && !exitModal.open) {
+      setExitModal({
+        open: true,
+        label:
+          "You haven't submitted the inspection, unsubmitted answers can not be recovered. are you sure?",
+      });
       return;
     }
     if (data?.inspectionType?.toLowerCase().includes("advanced")) {
@@ -57,7 +75,44 @@ export const InspectionQuestionsScreen = ({ route }) => {
     }
   };
 
-  const handleSubmit = () => {};
+  const handleScoreStr = (str) => {
+    let score_n = str.split(" ")[0];
+
+    return score_n.toLowerCase();
+  };
+
+  const handleSubmit = () => {
+    if (answers.length < questions.length) {
+      setvalidationModal({
+        open: true,
+        label: "Can't submit, this inspection contains unanswered questions.",
+      });
+      return;
+    }
+
+    let inspectionDate = new Date();
+    let kfHousehold = info._kf_Household;
+    let submitData = [
+      {
+        ...info,
+        _kf_Course: data.courseId || "",
+        __kp_Inspection: "",
+        uploaded: 0,
+        inspection_at: inspectionDate.toISOString(),
+        created_at: inspectionDate.toISOString(),
+        uploaded_at: "0000-00-00",
+        Score_n: handleScoreStr(data.inspectionType),
+      },
+    ];
+
+    dataTodb({
+      tableName: "inspections",
+      setCurrentJob: setCurrentJob,
+      syncData: submitData,
+      setInsertId: setInsertedInspection,
+      extraVal: kfHousehold,
+    });
+  };
   const handlePress = () => {
     if (currentPage >= totalPages) {
       setSubmitModalOpen(true);
@@ -105,10 +160,38 @@ export const InspectionQuestionsScreen = ({ route }) => {
   };
 
   useEffect(() => {
-    if (answers.length > 0) {
-      console.log("hehe ", answers);
+    if (currentJob === "Responses saved") {
+      displayToast("Responses saved");
+      setSubmitted(true);
     }
-  }, [answers.length]);
+  }, [currentJob]);
+  useEffect(() => {
+    if (insertedInspection) {
+      displayToast("Inspection saved");
+
+      let responseSubmitData = [];
+      let inspId = insertedInspection + 0;
+
+      for (const answer of answers) {
+        let response = {
+          rtc_inspection_id: inspId,
+          inspection_answer_id: answer.answer,
+          deleted: 0,
+          __kp_InspectionLog: "",
+          created_at: new Date(),
+        };
+
+        responseSubmitData.push(response);
+      }
+
+      dataTodb({
+        tableName: "inspectionResponses",
+        syncData: responseSubmitData,
+        setCurrentJob,
+        extraVal: inspId,
+      });
+    }
+  }, [insertedInspection]);
 
   useEffect(() => {
     handleQnsPagination();
@@ -169,6 +252,17 @@ export const InspectionQuestionsScreen = ({ route }) => {
         })
         .catch((err) => console.log(err));
     }
+
+    let userInfo = {
+      latitude: userData.location.coords.latitude,
+      longitude: userData.location.coords.longitude,
+      _kf_Station: userData.userData.staff._kf_Station,
+      _kf_Supplier: userData.userData.staff._kf_Supplier,
+      created_by: userData.userData.user.Name_User,
+      _kf_Household: data.householdId,
+    };
+
+    setInfo(userInfo);
   }, []);
 
   return (
@@ -259,24 +353,41 @@ export const InspectionQuestionsScreen = ({ route }) => {
         handlePress={handlePress}
         currentPage={currentPage}
         totalPages={totalPages}
+        active={!submitted}
       />
 
       {submitModalOpen && (
         <SyncModal
           label={`Are you sure you want to submit inspection now?`}
-          onYes={handleSubmit}
+          onYes={() => {
+            setSubmitModalOpen(false);
+            handleSubmit();
+          }}
           OnNo={handleClose}
         />
       )}
 
-      {/* exit modal */}
-      {exitModalOpen && (
+      {/* validation modal */}
+      {validationModal.open && (
         <SyncModal
-          label={
-            "You haven't submitted the inspection, unsubmitted answers can not be recovered. are you sure?"
+          label={validationModal.label}
+          onYes={() =>
+            setvalidationModal((prevState) => ({ ...prevState, open: false }))
           }
+          OnNo={() =>
+            setvalidationModal((prevState) => ({ ...prevState, open: false }))
+          }
+        />
+      )}
+
+      {/* exit modal */}
+      {exitModal.open && (
+        <SyncModal
+          label={exitModal.label}
           onYes={handleBackButton}
-          OnNo={() => setExitModalOpen(false)}
+          OnNo={() =>
+            setExitModal((prevState) => ({ ...prevState, open: false }))
+          }
         />
       )}
     </View>
