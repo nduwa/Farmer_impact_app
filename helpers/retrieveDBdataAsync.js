@@ -32,6 +32,8 @@ export const retrieveDBdataAsync = ({
     }
   } else if (tableName === "trainingModules") {
     query = `SELECT * FROM rtc_training;`;
+  } else if (tableName === "inspection_responses") {
+    query = `SELECT * FROM inspection_responses WHERE ${filterCol}='${filterValue}';`;
   }
 
   if (customQuery) query = customQuery;
@@ -52,7 +54,8 @@ export const retrieveDBdataAsync = ({
               if (
                 tableName === "rtc_transactions" ||
                 tableName === "inspection_questions" ||
-                tableName === "trainingModules"
+                tableName === "trainingModules" ||
+                tableName === "inspection_responses"
               ) {
                 resolve(data._array);
               }

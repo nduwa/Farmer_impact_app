@@ -16,14 +16,32 @@ import { InspectionRecordItems } from "../../components/InspectionRecordItem";
 import { SyncModal } from "../../components/SyncModal";
 import { deleteDBdataAsync } from "../../helpers/deleteDBdataAsync";
 import { InspectionHoverSubmitBtn } from "../../components/InspectionHoverSubmitBtn";
+import { InspectionModal } from "../../components/InspectionModal";
+import { retrieveDBdataAsync } from "../../helpers/retrieveDBdataAsync";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  inspectionAction,
+  inspectionSubmission,
+} from "../../redux/inspection/inspectionSlice";
+import { updateDBdata } from "../../helpers/updateDBdata";
 
 export const InspectionsScreen = () => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const navigation = useNavigation();
+  const dispatch = useDispatch();
+  const inspectionState = useSelector((state) => state.inspection);
 
   const [inspections, setInspections] = useState([]);
+  const [responses, setResponses] = useState([]);
   const [deleteModal, setDeleteModal] = useState({ open: false, id: null });
+  const [inspectionModal, setInspectionModal] = useState({
+    open: false,
+    id: null,
+    data: null,
+  });
+  const [currentJob, setCurrentJob] = useState(null);
+  const [inspectionDeleted, setInspectionDeleted] = useState(false);
 
   const handleBackButton = () => {
     navigation.navigate("Homepage", { data: null });
@@ -58,7 +76,19 @@ export const InspectionsScreen = () => {
     return theDate.toLocaleDateString("en-US", options);
   }
 
-  const handleSubmitInspections = () => {};
+  const handleSubmitInspections = async (id) => {
+    retrieveDBdataAsync({
+      tableName: "inspection_responses",
+      filterCol: "rtc_inspections_id",
+      filterValue: id,
+    })
+      .then((result) => {
+        if (result.length > 0) {
+          setResponses(result);
+        }
+      })
+      .catch((error) => console.log(error));
+  };
 
   const handleDelete = async () => {
     setDeleteModal((prevState) => ({ ...prevState, open: false }));
@@ -73,7 +103,7 @@ export const InspectionsScreen = () => {
         if (result.success) {
           removeDeletedInspection(result.deletedTransaction);
           handleCloseDeleteModal();
-          displayToast("Inspection deleted");
+          setInspectionDeleted(true);
         } else {
           handleCloseDeleteModal();
           displayToast("Deletion failed");
@@ -81,6 +111,65 @@ export const InspectionsScreen = () => {
       })
       .catch((error) => console.log(error));
   };
+
+  useEffect(() => {
+    if (currentJob === "Inspection Submitted") {
+      displayToast(currentJob);
+
+      let allInspections = inspections;
+
+      let filtered = allInspections.filter(
+        (item) => item.id !== inspectionModal.id
+      );
+
+      setInspectionModal((prevState) => ({ ...prevState, open: false }));
+
+      setInspections(filtered);
+    }
+  }, [currentJob]);
+
+  useEffect(() => {
+    if (inspectionDeleted) {
+      deleteDBdataAsync({
+        tableName: "inspection_responses",
+        targetCol: "rtc_inspections_id",
+        targetId: deleteModal.id,
+      })
+        .then((result) => {
+          if (result.success) {
+            displayToast("Inspection deleted");
+          } else {
+            displayToast("Deletion failed");
+          }
+        })
+        .catch((error) => console.log(error));
+    }
+  }, [inspectionDeleted]);
+
+  useEffect(() => {
+    if (inspectionState.serverResponded) {
+      const uploadDate = new Date();
+      let inspectionId = inspectionModal.id;
+
+      updateDBdata({
+        msgNo: "Submitting failed",
+        msgYes: "Inspection Submitted",
+        setCurrentJob,
+        query: `UPDATE rtc_inspections SET uploaded=1, uploaded_at='${uploadDate}' WHERE id='${inspectionId}'`,
+      });
+    }
+  }, [inspectionState.serverResponded]);
+
+  useEffect(() => {
+    if (responses.length > 0) {
+      dispatch(
+        inspectionSubmission({
+          inspection: inspectionModal.data,
+          responses: responses,
+        })
+      );
+    }
+  }, [responses.length]);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -154,7 +243,9 @@ export const InspectionsScreen = () => {
                 type: item.Score_n,
                 householdid: item._kf_Household,
               }}
-              deleteFn={() => setDeleteModal({ open: true, id: item.id })}
+              handlePress={() =>
+                setInspectionModal({ open: true, id: item.id, data: item })
+              }
             />
           )}
           keyExtractor={(item) => item.id}
@@ -172,10 +263,24 @@ export const InspectionsScreen = () => {
         />
       )}
 
-      <InspectionHoverSubmitBtn
-        active={inspections.length > 0}
-        handlePress={handleSubmitInspections}
-      />
+      {/* inspection modal */}
+      {inspectionModal.open && (
+        <InspectionModal
+          data={{
+            inspection_id: inspectionModal.id,
+            inspectionData: inspectionModal.data,
+          }}
+          active={!inspectionState.loading}
+          DeleteFn={() => {
+            setInspectionModal((prevState) => ({ ...prevState, open: false }));
+            setDeleteModal({ id: inspectionModal.id, open: true });
+          }}
+          UploadFn={() => handleSubmitInspections(inspectionModal.id)}
+          CloseFn={() =>
+            setInspectionModal((prevState) => ({ ...prevState, open: false }))
+          }
+        />
+      )}
     </View>
   );
 };

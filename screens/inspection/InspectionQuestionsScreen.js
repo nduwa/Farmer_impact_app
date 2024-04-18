@@ -12,7 +12,6 @@ import { AntDesign } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import InspectionQuestion from "../../components/InspectionQuestion";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { SyncModal } from "../../components/SyncModal";
 import { retrieveDBdataAsync } from "../../helpers/retrieveDBdataAsync";
 import { InspectionHoverSubmitBtn } from "../../components/InspectionHoverSubmitBtn";
@@ -24,7 +23,6 @@ export const InspectionQuestionsScreen = ({ route }) => {
   const screenWidth = Dimensions.get("window").width;
   const screenHeight = Dimensions.get("window").height;
   const navigation = useNavigation();
-  const dispatch = useDispatch();
 
   const userData = useSelector((state) => state.user);
 
@@ -52,7 +50,7 @@ export const InspectionQuestionsScreen = ({ route }) => {
   const [info, setInfo] = useState({});
 
   const handleBackButton = () => {
-    if (!submitted && !exitModal.open) {
+    if (!submitted && questions.length > 0 && !exitModal.open) {
       setExitModal({
         open: true,
         label:
@@ -349,12 +347,14 @@ export const InspectionQuestionsScreen = ({ route }) => {
         </View>
       </View>
       {currentPage > 1 && <InspectionHoverPrevBtn handlePress={handlePrevPg} />}
-      <InspectionHoverSubmitBtn
-        handlePress={handlePress}
-        currentPage={currentPage}
-        totalPages={totalPages}
-        active={!submitted}
-      />
+      {questions.length > 0 && (
+        <InspectionHoverSubmitBtn
+          handlePress={handlePress}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          active={!submitted}
+        />
+      )}
 
       {submitModalOpen && (
         <SyncModal

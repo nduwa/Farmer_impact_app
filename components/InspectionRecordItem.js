@@ -1,9 +1,9 @@
 import React from "react";
 import { Dimensions, Text, TouchableOpacity, View } from "react-native";
 import { colors } from "../data/colors";
-import { FontAwesome6 } from "@expo/vector-icons";
+import { AntDesign } from "@expo/vector-icons";
 
-export const InspectionRecordItems = ({ data, deleteFn }) => {
+export const InspectionRecordItems = ({ data, handlePress }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
 
@@ -56,13 +56,13 @@ export const InspectionRecordItems = ({ data, deleteFn }) => {
         </View>
       </View>
       <TouchableOpacity
-        onPress={deleteFn}
+        onPress={handlePress}
         style={{
           alignItems: "center",
           justifyContent: "center",
         }}
       >
-        <FontAwesome6 name="trash" size={24} color="black" />
+        <AntDesign name="right" size={screenHeight * 0.034} color="black" />
       </TouchableOpacity>
     </View>
   );
