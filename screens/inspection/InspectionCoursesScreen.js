@@ -70,7 +70,7 @@ export const InspectionCoursesScreen = ({ route }) => {
 
       fetchData();
       return () => {
-        // Cleanup code if needed
+        setCourses([]);
       };
     }, [route.params.data])
   );

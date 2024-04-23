@@ -18,13 +18,13 @@ export const updateDBdata = ({ id, query, setCurrentJob, msgYes, msgNo }) => {
             }
           },
           (_, error) => {
-            console.log("Error: ", error);
+            console.log("Error updating the db: ", error);
             reject(error);
           }
         );
       },
       (error) => {
-        console.log("Error: ", error);
+        console.log("Error performing db update operation: ", error);
       }
     );
   } catch (error) {

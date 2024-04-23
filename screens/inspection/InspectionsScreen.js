@@ -112,21 +112,19 @@ export const InspectionsScreen = () => {
       .catch((error) => console.log(error));
   };
 
-  useEffect(() => {
-    if (currentJob === "Inspection Submitted") {
-      displayToast(currentJob);
+  const handleServerResponse = () => {
+    displayToast("Inspection Submitted");
 
-      let allInspections = inspections;
+    let allInspections = inspections;
 
-      let filtered = allInspections.filter(
-        (item) => item.id !== inspectionModal.id
-      );
+    let filtered = allInspections.filter(
+      (item) => item.id !== inspectionModal.id
+    );
 
-      setInspectionModal((prevState) => ({ ...prevState, open: false }));
+    setInspectionModal((prevState) => ({ ...prevState, open: false }));
 
-      setInspections(filtered);
-    }
-  }, [currentJob]);
+    setInspections(filtered);
+  };
 
   useEffect(() => {
     if (inspectionDeleted) {
@@ -157,6 +155,10 @@ export const InspectionsScreen = () => {
         setCurrentJob,
         query: `UPDATE rtc_inspections SET uploaded=1, uploaded_at='${uploadDate}' WHERE id='${inspectionId}'`,
       });
+
+      handleServerResponse();
+      setResponses([]);
+      dispatch(inspectionAction.resetInspectionState());
     }
   }, [inspectionState.serverResponded]);
 
@@ -183,7 +185,15 @@ export const InspectionsScreen = () => {
 
       fetchData();
       return () => {
-        // Cleanup code if needed
+        setCurrentJob(null);
+        setInspections([]);
+        setResponses([]);
+        setDeleteModal({ open: false, id: null });
+        setInspectionModal({
+          open: false,
+          id: null,
+          data: null,
+        });
       };
     }, [])
   );

@@ -928,6 +928,7 @@ export const dataTodb = ({
                 setInsertId && setInsertId(result.insertId);
               }
             },
+
             (_, error) => {
               console.error("Error inserting inspections: ", error);
               return;

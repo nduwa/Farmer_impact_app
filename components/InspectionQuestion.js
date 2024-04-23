@@ -4,12 +4,13 @@ import { Dimensions, FlatList, Text, View } from "react-native";
 import { colors } from "../data/colors";
 import { useFocusEffect } from "@react-navigation/native";
 
-const InspectionQuestion = ({ data, question, setQnAnswer }) => {
+const InspectionQuestion = ({ data, question, setQnAnswer, currentAnswer }) => {
   const screenWidth = Dimensions.get("window").width;
   const screenHeight = Dimensions.get("window").height;
 
   const [answer, setAnswer] = useState("");
   const [choices, setChoices] = useState([]);
+  const [selectedAnswer, setSelectedAnswer] = useState("");
 
   const removeDuplicates = (items) => {
     return [...new Set(items)];
@@ -17,8 +18,13 @@ const InspectionQuestion = ({ data, question, setQnAnswer }) => {
 
   const handleAnswer = (value) => {
     setAnswer(value);
+
     setQnAnswer({ id: question.id, answer: value });
   };
+
+  useEffect(() => {
+    setSelectedAnswer(answer);
+  }, [answer]);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -47,9 +53,15 @@ const InspectionQuestion = ({ data, question, setQnAnswer }) => {
         multipleChoices.push(obj);
       }
 
+      if (currentAnswer) {
+        setSelectedAnswer(currentAnswer?.answer);
+      }
+
       multipleChoices = setChoices(multipleChoices);
       return () => {
-        // Cleanup code if needed
+        setAnswer("");
+        setChoices([]);
+        setSelectedAnswer("");
       };
     }, [])
   );
@@ -76,7 +88,7 @@ const InspectionQuestion = ({ data, question, setQnAnswer }) => {
         {choices.length > 0 && (
           <RadioButtonGroup
             containerStyle={{ marginBottom: 10, gap: 7 }}
-            selected={answer}
+            selected={selectedAnswer}
             onSelected={(value) => handleAnswer(value)}
             radioBackground={colors.secondary}
           >

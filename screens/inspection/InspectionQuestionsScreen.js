@@ -9,8 +9,8 @@ import {
 } from "react-native";
 import { colors } from "../../data/colors";
 import { AntDesign } from "@expo/vector-icons";
-import { useEffect, useState } from "react";
-import { useNavigation } from "@react-navigation/native";
+import React, { useEffect, useRef, useState } from "react";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import InspectionQuestion from "../../components/InspectionQuestion";
 import { SyncModal } from "../../components/SyncModal";
 import { retrieveDBdataAsync } from "../../helpers/retrieveDBdataAsync";
@@ -23,6 +23,7 @@ export const InspectionQuestionsScreen = ({ route }) => {
   const screenWidth = Dimensions.get("window").width;
   const screenHeight = Dimensions.get("window").height;
   const navigation = useNavigation();
+  const flatListRef = useRef(null);
 
   const userData = useSelector((state) => state.user);
 
@@ -38,7 +39,7 @@ export const InspectionQuestionsScreen = ({ route }) => {
   const [questions, setQuestions] = useState([]);
   const [language, setLanguage] = useState("kiny");
   const [currentPage, setCurrentPage] = useState(1);
-  const [limit, setLimit] = useState(40);
+  const [limit, setLimit] = useState(10);
   const [qnStart, setQnStart] = useState(0);
   const [qnEnd, setQnEnd] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
@@ -48,6 +49,10 @@ export const InspectionQuestionsScreen = ({ route }) => {
   const [submitted, setSubmitted] = useState(false);
 
   const [info, setInfo] = useState({});
+
+  const scrollToTop = () => {
+    flatListRef.current.scrollToOffset({ offset: 0, animated: true });
+  };
 
   const handleBackButton = () => {
     if (!submitted && questions.length > 0 && !exitModal.open) {
@@ -110,6 +115,8 @@ export const InspectionQuestionsScreen = ({ route }) => {
       setInsertId: setInsertedInspection,
       extraVal: kfHousehold,
     });
+
+    // setInsertedInspection(970);
   };
   const handlePress = () => {
     if (currentPage >= totalPages) {
@@ -157,6 +164,11 @@ export const InspectionQuestionsScreen = ({ route }) => {
     setAnswers([...answers, newAnswer]);
   };
 
+  const fetchAnswer = (qnId) => {
+    const answer = answers.find((item) => item.id === qnId);
+    return answer;
+  };
+
   useEffect(() => {
     if (currentJob === "Responses saved") {
       displayToast("Responses saved");
@@ -193,6 +205,7 @@ export const InspectionQuestionsScreen = ({ route }) => {
 
   useEffect(() => {
     handleQnsPagination();
+    scrollToTop();
   }, [currentPage]);
 
   useEffect(() => {
@@ -207,61 +220,71 @@ export const InspectionQuestionsScreen = ({ route }) => {
     }
   }, [questions]);
 
-  useEffect(() => {
-    let inspectionStr = "";
-    let query = null;
+  useFocusEffect(
+    React.useCallback(() => {
+      let inspectionStr = "";
+      let query = null;
 
-    if (data.inspectionType.toLowerCase().includes("generic"))
-      inspectionStr = "Generic";
-    else if (data.inspectionType.toLowerCase().includes("special"))
-      inspectionStr = "Special";
-    else if (data.inspectionType.toLowerCase().includes("cafe"))
-      inspectionStr = "CAFE";
-    else if (data.inspectionType.toLowerCase().includes("rfa"))
-      inspectionStr = "RFA";
-    else if (data.inspectionType.toLowerCase().includes("advanced"))
-      inspectionStr = "Advanced";
+      if (data.inspectionType.toLowerCase().includes("generic"))
+        inspectionStr = "Generic";
+      else if (data.inspectionType.toLowerCase().includes("special"))
+        inspectionStr = "Special";
+      else if (data.inspectionType.toLowerCase().includes("cafe"))
+        inspectionStr = "CAFE";
+      else if (data.inspectionType.toLowerCase().includes("rfa"))
+        inspectionStr = "RFA";
+      else if (data.inspectionType.toLowerCase().includes("advanced"))
+        inspectionStr = "Advanced";
 
-    if (inspectionStr === "") return;
+      if (inspectionStr === "") return;
 
-    if (inspectionStr === "Advanced" && data.courseId) {
-      retrieveDBdataAsync({
-        filterCol: "_kf_course",
-        filterValue: data.courseId,
-        tableName: "inspection_questions",
-      })
-        .then((results) => {
-          if (results.length > 0) {
-            setQuestions(results);
-          }
+      if (inspectionStr === "Advanced" && data.courseId) {
+        retrieveDBdataAsync({
+          filterCol: "_kf_course",
+          filterValue: data.courseId,
+          tableName: "inspection_questions",
         })
-        .catch((err) => console.log(err));
-    } else {
-      retrieveDBdataAsync({
-        filterCol: "evaluation_mode",
-        filterValue: inspectionStr,
-        tableName: "inspection_questions",
-        customQuery: query,
-      })
-        .then((results) => {
-          if (results.length > 0) {
-            setQuestions(results);
-          }
+          .then((results) => {
+            if (results.length > 0) {
+              setQuestions(results);
+            }
+          })
+          .catch((err) => console.log(err));
+      } else {
+        retrieveDBdataAsync({
+          filterCol: "evaluation_mode",
+          filterValue: inspectionStr,
+          tableName: "inspection_questions",
+          customQuery: query,
         })
-        .catch((err) => console.log(err));
-    }
+          .then((results) => {
+            if (results.length > 0) {
+              setQuestions(results);
+            }
+          })
+          .catch((err) => console.log(err));
+      }
 
-    let userInfo = {
-      latitude: userData.location.coords.latitude,
-      longitude: userData.location.coords.longitude,
-      _kf_Station: userData.userData.staff._kf_Station,
-      _kf_Supplier: userData.userData.staff._kf_Supplier,
-      created_by: userData.userData.user.Name_User,
-      _kf_Household: data.householdId,
-    };
+      let userInfo = {
+        latitude: userData.location.coords.latitude,
+        longitude: userData.location.coords.longitude,
+        _kf_Station: userData.userData.staff._kf_Station,
+        _kf_Supplier: userData.userData.staff._kf_Supplier,
+        created_by: userData.userData.user.Name_User,
+        _kf_Household: data.householdId,
+      };
 
-    setInfo(userInfo);
-  }, []);
+      setInfo(userInfo);
+
+      return () => {
+        setAnswers([]);
+        setQuestions([]);
+        setCurrentPage(1);
+        setDisplayQuestions([]);
+        setSubmitted(false);
+      };
+    }, [])
+  );
 
   return (
     <View
@@ -324,12 +347,13 @@ export const InspectionQuestionsScreen = ({ route }) => {
         </View>
         <View style={{ flex: 1 }}>
           <FlatList
+            ref={flatListRef}
             contentContainerStyle={{
               padding: screenHeight * 0.01,
               gap: screenHeight * 0.001,
             }}
             data={displayQuestions}
-            initialNumToRender={10}
+            initialNumToRender={6}
             renderItem={({ item, index }) => (
               <InspectionQuestion
                 data={{
@@ -338,6 +362,7 @@ export const InspectionQuestionsScreen = ({ route }) => {
                   index: qnStart + index,
                   language,
                 }}
+                currentAnswer={fetchAnswer(item.id)}
                 question={item}
                 setQnAnswer={handleAnswer}
               />

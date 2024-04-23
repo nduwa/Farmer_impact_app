@@ -4,26 +4,30 @@ import {
   ScrollView,
   Text,
   TextInput,
+  ToastAndroid,
   TouchableOpacity,
   View,
 } from "react-native";
 import * as SecureStore from "expo-secure-store";
 import { colors } from "../../data/colors";
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
 import { AntDesign } from "@expo/vector-icons";
-import { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Formik } from "formik";
 import { Feather } from "@expo/vector-icons";
 import FarmerInspectionCard from "../../components/FarmerInspectionCard";
 import { UpdateChildrenModal } from "../../components/UpdateChildrenModal";
 import { retrieveDBdata } from "../../helpers/retrieveDBdata";
 import { GroupsModal } from "../../components/GroupsModal";
+import { InspectionHoverSubmitBtn } from "../../components/InspectionHoverSubmitBtn";
+import { InspectionHoverPrevBtn } from "../../components/InspectionHoverPrevBtn";
 
 export const InspectionFarmerScreen = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const navigation = useNavigation();
+  const flatListRef = useRef(null);
 
   const [farmers, setFarmers] = useState([]);
   const [farmersXhouseholdsData, setFarmersXhouseholdsData] = useState([]); // each farmer info is merged with their corresponding household data
@@ -39,10 +43,48 @@ export const InspectionFarmerScreen = ({ route }) => {
     data: null,
   });
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [totalPages, setTotalPages] = useState(0);
+  const [dataStart, setDataStart] = useState(0);
+  const [dataEnd, setDataEnd] = useState(0);
+
   const { data } = route.params;
+
+  const scrollToTop = () => {
+    flatListRef?.current?.scrollToOffset({ offset: 0, animated: true });
+  };
 
   const toggleGroupsModal = () => {
     setGroupsModalOpen(true);
+  };
+
+  const displayToast = (msg) => {
+    ToastAndroid.show(msg, ToastAndroid.SHORT);
+  };
+
+  const handlePrevPg = () => {
+    let newpg = currentPage - 1;
+    let newpg_fitted = newpg % totalPages; // fitted in the range 0 -> max page
+    setCurrentPage(newpg_fitted);
+  };
+
+  const handleDataPagination = (data) => {
+    const totalItems = data.length;
+    const pages = Math.ceil(totalItems / limit);
+    setTotalPages(pages);
+
+    let start = (currentPage - 1) * limit;
+    let end = start + limit;
+
+    setDataStart(start);
+    setDataEnd(end);
+
+    let currentItems = data.slice(start, end);
+
+    setDisplayData(currentItems);
+
+    if (pages > 0) displayToast(`Page ${currentPage} of ${pages} loaded`);
   };
 
   const handleBackButton = () => {
@@ -50,6 +92,8 @@ export const InspectionFarmerScreen = ({ route }) => {
   };
 
   const handleSearch = (text) => {
+    setCurrentPage(1);
+
     if (text !== "") {
       text = text.toLowerCase();
       const results = farmersXhouseholdsData.filter((item) => {
@@ -68,11 +112,24 @@ export const InspectionFarmerScreen = ({ route }) => {
     return text === "" ? "0" : text;
   };
 
+  const handlePress = () => {
+    let current = currentPage;
+    let newpg = (current % totalPages) + 1; // a % b statement restricts value a from ever getting bigger than b.... :)
+    setCurrentPage(newpg);
+  };
+
+  useEffect(() => {
+    handleDataPagination(farmersXhouseholdsData);
+    scrollToTop();
+  }, [currentPage]);
+
   useEffect(() => {
     let data =
       searchResults.length > 0 ? searchResults : farmersXhouseholdsData;
 
-    setDisplayData(data);
+    if (data.length > 0) {
+      handleDataPagination(data);
+    }
   }, [farmersXhouseholdsData, searchResults]);
 
   useEffect(() => {
@@ -147,21 +204,35 @@ export const InspectionFarmerScreen = ({ route }) => {
     }
   }, [groups.length]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const stationId = await SecureStore.getItemAsync("rtc-station-id");
+  useFocusEffect(
+    React.useCallback(() => {
+      const fetchData = async () => {
+        const stationId = await SecureStore.getItemAsync("rtc-station-id");
 
-      if (stationId) {
-        retrieveDBdata({
-          tableName: "rtc_groups",
-          stationId,
-          setData: setGroups,
-        });
-      }
-    };
+        if (stationId) {
+          retrieveDBdata({
+            tableName: "rtc_groups",
+            stationId,
+            setData: setGroups,
+          });
+        }
+      };
 
-    fetchData();
-  }, []);
+      fetchData();
+      return () => {
+        setFarmers([]);
+        setFarmersXhouseholdsData([]); // each farmer info is merged with their corresponding household data
+        setGroups([]);
+        setHouseholds([]);
+        setSelectedGroup(null);
+        setSearchResults([]);
+        setDisplayData([]);
+        setGroupsModalOpen(false);
+        setActiveGroup([]);
+        setChildrenModal({ open: false, data: null });
+      };
+    }, [])
+  );
 
   return (
     <View
@@ -309,12 +380,13 @@ export const InspectionFarmerScreen = ({ route }) => {
       </View>
       <View style={{ flex: 1 }}>
         <FlatList
+          ref={flatListRef}
           contentContainerStyle={{
             padding: screenHeight * 0.01,
             gap: screenHeight * 0.02,
           }}
           data={displayData}
-          initialNumToRender={10}
+          initialNumToRender={6}
           renderItem={({ item }) => (
             <FarmerInspectionCard
               data={{
@@ -334,6 +406,17 @@ export const InspectionFarmerScreen = ({ route }) => {
           keyExtractor={(item) => item.id}
         />
       </View>
+      {currentPage > 1 && <InspectionHoverPrevBtn handlePress={handlePrevPg} />}
+      {displayData.length > 0 && (
+        <InspectionHoverSubmitBtn
+          handlePress={handlePress}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          active={currentPage < totalPages ? true : false}
+          mode="pagination"
+        />
+      )}
+
       {childrenModal.open && (
         <UpdateChildrenModal
           setModal={setChildrenModal}

@@ -36,7 +36,6 @@ const FarmerInspectionCard = ({ data, setModal }) => {
     });
   };
 
-
   return (
     <View
       style={{
@@ -121,6 +120,7 @@ const FarmerInspectionCard = ({ data, setModal }) => {
           width: "100%",
           paddingHorizontal: screenWidth * 0.045,
           marginTop: screenHeight * 0.01,
+          height: screenHeight * 0.07,
         }}
       >
         <CustomButton
@@ -131,7 +131,7 @@ const FarmerInspectionCard = ({ data, setModal }) => {
           bdcolor="transparent"
           mt={8}
           mb={8}
-          fontSizeRatio={0.045}
+          fontSizeRatio={0.04}
           radius={7}
           paddingRatio={0.014}
           disabled={false}

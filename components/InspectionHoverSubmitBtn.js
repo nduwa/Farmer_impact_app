@@ -1,22 +1,34 @@
 import { Dimensions, Text, TouchableOpacity } from "react-native";
 import { colors } from "../data/colors";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useEffect, useState } from "react";
 
 export const InspectionHoverSubmitBtn = ({
   handlePress,
   currentPage = null,
   totalPages = null,
   active = true,
+  mode = "submit",
 }) => {
   const screenWidth = Dimensions.get("window").width;
   const screenHeight = Dimensions.get("window").height;
+
+  const [color, setColor] = useState(colors.secondary);
+
+  useEffect(() => {
+    if (mode === "submit") {
+      setColor(active ? colors.secondary : colors.black_letter);
+    } else if (mode === "pagination") {
+      setColor(active ? colors.blue_font : colors.black_letter);
+    }
+  });
 
   return (
     <TouchableOpacity
       disabled={!active}
       style={{
         position: "absolute",
-        backgroundColor: active ? colors.secondary : colors.black_letter,
+        backgroundColor: color,
         borderColor: colors.white,
         borderWidth: screenHeight * 0.003,
         borderRadius: screenWidth * 0.5,
@@ -28,7 +40,7 @@ export const InspectionHoverSubmitBtn = ({
       }}
       onPress={handlePress}
     >
-      {currentPage >= totalPages ? (
+      {currentPage >= totalPages && mode === "submit" ? (
         <MaterialCommunityIcons
           name="folder-check"
           size={35}
