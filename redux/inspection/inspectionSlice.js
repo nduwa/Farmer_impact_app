@@ -17,6 +17,7 @@ export const inspectionSubmission = createAsyncThunk(
       return resp;
     } catch (err) {
       console.log(`Error submitting inspection: ${err}`);
+      throw err;
     }
   }
 );
@@ -49,7 +50,7 @@ const inspectionSlice = createSlice({
     });
     builder.addCase(inspectionSubmission.rejected, (state, action) => {
       state.loading = false;
-      state.error = action.error;
+      state.error = { ...action.error };
       state.serverResponded = false;
     });
   },

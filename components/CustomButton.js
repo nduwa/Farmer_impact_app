@@ -1,5 +1,5 @@
 import { View, Text, TouchableOpacity, Dimensions } from "react-native";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { colors } from "../data/colors";
 
 export default function CustomButton({
@@ -13,11 +13,19 @@ export default function CustomButton({
   radius = 50,
   paddingRatio = 0.02,
   bdcolor = colors.primary,
-  fontSizeRatio=0.055,
+  fontSizeRatio = 0.055,
   disabled = false,
 }) {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
+
+  const [adjustVal, setAdjustVal] = useState(0);
+
+  useEffect(() => {
+    if (screenHeight < 720) {
+      setAdjustVal(-3);
+    }
+  }, []);
 
   return (
     <TouchableOpacity
@@ -26,7 +34,7 @@ export default function CustomButton({
         backgroundColor: disabled ? colors.white_a : bg,
         justifyContent: "center",
         alignItems: "center",
-        // padding: screenWidth * paddingRatio,
+        paddingVertical: screenWidth * paddingRatio + adjustVal,
         borderRadius: radius,
         borderWidth: 1,
         borderColor: bdcolor,

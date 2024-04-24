@@ -63,8 +63,6 @@ export const LoginScreen = ({ navigation }) => {
     setAccurateHeight(screenHeight + additionalHeight);
   };
 
-  const handleClick = () => {};
-
   const preLoadUserData = async () => {
     await tokenDecoder()
       .then(async (userData) => {
@@ -166,10 +164,6 @@ export const LoginScreen = ({ navigation }) => {
   const handleHidepwd = () => {
     setPwdVisible(!pwdVisible);
   };
-
-  ///////////////////////////////////RESETTING THE APP DATABASE - FOR DEVELOPMENT PURPOSES ONLY/////////////////////////////////
-
-  /////////////////////////////////CAUTION///////////////////////////////////
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(

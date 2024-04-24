@@ -27,6 +27,7 @@ import { BuyCoffeeModal } from "../components/BuyCoffeeModal";
 import { detectNewUser } from "../helpers/detectNewUser";
 import { initializeLsKeys } from "../helpers/initializeLsKeys";
 import { SyncModal } from "../components/SyncModal";
+import { UserModal } from "../components/UserModal";
 
 export const HomeScreen = ({ route }) => {
   const userState = useSelector((state) => state.user);
@@ -45,6 +46,7 @@ export const HomeScreen = ({ route }) => {
   const [columnGapFac, setColumnGapFac] = useState(1);
   const [rowGapFac, setRowGapFac] = useState(1);
   const [newUserModalOpen, setNewUserModalOpen] = useState(false);
+  const [userDetailsModalOpen, setUserDetailsModalOpen] = useState(false);
 
   const [exitApp, setExitApp] = useState(false);
 
@@ -52,6 +54,10 @@ export const HomeScreen = ({ route }) => {
   const screenWidth = Dimensions.get("window").width;
 
   const { data = null } = route.params;
+
+  const toggleUserModal = () => {
+    setUserDetailsModalOpen((prevState) => !prevState);
+  };
 
   const handleClick = () => {
     setIsSidebarOpen(true);
@@ -263,7 +269,7 @@ export const HomeScreen = ({ route }) => {
             </Text>
             <Text style={{ fontSize: screenWidth * 0.037 }}>{today}</Text>
           </View>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={toggleUserModal}>
             <Image
               source={avatar_IMG}
               resizeMode="cover"
@@ -355,6 +361,18 @@ export const HomeScreen = ({ route }) => {
           OnNo={handleSyncModal}
           labelYes="Ok"
           labelNo="No, maybe later"
+        />
+      )}
+
+      {/* user details modal */}
+      {userDetailsModalOpen && (
+        <UserModal
+          data={{
+            names: userState.userData.staff.Name,
+            role: userState.userData.staff.Role,
+            station: stationDetails,
+          }}
+          CloseFn={setUserDetailsModalOpen}
         />
       )}
     </View>

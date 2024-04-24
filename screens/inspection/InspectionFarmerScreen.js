@@ -218,6 +218,8 @@ export const InspectionFarmerScreen = ({ route }) => {
         }
       };
 
+      console.log("insp farmer screen ", screenHeight);
+
       fetchData();
       return () => {
         setFarmers([]);
@@ -345,7 +347,11 @@ export const InspectionFarmerScreen = ({ route }) => {
                   width: "80%",
                 }}
               >
-                <AntDesign name="search1" size={24} color={colors.black_a} />
+                <AntDesign
+                  name="search1"
+                  size={screenWidth * 0.05}
+                  color={colors.black_a}
+                />
 
                 <TextInput
                   placeholderTextColor={colors.black_a}
@@ -371,7 +377,11 @@ export const InspectionFarmerScreen = ({ route }) => {
                     setSearchResults([]);
                   }}
                 >
-                  <Feather name="x" size={24} color={colors.black_a} />
+                  <Feather
+                    name="x"
+                    size={screenWidth * 0.05}
+                    color={colors.black_a}
+                  />
                 </TouchableOpacity>
               </View>
             )}

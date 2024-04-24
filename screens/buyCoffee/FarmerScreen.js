@@ -34,9 +34,12 @@ export const FarmerScreen = () => {
 
   const handleSearch = (text) => {
     if (text !== "") {
-      const results = farmers.filter((item) =>
-        item.Name.toLowerCase().includes(text.toLowerCase())
-      );
+      text = text.toLowerCase();
+      const results = farmers.filter((item) => {
+        return Object.values(item).some((value) => {
+          return String(value).toLowerCase().includes(text);
+        });
+      });
       setSearchResults(results);
     } else {
       setSearchResults([]);
@@ -179,8 +182,8 @@ export const FarmerScreen = () => {
               justifyContent: "center",
               borderRadius: 8,
               height: "62%",
-              paddingVertical: screenWidth * 0.013,
-              paddingHorizontal: screenWidth * 0.03,
+              paddingVertical: screenWidth * 0.012,
+              paddingHorizontal: screenWidth * 0.02,
               elevation: 6,
             }}
           >
@@ -221,7 +224,11 @@ export const FarmerScreen = () => {
                     width: "80%",
                   }}
                 >
-                  <AntDesign name="search1" size={24} color={colors.black_a} />
+                  <AntDesign
+                    name="search1"
+                    size={screenWidth * 0.05}
+                    color={colors.black_a}
+                  />
 
                   <TextInput
                     placeholderTextColor={colors.black_a}
@@ -246,7 +253,11 @@ export const FarmerScreen = () => {
                       setSearchResults([]);
                     }}
                   >
-                    <Feather name="x" size={24} color={colors.black_a} />
+                    <Feather
+                      name="x"
+                      size={screenWidth * 0.05}
+                      color={colors.black_a}
+                    />
                   </TouchableOpacity>
                 </View>
               )}

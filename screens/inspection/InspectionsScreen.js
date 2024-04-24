@@ -15,7 +15,6 @@ import { retrieveDBdata } from "../../helpers/retrieveDBdata";
 import { InspectionRecordItems } from "../../components/InspectionRecordItem";
 import { SyncModal } from "../../components/SyncModal";
 import { deleteDBdataAsync } from "../../helpers/deleteDBdataAsync";
-import { InspectionHoverSubmitBtn } from "../../components/InspectionHoverSubmitBtn";
 import { InspectionModal } from "../../components/InspectionModal";
 import { retrieveDBdataAsync } from "../../helpers/retrieveDBdataAsync";
 import { useDispatch, useSelector } from "react-redux";
@@ -143,6 +142,23 @@ export const InspectionsScreen = () => {
         .catch((error) => console.log(error));
     }
   }, [inspectionDeleted]);
+
+  useEffect(() => {
+    if (inspectionState.error) {
+      const inspectionError = inspectionState.error;
+
+      if (inspectionError?.code === "ERR_BAD_RESPONSE") {
+        displayToast("Error: Server error");
+      } else if (inspectionError?.code === "ERR_BAD_REQUEST") {
+        displayToast("Error: Incomplete data");
+      } else {
+        displayToast("Something went wrong");
+      }
+
+      setInspectionModal((prevState) => ({ ...prevState, open: false }));
+      setResponses([]);
+    }
+  }, [inspectionState.error]);
 
   useEffect(() => {
     if (inspectionState.serverResponded) {

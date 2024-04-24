@@ -115,7 +115,8 @@ db.transaction((tx) => {
         recordid int(11) NOT NULL,
         status varchar(255) NOT NULL,
         inspectionId varchar(255) NOT NULL,
-        cafeId varchar(255) NOT NULL
+        cafeId varchar(255) NOT NULL,
+        InspectionStatus varchar(255) NOT NULL
     )`,
     [],
     () => console.log(`Table rtc_households created successfully`),
@@ -386,7 +387,7 @@ const generateBulkValueString = (
       const z_Farmer_Primary = data[i].z_Farmer_Primary || "";
       const sanitizedValue = z_Farmer_Primary.replace(/'/g, "");
       bulkValues += `(
-        ${data[i].id},'${data[i].__kp_Household}','${data[i]._kf_Group}','${data[i]._kf_Location}','${data[i]._kf_Station}','${data[i]._kf_Supplier}','${data[i].Area_Small}','${data[i].Area_Smallest}','${data[i].householdid}','${sanitizedValue}','${data[i].created_at}','${data[i].type}','${data[i].farmerid}','${data[i].group_id}',${data[i].STP_Weight},'${data[i].number_of_plots_with_coffee}','${data[i].Trees_Producing}','${data[i].Trees}','${data[i].Longitude}','${data[i].Latitude}','${data[i].Children}','${data[i].Childen_gender}','${data[i].Childen_below_18}','${data[i].recordid}','${data[i].status}','${data[i].inspectionId}',${data[i].cafeId})`;
+        ${data[i].id},'${data[i].__kp_Household}','${data[i]._kf_Group}','${data[i]._kf_Location}','${data[i]._kf_Station}','${data[i]._kf_Supplier}','${data[i].Area_Small}','${data[i].Area_Smallest}','${data[i].householdid}','${sanitizedValue}','${data[i].created_at}','${data[i].type}','${data[i].farmerid}','${data[i].group_id}',${data[i].STP_Weight},'${data[i].number_of_plots_with_coffee}','${data[i].Trees_Producing}','${data[i].Trees}','${data[i].Longitude}','${data[i].Latitude}','${data[i].Children}','${data[i].Childen_gender}','${data[i].Childen_below_18}','${data[i].recordid}','${data[i].status}','${data[i].inspectionId}','${data[i].cafeId}','${data[i].InspectionStatus}')`;
       if (i < data.length - 1) bulkValues += ",";
     }
 
@@ -898,6 +899,10 @@ export const dataTodb = ({
         });
       }
     } else if (tableName === "inspections") {
+      if (!extraVal) {
+        setCurrentJob("Household ID not provided");
+        return;
+      }
       for (let i = 0; i < totalPages; i++) {
         let page = i + 1;
         let start = (page - 1) * limit; // the starting index
