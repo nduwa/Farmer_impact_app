@@ -44,7 +44,7 @@ export const InspectionModal = ({
       <View
         style={{
           width: "83%",
-          height: "36%",
+          // height: screenHeight * 0.36,
           alignItems: "center",
           gap: screenHeight * 0.02,
           borderRadius: 15,

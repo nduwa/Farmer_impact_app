@@ -26,7 +26,7 @@ export default function CustomButton({
         backgroundColor: disabled ? colors.white_a : bg,
         justifyContent: "center",
         alignItems: "center",
-        padding: screenWidth * paddingRatio,
+        // padding: screenWidth * paddingRatio,
         borderRadius: radius,
         borderWidth: 1,
         borderColor: bdcolor,
