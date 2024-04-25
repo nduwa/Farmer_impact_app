@@ -154,42 +154,44 @@ const ScTransactionItem = ({
         />
         <ScTransactionRow header={"Transaction Date"} data={trDate} />
       </View>
-      <View
-        style={{
-          flexDirection: "row",
-          justifyContent: "space-between",
-          width: "100%",
-          paddingHorizontal: screenWidth * 0.05,
-          marginTop: screenHeight * 0.01,
-        }}
-      >
-        <CustomButton
-          bg={colors.black}
-          color={"white"}
-          width="45%"
-          text="Edit"
-          bdcolor="transparent"
-          mt={8}
-          mb={8}
-          radius={7}
-          paddingRatio={0.01}
-          disabled={inActive}
-          onPress={handleEdit}
-        />
-        <CustomButton
-          bg={colors.secondary}
-          color={"white"}
-          width="45%"
-          text="Delete"
-          bdcolor="transparent"
-          mt={8}
-          mb={8}
-          radius={7}
-          paddingRatio={0.01}
-          disabled={inActive}
-          onPress={handleDelete}
-        />
-      </View>
+      {!inActive && (
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            width: "100%",
+            paddingHorizontal: screenWidth * 0.05,
+            marginTop: screenHeight * 0.01,
+          }}
+        >
+          <CustomButton
+            bg={colors.black}
+            color={"white"}
+            width="45%"
+            text="Edit"
+            bdcolor="transparent"
+            mt={8}
+            mb={8}
+            radius={7}
+            paddingRatio={0.01}
+            disabled={inActive}
+            onPress={handleEdit}
+          />
+          <CustomButton
+            bg={colors.secondary}
+            color={"white"}
+            width="45%"
+            text="Delete"
+            bdcolor="transparent"
+            mt={8}
+            mb={8}
+            radius={7}
+            paddingRatio={0.01}
+            disabled={inActive}
+            onPress={handleDelete}
+          />
+        </View>
+      )}
     </View>
   );
 };

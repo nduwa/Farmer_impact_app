@@ -16,6 +16,8 @@ import { InspectionFarmerScreen } from "./screens/inspection/InspectionFarmerScr
 import { InspectionQuestionsScreen } from "./screens/inspection/InspectionQuestionsScreen";
 import { InspectionCoursesScreen } from "./screens/inspection/InspectionCoursesScreen";
 import { InspectionsScreen } from "./screens/inspection/InspectionsScreen";
+import { HistoryScreen } from "./screens/history/HistoryScreen";
+import { HistoryDetails } from "./screens/history/HistoryDetails";
 
 const Stack = createNativeStackNavigator();
 
@@ -96,6 +98,16 @@ export default function App() {
             name="InspectionsScreen"
             options={{ unmountOnBlur: true }}
             component={InspectionsScreen}
+          />
+          <Stack.Screen
+            name="HistoryScreen"
+            options={{ unmountOnBlur: true }}
+            component={HistoryScreen}
+          />
+          <Stack.Screen
+            name="HistoryDetails"
+            options={{ unmountOnBlur: true }}
+            component={HistoryDetails}
           />
         </Stack.Navigator>
       </NavigationContainer>

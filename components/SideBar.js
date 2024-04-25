@@ -157,7 +157,7 @@ export const SideBar = ({ setsideBarScroll, setIsSidebarOpen }) => {
                 destination="ScDailyJournal"
               />
               <SideNav name={"CWS Finance"} />
-              <SideNav name={"History"} />
+              <SideNav name={"History"} destination="HistoryScreen" />
               <SideNav name={"Change Settings"} />
 
               <SideNav name={"Log out"} isLogOut={true} destination={"Login"} />
