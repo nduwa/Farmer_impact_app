@@ -30,7 +30,10 @@ export const retrieveDBdata = ({
     query = queryArg || "SELECT * FROM rtc_inspections WHERE uploaded=0 ;";
   }
 
-  console.log(queryArg);
+  if (queryArg) query = queryArg;
+
+  if (query.length < 1) return;
+
   let data = [];
   db.transaction((tx) => {
     tx.executeSql(

@@ -46,7 +46,7 @@ export const ScJournal = () => {
           tableName: "rtc_transactions",
           setData: setJournals,
           queryArg:
-            "SELECT site_day_lot,SUM(kilograms) AS kgsGood,SUM(bad_kilograms) AS kgsBad, COUNT(*) AS recordCount FROM rtc_transactions GROUP BY site_day_lot ORDER BY site_day_lot;",
+            "SELECT site_day_lot,SUM(kilograms) AS kgsGood,SUM(bad_kilograms) AS kgsBad, COUNT(*) AS recordCount FROM rtc_transactions WHERE uploaded='0' GROUP BY site_day_lot ORDER BY site_day_lot;",
         });
       };
 

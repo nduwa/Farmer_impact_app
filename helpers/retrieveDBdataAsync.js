@@ -34,11 +34,15 @@ export const retrieveDBdataAsync = ({
     query = `SELECT * FROM rtc_training;`;
   } else if (tableName === "inspection_responses") {
     query = `SELECT * FROM inspection_responses WHERE ${filterCol}='${filterValue}';`;
+  } else if (tableName === "rtc_inspections") {
+    query = `SELECT * FROM rtc_inspections WHERE ${filterCol}='${filterValue}';`;
   }
 
   if (customQuery) query = customQuery;
 
   console.log(query);
+
+  if (query.length < 1) return;
 
   return new Promise((resolve, reject) => {
     db.transaction(
@@ -55,7 +59,8 @@ export const retrieveDBdataAsync = ({
                 tableName === "rtc_transactions" ||
                 tableName === "inspection_questions" ||
                 tableName === "trainingModules" ||
-                tableName === "inspection_responses"
+                tableName === "inspection_responses" ||
+                tableName === "rtc_inspections"
               ) {
                 resolve(data._array);
               }
