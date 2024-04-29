@@ -18,6 +18,7 @@ import { InspectionHoverSubmitBtn } from "../../components/InspectionHoverSubmit
 import { InspectionHoverPrevBtn } from "../../components/InspectionHoverPrevBtn";
 import { dataTodb } from "../../helpers/dataTodb";
 import { useDispatch, useSelector } from "react-redux";
+import LottieView from "lottie-react-native";
 
 export const InspectionQuestionsScreen = ({ route }) => {
   const screenWidth = Dimensions.get("window").width;
@@ -47,11 +48,13 @@ export const InspectionQuestionsScreen = ({ route }) => {
   const [currentJob, setCurrentJob] = useState("");
   const [insertedInspection, setInsertedInspection] = useState();
   const [submitted, setSubmitted] = useState(false);
+  const [loadingData, setLoadingData] = useState(false);
+  const [loadingPage, setLoadingPage] = useState(false);
 
   const [info, setInfo] = useState({});
 
   const scrollToTop = () => {
-    flatListRef.current.scrollToOffset({ offset: 0, animated: true });
+    flatListRef?.current?.scrollToOffset({ offset: 0, animated: true });
   };
 
   const handleBackButton = () => {
@@ -122,6 +125,7 @@ export const InspectionQuestionsScreen = ({ route }) => {
     if (currentPage >= totalPages) {
       setSubmitModalOpen(true);
     } else {
+      setLoadingPage(true);
       let current = currentPage;
       let newpg = (current % totalPages) + 1; // a % b statement restricts value a from ever getting bigger than b.... :)
       setCurrentPage(newpg);
@@ -129,6 +133,7 @@ export const InspectionQuestionsScreen = ({ route }) => {
   };
 
   const handlePrevPg = () => {
+    setLoadingPage(true);
     let newpg = currentPage - 1;
     let newpg_fitted = newpg % totalPages; // fitted in the range 0 -> max page
     setCurrentPage(newpg_fitted);
@@ -156,6 +161,8 @@ export const InspectionQuestionsScreen = ({ route }) => {
     let currentQns = questions.slice(start, end);
 
     setDisplayQuestions(currentQns);
+    setLoadingData(false);
+    setLoadingPage(false);
 
     if (pages > 0) displayToast(`Page ${currentPage} of ${pages} loaded`);
   };
@@ -237,6 +244,8 @@ export const InspectionQuestionsScreen = ({ route }) => {
         inspectionStr = "Advanced";
 
       if (inspectionStr === "") return;
+
+      setLoadingData(true);
 
       if (inspectionStr === "Advanced" && data.courseId) {
         retrieveDBdataAsync({
@@ -346,29 +355,54 @@ export const InspectionQuestionsScreen = ({ route }) => {
           </Text>
         </View>
         <View style={{ flex: 1 }}>
-          <FlatList
-            ref={flatListRef}
-            contentContainerStyle={{
-              padding: screenHeight * 0.01,
-              gap: screenHeight * 0.001,
-            }}
-            data={displayQuestions}
-            initialNumToRender={6}
-            renderItem={({ item, index }) => (
-              <InspectionQuestion
-                data={{
-                  type: data.inspectionType,
-                  question: item,
-                  index: qnStart + index,
-                  language,
+          {loadingData ? (
+            <View
+              style={{
+                flex: 1,
+                width: "100%",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <LottieView
+                style={{
+                  height: 160,
+                  width: 160,
+                  alignSelf: "center",
+                  marginVertical: 30,
                 }}
-                currentAnswer={fetchAnswer(item.id)}
-                question={item}
-                setQnAnswer={handleAnswer}
+                source={require("../../assets/lottie/loader.json")}
+                autoPlay
+                speed={0.8}
+                loop={true}
+                resizeMode="cover"
               />
-            )}
-            keyExtractor={(item) => item.id}
-          />
+            </View>
+          ) : (
+            <FlatList
+              ref={flatListRef}
+              contentContainerStyle={{
+                padding: screenHeight * 0.01,
+                gap: screenHeight * 0.001,
+              }}
+              data={displayQuestions}
+              initialNumToRender={6}
+              renderItem={({ item, index }) => (
+                <InspectionQuestion
+                  data={{
+                    type: data.inspectionType,
+                    question: item,
+                    index: qnStart + index,
+                    language,
+                  }}
+                  currentAnswer={fetchAnswer(item.id)}
+                  question={item}
+                  setQnAnswer={handleAnswer}
+                />
+              )}
+              keyExtractor={(item) => item.id}
+            />
+          )}
         </View>
       </View>
       {currentPage > 1 && <InspectionHoverPrevBtn handlePress={handlePrevPg} />}
@@ -414,6 +448,42 @@ export const InspectionQuestionsScreen = ({ route }) => {
             setExitModal((prevState) => ({ ...prevState, open: false }))
           }
         />
+      )}
+
+      {/* page loader */}
+      {loadingPage && (
+        <View
+          style={{
+            position: "absolute",
+            marginTop: screenHeight * 0.195,
+            width: "100%",
+            backgroundColor: "transparent",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <View
+            style={{
+              width: "auto",
+              backgroundColor: "white",
+              borderRadius: screenHeight * 0.5,
+              elevation: 4,
+            }}
+          >
+            <LottieView
+              style={{
+                height: screenHeight * 0.05,
+                width: screenHeight * 0.05,
+                alignSelf: "center",
+              }}
+              source={require("../../assets/lottie/spinner.json")}
+              autoPlay
+              speed={1}
+              loop={true}
+              resizeMode="cover"
+            />
+          </View>
+        </View>
       )}
     </View>
   );

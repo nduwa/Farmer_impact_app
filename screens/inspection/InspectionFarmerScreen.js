@@ -22,6 +22,7 @@ import { retrieveDBdata } from "../../helpers/retrieveDBdata";
 import { GroupsModal } from "../../components/GroupsModal";
 import { InspectionHoverSubmitBtn } from "../../components/InspectionHoverSubmitBtn";
 import { InspectionHoverPrevBtn } from "../../components/InspectionHoverPrevBtn";
+import LottieView from "lottie-react-native";
 
 export const InspectionFarmerScreen = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
@@ -48,6 +49,8 @@ export const InspectionFarmerScreen = ({ route }) => {
   const [totalPages, setTotalPages] = useState(0);
   const [dataStart, setDataStart] = useState(0);
   const [dataEnd, setDataEnd] = useState(0);
+  const [loadingData, setLoadingData] = useState(false);
+  const [loadingPage, setLoadingPage] = useState(false);
 
   const { data } = route.params;
 
@@ -67,6 +70,7 @@ export const InspectionFarmerScreen = ({ route }) => {
     let newpg = currentPage - 1;
     let newpg_fitted = newpg % totalPages; // fitted in the range 0 -> max page
     setCurrentPage(newpg_fitted);
+    setLoadingPage(true);
   };
 
   const handleDataPagination = (data) => {
@@ -83,6 +87,8 @@ export const InspectionFarmerScreen = ({ route }) => {
     let currentItems = data.slice(start, end);
 
     setDisplayData(currentItems);
+    setLoadingData(false);
+    setLoadingPage(false);
 
     if (pages > 0) displayToast(`Page ${currentPage} of ${pages} loaded`);
   };
@@ -113,6 +119,7 @@ export const InspectionFarmerScreen = ({ route }) => {
   };
 
   const handlePress = () => {
+    setLoadingPage(true);
     let current = currentPage;
     let newpg = (current % totalPages) + 1; // a % b statement restricts value a from ever getting bigger than b.... :)
     setCurrentPage(newpg);
@@ -144,6 +151,9 @@ export const InspectionFarmerScreen = ({ route }) => {
 
     if (selectedGroup) {
       setActiveGroup(selectedGroup);
+      setLoadingData(true);
+      setLoadingPage(true);
+      setCurrentPage(1);
       fetchFarmers();
     }
   }, [selectedGroup]);
@@ -209,6 +219,7 @@ export const InspectionFarmerScreen = ({ route }) => {
       const fetchData = async () => {
         const stationId = await SecureStore.getItemAsync("rtc-station-id");
 
+        setLoadingData(true);
         if (stationId) {
           retrieveDBdata({
             tableName: "rtc_groups",
@@ -217,8 +228,6 @@ export const InspectionFarmerScreen = ({ route }) => {
           });
         }
       };
-
-      console.log("insp farmer screen ", screenHeight);
 
       fetchData();
       return () => {
@@ -389,32 +398,57 @@ export const InspectionFarmerScreen = ({ route }) => {
         </View>
       </View>
       <View style={{ flex: 1 }}>
-        <FlatList
-          ref={flatListRef}
-          contentContainerStyle={{
-            padding: screenHeight * 0.01,
-            gap: screenHeight * 0.02,
-          }}
-          data={displayData}
-          initialNumToRender={6}
-          renderItem={({ item }) => (
-            <FarmerInspectionCard
-              data={{
-                farmerName: item.Name,
-                farmerId: item.farmerid,
-                householdKey: item._kf_Household,
-                cell: item.cell,
-                village: item.village,
-                prodTrees: item.prodTrees,
-                totTrees: item.totalTrees,
-                children: item.children,
-                destination: data,
+        {loadingData ? (
+          <View
+            style={{
+              flex: 1,
+              width: "100%",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <LottieView
+              style={{
+                height: 160,
+                width: 160,
+                alignSelf: "center",
+                marginVertical: 30,
               }}
-              setModal={setChildrenModal}
+              source={require("../../assets/lottie/loader.json")}
+              autoPlay
+              speed={0.8}
+              loop={true}
+              resizeMode="cover"
             />
-          )}
-          keyExtractor={(item) => item.id}
-        />
+          </View>
+        ) : (
+          <FlatList
+            ref={flatListRef}
+            contentContainerStyle={{
+              padding: screenHeight * 0.01,
+              gap: screenHeight * 0.02,
+            }}
+            data={displayData}
+            initialNumToRender={6}
+            renderItem={({ item }) => (
+              <FarmerInspectionCard
+                data={{
+                  farmerName: item.Name,
+                  farmerId: item.farmerid,
+                  householdKey: item._kf_Household,
+                  cell: item.cell,
+                  village: item.village,
+                  prodTrees: item.prodTrees,
+                  totTrees: item.totalTrees,
+                  children: item.children,
+                  destination: data,
+                }}
+                setModal={setChildrenModal}
+              />
+            )}
+            keyExtractor={(item) => item.id}
+          />
+        )}
       </View>
       {currentPage > 1 && <InspectionHoverPrevBtn handlePress={handlePrevPg} />}
       {displayData.length > 0 && (
@@ -432,6 +466,42 @@ export const InspectionFarmerScreen = ({ route }) => {
           setModal={setChildrenModal}
           data={childrenModal.data}
         />
+      )}
+
+      {/* page loader */}
+      {loadingPage && (
+        <View
+          style={{
+            position: "absolute",
+            marginTop: screenHeight * 0.195,
+            width: "100%",
+            backgroundColor: "transparent",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <View
+            style={{
+              width: "auto",
+              backgroundColor: "white",
+              borderRadius: screenHeight * 0.5,
+              elevation: 4,
+            }}
+          >
+            <LottieView
+              style={{
+                height: screenHeight * 0.05,
+                width: screenHeight * 0.05,
+                alignSelf: "center",
+              }}
+              source={require("../../assets/lottie/spinner.json")}
+              autoPlay
+              speed={1}
+              loop={true}
+              resizeMode="cover"
+            />
+          </View>
+        </View>
       )}
     </View>
   );
