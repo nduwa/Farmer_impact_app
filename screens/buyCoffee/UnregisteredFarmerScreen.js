@@ -275,6 +275,7 @@ export const UnRegisteredFarmerScreen = () => {
         style={{
           flexDirection: "row",
           alignItems: "center",
+          justifyContent: "space-between",
           height: screenHeight * 0.11,
           backgroundColor: colors.white,
           paddingTop: screenHeight * 0.042,
@@ -288,7 +289,7 @@ export const UnRegisteredFarmerScreen = () => {
             alignItems: "center",
             justifyContent: "center",
             backgroundColor: "transparent",
-            padding: 5,
+            padding: screenWidth * 0.005,
           }}
         >
           <AntDesign name="left" size={screenWidth * 0.07} color="black" />
@@ -297,11 +298,13 @@ export const UnRegisteredFarmerScreen = () => {
           style={{
             fontWeight: "700",
             fontSize: 19,
-            marginLeft: screenWidth * 0.12,
           }}
         >
           Non-Registered ATP Farmer
         </Text>
+        <View
+          style={{ width: screenWidth * 0.07, backgroundColor: "transparent" }}
+        />
       </View>
       <View style={{ backgroundColor: colors.bg_variant }}>
         <Formik

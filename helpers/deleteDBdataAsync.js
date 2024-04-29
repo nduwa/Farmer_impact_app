@@ -3,10 +3,18 @@ import { DB_NAME } from "@env";
 
 const db = SQLite.openDatabase(DB_NAME);
 
-export const deleteDBdataAsync = ({ tableName, id, customQuery = null }) => {
-  let query = `DELETE FROM ${tableName} WHERE paper_receipt=${id}`;
+export const deleteDBdataAsync = ({
+  tableName,
+  targetCol = "paper_receipt",
+  targetId,
+  customQuery = null,
+}) => {
+  let query = `DELETE FROM ${tableName} WHERE ${targetCol}='${targetId}'`;
 
-  console.log(query)
+  if (customQuery) query = customQuery;
+
+  console.log(query);
+
   return new Promise((resolve, reject) => {
     db.transaction(
       (tx) => {
@@ -15,10 +23,14 @@ export const deleteDBdataAsync = ({ tableName, id, customQuery = null }) => {
           [],
           (_, result) => {
             if (result.rowsAffected > 0 || result.rows.length > 0) {
-              resolve({ success: true, deletedTransaction: id });
+              resolve({ success: true, deletedTransaction: targetId });
             } else {
               resolve({ success: false });
             }
+          },
+          () => {
+            console.log("closing db after deleting");
+            db.closeSync(); // Close the database connection
           },
           (_, error) => {
             console.log("Error: ", error);
@@ -27,6 +39,7 @@ export const deleteDBdataAsync = ({ tableName, id, customQuery = null }) => {
         );
       },
       (error) => {
+        if (!error) db.closeSync(); // Close the database connection
         console.log("Error: ", error);
         reject(error);
       }

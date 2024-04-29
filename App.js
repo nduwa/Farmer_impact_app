@@ -11,6 +11,13 @@ import { UnRegisteredFarmerScreen } from "./screens/buyCoffee/UnregisteredFarmer
 import { ScJournal } from "./screens/scJournal/ScDailyJournal";
 import { ScJournalsSummary } from "./screens/scJournal/ScJournalsSummary";
 import { EditTransactionScreen } from "./screens/scJournal/EditTransactionScreen";
+import { ChooseInspectionScreen } from "./screens/inspection/ChooseInspectionScreen";
+import { InspectionFarmerScreen } from "./screens/inspection/InspectionFarmerScreen";
+import { InspectionQuestionsScreen } from "./screens/inspection/InspectionQuestionsScreen";
+import { InspectionCoursesScreen } from "./screens/inspection/InspectionCoursesScreen";
+import { InspectionsScreen } from "./screens/inspection/InspectionsScreen";
+import { HistoryScreen } from "./screens/history/HistoryScreen";
+import { HistoryDetails } from "./screens/history/HistoryDetails";
 
 const Stack = createNativeStackNavigator();
 
@@ -66,6 +73,41 @@ export default function App() {
             name="EditTransaction"
             options={{ unmountOnBlur: true }}
             component={EditTransactionScreen}
+          />
+          <Stack.Screen
+            name="chooseInspection"
+            options={{ unmountOnBlur: true }}
+            component={ChooseInspectionScreen}
+          />
+          <Stack.Screen
+            name="inspectionFarmer"
+            options={{ unmountOnBlur: true }}
+            component={InspectionFarmerScreen}
+          />
+          <Stack.Screen
+            name="inspectionQuestions"
+            options={{ unmountOnBlur: true }}
+            component={InspectionQuestionsScreen}
+          />
+          <Stack.Screen
+            name="inspectionCourses"
+            options={{ unmountOnBlur: true }}
+            component={InspectionCoursesScreen}
+          />
+          <Stack.Screen
+            name="InspectionsScreen"
+            options={{ unmountOnBlur: true }}
+            component={InspectionsScreen}
+          />
+          <Stack.Screen
+            name="HistoryScreen"
+            options={{ unmountOnBlur: true }}
+            component={HistoryScreen}
+          />
+          <Stack.Screen
+            name="HistoryDetails"
+            options={{ unmountOnBlur: true }}
+            component={HistoryDetails}
           />
         </Stack.Navigator>
       </NavigationContainer>

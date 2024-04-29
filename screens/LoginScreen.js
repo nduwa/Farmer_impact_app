@@ -24,9 +24,12 @@ import { useFocusEffect, useIsFocused } from "@react-navigation/native";
 import * as SecureStore from "expo-secure-store";
 import tokenDecoder from "../helpers/tokenDecoder";
 import * as LocalAuthentication from "expo-local-authentication";
+import * as Location from "expo-location";
 import { UserActions } from "../redux/user/UserSlice";
 import { AntDesign } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
+import { deleteDBdataAsync } from "../helpers/deleteDBdataAsync";
+import { dropTableAsync } from "../helpers/dropTableAsync";
 
 export const LoginScreen = ({ navigation }) => {
   const loginState = useSelector((state) => state.login);
@@ -59,8 +62,6 @@ export const LoginScreen = ({ navigation }) => {
 
     setAccurateHeight(screenHeight + additionalHeight);
   };
-
-  const handleClick = () => {};
 
   const preLoadUserData = async () => {
     await tokenDecoder()
@@ -144,13 +145,16 @@ export const LoginScreen = ({ navigation }) => {
   };
 
   const validateInputs = (inputData) => {
+    let name = inputData.name.replace(/\s+/g, " ").trim();
+    let pwd = inputData.pwd.replace(/\s+/g, " ").trim();
+
     let regexName = /^[a-zA-Z0-9_-]+$/;
-    let regexPwd = /^.{8,}$/;
+    let regexPwd = /^.{3,}$/;
 
-    setErrorName(!regexName.test(inputData.name));
-    setErrorPwd(!regexPwd.test(inputData.pwd));
+    setErrorName(!regexName.test(name));
+    setErrorPwd(!regexPwd.test(pwd));
 
-    return regexName.test(inputData.name) && regexPwd.test(inputData.pwd);
+    return regexName.test(name) && regexPwd.test(pwd);
   };
 
   const displayToast = (msg) => {
@@ -227,7 +231,43 @@ export const LoginScreen = ({ navigation }) => {
         }
       };
 
+      const getLocation = async () => {
+        let { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== "granted") {
+          displayToast("Permission to access location was denied");
+          return;
+        }
+
+        let location = await Location.getCurrentPositionAsync({});
+
+        dispatch(UserActions.setUserLocation(location));
+      };
+
+      const wipeData = async (tableName, type) => {
+        if (type === "drop") {
+          dropTableAsync({ tableName })
+            .then((result) => console.log("reset: ", result))
+            .catch((error) => console.log(error));
+        } else if (type === "clean") {
+          deleteDBdataAsync({
+            tableName,
+            id: 1,
+            customQuery: `SELECT * FROM ${tableName};`,
+          })
+            .then((result) => {
+              console.log(result);
+            })
+            .catch((err) => console.log(err));
+        }
+      };
+
       validatedPreviousLogin();
+      getLocation();
+
+      //////////////////////// RESETTING THE APP DATABASE - FOR DEVELOPMENT PURPOSES ONLY ///////////////////////
+      // wipeData("rtc_inspections", "clean");
+      //////////////////////////////// CAUTION //////////////////////////////////////////////////////////////////
+
       return () => {
         if (formRef.current) {
           formRef.current.setValues({

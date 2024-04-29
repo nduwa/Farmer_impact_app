@@ -22,7 +22,6 @@ import { generateID } from "../../helpers/generateID";
 import { retrieveDBdata } from "../../helpers/retrieveDBdata";
 import { dataTodb } from "../../helpers/dataTodb";
 import { validateTransaction } from "../../helpers/validateTransaction";
-import { retrieveDBdataAsync } from "../../helpers/retrieveDBdataAsync";
 
 export const RegisteredFarmerScreen = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
@@ -52,6 +51,9 @@ export const RegisteredFarmerScreen = ({ route }) => {
   const [submitData, setSubmitData] = useState(null);
   const [farmerSeasonTransactions, setFarmerSeasonTransactions] = useState(0);
   const [farmerSeasonWeight, setFarmerSeasonWeight] = useState(0);
+  const [currentHousehold, setCurrentHousehold] = useState(null);
+  const [farmerCertified, setFarmerCertified] = useState(false);
+  const [certifications, setCertifications] = useState([]);
 
   const onChange = (event, selectedDate) => {
     const currentDate = selectedDate;
@@ -261,6 +263,25 @@ export const RegisteredFarmerScreen = ({ route }) => {
   }, [farmerSeasonTransactions.length]);
 
   useEffect(() => {
+    if (currentHousehold) {
+      let certs = [{ label: "Not Certified", value: "NC" }];
+      if (currentHousehold[0].InspectionStatus === "Active") {
+        setFarmerCertified(true);
+
+        certs = [
+          { label: "Cafe Practices", value: "CP" },
+          { label: "Rain Forest", value: "RF" },
+          ...certs,
+        ];
+      } else {
+        setCurrentCertificationType("NC");
+      }
+
+      setCertifications(certs);
+    }
+  }, [currentHousehold]);
+
+  useEffect(() => {
     const fetchIds = async () => {
       let staffID = await SecureStore.getItemAsync("rtc-user-staff-id");
       let staffKF = await SecureStore.getItemAsync("rtc-user-staff-kf");
@@ -297,7 +318,16 @@ export const RegisteredFarmerScreen = ({ route }) => {
       setSeasonId(seasonID);
     };
 
+    const fetchCertification = async () => {
+      retrieveDBdata({
+        tableName: "rtc_households",
+        setData: setCurrentHousehold,
+        queryArg: `SELECT InspectionStatus FROM rtc_households WHERE farmerid='${data.farmerid}';`,
+      });
+    };
+
     fetchIds();
+    fetchCertification();
   }, []);
 
   return (
@@ -313,6 +343,7 @@ export const RegisteredFarmerScreen = ({ route }) => {
         style={{
           flexDirection: "row",
           alignItems: "center",
+          justifyContent: "space-between",
           height: screenHeight * 0.11,
           backgroundColor: colors.white,
           paddingTop: screenHeight * 0.042,
@@ -326,7 +357,7 @@ export const RegisteredFarmerScreen = ({ route }) => {
             alignItems: "center",
             justifyContent: "center",
             backgroundColor: "transparent",
-            padding: 5,
+            padding: screenWidth * 0.005,
           }}
         >
           <AntDesign name="left" size={screenWidth * 0.07} color="black" />
@@ -335,11 +366,13 @@ export const RegisteredFarmerScreen = ({ route }) => {
           style={{
             fontWeight: "700",
             fontSize: 19,
-            marginLeft: screenWidth * 0.12,
           }}
         >
           Registered ATP Farmer
         </Text>
+        <View
+          style={{ width: screenWidth * 0.07, backgroundColor: "transparent" }}
+        />
       </View>
       <View style={{ backgroundColor: colors.bg_variant }}>
         <Formik
@@ -529,58 +562,33 @@ export const RegisteredFarmerScreen = ({ route }) => {
                   >
                     Certification Type
                   </Text>
-                  <RadioButtonGroup
-                    containerStyle={{ marginBottom: 10, gap: 5 }}
-                    selected={currentCertificationType}
-                    onSelected={(value) => setCurrentCertificationType(value)}
-                    radioBackground={colors.blue_font}
-                  >
-                    <RadioButtonItem
-                      value="CP"
-                      label={
-                        <Text
-                          style={{
-                            fontWeight: "600",
-                            fontSize: 16,
-                            marginLeft: 8,
-                            color: colors.black,
-                          }}
-                        >
-                          Cafe Practices
-                        </Text>
-                      }
-                    />
-                    <RadioButtonItem
-                      value="RA"
-                      label={
-                        <Text
-                          style={{
-                            fontWeight: "600",
-                            fontSize: 16,
-                            marginLeft: 8,
-                            color: colors.black,
-                          }}
-                        >
-                          Rainforest Alliance
-                        </Text>
-                      }
-                    />
-                    <RadioButtonItem
-                      value="NC"
-                      label={
-                        <Text
-                          style={{
-                            fontWeight: "600",
-                            fontSize: 16,
-                            marginLeft: 8,
-                            color: colors.black,
-                          }}
-                        >
-                          Not Certified
-                        </Text>
-                      }
-                    />
-                  </RadioButtonGroup>
+                  {certifications.length > 0 && (
+                    <RadioButtonGroup
+                      containerStyle={{ marginBottom: 10, gap: 5 }}
+                      selected={currentCertificationType}
+                      onSelected={(value) => setCurrentCertificationType(value)}
+                      radioBackground={colors.blue_font}
+                    >
+                      {certifications.map((item) => (
+                        <RadioButtonItem
+                          key={item.value}
+                          value={item.value}
+                          label={
+                            <Text
+                              style={{
+                                fontWeight: "600",
+                                fontSize: 16,
+                                marginLeft: 8,
+                                color: colors.black,
+                              }}
+                            >
+                              {item.label}
+                            </Text>
+                          }
+                        />
+                      ))}
+                    </RadioButtonGroup>
+                  )}
                 </View>
 
                 {/* coffee type */}

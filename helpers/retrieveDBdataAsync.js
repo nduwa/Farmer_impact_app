@@ -25,9 +25,20 @@ export const retrieveDBdataAsync = ({
     query = `SELECT * FROM rtc_transactions WHERE ${filterCol}='${filterValue}';`;
   } else if (tableName === "rtc_households") {
     query = `SELECT households.* FROM rtc_farmers AS farmers JOIN rtc_households AS households ON farmers._kf_Household = households.__kp_Household WHERE farmers.farmerid = '${filterValue}';`;
+  } else if (tableName === "inspection_questions") {
+    query = `SELECT questions.*,GROUP_CONCAT(answers.Eng_answer) AS answers_eng,GROUP_CONCAT(answers.Kiny_answer) AS answers_kiny,GROUP_CONCAT(answers.id) AS answers_ids FROM inspection_questions questions INNER JOIN inspection_answers answers ON questions.id = answers.question_id AND questions.${filterCol} = '${filterValue}' GROUP BY questions.id;`;
+    if (filterCol === "_kf_course") {
+      query = `SELECT questions.*,GROUP_CONCAT(answers.Eng_answer) AS answers_eng,GROUP_CONCAT(answers.Kiny_answer) AS answers_kiny,GROUP_CONCAT(answers.id) AS answers_ids FROM inspection_questions questions INNER JOIN inspection_answers answers ON questions.id = answers.question_id AND questions.evaluation_mode='Advanced' AND questions.${filterCol} = '${filterValue}' GROUP BY questions.id;`;
+    }
+  } else if (tableName === "trainingModules") {
+    query = `SELECT * FROM rtc_training;`;
+  } else if (tableName === "inspection_responses") {
+    query = `SELECT * FROM inspection_responses WHERE ${filterCol}='${filterValue}';`;
   }
 
   if (customQuery) query = customQuery;
+
+  console.log(query);
 
   return new Promise((resolve, reject) => {
     db.transaction(
@@ -40,7 +51,12 @@ export const retrieveDBdataAsync = ({
             if (result.rows.length < 1) {
               resolve([]);
             } else {
-              if (tableName === "rtc_transactions") {
+              if (
+                tableName === "rtc_transactions" ||
+                tableName === "inspection_questions" ||
+                tableName === "trainingModules" ||
+                tableName === "inspection_responses"
+              ) {
                 resolve(data._array);
               }
               resolve(data._array[0]);

@@ -1,4 +1,3 @@
-import React from "react";
 import * as SQLite from "expo-sqlite";
 import { SyncQueries } from "../data/SyncQueries";
 import { DB_NAME } from "@env";
@@ -116,7 +115,8 @@ db.transaction((tx) => {
         recordid int(11) NOT NULL,
         status varchar(255) NOT NULL,
         inspectionId varchar(255) NOT NULL,
-        cafeId varchar(255) NOT NULL
+        cafeId varchar(255) NOT NULL,
+        InspectionStatus varchar(255) NOT NULL
     )`,
     [],
     () => console.log(`Table rtc_households created successfully`),
@@ -172,7 +172,7 @@ db.transaction((tx) => {
   //inspection questions
   tx.executeSql(
     `CREATE TABLE IF NOT EXISTS inspection_questions (
-      id int(11) NOT NULL,
+      id int(11) NOT NULL UNIQUE,
       updated_at datetime NOT NULL,
       __kp_Evaluation varchar(100) NOT NULL,
       evaluation_id varchar(45) NOT NULL,
@@ -189,6 +189,66 @@ db.transaction((tx) => {
     () => console.log(`Table inspection_questions created successfully`),
     (_, error) =>
       console.error(`Error creating inspection_questions table:`, error)
+  );
+
+  //inspection answers
+  tx.executeSql(
+    `CREATE TABLE IF NOT EXISTS inspection_answers (
+      id int(11) NOT NULL UNIQUE,
+      created_at datetime NOT NULL,
+      Eng_answer text NOT NULL,
+      Kiny_answer text NOT NULL,
+      question_id varchar(45) NOT NULL,
+      priority int(11) NOT NULL,
+      status int(11) NOT NULL,
+      created_by varchar(100) NOT NULL,
+      score int(11) NOT NULL,
+      __kp_Option varchar(100) NOT NULL,
+      _kf_Evaluation varchar(100) NOT NULL
+    )`,
+    [],
+    () => console.log(`Table inspection_answers created successfully`),
+    (_, error) =>
+      console.error(`Error creating inspection_answers table:`, error)
+  );
+
+  //inspection responses
+  tx.executeSql(
+    `CREATE TABLE IF NOT EXISTS inspection_responses (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      created_at datetime NOT NULL,
+      rtc_inspections_id int(11) NOT NULL,
+      inspection_answer_id int(11) NOT NULL,
+      deleted int(11) NOT NULL,
+      __kp_InspectionLog varchar(45) NOT NULL
+    )`,
+    [],
+    () => console.log(`Table inspection_responses created successfully`),
+    (_, error) =>
+      console.error(`Error creating inspection_responses table:`, error)
+  );
+
+  //inspections
+  tx.executeSql(
+    `CREATE TABLE IF NOT EXISTS rtc_inspections (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      created_at datetime NOT NULL,
+      Score_n varchar(45) NOT NULL,
+      _kf_Course varchar(100) NOT NULL,
+      _kf_Household varchar(100) NOT NULL,
+      __kp_Inspection varchar(100) NOT NULL,
+      _kf_Station varchar(100) NOT NULL,
+      _kf_Supplier varchar(100) NOT NULL,
+      created_by varchar(100) NOT NULL,
+      inspection_at datetime NOT NULL,
+      uploaded int(11) NOT NULL,
+      uploaded_at datetime NOT NULL,
+      longitude double NOT NULL,
+      latitude double NOT NULL
+    )`,
+    [],
+    () => console.log(`Table rtc_inspections created successfully`),
+    (_, error) => console.error(`Error creating rtc_inspections table:`, error)
   );
 
   //transactions
@@ -286,7 +346,12 @@ db.transaction((tx) => {
   );
 });
 
-const generateBulkValueString = (tableName, totalRows, data) => {
+const generateBulkValueString = (
+  tableName,
+  totalRows,
+  data,
+  extraVal = null
+) => {
   if (tableName === "stations") {
     let bulkValues = "";
     for (let i = 0; i < data.length; i++) {
@@ -322,7 +387,7 @@ const generateBulkValueString = (tableName, totalRows, data) => {
       const z_Farmer_Primary = data[i].z_Farmer_Primary || "";
       const sanitizedValue = z_Farmer_Primary.replace(/'/g, "");
       bulkValues += `(
-        ${data[i].id},'${data[i].__kp_Household}','${data[i]._kf_Group}','${data[i]._kf_Location}','${data[i]._kf_Station}','${data[i]._kf_Supplier}','${data[i].Area_Small}','${data[i].Area_Smallest}','${data[i].householdid}','${sanitizedValue}','${data[i].created_at}','${data[i].type}','${data[i].farmerid}','${data[i].group_id}',${data[i].STP_Weight},'${data[i].number_of_plots_with_coffee}','${data[i].Trees_Producing}','${data[i].Trees}','${data[i].Longitude}','${data[i].Latitude}','${data[i].Children}','${data[i].Childen_gender}','${data[i].Childen_below_18}','${data[i].recordid}','${data[i].status}','${data[i].inspectionId}',${data[i].cafeId})`;
+        ${data[i].id},'${data[i].__kp_Household}','${data[i]._kf_Group}','${data[i]._kf_Location}','${data[i]._kf_Station}','${data[i]._kf_Supplier}','${data[i].Area_Small}','${data[i].Area_Smallest}','${data[i].householdid}','${sanitizedValue}','${data[i].created_at}','${data[i].type}','${data[i].farmerid}','${data[i].group_id}',${data[i].STP_Weight},'${data[i].number_of_plots_with_coffee}','${data[i].Trees_Producing}','${data[i].Trees}','${data[i].Longitude}','${data[i].Latitude}','${data[i].Children}','${data[i].Childen_gender}','${data[i].Childen_below_18}','${data[i].recordid}','${data[i].status}','${data[i].inspectionId}','${data[i].cafeId}','${data[i].InspectionStatus}')`;
       if (i < data.length - 1) bulkValues += ",";
     }
 
@@ -342,8 +407,43 @@ const generateBulkValueString = (tableName, totalRows, data) => {
   } else if (tableName === "inspectionQuestions") {
     let bulkValues = "";
     for (let i = 0; i < data.length; i++) {
+      let kinyStr = data[i].Kiny_phrase || "";
+      let engStr = data[i].Eng_phrase || "";
+
+      const sanitizedKinyStr = kinyStr.replace(/'/g, "");
+      const sanitizedEngStr = engStr.replace(/'/g, "");
+
       bulkValues += `(
-        ${data[i].id},'${data[i].updated_at}','${data[i].__kp_Evaluation}','${data[i].evaluation_id}','${data[i].evaluation_mode}','${data[i].Eng_phrase}','${data[i].Kiny_phrase}','${data[i].award}','${data[i].priority}','${data[i]._kf_Course}','${data[i].Answer}','${data[i].status}')`;
+        ${data[i].id},'${data[i].updated_at}','${data[i].__kp_Evaluation}','${data[i].evaluation_id}','${data[i].evaluation_mode}','${sanitizedEngStr}','${sanitizedKinyStr}','${data[i].award}','${data[i].priority}','${data[i]._kf_Course}','${data[i].Answer}','${data[i].status}')`;
+      if (i < data.length - 1) bulkValues += ",";
+    }
+
+    return bulkValues;
+  } else if (tableName === "inspectionAnswers") {
+    let bulkValues = "";
+    for (let i = 0; i < data.length; i++) {
+      let str = data[i].Kiny_answer || "";
+      const sanitizedStr = str.replace(/'/g, "");
+
+      bulkValues += `(
+        ${data[i].id},'${data[i].created_at}','${data[i].Eng_answer}','${sanitizedStr}','${data[i].question_id}','${data[i].priority}','${data[i].status}','${data[i].created_by}','${data[i].score}','${data[i].__kp_Option}','${data[i]._kf_Evaluation}')`;
+      if (i < data.length - 1) bulkValues += ",";
+    }
+
+    return bulkValues;
+  } else if (tableName === "inspections") {
+    let bulkValues = "";
+    for (let i = 0; i < data.length; i++) {
+      bulkValues += `(
+        '${data[i].created_at}','${data[i].Score_n}','${data[i]._kf_Course}','${extraVal}','${data[i].__kp_Inspection}','${data[i]._kf_Station}','${data[i]._kf_Supplier}','${data[i].created_by}','${data[i].inspection_at}','${data[i].uploaded}','${data[i].uploaded_at}','${data[i].longitude}','${data[i].latitude}')`;
+      if (i < data.length - 1) bulkValues += ",";
+    }
+
+    return bulkValues;
+  } else if (tableName === "inspectionResponses") {
+    let bulkValues = "";
+    for (let i = 0; i < data.length; i++) {
+      bulkValues += `('${data[i].created_at}','${extraVal}','${data[i].inspection_answer_id}','${data[i].deleted}','${data[i].__kp_InspectionLog}')`;
       if (i < data.length - 1) bulkValues += ",";
     }
 
@@ -355,7 +455,6 @@ const generateBulkValueString = (tableName, totalRows, data) => {
         ${data[i].id},'${data[i]._kf_Quality}','${data[i]._kf_Type}','${data[i].__kp_Supplier}','${data[i]._kf_Location}','${data[i]._kf_User_g}','${data[i].Area_Big}','${data[i].Area_Biggest}','${data[i].Area_Medium}','${data[i].Area_Small}','${data[i].Area_Smallest}','${data[i].Certification}','${data[i].Name}','${data[i].Status}','${data[i].Ratio_CP}','${data[i].Relationship}','${data[i].Report}','${data[i].Supplier_ID_t}','${data[i].created_at}','${data[i].z_recCreateTimestamp}','${data[i].z_recModifyTimestamp}','${data[i]._kf_User}','${data[i]._kf_Season}','${data[i].deleted}')`;
       if (i < data.length - 1) bulkValues += ",";
     }
-
     return bulkValues;
   } else if (tableName === "transactions") {
     let bulkValues = "";
@@ -383,6 +482,20 @@ const generateBulkValueString = (tableName, totalRows, data) => {
   }
 };
 
+const cleanInspectionQns = (data) => {
+  let passedData = data.filter(
+    (item) => item.Kiny_phrase.length > 0 && item.Eng_phrase.length > 0
+  );
+
+  return passedData;
+};
+
+const cleanInspectionCourses = (data) => {
+  let passedData = data.filter((item) => item.__kp_Course.length > 0);
+
+  return passedData;
+};
+
 export const dataTodb = ({
   tableName,
   setProgress = null,
@@ -390,11 +503,21 @@ export const dataTodb = ({
   syncData,
   setIsSyncing = null,
   setSyncList = null,
+  setInsertId = null,
+  extraVal = null,
 }) => {
   try {
     if (!syncData) {
       console.log("data to db: no data provided", syncData);
       return;
+    }
+
+    if (tableName === "inspectionQuestions") {
+      syncData = cleanInspectionQns(syncData);
+    }
+
+    if (tableName === "trainingModules") {
+      syncData = cleanInspectionCourses(syncData);
     }
 
     const limit = 10; // 10 rows per insert to avoid parser stack overflow
@@ -692,6 +815,132 @@ export const dataTodb = ({
           );
         });
       }
+    } else if (tableName === "inspectionAnswers") {
+      for (let i = 0; i < totalPages; i++) {
+        let page = i + 1;
+        let start = (page - 1) * limit; // the starting index
+        let end = start + limit; // the last index
+        let data = syncData.slice(
+          start,
+          end
+        ); /* on the last page when the rows aren't 10, it won't throw array index errors because of how slice() handles last index parameter */
+        let activeRows = data.length;
+
+        let bulkValues = generateBulkValueString(tableName, totalRows, data);
+
+        db.transaction((tx) => {
+          tx.executeSql(
+            `${SyncQueries.RTC_INSPECTION_ANS} ${bulkValues}`,
+            [],
+            () => {
+              insertedRows += activeRows;
+              const progress = (insertedRows / totalRows) * 100;
+              let jobString =
+                progress < 100 ? `data batch ${page} completed` : "completed";
+
+              if (setProgress) setProgress(+progress.toFixed(2));
+              if (setCurrentJob) setCurrentJob(jobString);
+
+              if (setIsSyncing && setSyncList) {
+                if (progress >= 100) {
+                  setIsSyncing(false);
+                  setSyncList((prevSyncList) => {
+                    const updatedSyncList = [...prevSyncList];
+                    updatedSyncList[7] = {
+                      ...updatedSyncList[7],
+                      status: true,
+                    };
+                    // Return the updated array
+                    return updatedSyncList;
+                  });
+                }
+              }
+            },
+            (_, error) => {
+              console.error("Error inserting inspection answers: ", error);
+              return;
+            }
+          );
+        });
+      }
+    } else if (tableName === "inspectionResponses") {
+      for (let i = 0; i < totalPages; i++) {
+        let page = i + 1;
+        let start = (page - 1) * limit; // the starting index
+        let end = start + limit; // the last index
+        let data = syncData.slice(
+          start,
+          end
+        ); /* on the last page when the rows aren't 10, it won't throw array index errors because of how slice() handles last index parameter */
+        let activeRows = data.length;
+
+        let bulkValues = generateBulkValueString(
+          tableName,
+          totalRows,
+          data,
+          extraVal
+        );
+
+        db.transaction((tx) => {
+          tx.executeSql(
+            `${SyncQueries.RTC_INSPECTION_RESP} ${bulkValues}`,
+            [],
+            () => {
+              insertedRows += activeRows;
+              const progress = (insertedRows / totalRows) * 100;
+
+              if (progress >= 100) setCurrentJob("Responses saved");
+            },
+            (_, error) => {
+              console.error("Error inserting inspection responses: ", error);
+              return;
+            }
+          );
+        });
+      }
+    } else if (tableName === "inspections") {
+      if (!extraVal) {
+        setCurrentJob("Household ID not provided");
+        return;
+      }
+      for (let i = 0; i < totalPages; i++) {
+        let page = i + 1;
+        let start = (page - 1) * limit; // the starting index
+        let end = start + limit; // the last index
+        let data = syncData.slice(
+          start,
+          end
+        ); /* on the last page when the rows aren't 10, it won't throw array index errors because of how slice() handles last index parameter */
+        let activeRows = data.length;
+
+        let bulkValues = generateBulkValueString(
+          tableName,
+          totalRows,
+          data,
+          extraVal
+        );
+
+        db.transaction((tx) => {
+          tx.executeSql(
+            `${SyncQueries.RTC_INSPECTIONS} ${bulkValues}`,
+            [],
+            (_, result) => {
+              insertedRows += activeRows;
+              const progress = (insertedRows / totalRows) * 100;
+
+              if (progress >= 100) {
+                setCurrentJob("Inspection submitted");
+                setInsertId && setInsertId(result.insertId);
+              }
+            },
+
+            (_, error) => {
+              console.error("Error inserting inspections: ", error);
+              return;
+            }
+          );
+        });
+      }
     } else if (tableName === "suppliers") {
       for (let i = 0; i < totalPages; i++) {
         let page = i + 1;
@@ -723,8 +972,8 @@ export const dataTodb = ({
                   setIsSyncing(false);
                   setSyncList((prevSyncList) => {
                     const updatedSyncList = [...prevSyncList];
-                    updatedSyncList[8] = {
-                      ...updatedSyncList[8],
+                    updatedSyncList[9] = {
+                      ...updatedSyncList[9],
                       status: true,
                     };
                     // Return the updated array
@@ -807,8 +1056,8 @@ export const dataTodb = ({
                   setIsSyncing(false);
                   setSyncList((prevSyncList) => {
                     const updatedSyncList = [...prevSyncList];
-                    updatedSyncList[9] = {
-                      ...updatedSyncList[9],
+                    updatedSyncList[10] = {
+                      ...updatedSyncList[10],
                       status: true,
                     };
                     // Return the updated array

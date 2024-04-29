@@ -27,6 +27,7 @@ import { BuyCoffeeModal } from "../components/BuyCoffeeModal";
 import { detectNewUser } from "../helpers/detectNewUser";
 import { initializeLsKeys } from "../helpers/initializeLsKeys";
 import { SyncModal } from "../components/SyncModal";
+import { UserModal } from "../components/UserModal";
 
 export const HomeScreen = ({ route }) => {
   const userState = useSelector((state) => state.user);
@@ -34,13 +35,18 @@ export const HomeScreen = ({ route }) => {
   const navigation = useNavigation();
   const [today, setToday] = useState("");
   const [displayName, setDisplayName] = useState("");
-  const [stationDetails, setStationDetails] = useState(null);
+  const [stationDetails, setStationDetails] = useState({
+    location: null,
+    name: null,
+    id: null,
+  });
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [sidebarScrolled, setsideBarScroll] = useState(false);
   const [isBuyCoffeeModalOpen, setIsBuyCoffeeModalOpen] = useState(false);
   const [columnGapFac, setColumnGapFac] = useState(1);
   const [rowGapFac, setRowGapFac] = useState(1);
   const [newUserModalOpen, setNewUserModalOpen] = useState(false);
+  const [userDetailsModalOpen, setUserDetailsModalOpen] = useState(false);
 
   const [exitApp, setExitApp] = useState(false);
 
@@ -49,12 +55,16 @@ export const HomeScreen = ({ route }) => {
 
   const { data = null } = route.params;
 
+  const toggleUserModal = () => {
+    setUserDetailsModalOpen((prevState) => !prevState);
+  };
+
   const handleClick = () => {
     setIsSidebarOpen(true);
   };
 
   const handleSync = () => {
-    navigation.navigate("Sync", { data: { newUser: true } });
+    navigation.replace("Sync", { data: { newUser: true } });
   };
 
   const handleSyncModal = () => {
@@ -81,58 +91,6 @@ export const HomeScreen = ({ route }) => {
     return date.toLocaleDateString("en-US", options);
   }
 
-  useEffect(() => {
-    const initData = async () => {
-      const userName = data?.nameFull
-        ? data?.nameFull
-        : await SecureStore.getItemAsync("rtc-name-full");
-      const stationData = { location: null, name: null };
-
-      stationData.location = await SecureStore.getItemAsync(
-        "rtc-station-location"
-      );
-      stationData.name = await SecureStore.getItemAsync("rtc-station-name");
-
-      if (stationData.location && stationData.name) {
-        setStationDetails(stationData);
-      }
-
-      if (userName) {
-        setDisplayName(userName.split(" ")[1]);
-      }
-
-      const currentDate = new Date();
-      setToday(formatDate(currentDate));
-      const unsubscribe = navigation.addListener("blur", () => {
-        if (!navigation.isFocused()) {
-          dispatch(UserActions.clearUserData());
-          dispatch(sidebarActions.closeSidebar());
-          setIsSidebarOpen(false);
-        }
-      });
-
-      return unsubscribe;
-    };
-    const newUserDetection = async () => {
-      detectNewUser({ newStationId: data?.stationId })
-        .then((isNewUser) => {
-          if (isNewUser) {
-            // setNewUserModalOpen(true);
-          } else {
-            console.log("old user");
-            initializeLsKeys({ stationId: data?.stationId, setStationDetails });
-          }
-        })
-        .catch((error) => {
-          console.error("Error detecting new user:", error);
-        });
-    };
-
-    calculateFactor();
-    initData();
-    newUserDetection();
-  }, [navigation, userState.dataReceived]);
-
   useFocusEffect(
     React.useCallback(() => {
       const onBackPress = () => {
@@ -152,6 +110,83 @@ export const HomeScreen = ({ route }) => {
       return () =>
         BackHandler.removeEventListener("hardwareBackPress", onBackPress);
     }, [exitApp])
+  );
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const initData = async () => {
+        const userName = data?.nameFull
+          ? data?.nameFull
+          : await SecureStore.getItemAsync("rtc-name-full");
+        const stationData = { location: null, name: null, id: null };
+
+        stationData.location = await SecureStore.getItemAsync(
+          "rtc-station-location"
+        );
+        stationData.name = await SecureStore.getItemAsync("rtc-station-name");
+        stationData.id =
+          userState.userData.staff._kf_Station ||
+          (await SecureStore.getItemAsync("rtc-station-id"));
+
+        if (stationData.location && stationData.name) {
+          setStationDetails((prevState) => ({
+            ...prevState,
+            location: stationData.location,
+            name: stationData.name,
+          }));
+        }
+        if (stationData.id) {
+          setStationDetails((prevState) => ({
+            ...prevState,
+            id: stationData.id,
+          }));
+        }
+
+        if (userName) {
+          setDisplayName(userName.split(" ")[1]);
+        }
+
+        const currentDate = new Date();
+        setToday(formatDate(currentDate));
+        const unsubscribe = navigation.addListener("blur", () => {
+          if (!navigation.isFocused()) {
+            dispatch(sidebarActions.closeSidebar());
+            setIsSidebarOpen(false);
+          }
+        });
+
+        return unsubscribe;
+      };
+      const newUserDetection = async () => {
+        let stationId = userState.userData.staff._kf_Station;
+        detectNewUser({ newStationId: data?.stationId || stationId })
+          .then((isNewUser) => {
+            if (isNewUser && !userState.checkedForNewUser) {
+              setNewUserModalOpen(true);
+            } else {
+              console.log("old user");
+              initializeLsKeys({
+                stationId: data?.stationId || stationId,
+                setStationDetails,
+              }); // init local storage data
+            }
+          })
+          .catch((error) => {
+            console.error("Error detecting new user:", error);
+          });
+
+        dispatch(UserActions.setCheckedForNewUser(true));
+      };
+
+      calculateFactor();
+      initData();
+      newUserDetection();
+
+      return () => {
+        setNewUserModalOpen(false);
+        dispatch(UserActions.setCheckedForNewUser(true));
+      };
+    }, [navigation, userState.dataReceived])
   );
 
   return (
@@ -234,7 +269,7 @@ export const HomeScreen = ({ route }) => {
             </Text>
             <Text style={{ fontSize: screenWidth * 0.037 }}>{today}</Text>
           </View>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={toggleUserModal}>
             <Image
               source={avatar_IMG}
               resizeMode="cover"
@@ -275,7 +310,7 @@ export const HomeScreen = ({ route }) => {
               alignItems: "flex-end",
             }}
           >
-            {stationDetails && <StationLocation data={stationDetails} />}
+            {stationDetails.name && <StationLocation data={stationDetails} />}
           </ImageBackground>
         </View>
         <View
@@ -304,7 +339,7 @@ export const HomeScreen = ({ route }) => {
           }}
         >
           <OpCard name={"Register"} />
-          <OpCard name={"Inspection"} />
+          <OpCard name={"Inspection"} destination={"chooseInspection"} />
           <OpCard name={"Update Farmer"} />
           <OpCard name={"Training"} />
           <OpCard name={"Buy Coffee"} action={setIsBuyCoffeeModalOpen} />
@@ -326,6 +361,18 @@ export const HomeScreen = ({ route }) => {
           OnNo={handleSyncModal}
           labelYes="Ok"
           labelNo="No, maybe later"
+        />
+      )}
+
+      {/* user details modal */}
+      {userDetailsModalOpen && (
+        <UserModal
+          data={{
+            names: userState.userData.staff.Name,
+            role: userState.userData.staff.Role,
+            station: stationDetails,
+          }}
+          CloseFn={setUserDetailsModalOpen}
         />
       )}
     </View>

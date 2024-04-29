@@ -4,7 +4,7 @@ export const SyncQueries = {
   RTC_FARMERS:
     "INSERT OR REPLACE INTO rtc_farmers (id,__kp_Farmer,_kf_Group,_kf_Household,_kf_Location,_kf_Supplier,_kf_Station,Year_Birth,Gender,farmerid,Name,National_ID_t,Phone,Position,CAFE_ID,SAN_ID,UTZ_ID,Marital_Status,Reading_Skills,Math_Skills,created_at,created_by,registered_at,updated_at,type,sync_farmers,uploaded,uploaded_at,Area_Small,Area_Smallest,Trees,Trees_Producing,number_of_plots_with_coffee,STP_Weight,education_level,latitude,longitude,householdid,seasonal_goal,recordid) VALUES",
   RTC_HOUSEHOLD:
-    "INSERT OR REPLACE INTO rtc_households (id,__kp_Household,_kf_Group,_kf_Location,_kf_Station,_kf_Supplier,Area_Small,Area_Smallest,householdid,z_Farmer_Primary,created_at,type,farmerid,group_id,STP_Weight,number_of_plots_with_coffee,Trees_Producing,Trees,Longitude,Latitude,Children,Childen_gender,Childen_below_18,recordid,status,inspectionId,cafeId) VALUES",
+    "INSERT OR REPLACE INTO rtc_households (id,__kp_Household,_kf_Group,_kf_Location,_kf_Station,_kf_Supplier,Area_Small,Area_Smallest,householdid,z_Farmer_Primary,created_at,type,farmerid,group_id,STP_Weight,number_of_plots_with_coffee,Trees_Producing,Trees,Longitude,Latitude,Children,Childen_gender,Childen_below_18,recordid,status,inspectionId,cafeId,InspectionStatus) VALUES",
   RTC_STATIONS:
     "INSERT OR REPLACE INTO rtc_station (id,created_at,__kp_Station,_kf_Location,_kf_Supplier,Area_Big,Area_Biggest,Area_Medium,Area_Small,Area_Smallest,Certification,StationID,Name,Prefix,RTC_Owned,synced_price,sync_roles,updated_at,updated) VALUES",
   RTC_TRAINING:
@@ -17,4 +17,10 @@ export const SyncQueries = {
     "INSERT OR REPLACE INTO rtc_supplier (id, _kf_Quality, _kf_Type, __kp_Supplier, _kf_Location, _kf_User_g, Area_Big, Area_Biggest, Area_Medium, Area_Small, Area_Smallest, Certification, Name, Status, Ratio_CP, Relationship, Report, Supplier_ID_t, created_at, z_recCreateTimestamp, z_recModifyTimestamp, _kf_User, _kf_Season, deleted) VALUES",
   RTC_SEASONS:
     "INSERT OR REPLACE INTO rtc_seasons (id, __kp_Season, _kf_Location, End_d, Label, Start_d, z_recCreateAccountName, z_recCreateTimestamp, z_recModifyAccountName, DefaultState, z_Year, Label_Short, z_recModifyTimestamp, Location) VALUES",
+  RTC_INSPECTION_ANS:
+    "INSERT OR REPLACE INTO inspection_answers (id,created_at,Eng_answer,Kiny_answer,question_id,priority,status,created_by,score,__kp_Option,_kf_Evaluation) VALUES",
+  RTC_INSPECTION_RESP:
+    "INSERT OR REPLACE INTO inspection_responses (created_at, rtc_inspections_id, inspection_answer_id, deleted, __kp_InspectionLog) VALUES",
+  RTC_INSPECTIONS:
+    "INSERT INTO rtc_inspections (created_at, Score_n, _kf_Course, _kf_Household, __kp_Inspection, _kf_Station, _kf_Supplier, created_by, inspection_at, uploaded, uploaded_at, longitude, latitude) VALUES",
 };

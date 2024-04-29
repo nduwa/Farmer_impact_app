@@ -29,7 +29,7 @@ export const SyncModal = ({
       <View
         style={{
           width: "70%",
-          height: "16%",
+          height: screenHeight * 0.19,
           alignItems: "center",
           justifyContent: "center",
           borderRadius: 15,

@@ -34,12 +34,14 @@ export const FarmerScreen = () => {
 
   const handleSearch = (text) => {
     if (text !== "") {
-      const results = farmers.filter((item) =>
-        item.Name.toLowerCase().includes(text.toLowerCase())
-      );
+      text = text.toLowerCase();
+      const results = farmers.filter((item) => {
+        return Object.values(item).some((value) => {
+          return String(value).toLowerCase().includes(text);
+        });
+      });
       setSearchResults(results);
     } else {
-      console.log("hehe");
       setSearchResults([]);
     }
   };
@@ -123,6 +125,7 @@ export const FarmerScreen = () => {
         style={{
           flexDirection: "row",
           alignItems: "center",
+          justifyContent: "space-between",
           height: screenHeight * 0.11,
           backgroundColor: colors.white,
           paddingTop: screenHeight * 0.042,
@@ -145,11 +148,13 @@ export const FarmerScreen = () => {
           style={{
             fontWeight: "700",
             fontSize: 19,
-            marginLeft: screenWidth * 0.16,
           }}
         >
           Registered ATP Farmer
         </Text>
+        <View
+          style={{ width: screenWidth * 0.07, backgroundColor: "transparent" }}
+        />
       </View>
       <View
         style={{
@@ -177,8 +182,8 @@ export const FarmerScreen = () => {
               justifyContent: "center",
               borderRadius: 8,
               height: "62%",
-              paddingVertical: screenWidth * 0.013,
-              paddingHorizontal: screenWidth * 0.03,
+              paddingVertical: screenWidth * 0.012,
+              paddingHorizontal: screenWidth * 0.02,
               elevation: 6,
             }}
           >
@@ -189,9 +194,9 @@ export const FarmerScreen = () => {
           <View
             style={{
               backgroundColor: colors.white_variant,
-              marginVertical: 12,
-              paddingHorizontal: 12,
-              paddingVertical: 4,
+              marginVertical: screenHeight * 0.018,
+              paddingHorizontal: screenWidth * 0.018,
+              paddingVertical: screenWidth * 0.02,
               borderRadius: 15,
               width: "80%",
               elevation: 6,
@@ -219,7 +224,11 @@ export const FarmerScreen = () => {
                     width: "80%",
                   }}
                 >
-                  <AntDesign name="search1" size={24} color={colors.black_a} />
+                  <AntDesign
+                    name="search1"
+                    size={screenWidth * 0.05}
+                    color={colors.black_a}
+                  />
 
                   <TextInput
                     placeholderTextColor={colors.black_a}
@@ -244,7 +253,11 @@ export const FarmerScreen = () => {
                       setSearchResults([]);
                     }}
                   >
-                    <Feather name="x" size={24} color={colors.black_a} />
+                    <Feather
+                      name="x"
+                      size={screenWidth * 0.05}
+                      color={colors.black_a}
+                    />
                   </TouchableOpacity>
                 </View>
               )}

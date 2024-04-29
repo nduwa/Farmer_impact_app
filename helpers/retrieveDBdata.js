@@ -23,9 +23,14 @@ export const retrieveDBdata = ({
     query = queryArg || `SELECT * FROM ${tableName}`;
   } else if (tableName === "rtc_transactions") {
     query = queryArg || `SELECT * FROM ${tableName}`;
+  } else if (tableName === "rtc_households") {
+    query =
+      queryArg || `SELECT * FROM ${tableName} WHERE group_id='${groupID}'`;
+  } else if (tableName === "rtc_inspections") {
+    query = queryArg || "SELECT * FROM rtc_inspections WHERE uploaded=0 ;";
   }
 
-  console.log(query);
+  console.log(queryArg);
   let data = [];
   db.transaction((tx) => {
     tx.executeSql(

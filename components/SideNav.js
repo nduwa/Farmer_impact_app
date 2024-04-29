@@ -12,6 +12,7 @@ import { useNavigation } from "@react-navigation/native";
 import { useDispatch } from "react-redux";
 import { sidebarActions } from "../redux/SidebarSlice";
 import * as SecureStore from "expo-secure-store";
+import { UserActions } from "../redux/user/UserSlice";
 
 export const SideNav = ({
   name,
@@ -47,6 +48,9 @@ export const SideNav = ({
       await SecureStore.deleteItemAsync("rtc-seasons-label");
       await SecureStore.deleteItemAsync("rtc-seasons-year");
       await SecureStore.deleteItemAsync("rtc-user-name");
+
+      dispatch(UserActions.clearUserData());
+      dispatch(UserActions.setCheckedForNewUser(false));
 
       console.log("Secure store key(s) deleted successfully.");
     } catch (error) {
@@ -110,7 +114,7 @@ export const SideNav = ({
       {name === "Pending Inspections" && (
         <Foundation
           name="page-search"
-          size={24}
+          size={29}
           color={isActive ? colors.secondary : colors.black_a}
         />
       )}
