@@ -10,7 +10,7 @@ export const HistoryCard = ({ data }) => {
   const navigation = useNavigation();
 
   const handleNavigation = () => {
-    navigation.navigate("HistoryDetails", { data: null });
+    navigation.navigate("HistoryDetails", { data: data.about });
   };
 
   return (
@@ -29,17 +29,17 @@ export const HistoryCard = ({ data }) => {
     >
       <View style={{ gap: screenHeight * 0.008 }}>
         <Text style={{ fontSize: screenWidth * 0.05, fontWeight: "600" }}>
-          Submitted transactions
+          {`${data.action} ${data.about}`}
         </Text>
         <Text
           style={{ fontSize: screenWidth * 0.035, color: colors.black_letter }}
         >
-          7 transactions Submitted
+          {`${data.quantity} ${data.about} ${data.action.toLowerCase()}`}
         </Text>
         <Text
           style={{ fontSize: screenWidth * 0.035, color: colors.black_letter }}
         >
-          22/04/2024
+          {`In the last ${data.period} ago`}
         </Text>
       </View>
       <View

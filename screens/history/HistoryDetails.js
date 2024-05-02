@@ -1,21 +1,88 @@
 import { StatusBar } from "expo-status-bar";
-import { Dimensions, Text, TouchableOpacity, View } from "react-native";
+import {
+  Dimensions,
+  FlatList,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { colors } from "../../data/colors";
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { useDispatch } from "react-redux";
 import { AntDesign } from "@expo/vector-icons";
 import ScTransactionItem from "../../components/ScTransactionItem";
 import { InspectionRecordItems } from "../../components/InspectionRecordItem";
+import React, { useEffect, useState } from "react";
+import { retrieveDBdata } from "../../helpers/retrieveDBdata";
+import { retrieveDBdataAsync } from "../../helpers/retrieveDBdataAsync";
+import { InspectionHistoryCard } from "../../components/InspectionHistoryCard";
 
-export const HistoryDetails = () => {
+export const HistoryDetails = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const navigation = useNavigation();
   const dispatch = useDispatch();
 
+  const [displayData, setDisplayData] = useState([]);
+
   const handleBackButton = () => {
     navigation.navigate("HistoryScreen", { data: null });
   };
+
+  const { data = null } = route.params;
+
+  function formatDate(date) {
+    const options = {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    };
+    let theDate = new Date(date);
+
+    return theDate.toLocaleDateString("en-US", options);
+  }
+
+  const dateExtraction = (str) => {
+    let substr = str.substring(str.length - 6);
+
+    let year = `20${substr.substring(0, 2)}`;
+    let month = substr.substring(4);
+    let day = substr.substring(2, 4);
+
+    return `${day}/${month}/${year}`;
+  };
+
+  const getTableName = (str) => {
+    let tableName = "";
+    if (str === "transactions") {
+      tableName = "rtc_transactions";
+    } else if (str === "inspections") {
+      tableName = "rtc_inspections";
+    }
+    return tableName;
+  };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const initData = async () => {
+        retrieveDBdataAsync({
+          tableName: getTableName(data),
+          filterCol: "uploaded",
+          filterValue: "1",
+        })
+          .then((result) => {
+            if (result.length > 0) {
+              setDisplayData(result);
+            }
+          })
+          .catch((error) => console.log(error));
+      };
+
+      initData();
+      return () => {};
+    }, [navigation])
+  );
 
   return (
     <View
@@ -61,124 +128,67 @@ export const HistoryDetails = () => {
           style={{ width: screenWidth * 0.07, backgroundColor: "transparent" }}
         />
       </View>
-      <View style={{ padding: 12, gap: 9 }}>
-        <ScTransactionItem
-          kgsGood={12}
-          kgsBad={25}
-          priceGood={123}
-          priceBad={43}
-          trDate={"12/03/2023"}
-          cashTotal={"45678"}
-          farmerId={"F3456A"}
-          farmerNames={"NTUZA JOHN"}
-          lotnumber={"FNE9392039392"}
-          coffeeVal={"3457"}
-          coffeeType={"Cherry"}
-          deleteFn={null}
-          receiptId={"12345678"}
-          routeData={{ hehe: "hehe" }}
-          inActive={true}
-        />
+
+      <View style={{ flex: 1, padding: 12 }}>
         <View
           style={{
-            width: "100%",
-            // height: screenHeight * 0.36,
+            justifyContent: "center",
             alignItems: "center",
-            gap: screenHeight * 0.02,
-            borderRadius: 15,
             backgroundColor: colors.white,
-            padding: 10,
+            padding: screenHeight * 0.02,
+            borderRadius: screenHeight * 0.01,
             elevation: 3,
           }}
         >
-          <View
-            style={{
-              alignItems: "center",
-              gap: screenHeight * 0.01,
-            }}
-          >
-            <Text
-              style={{
-                fontSize: screenWidth * 0.05,
-                fontWeight: "600",
-              }}
-            >
-              Inspection
-            </Text>
-            <View
-              style={{
-                backgroundColor: colors.secondary_variant,
-                height: screenHeight * 0.002,
-                width: screenWidth * 0.8,
-              }}
-            />
-          </View>
-
-          <View style={{ alignItems: "center" }}>
-            <Text
-              style={{
-                fontWeight: "500",
-                textAlign: "center",
-                fontSize: screenWidth * 0.035,
-                marginVertical: screenHeight * 0.006,
-              }}
-            >
-              {`FE34-457D-454E-213F-58DC-8110`}
-            </Text>
-
-            <View
-              style={{
-                backgroundColor: colors.secondary_variant,
-                height: screenHeight * 0.001,
-                width: screenWidth * 0.7,
-              }}
-            />
-            <Text
-              style={{
-                fontWeight: "500",
-                textAlign: "center",
-                fontSize: screenWidth * 0.04,
-                marginVertical: screenHeight * 0.006,
-              }}
-            >
-              {`TYPE / GENERIC`}
-            </Text>
-            <View
-              style={{
-                backgroundColor: colors.secondary_variant,
-                height: screenHeight * 0.001,
-                width: screenWidth * 0.7,
-              }}
-            />
-            <Text
-              style={{
-                fontWeight: "500",
-                textAlign: "center",
-                fontSize: screenWidth * 0.04,
-                marginVertical: screenHeight * 0.006,
-              }}
-            >
-              {`DATE / 12/04/2023`}
-            </Text>
-            <View
-              style={{
-                backgroundColor: colors.secondary_variant,
-                height: screenHeight * 0.001,
-                width: screenWidth * 0.7,
-              }}
-            />
-            <Text
-              style={{
-                fontWeight: "500",
-                textAlign: "center",
-                fontSize: screenWidth * 0.04,
-                marginVertical: screenHeight * 0.006,
-              }}
-            >
-              {`STATUS / UPLOADED`}
-            </Text>
-          </View>
+          <Text style={{ fontSize: screenHeight * 0.02, fontWeight: "700" }}>
+            {data.toUpperCase()}
+          </Text>
         </View>
+        {displayData.length > 0 && data === "transactions" && (
+          <FlatList
+            contentContainerStyle={{ padding: 12, gap: 9 }}
+            data={displayData}
+            initialNumToRender={5}
+            renderItem={({ item }) => (
+              <ScTransactionItem
+                kgsGood={item.kilograms}
+                kgsBad={item.bad_kilograms}
+                priceGood={item.unitprice}
+                priceBad={item.bad_unit_price}
+                trDate={dateExtraction(item.site_day_lot)}
+                cashTotal={item.cash_paid + item.total_mobile_money_payment}
+                farmerId={item.farmerid === "" ? "FARMER" : item.farmerid}
+                farmerNames={item.farmername}
+                lotnumber={item.lotnumber}
+                coffeeVal={item.kilograms * item.unitprice}
+                coffeeType={item.coffee_type}
+                deleteFn={null}
+                receiptId={item.paper_receipt}
+                routeData={null}
+                inActive={true}
+              />
+            )}
+            keyExtractor={(item) => item.paper_receipt}
+          />
+        )}
+
+        {displayData.length > 0 && data === "inspections" && (
+          <FlatList
+            contentContainerStyle={{ padding: 12, gap: 9 }}
+            data={displayData}
+            initialNumToRender={5}
+            renderItem={({ item }) => (
+              <InspectionHistoryCard
+                data={{
+                  householdId: item._kf_Household,
+                  insp_type: item.Score_n,
+                  date: formatDate(item.created_at),
+                }}
+              />
+            )}
+            keyExtractor={(item) => item.id}
+          />
+        )}
       </View>
     </View>
   );
