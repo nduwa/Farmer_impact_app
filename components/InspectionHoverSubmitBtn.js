@@ -7,6 +7,7 @@ export const InspectionHoverSubmitBtn = ({
   handlePress,
   currentPage = null,
   totalPages = null,
+  topRatio = 0.85,
   active = true,
   mode = "submit",
 }) => {
@@ -33,7 +34,7 @@ export const InspectionHoverSubmitBtn = ({
         borderWidth: screenHeight * 0.003,
         borderRadius: screenWidth * 0.5,
         padding: screenHeight * 0.018,
-        marginTop: screenHeight * 0.85,
+        marginTop: screenHeight * topRatio,
         marginLeft: screenWidth * 0.8,
         opacity: active ? 1 : 0.4,
         elevation: 4,

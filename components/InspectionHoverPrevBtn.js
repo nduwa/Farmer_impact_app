@@ -1,7 +1,7 @@
 import { Dimensions, Text, TouchableOpacity } from "react-native";
 import { colors } from "../data/colors";
 
-export const InspectionHoverPrevBtn = ({ handlePress }) => {
+export const InspectionHoverPrevBtn = ({ handlePress, topRatio = 0.75 }) => {
   const screenWidth = Dimensions.get("window").width;
   const screenHeight = Dimensions.get("window").height;
 
@@ -14,7 +14,7 @@ export const InspectionHoverPrevBtn = ({ handlePress }) => {
         borderWidth: screenHeight * 0.003,
         borderRadius: screenWidth * 0.5,
         padding: screenHeight * 0.018,
-        marginTop: screenHeight * 0.75,
+        marginTop: screenHeight * topRatio,
         marginLeft: screenWidth * 0.81,
         elevation: 2,
       }}
