@@ -23,10 +23,16 @@ import { InspectionHoverPrevBtn } from "../../components/InspectionHoverPrevBtn"
 import LottieView from "lottie-react-native";
 import FarmerTrainingCard from "../../components/FarmerTrainingCard";
 import { AttendanceSheetModal } from "../../components/AttendanceSheetModal";
+import { useSelector } from "react-redux";
+import { generateID } from "../../helpers/generateID";
+import { dataTodb } from "../../helpers/dataTodb";
 
 export const TrainingFarmers = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
+  const userId = useSelector((state) => state.user.userData.staff.userID);
+  const userName = useSelector((state) => state.user.userData.user.Name_User);
+
   const navigation = useNavigation();
   const flatListRef = useRef(null);
 
@@ -38,6 +44,7 @@ export const TrainingFarmers = ({ route }) => {
   const [groupsModalOpen, setGroupsModalOpen] = useState(false);
   const [activeGroup, setActiveGroup] = useState([]);
   const [selectedFarmers, setSelectedFarmers] = useState([]);
+  const [stationName, setStationName] = useState(null);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(10);
@@ -48,6 +55,7 @@ export const TrainingFarmers = ({ route }) => {
   const [loadingPage, setLoadingPage] = useState(false);
 
   const [submitted, setSubmitted] = useState(false);
+  const [attendanceSheet, setAttendanceSheet] = useState(null);
   const [sheetModalOpen, setSheetModalOpen] = useState(false);
 
   const { data } = route.params;
@@ -138,6 +146,29 @@ export const TrainingFarmers = ({ route }) => {
   };
 
   useEffect(() => {
+    if (attendanceSheet) {
+      const uuid = generateID({
+        type: "uuid",
+        username: userName,
+        userID: userId,
+      });
+
+      let submitData = [];
+      let obj = {
+        created_at: new Date(),
+        uuid,
+        filepath: `attendance/${stationName}/${userName}/${attendanceSheet}`,
+        status: 1,
+        uploaded_at: "0000-00-0",
+      };
+      submitData.push(obj);
+      dataTodb({ tableName: "attandanceSheets", syncData: submitData });
+
+      console.log("hehe ", uuid);
+    }
+  }, [attendanceSheet]);
+
+  useEffect(() => {
     handleDataPagination(farmers);
     scrollToTop();
   }, [currentPage]);
@@ -190,6 +221,7 @@ export const TrainingFarmers = ({ route }) => {
     React.useCallback(() => {
       const fetchData = async () => {
         const stationId = await SecureStore.getItemAsync("rtc-station-id");
+        const station_name = await SecureStore.getItemAsync("rtc-station-name");
 
         setLoadingData(true);
         if (stationId) {
@@ -198,6 +230,10 @@ export const TrainingFarmers = ({ route }) => {
             stationId,
             setData: setGroups,
           });
+        }
+
+        if (stationName) {
+          setStationName(station_name);
         }
       };
 
@@ -476,7 +512,13 @@ export const TrainingFarmers = ({ route }) => {
         </View>
       )}
 
-      {sheetModalOpen && <AttendanceSheetModal setModal={setSheetModalOpen} />}
+      {sheetModalOpen && (
+        <AttendanceSheetModal
+          setSelectedImage={setAttendanceSheet}
+          setModal={setSheetModalOpen}
+          setToast={displayToast}
+        />
+      )}
     </View>
   );
 };

@@ -251,6 +251,46 @@ db.transaction((tx) => {
     (_, error) => console.error(`Error creating rtc_inspections table:`, error)
   );
 
+  //training attendance
+  tx.executeSql(
+    `CREATE TABLE IF NOT EXISTS rtc_training_attendance (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      created_at datetime NOT NULL,
+      training_course_id varchar(100) NOT NULL,
+      __kf_farmer varchar(100) NOT NULL,
+      __kf_group varchar(100) NOT NULL,
+      status int(11) NOT NULL,
+      __kf_attendance varchar(100) NOT NULL,
+      username varchar(100) NOT NULL,
+      password varchar(100) NOT NULL,
+      uuid varchar(100) NOT NULL,
+      uploaded_at datetime NOT NULL DEFAULT '0000-00-00',
+      _kf_training varchar(100) NOT NULL,
+      lo double NOT NULL,
+      la double NOT NULL
+    )`,
+    [],
+    () => console.log(`Table rtc_training_attendance created successfully`),
+    (_, error) =>
+      console.error(`Error creating rtc_training_attendance table:`, error)
+  );
+
+  //attendance sheets
+  tx.executeSql(
+    `CREATE TABLE IF NOT EXISTS rtc_attendance_sheets (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      created_at datetime NOT NULL,
+      uuid varchar(100) NOT NULL,
+      filepath varchar(100) NOT NULL,
+      status int(11) NOT NULL,
+      uploaded_at datetime NOT NULL DEFAULT '0000-00-00'
+    )`,
+    [],
+    () => console.log(`Table rtc_attendance_sheets created successfully`),
+    (_, error) =>
+      console.error(`Error creating rtc_attendance_sheets table:`, error)
+  );
+
   //transactions
   tx.executeSql(
     `CREATE TABLE IF NOT EXISTS rtc_transactions (
@@ -475,6 +515,22 @@ const generateBulkValueString = (
     for (let i = 0; i < data.length; i++) {
       bulkValues += `(
         ${data[i].id},'${data[i].__kp_Season}','${data[i]._kf_Location}','${data[i].End_d}','${data[i].Label}','${data[i].Start_d}','${data[i].z_recCreateAccountName}','${data[i].z_recCreateTimestamp}','${data[i].z_recModifyAccountName}','${data[i].Default}','${data[i].z_Year}','${data[i].Label_Short}','${data[i].z_recModifyTimestamp}','${data[i].Location}')`;
+      if (i < data.length - 1) bulkValues += ",";
+    }
+
+    return bulkValues;
+  } else if (tableName === "attandanceSheets") {
+    let bulkValues = "";
+    for (let i = 0; i < data.length; i++) {
+      bulkValues += `('${data[i].created_at}','${data[i].uuid}','${data[i].filepath}','${data[i].status}','${data[i].uploaded_at}')`;
+      if (i < data.length - 1) bulkValues += ",";
+    }
+
+    return bulkValues;
+  } else if (tableName === "trainingAttendance") {
+    let bulkValues = "";
+    for (let i = 0; i < data.length; i++) {
+      bulkValues += `('${data[i].created_at}','${data[i].training_course_id}','${data[i].__kf_farmer}','${data[i].__kf_group}','${data[i].status}','${data[i].__kf_attendance}','${data[i].username}','${data[i].password}','${data[i].uuid}','${data[i].uploaded_at}','${data[i]._kf_training}','${data[i].lo}','${data[i].la}')`;
       if (i < data.length - 1) bulkValues += ",";
     }
 
@@ -1068,6 +1124,66 @@ export const dataTodb = ({
             },
             (_, error) => {
               console.log("Error inserting seasons: ", error);
+              return;
+            }
+          );
+        });
+      }
+    } else if (tableName === "attandanceSheets") {
+      for (let i = 0; i < totalPages; i++) {
+        let page = i + 1;
+        let start = (page - 1) * limit; // the starting index
+        let end = start + limit; // the last index
+        let data = syncData.slice(
+          start,
+          end
+        ); /* on the last page when the rows aren't 10, it won't throw array index errors because of how slice() handles last index parameter */
+        let activeRows = data.length;
+
+        let bulkValues = generateBulkValueString(tableName, totalRows, data);
+
+        db.transaction((tx) => {
+          tx.executeSql(
+            `${SyncQueries.RTC_ATTENDANCE_SHEETS} ${bulkValues}`,
+            [],
+            () => {
+              insertedRows += activeRows;
+              const progress = (insertedRows / totalRows) * 100;
+
+              if (progress >= 100) setCurrentJob("Attendance sheet saved");
+            },
+            (_, error) => {
+              console.log("Error inserting Attendance sheet: ", error);
+              return;
+            }
+          );
+        });
+      }
+    } else if (tableName === "trainingAttendance") {
+      for (let i = 0; i < totalPages; i++) {
+        let page = i + 1;
+        let start = (page - 1) * limit; // the starting index
+        let end = start + limit; // the last index
+        let data = syncData.slice(
+          start,
+          end
+        ); /* on the last page when the rows aren't 10, it won't throw array index errors because of how slice() handles last index parameter */
+        let activeRows = data.length;
+
+        let bulkValues = generateBulkValueString(tableName, totalRows, data);
+
+        db.transaction((tx) => {
+          tx.executeSql(
+            `${SyncQueries.RTC_TRAINING_ATTENDANCE} ${bulkValues}`,
+            [],
+            () => {
+              insertedRows += activeRows;
+              const progress = (insertedRows / totalRows) * 100;
+
+              if (progress >= 100) setCurrentJob("Training details saved");
+            },
+            (_, error) => {
+              console.log("Error inserting Training details: ", error);
               return;
             }
           );

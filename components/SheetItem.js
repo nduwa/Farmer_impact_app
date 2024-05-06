@@ -1,16 +1,13 @@
-import { useNavigation } from "@react-navigation/native";
 import React from "react";
-import { Text, TouchableOpacity, View, Platform } from "react-native";
+import { Text, TouchableOpacity, Platform } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 import { Fontisto } from "@expo/vector-icons";
 import { colors } from "../data/colors";
 
-export const SheetItem = ({ destination, label, setModal }) => {
-  const navigation = useNavigation();
-
-  const handleNavigation = () => {
+export const SheetItem = ({ label, setModal, Fn }) => {
+  const handleClick = () => {
     setModal(false);
-    navigation.navigate(destination);
+    Fn();
   };
 
   return (
@@ -34,7 +31,7 @@ export const SheetItem = ({ destination, label, setModal }) => {
           },
         }),
       }}
-      onPress={handleNavigation}
+      onPress={handleClick}
     >
       {label === "Take photo" && (
         <AntDesign name="camera" size={24} color="black" />

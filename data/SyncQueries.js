@@ -22,5 +22,9 @@ export const SyncQueries = {
   RTC_INSPECTION_RESP:
     "INSERT OR REPLACE INTO inspection_responses (created_at, rtc_inspections_id, inspection_answer_id, deleted, __kp_InspectionLog) VALUES",
   RTC_INSPECTIONS:
-    "INSERT INTO rtc_inspections (created_at, Score_n, _kf_Course, _kf_Household, __kp_Inspection, _kf_Station, _kf_Supplier, created_by, inspection_at, uploaded, uploaded_at, longitude, latitude) VALUES",
+    "INSERT OR REPLACE INTO rtc_inspections (created_at, Score_n, _kf_Course, _kf_Household, __kp_Inspection, _kf_Station, _kf_Supplier, created_by, inspection_at, uploaded, uploaded_at, longitude, latitude) VALUES",
+  RTC_ATTENDANCE_SHEETS:
+    "INSERT OR REPLACE INTO rtc_attendance_sheets (created_at,uuid,filepath,status,uploaded_at) VALUES",
+  RTC_TRAINING_ATTENDANCE:
+    "INSERT OR REPLACE INTO rtc_training_attendance (created_at,training_course_id,__kf_farmer,__kf_group,status,__kf_attendance,username,password,uuid,uploaded_at,_kf_training,lo,la) VALUES",
 };
