@@ -151,7 +151,7 @@ export const SideBar = ({ setsideBarScroll, setIsSidebarOpen }) => {
                 destination="InspectionsScreen"
               />
               <SideNav name={"Pending Children"} />
-              <SideNav name={"Pending Training"} />
+              <SideNav name={"Pending Training"} destination="TrainingScreen" />
               <SideNav
                 name={"SC Daily Journals"}
                 destination="ScDailyJournal"

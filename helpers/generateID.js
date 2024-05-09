@@ -35,6 +35,13 @@ export const generateID = ({
     } else if (type === "uuid") {
       const timestamp = Math.floor(Date.now() / 1000);
       id = `${username}${timestamp}${userID}`;
+    } else if (type === "fm_uuid") {
+      const segment = () =>
+        Math.floor((1 + Math.random()) * 0x10000)
+          .toString(16)
+          .substring(1);
+
+      return `${segment()}${segment()}-${segment()}-${segment()}-${segment()}-${segment()}${segment()}${segment()}`;
     }
 
     return id;

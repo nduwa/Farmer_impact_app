@@ -13,7 +13,7 @@ import * as FileSystem from "expo-file-system";
 import { colors } from "../data/colors";
 import { globalStyles } from "../data/globalStyles";
 import { SheetItem } from "./SheetItem";
-import { useFocusEffect } from "@react-navigation/native";
+import { Foundation } from "@expo/vector-icons";
 import { useSelector } from "react-redux";
 
 export const AttendanceSheetModal = ({
@@ -22,12 +22,15 @@ export const AttendanceSheetModal = ({
   setToast,
 }) => {
   const [initClose, setInitClose] = useState(false);
+  const [heightRatio, setHeightRatio] = useState(0.4);
   const userId = useSelector((state) => state.user.userData.staff.userID);
 
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const modalHeight = screenHeight * 0.5;
   const animation = new Animated.Value(0);
+  const androidVersion =
+    Platform.OS === "android" ? Platform.Version : "Not Android";
 
   const openCamera = async () => {
     if (Platform.OS !== "web") {
@@ -168,6 +171,7 @@ export const AttendanceSheetModal = ({
               destination={null}
               label={"Take photo"}
               Fn={openCamera}
+              supportedVersion={androidVersion >= 34}
             />
             <SheetItem
               setModal={setModal}
@@ -176,6 +180,35 @@ export const AttendanceSheetModal = ({
               Fn={pickImage}
             />
           </View>
+          {androidVersion < 34 ? (
+            <>
+              <View
+                style={{
+                  width: screenWidth * 0.3,
+                  height: screenHeight * 0.002,
+                  backgroundColor: colors.secondary,
+                }}
+              />
+              <View>
+                <Text
+                  style={{
+                    textAlign: "center",
+                    color: colors.black_letter,
+                  }}
+                >
+                  Taking photo might not work on this device due to the platform
+                  version, it is recommended to choose the image from the
+                  gallery.
+                </Text>
+              </View>
+            </>
+          ) : (
+            <View
+              style={{
+                height: screenHeight * 0.04,
+              }}
+            />
+          )}
         </Animated.View>
       </View>
     </TouchableWithoutFeedback>

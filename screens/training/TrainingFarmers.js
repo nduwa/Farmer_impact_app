@@ -32,6 +32,7 @@ export const TrainingFarmers = ({ route }) => {
   const screenWidth = Dimensions.get("window").width;
   const userId = useSelector((state) => state.user.userData.staff.userID);
   const userName = useSelector((state) => state.user.userData.user.Name_User);
+  const location = useSelector((state) => state.user.location);
 
   const navigation = useNavigation();
   const flatListRef = useRef(null);
@@ -44,7 +45,8 @@ export const TrainingFarmers = ({ route }) => {
   const [groupsModalOpen, setGroupsModalOpen] = useState(false);
   const [activeGroup, setActiveGroup] = useState([]);
   const [selectedFarmers, setSelectedFarmers] = useState([]);
-  const [stationName, setStationName] = useState(null);
+  const [stationName, setStationName] = useState("");
+  const [currentJob, setCurrentJob] = useState(null);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(10);
@@ -53,6 +55,8 @@ export const TrainingFarmers = ({ route }) => {
   const [dataEnd, setDataEnd] = useState(0);
   const [loadingData, setLoadingData] = useState(false);
   const [loadingPage, setLoadingPage] = useState(false);
+
+  const [UUID, setUUID] = useState(null);
 
   const [submitted, setSubmitted] = useState(false);
   const [attendanceSheet, setAttendanceSheet] = useState(null);
@@ -153,6 +157,8 @@ export const TrainingFarmers = ({ route }) => {
         userID: userId,
       });
 
+      setUUID(uuid);
+
       let submitData = [];
       let obj = {
         created_at: new Date(),
@@ -162,11 +168,52 @@ export const TrainingFarmers = ({ route }) => {
         uploaded_at: "0000-00-0",
       };
       submitData.push(obj);
-      dataTodb({ tableName: "attandanceSheets", syncData: submitData });
 
-      console.log("hehe ", uuid);
+      dataTodb({
+        tableName: "attandanceSheets",
+        syncData: submitData,
+        setCurrentJob: setCurrentJob,
+      });
     }
   }, [attendanceSheet]);
+
+  useEffect(() => {
+    if (currentJob === "Attendance sheet saved") {
+      displayToast("Attendance sheet saved");
+
+      let trainingData = [];
+      let training_id = generateID({ type: "fm_uuid" }).toUpperCase();
+
+      for (const farmer of selectedFarmers) {
+        let obj = {
+          created_at: new Date(),
+          training_course_id: data.courseId,
+          __kf_farmer: farmer.__kf_farmer,
+          __kf_group: farmer._kf_Group,
+          status: 1,
+          __kf_attendance: "",
+          username: userName,
+          password: "",
+          uuid: UUID,
+          uploaded_at: "0000-00-00",
+          _kf_training: training_id,
+          lo: location.coords.longitude,
+          la: location.coords.latitude,
+        };
+
+        trainingData.push(obj);
+      }
+
+      dataTodb({
+        tableName: "trainingAttendance",
+        syncData: trainingData,
+        setCurrentJob: setCurrentJob,
+      });
+    } else if (currentJob === "Training details saved") {
+      displayToast("Training details saved");
+      setSubmitted(true);
+    }
+  }, [currentJob]);
 
   useEffect(() => {
     handleDataPagination(farmers);
@@ -232,9 +279,11 @@ export const TrainingFarmers = ({ route }) => {
           });
         }
 
-        if (stationName) {
+        if (station_name) {
           setStationName(station_name);
         }
+
+        console.log("train farme ", data);
       };
 
       fetchData();
@@ -247,6 +296,9 @@ export const TrainingFarmers = ({ route }) => {
         setGroupsModalOpen(false);
         setActiveGroup([]);
         setSelectedFarmers([]);
+        setAttendanceSheet(null);
+        setStationName("");
+        setCurrentJob(null);
       };
     }, [])
   );
@@ -442,6 +494,8 @@ export const TrainingFarmers = ({ route }) => {
                   farmerName: item.Name,
                   farmerId: item.farmerid,
                   Year_Birth: item.Year_Birth,
+                  __kf_farmer: item.__kp_Farmer,
+                  __kf_group: item._kf_Group,
                 }}
                 filterFn={filterChecked}
                 isChecked={handleCheckbox(item) || false}

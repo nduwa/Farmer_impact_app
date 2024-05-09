@@ -31,7 +31,7 @@ export const globalStyles = StyleSheet.create({
   attendanceSheetModalStyles: {
     position: "absolute",
     width: "100%",
-    height: screenHeight * 0.4,
+    maxHeight: screenHeight * 0.5,
     padding: 20,
     gap: 20,
     backgroundColor: colors.bg_variant,

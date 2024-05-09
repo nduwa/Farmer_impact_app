@@ -20,6 +20,7 @@ import { HistoryScreen } from "./screens/history/HistoryScreen";
 import { HistoryDetails } from "./screens/history/HistoryDetails";
 import { TrainingCourses } from "./screens/training/TrainingCourses";
 import { TrainingFarmers } from "./screens/training/TrainingFarmers";
+import { TrainingScreen } from "./screens/training/TrainingScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -120,6 +121,11 @@ export default function App() {
             name="TrainingFarmers"
             options={{ unmountOnBlur: true }}
             component={TrainingFarmers}
+          />
+          <Stack.Screen
+            name="TrainingScreen"
+            options={{ unmountOnBlur: true }}
+            component={TrainingScreen}
           />
         </Stack.Navigator>
       </NavigationContainer>

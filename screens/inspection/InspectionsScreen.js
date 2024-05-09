@@ -151,6 +151,8 @@ export const InspectionsScreen = () => {
         displayToast("Error: Server error");
       } else if (inspectionError?.code === "ERR_BAD_REQUEST") {
         displayToast("Error: Incomplete data");
+      } else if (inspectionError?.code === "ERR_NETWORK") {
+        displayToast("Error: Network error");
       } else {
         displayToast("Something went wrong");
       }

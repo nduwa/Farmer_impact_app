@@ -13,7 +13,12 @@ const FarmerTrainingCard = ({ data, isChecked, setChecked, filterFn }) => {
     if (value) {
       setChecked((prevState) => [
         ...prevState,
-        { farmerid: data.farmerId, checked: value },
+        {
+          farmerid: data.farmerId,
+          __kf_farmer: data.__kf_farmer,
+          _kf_Group: data.__kf_group,
+          checked: value,
+        },
       ]);
     } else {
       filterFn(data.farmerId);

@@ -6,7 +6,7 @@ const db = SQLite.openDatabase(DB_NAME);
 export const deleteDBdataAsync = ({
   tableName,
   targetCol = "paper_receipt",
-  targetId,
+  targetId = null,
   customQuery = null,
 }) => {
   let query = `DELETE FROM ${tableName} WHERE ${targetCol}='${targetId}'`;

@@ -1,29 +1,38 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import api from "../axiosInstance";
 
-export const scJournalSubmission = createAsyncThunk(
-  "journal/submit",
+export const trainingSubmission = createAsyncThunk(
+  "training/submit",
   async (data) => {
     try {
-      const response = await api.post(`/sync/journal`, data);
+      const response = await api.post(
+        `/sync/training?filepath=${data.filepath}`,
+        data.formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
 
       let resp = null;
       if (response.status === 200) {
-        console.log("Journal Submitted");
+        console.log("Training session Submitted");
         resp = response.data;
       } else {
-        console.log("Error submitting journal: ", response.data);
+        console.log("Error submitting Training session: ", response.data);
       }
+
       return resp;
     } catch (err) {
-      console.log(`Error submitting journal: ${err}`);
+      console.log(`Error submitting Training session: ${err}`);
       throw err;
     }
   }
 );
 
-const JournalSlice = createSlice({
-  name: "journal",
+const trainingSlice = createSlice({
+  name: "training",
   initialState: {
     response: null,
     loading: false,
@@ -31,7 +40,7 @@ const JournalSlice = createSlice({
     serverResponded: false,
   },
   reducers: {
-    resetJournalState(state, action) {
+    resetTrainingState(state, action) {
       state.response = null;
       state.loading = false;
       state.error = null;
@@ -39,16 +48,16 @@ const JournalSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    builder.addCase(scJournalSubmission.pending, (state) => {
+    builder.addCase(trainingSubmission.pending, (state) => {
       state.loading = true;
     });
-    builder.addCase(scJournalSubmission.fulfilled, (state, action) => {
+    builder.addCase(trainingSubmission.fulfilled, (state, action) => {
       state.loading = false;
       state.response = { ...action.payload };
       state.error = null;
       state.serverResponded = action.payload ? true : false;
     });
-    builder.addCase(scJournalSubmission.rejected, (state, action) => {
+    builder.addCase(trainingSubmission.rejected, (state, action) => {
       state.loading = false;
       state.error = action.error;
       state.serverResponded = false;
@@ -56,5 +65,5 @@ const JournalSlice = createSlice({
   },
 });
 
-export const journalActions = JournalSlice.actions;
-export default JournalSlice;
+export const trainingActions = trainingSlice.actions;
+export default trainingSlice;
