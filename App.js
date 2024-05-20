@@ -18,6 +18,9 @@ import { InspectionCoursesScreen } from "./screens/inspection/InspectionCoursesS
 import { InspectionsScreen } from "./screens/inspection/InspectionsScreen";
 import { HistoryScreen } from "./screens/history/HistoryScreen";
 import { HistoryDetails } from "./screens/history/HistoryDetails";
+import { TrainingCourses } from "./screens/training/TrainingCourses";
+import { TrainingFarmers } from "./screens/training/TrainingFarmers";
+import { TrainingScreen } from "./screens/training/TrainingScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -108,6 +111,21 @@ export default function App() {
             name="HistoryDetails"
             options={{ unmountOnBlur: true }}
             component={HistoryDetails}
+          />
+          <Stack.Screen
+            name="TrainingCourses"
+            options={{ unmountOnBlur: true }}
+            component={TrainingCourses}
+          />
+          <Stack.Screen
+            name="TrainingFarmers"
+            options={{ unmountOnBlur: true }}
+            component={TrainingFarmers}
+          />
+          <Stack.Screen
+            name="TrainingScreen"
+            options={{ unmountOnBlur: true }}
+            component={TrainingScreen}
           />
         </Stack.Navigator>
       </NavigationContainer>

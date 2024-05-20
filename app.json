@@ -20,11 +20,23 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#fbf9ec"
       },
-      "permissions": ["android.permission.DETECT_SCREEN_CAPTURE"]
+      "permissions": [
+        "android.permission.DETECT_SCREEN_CAPTURE",
+        "CAMERA",
+        "CAMERA_ROLL"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": ["expo-secure-store"]
+    "plugins": [
+      "expo-secure-store",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app accesses your photos to let you share them with your friends."
+        }
+      ]
+    ]
   }
 }

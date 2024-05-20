@@ -1,4 +1,10 @@
-export const generateID = ({ type, staffId = null, supplierId = null }) => {
+export const generateID = ({
+  type,
+  staffId = null,
+  supplierId = null,
+  username = null,
+  userID = null,
+}) => {
   try {
     let id;
     const currentDate = new Date();
@@ -14,7 +20,7 @@ export const generateID = ({ type, staffId = null, supplierId = null }) => {
     } else if (type === "site_day_lot") {
       if (!staffId) return;
       id = `SCJ${staffId}${twoDigitYear}${twoDigitDay}${twoDigitMonth}`;
-        } else if (type === "cherry_lot_id") {
+    } else if (type === "cherry_lot_id") {
       if (!supplierId) return;
       id = `${twoDigitYear}${supplierId}CH${twoDigitDay}${twoDigitMonth}`;
     } else if (type === "parchment_lot_id") {
@@ -26,6 +32,16 @@ export const generateID = ({ type, staffId = null, supplierId = null }) => {
     } else if (type === "bad_parch_lot_id") {
       if (!supplierId) return;
       id = `${twoDigitYear}${supplierId}P${twoDigitDay}${twoDigitMonth}F`;
+    } else if (type === "uuid") {
+      const timestamp = Math.floor(Date.now() / 1000);
+      id = `${username}${timestamp}${userID}`;
+    } else if (type === "fm_uuid") {
+      const segment = () =>
+        Math.floor((1 + Math.random()) * 0x10000)
+          .toString(16)
+          .substring(1);
+
+      return `${segment()}${segment()}-${segment()}-${segment()}-${segment()}-${segment()}${segment()}${segment()}`;
     }
 
     return id;

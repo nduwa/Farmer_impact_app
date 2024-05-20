@@ -23,7 +23,7 @@ export const OpCard = ({ name, action, destination = null }) => {
 
   const handlePress = () => {
     if (name == "Buy Coffee") action(true);
-    if (destination) navigation.navigate(destination);
+    if (destination) navigation.navigate(destination, { data: null });
   };
 
   const calculateFactor = () => {
