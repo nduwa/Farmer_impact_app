@@ -21,6 +21,11 @@ import { HistoryDetails } from "./screens/history/HistoryDetails";
 import { TrainingCourses } from "./screens/training/TrainingCourses";
 import { TrainingFarmers } from "./screens/training/TrainingFarmers";
 import { TrainingScreen } from "./screens/training/TrainingScreen";
+import { FarmerRegistrationScreen } from "./screens/farmer/FarmerRegistrationScreen";
+import { FarmerUpdateHome } from "./screens/farmer/FarmerUpdateHome";
+import { FarmerUpdateScreen } from "./screens/farmer/FarmerUpdateScreen";
+import { FarmUpdateScreen } from "./screens/farmer/FarmUpdateScreen";
+import { ChooseFarmerScreen } from "./screens/farmer/ChooseFarmerScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -47,6 +52,8 @@ export default function App() {
             options={{ unmountOnBlur: true }}
             component={SyncScreen}
           />
+
+          {/* coffee purchase */}
           <Stack.Screen
             name="Registered_ATP_Farmer"
             options={{ unmountOnBlur: true }}
@@ -77,6 +84,8 @@ export default function App() {
             options={{ unmountOnBlur: true }}
             component={EditTransactionScreen}
           />
+
+          {/* inspection */}
           <Stack.Screen
             name="chooseInspection"
             options={{ unmountOnBlur: true }}
@@ -102,6 +111,8 @@ export default function App() {
             options={{ unmountOnBlur: true }}
             component={InspectionsScreen}
           />
+
+          {/* history */}
           <Stack.Screen
             name="HistoryScreen"
             options={{ unmountOnBlur: true }}
@@ -112,6 +123,8 @@ export default function App() {
             options={{ unmountOnBlur: true }}
             component={HistoryDetails}
           />
+
+          {/* training */}
           <Stack.Screen
             name="TrainingCourses"
             options={{ unmountOnBlur: true }}
@@ -126,6 +139,33 @@ export default function App() {
             name="TrainingScreen"
             options={{ unmountOnBlur: true }}
             component={TrainingScreen}
+          />
+
+          {/* farmer management */}
+          <Stack.Screen
+            name="FarmerRegistration"
+            options={{ unmountOnBlur: true }}
+            component={FarmerRegistrationScreen}
+          />
+          <Stack.Screen
+            name="FarmerUpdateHome"
+            options={{ unmountOnBlur: true }}
+            component={FarmerUpdateHome}
+          />
+          <Stack.Screen
+            name="FarmerUpdateScreen"
+            options={{ unmountOnBlur: true }}
+            component={FarmerUpdateScreen}
+          />
+          <Stack.Screen
+            name="FarmUpdateScreen"
+            options={{ unmountOnBlur: true }}
+            component={FarmUpdateScreen}
+          />
+          <Stack.Screen
+            name="ChooseFarmerUpdateScreen"
+            options={{ unmountOnBlur: true }}
+            component={ChooseFarmerScreen}
           />
         </Stack.Navigator>
       </NavigationContainer>

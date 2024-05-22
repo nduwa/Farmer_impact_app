@@ -3,17 +3,15 @@ import React from "react";
 import { Text, TouchableOpacity, View, Platform } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Foundation } from "@expo/vector-icons";
+import { AntDesign } from '@expo/vector-icons';
 import { colors } from "../data/colors";
 
-export const BuyCoffeeItem = ({
-  destination,
-  label,
-  setIsBuyCoffeeModalOpen,
-}) => {
+export const FarmerMgtItem = ({ destination, label, setIsFarmerModalOpen }) => {
   const navigation = useNavigation();
 
   const handleNavigation = () => {
-    setIsBuyCoffeeModalOpen(false);
+    setIsFarmerModalOpen(false);
     navigation.navigate(destination);
   };
 
@@ -40,24 +38,25 @@ export const BuyCoffeeItem = ({
       }}
       onPress={handleNavigation}
     >
-      {label === "Registered ATP Farmer" && (
+      {label === "New Farmer" && (
         <Feather name="save" size={24} color="black" />
       )}
 
-      {label === "Unregistered ATP Farmer" && (
+      {label === "Remove Farmers" && (
         <MaterialCommunityIcons
-          name="content-save-alert"
+          name="delete-forever-outline"
           size={24}
           color="black"
         />
       )}
-
-      {label === "Review Purchases" && (
-        <MaterialCommunityIcons
-          name="note-search-outline"
-          size={24}
-          color="black"
-        />
+      {label === "Farmer GPS" && (
+        <MaterialCommunityIcons name="crosshairs-gps" size={24} color="black" />
+      )}
+      {label === "Update Trees" && (
+        <Foundation name="trees" size={24} color="black" />
+      )}
+      {label === "Weekly Reports" && (
+        <AntDesign name="barchart" size={24} color="black" />
       )}
 
       <Text style={{ fontWeight: "600", fontSize: 20 }}>{label}</Text>

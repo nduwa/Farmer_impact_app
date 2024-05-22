@@ -9,9 +9,9 @@ import {
 } from "react-native";
 import { colors } from "../data/colors";
 import { globalStyles } from "../data/globalStyles";
-import { BuyCoffeeItem } from "./BuyCoffeeItem";
+import { FarmerMgtItem } from "./FarmerMgtItem";
 
-export const BuyCoffeeModal = ({ setIsBuyCoffeeModalOpen }) => {
+export const FarmerMgtModal = ({ setIsFarmerModalOpen }) => {
   const [initClose, setInitClose] = useState(false);
 
   const screenHeight = Dimensions.get("window").height;
@@ -35,7 +35,7 @@ export const BuyCoffeeModal = ({ setIsBuyCoffeeModalOpen }) => {
       duration: 200,
       useNativeDriver: true,
     }).start(() => {
-      if (initClose) setIsBuyCoffeeModalOpen(false);
+      if (initClose) setIsFarmerModalOpen(false);
     });
   }, [initClose]);
 
@@ -78,25 +78,35 @@ export const BuyCoffeeModal = ({ setIsBuyCoffeeModalOpen }) => {
                 color: colors.secondary,
               }}
             >
-              Buy Coffee
+              Farmer Management
             </Text>
           </View>
 
           <View style={{ flex: 1, gap: 16 }}>
-            <BuyCoffeeItem
-              setIsBuyCoffeeModalOpen={setIsBuyCoffeeModalOpen}
-              destination={"FarmerScreen"}
-              label={"Registered ATP Farmer"}
+            <FarmerMgtItem
+              setIsFarmerModalOpen={setIsFarmerModalOpen}
+              destination={"FarmerRegistration"}
+              label={"New Farmer"}
             />
-            <BuyCoffeeItem
-              setIsBuyCoffeeModalOpen={setIsBuyCoffeeModalOpen}
+            <FarmerMgtItem
+              setIsFarmerModalOpen={setIsFarmerModalOpen}
               destination={"Unregistered_ATP_Farmer"}
-              label={"Unregistered ATP Farmer"}
+              label={"Remove Farmers"}
             />
-            <BuyCoffeeItem
-              setIsBuyCoffeeModalOpen={setIsBuyCoffeeModalOpen}
+            <FarmerMgtItem
+              setIsFarmerModalOpen={setIsFarmerModalOpen}
               destination={"Unregistered_ATP_Farmer"}
-              label={"Review Purchases"}
+              label={"Farmer GPS"}
+            />
+            <FarmerMgtItem
+              setIsFarmerModalOpen={setIsFarmerModalOpen}
+              destination={"FarmerUpdateHome"}
+              label={"Update Trees"}
+            />
+            <FarmerMgtItem
+              setIsFarmerModalOpen={setIsFarmerModalOpen}
+              destination={"Unregistered_ATP_Farmer"}
+              label={"Weekly Reports"}
             />
           </View>
         </Animated.View>
