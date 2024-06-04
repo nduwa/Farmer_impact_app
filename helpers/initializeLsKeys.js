@@ -16,7 +16,24 @@ export const initializeLsKeys = ({ stationId, setStationDetails }) => {
         setStationDetails({ name: data.Name, location: data.Area_Big });
 
         await SecureStore.setItemAsync("rtc-station-id", data.__kp_Station);
-        await SecureStore.setItemAsync("rtc-station-location", data.Area_Big);
+        await SecureStore.setItemAsync("rtc-station-location", data.Area_Big); // distric
+        await SecureStore.setItemAsync(
+          "rtc-station-location-province",
+          data.Area_Biggest
+        ); // province
+        await SecureStore.setItemAsync(
+          "rtc-station-location-sector",
+          data.Area_Medium
+        ); // sector
+        await SecureStore.setItemAsync(
+          "rtc-station-location-cell",
+          data.Area_Small
+        ); // cell
+        await SecureStore.setItemAsync(
+          "rtc-station-location-village",
+          data.Area_Smallest
+        ); // village
+
         await SecureStore.setItemAsync("rtc-station-name", data.Name);
       })
       .catch((error) => {

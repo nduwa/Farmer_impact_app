@@ -21,7 +21,9 @@ import * as SecureStore from "expo-secure-store";
 export const FarmerUpdateScreen = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
+  let seasonYear;
 
+  const [farmerDetails, setFarmerDetails] = useState({});
   const [gender, setGender] = useState("CP");
   const [indicatorVisible, setIndicatorVisibility] = useState(false);
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
@@ -35,6 +37,10 @@ export const FarmerUpdateScreen = ({ route }) => {
   const navigation = useNavigation();
 
   const { data } = route.params;
+
+  const stringfy = (str) => {
+    return str.toString();
+  };
 
   const handleBackButton = () => {
     navigation.navigate("ChooseFarmerUpdateScreen", { data: data.destination });
@@ -72,13 +78,23 @@ export const FarmerUpdateScreen = ({ route }) => {
     };
   }, [isKeyboardActive]);
 
-//   useFocusEffect(
-//     React.useCallback(() => {
-//       console.log(data);
+  useFocusEffect(
+    React.useCallback(() => {
+      const initData = async () => {
+        if (data) {
+          setFarmerDetails(data.farmerData);
+          setGender(data.farmerData.Gender);
+        }
 
-//       return () => {};
-//     }, [])
-//   );
+        seasonYear = await SecureStore.getItemAsync("rtc-seasons-year");
+      };
+
+      initData();
+      return () => {
+        setFarmerDetails({});
+      };
+    }, [data])
+  );
 
   return (
     <View
@@ -127,17 +143,26 @@ export const FarmerUpdateScreen = ({ route }) => {
       <View style={{ backgroundColor: colors.bg_variant }}>
         <Formik
           initialValues={{
-            groupName: "",
-            farmerName: "",
-            birthYear: "",
-            householdID: "",
-            cell: "",
-            village: "",
-            totalPlots: "",
-            prodTrees: "",
-            totTrees: "",
+            groupName: stringfy(data.farmerData.group_id || ""),
+            farmerName: stringfy(data.farmerData.Name || ""),
+            birthYear: stringfy(data.farmerData.Year_Birth || ""),
+            householdID: stringfy(data.farmerData.householdid || ""),
+            cell: stringfy(data.farmerData.Area_Smallest || ""),
+            village: stringfy(data.farmerData.Area_Small || ""),
+            totalPlots: stringfy(
+              data.farmerData.number_of_plots_with_coffee || ""
+            ),
+            prodTrees: stringfy(data.farmerData.Trees_Producing || ""),
+            totTrees: stringfy(data.farmerData.Trees || ""),
             stp1: "",
             stp2: "",
+            phoneNumber: stringfy(data.farmerData.Phone || ""),
+            nationalID: stringfy(data.farmerData.National_ID_t || ""),
+            position: stringfy(data.farmerData.Position || ""),
+            maritalStatus: stringfy(data.farmerData.Marital_Status || ""),
+            basicMathSkills: stringfy(data.farmerData.Math_Skills || ""),
+            readingSkills: stringfy(data.farmerData.Reading_Skills || ""),
+            educationalLevel: stringfy(data.farmerData.education_level || ""),
           }}
           onSubmit={async (values) => {
             submitFarmer(values);
@@ -246,14 +271,14 @@ export const FarmerUpdateScreen = ({ route }) => {
                     handleChange={handleChange("stp1")}
                     handleBlur={handleBlur("totTrees")}
                     label={"Seasonal Total produced for 2023"}
-                    value={values.totTrees}
+                    value={values.stp1}
                   />
                   <BuyCoffeeInput
                     values={values}
                     handleChange={handleChange("stp2")}
                     handleBlur={handleBlur("totTrees")}
-                    label={"Seasonal Total produced for 2024"}
-                    value={values.totTrees}
+                    label={`Seasonal Total produced for ${seasonYear}`}
+                    value={values.stp1}
                   />
                 </View>
 
@@ -322,7 +347,7 @@ export const FarmerUpdateScreen = ({ route }) => {
                       radioBackground={colors.secondary}
                     >
                       <RadioButtonItem
-                        value={"Male"}
+                        value={"M"}
                         label={
                           <Text
                             style={{
@@ -337,7 +362,7 @@ export const FarmerUpdateScreen = ({ route }) => {
                         }
                       />
                       <RadioButtonItem
-                        value={"Female"}
+                        value={"F"}
                         label={
                           <Text
                             style={{

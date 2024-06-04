@@ -22,7 +22,6 @@ export const FarmUpdateScreen = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
 
-  const [gender, setGender] = useState("CP");
   const [indicatorVisible, setIndicatorVisibility] = useState(false);
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
   const [currentJob, setCurrentJob] = useState(null);
@@ -72,7 +71,6 @@ export const FarmUpdateScreen = ({ route }) => {
     };
   }, [isKeyboardActive]);
 
-  useEffect(() => {}, []);
 
   return (
     <View

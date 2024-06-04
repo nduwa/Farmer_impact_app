@@ -6,6 +6,8 @@ const db = SQLite.openDatabase(DB_NAME);
 export const updateDBdataAsync = ({ id, query }) => {
   if (!query || !id) return;
 
+  console.log(query);
+
   return new Promise((resolve, reject) => {
     db.transaction(
       (tx) => {

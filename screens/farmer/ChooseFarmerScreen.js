@@ -3,7 +3,6 @@ import { colors } from "../../data/colors";
 import {
   Dimensions,
   FlatList,
-  ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
@@ -15,7 +14,6 @@ import { StatusBar } from "expo-status-bar";
 import { AntDesign } from "@expo/vector-icons";
 import { Feather } from "@expo/vector-icons";
 import { Formik } from "formik";
-import { FarmerCard } from "../../components/FarmerCard";
 import { GroupsModal } from "../../components/GroupsModal";
 import { retrieveDBdata } from "../../helpers/retrieveDBdata";
 import { FarmerUpdateCard } from "../../components/FarmerUpdateCard";
@@ -65,10 +63,9 @@ export const ChooseFarmerScreen = ({ route }) => {
   useEffect(() => {
     if (activeGroup.id) {
       retrieveDBdata({
-        tableName: "rtc_farmers",
-        stationId: activeGroup._kf_Station,
-        groupID: activeGroup.__kp_Group,
+        tableName: "farmers",
         setData: setFarmers,
+        queryArg: `SELECT farmer.*,household.* FROM rtc_farmers AS farmer INNER JOIN rtc_households AS household ON farmer._kf_Household = household.__kp_Household WHERE household._kf_Group='${activeGroup.__kp_Group}'`,
       });
     }
   }, [activeGroup]);
@@ -78,10 +75,9 @@ export const ChooseFarmerScreen = ({ route }) => {
   useEffect(() => {
     const fetchFarmers = () => {
       retrieveDBdata({
-        tableName: "rtc_farmers",
-        stationId: selectedGroup._kf_Station,
-        groupID: selectedGroup.__kp_Group,
+        tableName: "farmers",
         setData: setFarmers,
+        queryArg: `SELECT farmer.*,household.* FROM rtc_farmers AS farmer INNER JOIN rtc_households AS household ON farmer._kf_Household = household.__kp_Household WHERE farmer.deleted = 0, household._kf_Group='${selectedGroup.__kp_Group}'`,
       });
     };
 
@@ -299,7 +295,7 @@ export const ChooseFarmerScreen = ({ route }) => {
               renderItem={({ item }) => (
                 <FarmerUpdateCard data={item} destination={data} />
               )}
-              keyExtractor={(item) => item.id}
+              keyExtractor={(item, index) => index}
             />
           ) : (
             <Text style={{ textAlign: "center" }}>No farmers found</Text>

@@ -1,12 +1,6 @@
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useState } from "react";
-import {
-  districts,
-  sectors,
-  provinces,
-  cells,
-  villages,
-} from "rwanda-relational";
+import { sectors, cells, villages } from "rwanda-relational";
 import {
   Dimensions,
   Keyboard,
@@ -34,10 +28,11 @@ import { LocalizationModal } from "../../components/LocalizationModal";
 import { newFarmerSchema } from "../../validation/newFarmerSchema";
 import { useSelector } from "react-redux";
 
-export const FarmerRegistrationScreen = ({ route }) => {
+export const FarmerEditScreen = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const userData = useSelector((state) => state.user);
+  const { data } = route.params;
 
   const [currentStationID, setCurrentStationID] = useState();
   const [supplierID, setSupplierID] = useState();
@@ -69,8 +64,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
 
   const [householdSubmitData, setHouseholdSubmitData] = useState();
 
-  const [gender, setGender] = useState("");
-  const [indicatorVisible, setIndicatorVisibility] = useState(false);
+  const [gender, setGender] = useState(data.farmerData.Gender || "");
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
   const [accurateHeight, setAccurateHeight] = useState(0);
   const [currentJob, setCurrentJob] = useState(null);
@@ -341,12 +335,6 @@ export const FarmerRegistrationScreen = ({ route }) => {
   }, [isKeyboardActive]);
 
   useEffect(() => {
-    if (groups.length > 0) {
-      setActiveGroup(groups[0]);
-    }
-  }, [groups.length]);
-
-  useEffect(() => {
     if (selectedGroup) {
       setActiveGroup(selectedGroup);
     }
@@ -367,6 +355,17 @@ export const FarmerRegistrationScreen = ({ route }) => {
       setVillageList(stationVillages);
     }
   }, [cellChoice]);
+
+  useEffect(() => {
+    if (groups.length > 0) {
+      for (const group of groups) {
+        if (group.__kp_Group === data.farmerData._kf_Group) {
+          setActiveGroup(group);
+          
+        }
+      }
+    }
+  }, [groups.length]);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -560,22 +559,22 @@ export const FarmerRegistrationScreen = ({ route }) => {
               activeGroup?.Name?.length > 0
                 ? activeGroup?.Name
                 : activeGroup?.ID_GROUP,
-            farmerName: "",
-            phoneNumber: "",
+            farmerName: data.farmerData.Name,
+            phoneNumber: data.farmerData.Phone,
             gender,
-            nationalID: "",
-            position: "",
-            maritalStatus: "",
-            basicMathSkills: "",
-            readingSkills: "",
-            educationalLevel: "",
-            birthYear: "",
+            nationalID: data.farmerData.National_ID_t,
+            position: data.farmerData.Position,
+            maritalStatus: data.farmerData.Marital_Status,
+            basicMathSkills: data.farmerData.Math_Skills,
+            readingSkills: data.farmerData.Reading_Skills,
+            educationalLevel: data.farmerData.education_level,
+            birthYear: data.farmerData.Year_Birth,
             householdID: "",
-            cell: "",
-            village: "",
-            totalPlots: "",
-            prodTrees: "",
-            totTrees: "",
+            cell: data.farmerData.Area_Small,
+            village: data.farmerData.Area_Smallest,
+            totalPlots: data.farmerData.number_of_plots_with_coffee,
+            prodTrees: data.farmerData.Trees_Producing,
+            totTrees: data.farmerData.Trees,
             stp1: "",
             stp2: "",
           }}
@@ -681,7 +680,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
                       handleChange={handleChange("cell")}
                       handleBlur={handleBlur("cell")}
                       label={"Cell"}
-                      value={cellChoice?.name}
+                      value={cellChoice?.name || values.cell}
                       active={false}
                       error={errors.Area_Small}
                     />
@@ -736,7 +735,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
                       handleChange={handleChange("village")}
                       handleBlur={handleBlur("village")}
                       label={"Village"}
-                      value={villageChoice?.name}
+                      value={villageChoice?.name || values.village}
                       active={false}
                       error={errors.Area_Smallest}
                     />
@@ -788,7 +787,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
                     handleChange={handleChange("totalPlots")}
                     handleBlur={handleBlur("totalPlots")}
                     label={"Total plots of land with coffee"}
-                    value={values.totalPlots}
+                    value={`${values.totalPlots}`}
                     active={true}
                     error={errors.number_of_plots_with_coffee}
                   />
@@ -797,7 +796,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
                     handleChange={handleChange("prodTrees")}
                     handleBlur={handleBlur("prodTrees")}
                     label={"Productive Trees"}
-                    value={values.prodTrees}
+                    value={`${values.prodTrees}`}
                     active={true}
                     error={errors.Trees_Producing}
                   />
@@ -806,7 +805,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
                     handleChange={handleChange("totTrees")}
                     handleBlur={handleBlur("totTrees")}
                     label={"Total Trees"}
-                    value={values.totTrees}
+                    value={`${values.totTrees}`}
                     active={true}
                     error={errors.Trees}
                   />
@@ -815,7 +814,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
                     handleChange={handleChange("stp1")}
                     handleBlur={handleBlur("stp1")}
                     label={"Seasonal Total produced for previous year"}
-                    value={values.stp1}
+                    value={`${values.stp1}`}
                     active={true}
                     error={errors.STP_Weight}
                   />
@@ -824,7 +823,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
                     handleChange={handleChange("stp2")}
                     handleBlur={handleBlur("stp2")}
                     label={"Seasonal Total produced for current year"}
-                    value={values.stp2}
+                    value={`${values.stp2}`}
                     active={true}
                     error={errors.STP_Weight}
                   />
@@ -934,7 +933,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
                     handleChange={handleChange("birthYear")}
                     handleBlur={handleBlur("birthYear")}
                     label={"Year of Birth"}
-                    value={values.birthYear}
+                    value={`${values.birthYear}`}
                     error={errors.Year_Birth}
                   />
                   <BuyCoffeeInput

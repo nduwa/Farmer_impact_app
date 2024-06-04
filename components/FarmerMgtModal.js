@@ -90,7 +90,7 @@ export const FarmerMgtModal = ({ setIsFarmerModalOpen }) => {
             />
             <FarmerMgtItem
               setIsFarmerModalOpen={setIsFarmerModalOpen}
-              destination={"Unregistered_ATP_Farmer"}
+              destination={"SelectFarmerDeleteScreen"}
               label={"Remove Farmers"}
             />
             <FarmerMgtItem

@@ -18,7 +18,7 @@ export const retrieveDBdata = ({
   } else if (tableName === "rtc_farmers") {
     query =
       queryArg ||
-      `SELECT * FROM ${tableName} WHERE _kf_Station='${stationId}' AND _kf_Group='${groupID}'`;
+      `SELECT * FROM ${tableName} WHERE _kf_Station='${stationId}' AND _kf_Group='${groupID}' AND deleted = 0`;
   } else if (tableName === "rtc_supplier") {
     query = queryArg || `SELECT * FROM ${tableName}`;
   } else if (tableName === "rtc_transactions") {
@@ -33,6 +33,8 @@ export const retrieveDBdata = ({
   if (queryArg) query = queryArg;
 
   if (query.length < 1) return;
+
+  console.log(query);
 
   let data = [];
   db.transaction((tx) => {
