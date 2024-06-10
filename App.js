@@ -29,6 +29,7 @@ import { ChooseFarmerScreen } from "./screens/farmer/ChooseFarmerScreen";
 import { SelectFarmersScreen } from "./screens/farmer/SelectFarmersScreen";
 import { PendingRegistrationsScreen } from "./screens/farmer/PendingRegistrationsScreen";
 import { FarmerEditScreen } from "./screens/farmer/FarmerEditScreen";
+import { FarmerNewHHmember } from "./screens/farmer/FarmerNewHHmember";
 
 const Stack = createNativeStackNavigator();
 
@@ -184,6 +185,11 @@ export default function App() {
             name="PendingFarmerEditScreen"
             options={{ unmountOnBlur: true }}
             component={FarmerEditScreen}
+          />
+          <Stack.Screen
+            name="FarmerNewHHmember"
+            options={{ unmountOnBlur: true }}
+            component={FarmerNewHHmember}
           />
         </Stack.Navigator>
       </NavigationContainer>

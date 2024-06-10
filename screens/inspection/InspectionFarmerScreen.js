@@ -51,6 +51,7 @@ export const InspectionFarmerScreen = ({ route }) => {
   const [dataEnd, setDataEnd] = useState(0);
   const [loadingData, setLoadingData] = useState(false);
   const [loadingPage, setLoadingPage] = useState(false);
+  const [searchQueryLength, setSearchQueryLength] = useState(0);
 
   const { data } = route.params;
 
@@ -90,6 +91,7 @@ export const InspectionFarmerScreen = ({ route }) => {
     setLoadingData(false);
     setLoadingPage(false);
 
+    if (searchQueryLength > 0) return;
     if (pages > 0) displayToast(`Page ${currentPage} of ${pages} loaded`);
   };
 
@@ -98,6 +100,7 @@ export const InspectionFarmerScreen = ({ route }) => {
   };
 
   const handleSearch = (text) => {
+    setSearchQueryLength(text.length);
     setCurrentPage(1);
 
     if (text !== "") {
@@ -165,7 +168,7 @@ export const InspectionFarmerScreen = ({ route }) => {
       for (const farmer of thisGroupFarmers) {
         let extendedFarmerData = {};
         let farmerHouseholdData = households.filter(
-          (item) => item.farmerid === farmer.farmerid
+          (item) => item.__kp_Household === farmer._kf_Household
         );
         if (farmerHouseholdData && farmerHouseholdData.length > 0) {
           let neededHouseholdInfo = {

@@ -22,11 +22,12 @@ import CustomButton from "../../components/CustomButton";
 import { FontAwesome6 } from "@expo/vector-icons";
 import { retrieveDBdata } from "../../helpers/retrieveDBdata";
 import { GroupsModal } from "../../components/GroupsModal";
-import { generateID } from "../../helpers/generateID";
-import { dataTodb } from "../../helpers/dataTodb";
 import { LocalizationModal } from "../../components/LocalizationModal";
 import { newFarmerSchema } from "../../validation/newFarmerSchema";
 import { useSelector } from "react-redux";
+import { SyncModal } from "../../components/SyncModal";
+import { deleteDBdataAsync } from "../../helpers/deleteDBdataAsync";
+import { updateDBdataAsync } from "../../helpers/updateDBdataAsync";
 
 export const FarmerEditScreen = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
@@ -76,6 +77,7 @@ export const FarmerEditScreen = ({ route }) => {
 
   const [errors, setErrors] = useState({}); // validation errors
   const [formSubmitted, setFormSubmitted] = useState(false);
+  const [deleteModal, setDeleteModal] = useState({ open: false, id: null });
 
   const farmerPositions = [
     { id: 1, name: "Member" },
@@ -119,7 +121,7 @@ export const FarmerEditScreen = ({ route }) => {
   const navigation = useNavigation();
 
   const handleBackButton = () => {
-    navigation.navigate("Homepage", { data: null });
+    navigation.navigate("PendingRegistrationScreen", { data: null });
   };
 
   const validateForm = (data, schema) => {
@@ -152,18 +154,19 @@ export const FarmerEditScreen = ({ route }) => {
       newErrors[detail.path[0]] = detail.message;
     });
     setErrors(newErrors);
+    console.log(newErrors);
     return false;
   };
 
   const submitFarmer = async (farmerData) => {
     try {
       let farmerInfo = {
-        __kp_Farmer: generateID({ type: "fm_uuid" }).toUpperCase(),
+        __kp_Farmer: data.farmerData.__kp_Farmer,
         Name: farmerData?.farmerName.trim(),
-        Phone: farmerData?.phoneNumber.trim(),
+        Phone: String(farmerData?.phoneNumber).trim(),
         Gender: gender,
-        Year_Birth: farmerData?.birthYear.trim(),
-        National_ID_t: farmerData?.nationalID.trim(),
+        Year_Birth: String(farmerData?.birthYear).trim(),
+        National_ID_t: String(farmerData?.nationalID).trim(),
         Position: positionChoice?.name || farmerData?.position,
         Marital_Status: maritalChoice?.name || farmerData?.maritalStatus,
         Math_Skills: mathChoice?.name || farmerData?.basicMathSkills,
@@ -181,8 +184,8 @@ export const FarmerEditScreen = ({ route }) => {
         sync_farmers: "0",
         uploaded: "0",
         uploaded_at: "0000-00-00 00:00:0",
-        Area_Small: cellChoice?.name,
-        Area_Smallest: villageChoice?.name,
+        Area_Small: cellChoice?.name || data.farmerData.Area_Small,
+        Area_Smallest: villageChoice?.name || data.farmerData.Area_Smallest,
         Trees: farmerData?.totTrees.trim(),
         Trees_Producing: farmerData?.prodTrees.trim(),
         number_of_plots_with_coffee: farmerData?.totalPlots.trim(),
@@ -196,12 +199,12 @@ export const FarmerEditScreen = ({ route }) => {
 
       let householdInfo = {
         _kf_Group: activeGroup.__kp_Group,
-        __kp_Household: generateID({ type: "fm_uuid" }).toUpperCase(),
+        __kp_Household: data.farmerData.__kp_Household,
         _kf_Location: "",
         _kf_Supplier: supplierID,
         _kf_Station: currentStationID,
-        Area_Small: cellChoice?.name,
-        Area_Smallest: villageChoice?.name,
+        Area_Small: cellChoice?.name || data.farmerData.Area_Small,
+        Area_Smallest: villageChoice?.name || data.farmerData.Area_Smallest,
         Trees_Producing: farmerData?.prodTrees.trim(),
         Trees: farmerData?.totTrees.trim(),
         number_of_plots_with_coffee: farmerData?.totalPlots.trim(),
@@ -234,31 +237,47 @@ export const FarmerEditScreen = ({ route }) => {
 
       if (!validateForm(submitData, newFarmerSchema)) return;
 
-      let kfgroup = householdInfo._kf_Group;
-      let kphousehold = householdInfo.__kp_Household;
-      let kflocation = "";
-      let kfsupplier = supplierID;
-      let kfstation = currentStationID;
-
       setHouseholdSubmitData(householdInfo);
 
-      dataTodb({
-        tableName: "farmers_new",
-        syncData: [farmerInfo],
-        setCurrentJob,
-        extraValArr: [kfgroup, kphousehold, kflocation, kfsupplier, kfstation],
-      });
+      let updateQuery = `UPDATE rtc_farmers SET _kf_Group = '${
+        activeGroup.__kp_Group
+      }', Name='${farmerInfo.Name}', Phone='${farmerInfo.Phone}', Gender='${
+        farmerInfo.Gender
+      }',Year_Birth='${farmerInfo.Year_Birth}', National_ID_t = '${
+        farmerInfo.National_ID_t
+      }', Position = '${farmerInfo.Position}', Marital_Status = '${
+        farmerInfo.Marital_Status
+      }', Math_Skills = '${farmerInfo.Math_Skills}', Reading_Skills = '${
+        farmerInfo.Reading_Skills
+      }', education_level = '${
+        farmerInfo.education_level
+      }', updated_at = '${new Date()}', Area_Small = '${
+        farmerInfo.Area_Small
+      }', Area_Smallest = '${farmerInfo.Area_Smallest}', Trees = '${
+        farmerInfo.Trees
+      }', Trees_Producing = '${
+        farmerInfo.Trees_Producing
+      }', number_of_plots_with_coffee = '${
+        farmerInfo.number_of_plots_with_coffee
+      }',STP_Weight = '${farmerInfo.STP_Weight}' WHERE __kp_Farmer = '${
+        farmerInfo.__kp_Farmer
+      }' `;
+
+      updateDBdataAsync({ id: data.farmerData.__kp_Farmer, query: updateQuery })
+        .then((result) => {
+          if (result.success) {
+            setCurrentJob("Farmer details updated");
+          } else {
+            setCurrentJob("Failed to update farmer details");
+          }
+        })
+        .catch((error) => {
+          setCurrentJob("Failed to update farmer details");
+          console.log("Failed to update farmer details: ", error);
+        });
     } catch (error) {
       console.log(error);
     }
-  };
-
-  const calculateHeight = () => {
-    setAccurateHeight(0);
-
-    let heightAdjustmentRatio = 0.4;
-
-    setAccurateHeight(screenHeight * heightAdjustmentRatio);
   };
 
   const displayToast = (msg) => {
@@ -282,6 +301,31 @@ export const FarmerEditScreen = ({ route }) => {
     return output;
   };
 
+  const handleNewMember = () => {
+    navigation.navigate("FarmerNewHHmember", { data });
+  };
+
+  const handleDelete = () => {
+    setDeleteModal((prevState) => ({ ...prevState, open: false }));
+
+    let id = deleteModal.id;
+    deleteDBdataAsync({
+      tableName: "rtc_farmers",
+      targetId: id,
+      customQuery: `DELETE FROM rtc_farmers WHERE __kp_Farmer = '${id}';`,
+    })
+      .then((result) => {
+        if (result.success) {
+          displayToast("Farmer deleted");
+          setCurrentJob("Farmer deleted");
+          navigation.navigate();
+        } else {
+          displayToast("Deletion failed");
+        }
+      })
+      .catch((error) => console.log(error));
+  };
+
   useEffect(() => {
     if (Object.keys(errors).length > 0) {
       setValidationError({
@@ -295,19 +339,28 @@ export const FarmerEditScreen = ({ route }) => {
   }, [errors]);
 
   useEffect(() => {
-    if (currentJob === "Farmer details saved") {
-      let latitude = userData.location.coords.latitude;
-      let longitude = userData.location.coords.longitude;
-
-      dataTodb({
-        tableName: "households_new",
-        syncData: [householdSubmitData],
-        setCurrentJob,
-        extraValArr: [latitude, longitude],
-      });
-    } else if (currentJob === "Household details saved") {
-      displayToast("Farmer pending registration");
+    if (currentJob === "Farmer details updated") {
+      let updateQuery = `UPDATE rtc_households SET _kf_Group = '${householdSubmitData._kf_Group}', Area_Small = '${householdSubmitData.Area_Small}', Area_Smallest = '${householdSubmitData.Area_Smallest}', Trees_Producing = '${householdSubmitData.Trees_Producing}', Trees = '${householdSubmitData.Trees}', number_of_plots_with_coffee = '${householdSubmitData.number_of_plots_with_coffee}', STP_Weight = '${householdSubmitData.STP_Weight}', group_id = '${householdSubmitData.group_id}' WHERE __kp_Household = '${data.farmerData.__kp_Household}'`;
+      updateDBdataAsync({
+        id: data.farmerData.__kp_Household,
+        query: updateQuery,
+      })
+        .then((result) => {
+          if (result.success) {
+            setCurrentJob("Household details updated");
+          } else {
+            setCurrentJob("Failed to update Household details");
+          }
+        })
+        .catch((error) => {
+          setCurrentJob("Failed to update Household details");
+          console.log("Failed to update Household details: ", error);
+        });
+    } else if (currentJob === "Household details updated") {
+      displayToast("All details updated");
       setFormSubmitted(true);
+    } else if (currentJob === "Farmer deleted") {
+      navigation.navigate("PendingRegistrationScreen");
     }
   }, [currentJob]);
 
@@ -325,8 +378,6 @@ export const FarmerEditScreen = ({ route }) => {
         setIsKeyboardActive(false);
       }
     );
-
-    calculateHeight();
 
     return () => {
       keyboardDidShowListener.remove();
@@ -361,7 +412,6 @@ export const FarmerEditScreen = ({ route }) => {
       for (const group of groups) {
         if (group.__kp_Group === data.farmerData._kf_Group) {
           setActiveGroup(group);
-          
         }
       }
     }
@@ -1238,25 +1288,85 @@ export const FarmerEditScreen = ({ route }) => {
                   </View>
                 )}
 
-                <CustomButton
-                  bg={colors.secondary}
-                  color={"white"}
-                  width="95%"
-                  text="Register"
-                  bdcolor="transparent"
-                  mt={screenHeight * 0.017}
-                  mb={
-                    isKeyboardActive ? screenHeight * 0.04 : screenHeight * 0.03
-                  }
-                  radius={10}
-                  disabled={formSubmitted}
-                  onPress={handleSubmit}
-                />
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-evenly",
+                    width: screenWidth * 0.98,
+                  }}
+                >
+                  <CustomButton
+                    bg={colors.secondary}
+                    color={"white"}
+                    width="32%"
+                    text="Delete"
+                    bdcolor="transparent"
+                    fontSizeRatio={0.043}
+                    mt={screenHeight * 0.017}
+                    mb={
+                      isKeyboardActive
+                        ? screenHeight * 0.04
+                        : screenHeight * 0.03
+                    }
+                    radius={5}
+                    disabled={formSubmitted}
+                    onPress={() =>
+                      setDeleteModal({
+                        id: data?.farmerData?.__kp_Farmer,
+                        open: true,
+                      })
+                    }
+                  />
+                  <CustomButton
+                    bg={colors.blue_font}
+                    color={"white"}
+                    width="32%"
+                    text="Edit"
+                    bdcolor="transparent"
+                    fontSizeRatio={0.043}
+                    mt={screenHeight * 0.017}
+                    mb={
+                      isKeyboardActive
+                        ? screenHeight * 0.04
+                        : screenHeight * 0.03
+                    }
+                    radius={5}
+                    disabled={formSubmitted}
+                    onPress={handleSubmit}
+                  />
+                  <CustomButton
+                    bg={colors.black}
+                    color={"white"}
+                    width="32%"
+                    text="Add member"
+                    bdcolor="transparent"
+                    fontSizeRatio={0.043}
+                    mt={screenHeight * 0.017}
+                    mb={
+                      isKeyboardActive
+                        ? screenHeight * 0.04
+                        : screenHeight * 0.03
+                    }
+                    radius={5}
+                    disabled={formSubmitted}
+                    onPress={handleNewMember}
+                  />
+                </View>
               </ScrollView>
             </View>
           )}
         </Formik>
       </View>
+
+      {deleteModal.open && (
+        <SyncModal
+          label={"Are you sure you want to delete this farmer?"}
+          onYes={handleDelete}
+          OnNo={() =>
+            setDeleteModal((prevState) => ({ ...prevState, open: false }))
+          }
+        />
+      )}
     </View>
   );
 };

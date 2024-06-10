@@ -28,10 +28,6 @@ export const deleteDBdataAsync = ({
               resolve({ success: false });
             }
           },
-          () => {
-            console.log("closing db after deleting");
-            db.closeSync(); // Close the database connection
-          },
           (_, error) => {
             console.log("Error: ", error);
             reject(error);
@@ -39,7 +35,6 @@ export const deleteDBdataAsync = ({
         );
       },
       (error) => {
-        if (!error) db.closeSync(); // Close the database connection
         console.log("Error: ", error);
         reject(error);
       }

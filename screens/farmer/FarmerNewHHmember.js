@@ -1,13 +1,6 @@
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useState } from "react";
 import {
-  districts,
-  sectors,
-  provinces,
-  cells,
-  villages,
-} from "rwanda-relational";
-import {
   Dimensions,
   Keyboard,
   ScrollView,
@@ -26,36 +19,30 @@ import RadioButtonGroup, { RadioButtonItem } from "expo-radio-button";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import CustomButton from "../../components/CustomButton";
 import { FontAwesome6 } from "@expo/vector-icons";
-import { retrieveDBdata } from "../../helpers/retrieveDBdata";
-import { GroupsModal } from "../../components/GroupsModal";
 import { generateID } from "../../helpers/generateID";
 import { dataTodb } from "../../helpers/dataTodb";
 import { LocalizationModal } from "../../components/LocalizationModal";
-import { newFarmerSchema } from "../../validation/newFarmerSchema";
 import { useSelector } from "react-redux";
+import { FarmerOnlySchema } from "../../validation/FarmerOnlySchema";
 
-export const FarmerRegistrationScreen = ({ route }) => {
+export const FarmerNewHHmember = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const userData = useSelector((state) => state.user);
+  const navigation = useNavigation();
+  const { data } = route.params;
 
   const [currentStationID, setCurrentStationID] = useState();
   const [supplierID, setSupplierID] = useState();
   const [userName, setUserName] = useState();
 
-  const [groupsModalOpen, setGroupsModalOpen] = useState(false);
-  const [cellsModalOpen, setCellsModalOpen] = useState(false);
-  const [villagesModalOpen, setvillagesModalOpen] = useState(false);
   const [positionModalOpen, setPositionModalOpen] = useState(false);
   const [readingModalOpen, setReadingModalOpen] = useState(false);
   const [mathModalOpen, setMathModalOpen] = useState(false);
   const [maritalModalOpen, setMaritalModalOpen] = useState(false);
   const [educationModalOpen, setEducationModalOpen] = useState(false);
 
-  const [cellChoice, setCellChoice] = useState(null);
-  const [villageChoice, setVillageChoice] = useState(null);
-  const [cellList, setCellList] = useState([]);
-  const [villageList, setVillageList] = useState([]);
+  const [memberLevel, setMemberLevel] = useState(0);
 
   const [positionChoice, setPositionChoice] = useState(null);
   const [maritalChoice, setMaritalChoice] = useState(null);
@@ -63,15 +50,8 @@ export const FarmerRegistrationScreen = ({ route }) => {
   const [educationChoice, setEducationChoice] = useState(null);
   const [mathChoice, setMathChoice] = useState(null);
 
-  const [activeGroup, setActiveGroup] = useState([]);
-  const [selectedGroup, setSelectedGroup] = useState(null);
-  const [groups, setGroups] = useState([]);
-
-  const [householdSubmitData, setHouseholdSubmitData] = useState();
-
   const [gender, setGender] = useState("");
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
-  const [accurateHeight, setAccurateHeight] = useState(0);
   const [currentJob, setCurrentJob] = useState(null);
   const [validationError, setValidationError] = useState({
     message: null,
@@ -121,10 +101,8 @@ export const FarmerRegistrationScreen = ({ route }) => {
     { id: 3, name: "Can do basic math without assistance from others" },
   ];
 
-  const navigation = useNavigation();
-
   const handleBackButton = () => {
-    navigation.navigate("Homepage", { data: null });
+    navigation.navigate("PendingRegistrationScreen", { data: null });
   };
 
   const validateForm = (data, schema) => {
@@ -162,8 +140,13 @@ export const FarmerRegistrationScreen = ({ route }) => {
 
   const submitFarmer = async (farmerData) => {
     try {
+      let currentMemberLevel = +data.farmerData.farmerid;
+      let newMemberLevel = currentMemberLevel + 1;
+
       let farmerInfo = {
         __kp_Farmer: generateID({ type: "fm_uuid" }).toUpperCase(),
+        _kf_Group: data.farmerData._kf_Group,
+        _kf_Station: data.farmerData._kf_Station,
         Name: farmerData?.farmerName.trim(),
         Phone: farmerData?.phoneNumber.trim(),
         Gender: gender,
@@ -174,7 +157,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
         Math_Skills: mathChoice?.name || farmerData?.basicMathSkills,
         Reading_Skills: readingChoice?.name || farmerData?.readingSkills,
         education_level: educationChoice?.name || farmerData?.educationalLevel,
-        farmerid: "1", // generated on the server, 1 means the primary member of the household
+        farmerid: String(newMemberLevel), /// generated on the server, 1 means the primary member of the household
         CAFE_ID: "",
         SAN_ID: "",
         UTZ_ID: "",
@@ -186,12 +169,14 @@ export const FarmerRegistrationScreen = ({ route }) => {
         sync_farmers: "0",
         uploaded: "0",
         uploaded_at: "0000-00-00 00:00:0",
-        Area_Small: cellChoice?.name,
-        Area_Smallest: villageChoice?.name,
-        Trees: farmerData?.totTrees.trim(),
-        Trees_Producing: farmerData?.prodTrees.trim(),
-        number_of_plots_with_coffee: farmerData?.totalPlots.trim(),
-        STP_Weight: `${farmerData?.stp1.trim()} ${farmerData?.stp2.trim()}`,
+        Area_Small: data.farmerData.Area_Small,
+        Area_Smallest: data.farmerData.Area_Smallest,
+        STP_Weight: String(data.farmerData.STP_Weight),
+        Trees: String(data.farmerData.Trees),
+        Trees_Producing: String(data.farmerData.Trees_Producing),
+        number_of_plots_with_coffee: String(
+          data.farmerData.number_of_plots_with_coffee
+        ),
         latitude: userData.location.coords.latitude,
         longitude: userData.location.coords.longitude,
         householdid: "",
@@ -199,53 +184,21 @@ export const FarmerRegistrationScreen = ({ route }) => {
         recordid: "",
       };
 
-      let householdInfo = {
-        _kf_Group: activeGroup.__kp_Group,
-        __kp_Household: generateID({ type: "fm_uuid" }).toUpperCase(),
-        _kf_Location: "",
-        _kf_Supplier: supplierID,
-        _kf_Station: currentStationID,
-        Area_Small: cellChoice?.name,
-        Area_Smallest: villageChoice?.name,
-        Trees_Producing: farmerData?.prodTrees.trim(),
-        Trees: farmerData?.totTrees.trim(),
-        number_of_plots_with_coffee: farmerData?.totalPlots.trim(),
-        STP_Weight: `${farmerData?.stp1.trim()} ${farmerData?.stp2.trim()}`,
-        householdid: "",
-        z_Farmer_Primary: "",
-        created_at: new Date(),
-        type: "new",
-        farmerid: "1", // generated on the server, 1 means the primary member of the household
-        group_id: activeGroup.ID_GROUP,
-        latitude: userData.location.coords.latitude,
-        longitude: userData.location.coords.longitude,
-        Children: "",
-        Childen_gender: "",
-        Childen_below_18: "",
-        recordid: "",
-        status: "Active",
-        inspectionId: "",
-        cafeId: "0",
-        InspectionStatus: "Inactive",
-        sync: "0",
-      };
+      console.log(farmerInfo);
 
       setErrors({});
       let submitData = {
         ...farmerInfo,
-        ...householdInfo,
-        ...{ _kf_Household: householdInfo.__kp_Household },
+        ...{ _kf_Household: data.farmerData.__kp_Household },
       };
 
-      if (!validateForm(submitData, newFarmerSchema)) return;
+      if (!validateForm(submitData, FarmerOnlySchema)) return;
 
-      let kfgroup = householdInfo._kf_Group;
-      let kphousehold = householdInfo.__kp_Household;
+      let kfgroup = data.farmerData._kf_Group;
+      let kphousehold = data.farmerData.__kp_Household;
       let kflocation = "";
       let kfsupplier = supplierID;
       let kfstation = currentStationID;
-
-      setHouseholdSubmitData(householdInfo);
 
       dataTodb({
         tableName: "farmers_new",
@@ -256,14 +209,6 @@ export const FarmerRegistrationScreen = ({ route }) => {
     } catch (error) {
       console.log(error);
     }
-  };
-
-  const calculateHeight = () => {
-    setAccurateHeight(0);
-
-    let heightAdjustmentRatio = 0.4;
-
-    setAccurateHeight(screenHeight * heightAdjustmentRatio);
   };
 
   const displayToast = (msg) => {
@@ -301,16 +246,6 @@ export const FarmerRegistrationScreen = ({ route }) => {
 
   useEffect(() => {
     if (currentJob === "Farmer details saved") {
-      let latitude = userData.location.coords.latitude;
-      let longitude = userData.location.coords.longitude;
-
-      dataTodb({
-        tableName: "households_new",
-        syncData: [householdSubmitData],
-        setCurrentJob,
-        extraValArr: [latitude, longitude],
-      });
-    } else if (currentJob === "Household details saved") {
       displayToast("Farmer pending registration");
       setFormSubmitted(true);
     }
@@ -331,41 +266,11 @@ export const FarmerRegistrationScreen = ({ route }) => {
       }
     );
 
-    calculateHeight();
-
     return () => {
       keyboardDidShowListener.remove();
       keyboardDidHideListener.remove();
     };
   }, [isKeyboardActive]);
-
-  useEffect(() => {
-    if (groups.length > 0) {
-      setActiveGroup(groups[0]);
-    }
-  }, [groups.length]);
-
-  useEffect(() => {
-    if (selectedGroup) {
-      setActiveGroup(selectedGroup);
-    }
-  }, [selectedGroup]);
-
-  useEffect(() => {
-    if (cellChoice) {
-      setVillageChoice(null);
-      const allVillages = villages();
-      let stationVillages = [];
-
-      for (const village of allVillages) {
-        if (village.parent_id === cellChoice.id) {
-          stationVillages.push(village);
-        }
-      }
-
-      setVillageList(stationVillages);
-    }
-  }, [cellChoice]);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -378,49 +283,12 @@ export const FarmerRegistrationScreen = ({ route }) => {
           setCurrentStationID(stationId);
           setSupplierID(supplierID);
           setUserName(currentUser);
-
-          retrieveDBdata({
-            tableName: "rtc_groups",
-            stationId,
-            setData: setGroups,
-          });
         }
-      };
-
-      const fetchPlace = async () => {
-        const stationSector = await SecureStore.getItemAsync(
-          "rtc-station-location-sector"
-        );
-
-        const allSectors = sectors();
-        const allCells = cells();
-        const stationCells = [];
-
-        for (const sector of allSectors) {
-          if (sector.name === stationSector) {
-            for (const cell of allCells) {
-              if (cell.parent_id === sector.id) {
-                stationCells.push(cell);
-              }
-            }
-          }
-        }
-
-        setCellList(stationCells);
       };
 
       fetchData();
-      fetchPlace();
 
       return () => {
-        setGroups([]);
-        setSelectedGroup(null);
-        setGroupsModalOpen(false);
-        setActiveGroup([]);
-        setVillageList([]);
-        setCellList([]);
-        setVillageChoice(null);
-        setCellChoice(null);
         setErrors({});
         setValidationError({
           type: null,
@@ -439,34 +307,6 @@ export const FarmerRegistrationScreen = ({ route }) => {
       }}
     >
       <StatusBar style="dark" />
-      {groupsModalOpen && (
-        <GroupsModal
-          setGroupChoice={setSelectedGroup}
-          data={groups}
-          setModalOpen={setGroupsModalOpen}
-        />
-      )}
-
-      {cellsModalOpen && (
-        <LocalizationModal
-          setChoice={setCellChoice}
-          data={cellList}
-          setModalOpen={setCellsModalOpen}
-          heightRatio={isKeyboardActive ? 0.5 : 0.8}
-          title={"Cells"}
-        />
-      )}
-
-      {villagesModalOpen && (
-        <LocalizationModal
-          setChoice={setVillageChoice}
-          data={villageList}
-          setModalOpen={setvillagesModalOpen}
-          heightRatio={isKeyboardActive ? 0.5 : 0.8}
-          title={"Villages"}
-        />
-      )}
-
       {positionModalOpen && (
         <LocalizationModal
           setChoice={setPositionChoice}
@@ -526,7 +366,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
           backgroundColor: colors.white,
           paddingTop: screenHeight * 0.042,
           padding: 10,
-          elevation: 3,
+          elevation: 5,
         }}
       >
         <TouchableOpacity
@@ -546,7 +386,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
             fontSize: 19,
           }}
         >
-          New Farmer
+          New Household Member
         </Text>
         <View
           style={{ width: screenWidth * 0.07, backgroundColor: "transparent" }}
@@ -555,10 +395,6 @@ export const FarmerRegistrationScreen = ({ route }) => {
       <View style={{ backgroundColor: colors.bg_variant }}>
         <Formik
           initialValues={{
-            groupName:
-              activeGroup?.Name?.length > 0
-                ? activeGroup?.Name
-                : activeGroup?.ID_GROUP,
             farmerName: "",
             phoneNumber: "",
             gender,
@@ -572,11 +408,6 @@ export const FarmerRegistrationScreen = ({ route }) => {
             householdID: "",
             cell: "",
             village: "",
-            totalPlots: "",
-            prodTrees: "",
-            totTrees: "",
-            stp1: "",
-            stp2: "",
           }}
           onSubmit={async (values) => {
             submitFarmer(values);
@@ -607,228 +438,6 @@ export const FarmerRegistrationScreen = ({ route }) => {
                   paddingVertical: screenHeight * 0.005,
                 }}
               >
-                <View
-                  style={{
-                    width: "95%",
-                    backgroundColor: colors.white,
-                    elevation: 2,
-                    borderRadius: 15,
-                    marginTop: screenHeight * 0.025,
-                    paddingHorizontal: screenWidth * 0.04,
-                    paddingVertical: screenHeight * 0.03,
-                    gap: screenHeight * 0.01,
-                  }}
-                >
-                  <Text
-                    style={{
-                      fontWeight: "400",
-                      fontSize: screenWidth * 0.05,
-                      color: colors.secondary,
-                      marginLeft: screenWidth * 0.02,
-                    }}
-                  >
-                    Household information
-                  </Text>
-                  <View>
-                    <BuyCoffeeInput
-                      values={values}
-                      handleChange={handleChange("groupName")}
-                      handleBlur={handleBlur("groupName")}
-                      label={"Choose group name"}
-                      value={
-                        activeGroup?.Name?.length > 0
-                          ? activeGroup?.Name
-                          : activeGroup?.ID_GROUP
-                      }
-                      active={false}
-                      error={errors._kf_Group}
-                    />
-                    <TouchableOpacity
-                      onPress={() => setGroupsModalOpen(true)}
-                      style={{
-                        position: "absolute",
-                        left: screenWidth * 0.775,
-                        top: screenHeight * 0.043,
-                        backgroundColor: "white",
-                        borderRadius: screenWidth * 0.009,
-                        padding: screenHeight * 0.007,
-                        elevation: 3,
-                      }}
-                    >
-                      <FontAwesome6
-                        name="expand"
-                        size={screenWidth * 0.05}
-                        color="black"
-                      />
-                    </TouchableOpacity>
-                  </View>
-
-                  <View>
-                    <BuyCoffeeInput
-                      values={values}
-                      handleChange={handleChange("householdID")}
-                      handleBlur={handleBlur("householdID")}
-                      label={"Household ID(if any)"}
-                      value={values.householdID}
-                      active={false}
-                    />
-                  </View>
-
-                  <View>
-                    <BuyCoffeeInput
-                      values={values}
-                      handleChange={handleChange("cell")}
-                      handleBlur={handleBlur("cell")}
-                      label={"Cell"}
-                      value={cellChoice?.name}
-                      active={false}
-                      error={errors.Area_Small}
-                    />
-                    <>
-                      <TouchableOpacity
-                        onPress={() => setCellsModalOpen(true)}
-                        style={{
-                          position: "absolute",
-                          left: screenWidth * 0.775,
-                          top: screenHeight * 0.043,
-                          backgroundColor: "white",
-                          borderRadius: screenWidth * 0.009,
-                          padding: screenHeight * 0.007,
-                          elevation: 3,
-                        }}
-                      >
-                        <FontAwesome6
-                          name="expand"
-                          size={screenWidth * 0.05}
-                          color="black"
-                        />
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        onPress={() => {
-                          setFieldValue("cell", "");
-                          setFieldValue("village", "");
-                          setCellChoice(null);
-                          setVillageChoice(null);
-                        }}
-                        style={{
-                          position: "absolute",
-                          left: screenWidth * 0.68,
-                          top: screenHeight * 0.043,
-                          backgroundColor: "white",
-                          borderRadius: screenWidth * 0.009,
-                          padding: screenHeight * 0.007,
-                          elevation: 3,
-                        }}
-                      >
-                        <MaterialIcons
-                          name="clear"
-                          size={screenWidth * 0.05}
-                          color="black"
-                        />
-                      </TouchableOpacity>
-                    </>
-                  </View>
-
-                  <View>
-                    <BuyCoffeeInput
-                      values={values}
-                      handleChange={handleChange("village")}
-                      handleBlur={handleBlur("village")}
-                      label={"Village"}
-                      value={villageChoice?.name}
-                      active={false}
-                      error={errors.Area_Smallest}
-                    />
-                    <>
-                      <TouchableOpacity
-                        onPress={() => setvillagesModalOpen(true)}
-                        style={{
-                          position: "absolute",
-                          left: screenWidth * 0.775,
-                          top: screenHeight * 0.043,
-                          backgroundColor: "white",
-                          borderRadius: screenWidth * 0.009,
-                          padding: screenHeight * 0.007,
-                          elevation: 3,
-                        }}
-                      >
-                        <FontAwesome6
-                          name="expand"
-                          size={screenWidth * 0.05}
-                          color="black"
-                        />
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        onPress={() => {
-                          setFieldValue("village", "");
-                          setVillageChoice(null);
-                        }}
-                        style={{
-                          position: "absolute",
-                          left: screenWidth * 0.68,
-                          top: screenHeight * 0.043,
-                          backgroundColor: "white",
-                          borderRadius: screenWidth * 0.009,
-                          padding: screenHeight * 0.007,
-                          elevation: 3,
-                        }}
-                      >
-                        <MaterialIcons
-                          name="clear"
-                          size={screenWidth * 0.05}
-                          color="black"
-                        />
-                      </TouchableOpacity>
-                    </>
-                  </View>
-
-                  <BuyCoffeeInput
-                    values={values}
-                    handleChange={handleChange("totalPlots")}
-                    handleBlur={handleBlur("totalPlots")}
-                    label={"Total plots of land with coffee"}
-                    value={values.totalPlots}
-                    active={true}
-                    error={errors.number_of_plots_with_coffee}
-                  />
-                  <BuyCoffeeInput
-                    values={values}
-                    handleChange={handleChange("prodTrees")}
-                    handleBlur={handleBlur("prodTrees")}
-                    label={"Productive Trees"}
-                    value={values.prodTrees}
-                    active={true}
-                    error={errors.Trees_Producing}
-                  />
-                  <BuyCoffeeInput
-                    values={values}
-                    handleChange={handleChange("totTrees")}
-                    handleBlur={handleBlur("totTrees")}
-                    label={"Total Trees"}
-                    value={values.totTrees}
-                    active={true}
-                    error={errors.Trees}
-                  />
-                  <BuyCoffeeInput
-                    values={values}
-                    handleChange={handleChange("stp1")}
-                    handleBlur={handleBlur("stp1")}
-                    label={"Seasonal Total produced for previous year"}
-                    value={values.stp1}
-                    active={true}
-                    error={errors.STP_Weight}
-                  />
-                  <BuyCoffeeInput
-                    values={values}
-                    handleChange={handleChange("stp2")}
-                    handleBlur={handleBlur("stp2")}
-                    label={"Seasonal Total produced for current year"}
-                    value={values.stp2}
-                    active={true}
-                    error={errors.STP_Weight}
-                  />
-                </View>
-
                 <View
                   style={{
                     width: "95%",

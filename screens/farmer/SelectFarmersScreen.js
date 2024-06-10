@@ -206,7 +206,7 @@ export const SelectFarmersScreen = ({ route }) => {
       fetchFarmers();
     }
   }, [selectedGroup]);
-
+ 
   useEffect(() => {
     if (activeGroup.id) {
       retrieveDBdata({

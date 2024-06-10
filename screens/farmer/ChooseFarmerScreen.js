@@ -77,7 +77,7 @@ export const ChooseFarmerScreen = ({ route }) => {
       retrieveDBdata({
         tableName: "farmers",
         setData: setFarmers,
-        queryArg: `SELECT farmer.*,household.* FROM rtc_farmers AS farmer INNER JOIN rtc_households AS household ON farmer._kf_Household = household.__kp_Household WHERE farmer.deleted = 0, household._kf_Group='${selectedGroup.__kp_Group}'`,
+        queryArg: `SELECT farmer.*,household.* FROM rtc_farmers AS farmer INNER JOIN rtc_households AS household ON farmer._kf_Household = household.__kp_Household WHERE farmer.deleted = 0 AND household._kf_Group='${selectedGroup.__kp_Group}'`,
       });
     };
 
