@@ -28,6 +28,7 @@ import { useSelector } from "react-redux";
 import { SyncModal } from "../../components/SyncModal";
 import { deleteDBdataAsync } from "../../helpers/deleteDBdataAsync";
 import { updateDBdataAsync } from "../../helpers/updateDBdataAsync";
+import LottieView from "lottie-react-native";
 
 export const FarmerEditScreen = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
@@ -64,6 +65,7 @@ export const FarmerEditScreen = ({ route }) => {
   const [groups, setGroups] = useState([]);
 
   const [householdSubmitData, setHouseholdSubmitData] = useState();
+  const [loading, setLoading] = useState(true);
 
   const [gender, setGender] = useState(data.farmerData.Gender || "");
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
@@ -346,6 +348,7 @@ export const FarmerEditScreen = ({ route }) => {
         query: updateQuery,
       })
         .then((result) => {
+          setLoading(false);
           if (result.success) {
             setCurrentJob("Household details updated");
           } else {
@@ -353,6 +356,7 @@ export const FarmerEditScreen = ({ route }) => {
           }
         })
         .catch((error) => {
+          setLoading(false);
           setCurrentJob("Failed to update Household details");
           console.log("Failed to update Household details: ", error);
         });
@@ -409,6 +413,7 @@ export const FarmerEditScreen = ({ route }) => {
 
   useEffect(() => {
     if (groups.length > 0) {
+      setLoading(false);
       for (const group of groups) {
         if (group.__kp_Group === data.farmerData._kf_Group) {
           setActiveGroup(group);
@@ -428,6 +433,7 @@ export const FarmerEditScreen = ({ route }) => {
           setCurrentStationID(stationId);
           setSupplierID(supplierID);
           setUserName(currentUser);
+          setLoading(true);
 
           retrieveDBdata({
             tableName: "rtc_groups",
@@ -463,6 +469,7 @@ export const FarmerEditScreen = ({ route }) => {
       fetchPlace();
 
       return () => {
+        setLoading(false);
         setGroups([]);
         setSelectedGroup(null);
         setGroupsModalOpen(false);
@@ -1366,6 +1373,42 @@ export const FarmerEditScreen = ({ route }) => {
             setDeleteModal((prevState) => ({ ...prevState, open: false }))
           }
         />
+      )}
+
+      {/* loader */}
+      {loading && (
+        <View
+          style={{
+            position: "absolute",
+            marginTop: screenHeight * 0.12,
+            width: "100%",
+            backgroundColor: "transparent",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <View
+            style={{
+              width: "auto",
+              backgroundColor: "white",
+              borderRadius: screenHeight * 0.5,
+              elevation: 4,
+            }}
+          >
+            <LottieView
+              style={{
+                height: screenHeight * 0.05,
+                width: screenHeight * 0.05,
+                alignSelf: "center",
+              }}
+              source={require("../../assets/lottie/spinner.json")}
+              autoPlay
+              speed={1}
+              loop={true}
+              resizeMode="cover"
+            />
+          </View>
+        </View>
       )}
     </View>
   );

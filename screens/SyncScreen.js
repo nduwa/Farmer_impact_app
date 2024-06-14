@@ -18,6 +18,7 @@ import { dataTodb } from "../helpers/dataTodb";
 import { SyncModal } from "../components/SyncModal";
 import { sync, syncActions } from "../redux/sync/syncSlice";
 import { checkTableExistence } from "../helpers/checkTableExistence";
+import LottieView from "lottie-react-native";
 
 export const SyncScreen = ({ navigation, route }) => {
   const screenHeight = Dimensions.get("window").height;
@@ -34,6 +35,7 @@ export const SyncScreen = ({ navigation, route }) => {
 
   const [syncStarted, setSyncStarted] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [sycnList, setSyncList] = useState([
     { table: "stations", status: false },
     { table: "groups", status: false },
@@ -67,8 +69,12 @@ export const SyncScreen = ({ navigation, route }) => {
   };
   const handleSyncStart = () => {
     setstartSyncModalOpen(false);
+    setLoading(true);
 
-    if (!currentTable) return;
+    if (!currentTable) {
+      setLoading(false);
+      return;
+    }
     dispatch(sync({ tableName: currentTable }));
     setSyncStarted(true);
     setIsSyncing(true);
@@ -78,6 +84,7 @@ export const SyncScreen = ({ navigation, route }) => {
       ...prevState,
       open: false,
     }));
+    setLoading(true);
 
     if (restartSyncModal.table == null) return;
     let restartTable = sycnList[restartSyncModal.table].table;
@@ -92,6 +99,7 @@ export const SyncScreen = ({ navigation, route }) => {
   };
   handleEndProcess = () => {
     setstartSyncModalOpen(false);
+    setLoading(false);
   };
   const handleBackButton = () => {
     if (isSyncing) {
@@ -132,11 +140,14 @@ export const SyncScreen = ({ navigation, route }) => {
         setIsSyncing: setIsSyncing,
         setSyncList: setSyncList,
       });
+
+      setLoading(false);
     }
     if (syncState.error) {
       setCurrentJob("Error");
       displayToast(`Error fetching data for ${currentTable}`);
       setIsSyncing(false);
+      setLoading(false);
     }
   }, [syncState.loading, syncState.serverResponded]);
 
@@ -393,6 +404,42 @@ export const SyncScreen = ({ navigation, route }) => {
             }))
           }
         />
+      )}
+
+      {/* loader */}
+      {loading && (
+        <View
+          style={{
+            position: "absolute",
+            marginTop: screenHeight * 0.12,
+            width: "100%",
+            backgroundColor: "transparent",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <View
+            style={{
+              width: "auto",
+              backgroundColor: "white",
+              borderRadius: screenHeight * 0.5,
+              elevation: 4,
+            }}
+          >
+            <LottieView
+              style={{
+                height: screenHeight * 0.05,
+                width: screenHeight * 0.05,
+                alignSelf: "center",
+              }}
+              source={require("../assets/lottie/spinner.json")}
+              autoPlay
+              speed={1}
+              loop={true}
+              resizeMode="cover"
+            />
+          </View>
+        </View>
       )}
     </View>
   );

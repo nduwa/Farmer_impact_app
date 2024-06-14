@@ -10,7 +10,7 @@ export const FarmerPendingCard = ({ data, registrationDate }) => {
   const navigation = useNavigation();
 
   const handleNavigation = () => {
-    navigation.navigate("PendingFarmerEditScreen", {
+    navigation.replace("PendingFarmerEditScreen", {
       data: { farmerData: data },
     });
   };

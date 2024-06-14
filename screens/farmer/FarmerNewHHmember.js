@@ -24,6 +24,7 @@ import { dataTodb } from "../../helpers/dataTodb";
 import { LocalizationModal } from "../../components/LocalizationModal";
 import { useSelector } from "react-redux";
 import { FarmerOnlySchema } from "../../validation/FarmerOnlySchema";
+import LottieView from "lottie-react-native";
 
 export const FarmerNewHHmember = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
@@ -42,8 +43,6 @@ export const FarmerNewHHmember = ({ route }) => {
   const [maritalModalOpen, setMaritalModalOpen] = useState(false);
   const [educationModalOpen, setEducationModalOpen] = useState(false);
 
-  const [memberLevel, setMemberLevel] = useState(0);
-
   const [positionChoice, setPositionChoice] = useState(null);
   const [maritalChoice, setMaritalChoice] = useState(null);
   const [readingChoice, setReadingChoice] = useState(null);
@@ -61,6 +60,7 @@ export const FarmerNewHHmember = ({ route }) => {
 
   const [errors, setErrors] = useState({}); // validation errors
   const [formSubmitted, setFormSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const farmerPositions = [
     { id: 1, name: "Member" },
@@ -248,6 +248,7 @@ export const FarmerNewHHmember = ({ route }) => {
     if (currentJob === "Farmer details saved") {
       displayToast("Farmer pending registration");
       setFormSubmitted(true);
+      setLoading(false);
     }
   }, [currentJob]);
 
@@ -290,6 +291,7 @@ export const FarmerNewHHmember = ({ route }) => {
 
       return () => {
         setErrors({});
+        setLoading(false);
         setValidationError({
           type: null,
           message: null,
@@ -410,6 +412,7 @@ export const FarmerNewHHmember = ({ route }) => {
             village: "",
           }}
           onSubmit={async (values) => {
+            setLoading(true);
             submitFarmer(values);
           }}
         >
@@ -866,6 +869,42 @@ export const FarmerNewHHmember = ({ route }) => {
           )}
         </Formik>
       </View>
+
+      {/* loader */}
+      {loading && (
+        <View
+          style={{
+            position: "absolute",
+            marginTop: screenHeight * 0.12,
+            width: "100%",
+            backgroundColor: "transparent",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <View
+            style={{
+              width: "auto",
+              backgroundColor: "white",
+              borderRadius: screenHeight * 0.5,
+              elevation: 4,
+            }}
+          >
+            <LottieView
+              style={{
+                height: screenHeight * 0.05,
+                width: screenHeight * 0.05,
+                alignSelf: "center",
+              }}
+              source={require("../../assets/lottie/spinner.json")}
+              autoPlay
+              speed={1}
+              loop={true}
+              resizeMode="cover"
+            />
+          </View>
+        </View>
+      )}
     </View>
   );
 };

@@ -91,7 +91,7 @@ export const LocalizationModal = ({ setModalOpen, data, setChoice, title }) => {
           initialNumToRender={15}
           contentContainerStyle={{
             marginBottom: 25,
-            padding: screenWidth * 0.03,
+            padding: screenWidth * 0.01,
           }}
           data={data}
           renderItem={({ item }) => (
@@ -111,6 +111,7 @@ export const LocalizationModal = ({ setModalOpen, data, setChoice, title }) => {
               <Text
                 style={{
                   fontSize: screenHeight * 0.02,
+                  width: screenWidth * 0.7,
                 }}
               >
                 {item.name}

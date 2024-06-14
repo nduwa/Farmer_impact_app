@@ -33,6 +33,7 @@ import { dataTodb } from "../../helpers/dataTodb";
 import { LocalizationModal } from "../../components/LocalizationModal";
 import { newFarmerSchema } from "../../validation/newFarmerSchema";
 import { useSelector } from "react-redux";
+import LottieView from "lottie-react-native";
 
 export const FarmerRegistrationScreen = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
@@ -81,6 +82,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
 
   const [errors, setErrors] = useState({}); // validation errors
   const [formSubmitted, setFormSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const farmerPositions = [
     { id: 1, name: "Member" },
@@ -146,7 +148,6 @@ export const FarmerRegistrationScreen = ({ route }) => {
           message: "Production trees can't be more than total trees",
           inputBox: null,
         });
-
         return false;
       }
       return true;
@@ -289,6 +290,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
 
   useEffect(() => {
     if (Object.keys(errors).length > 0) {
+      setLoading(false);
       setValidationError({
         type: "emptyOrInvalidData",
         message: `Invalid input in ${getInputLabel(
@@ -312,6 +314,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
       });
     } else if (currentJob === "Household details saved") {
       displayToast("Farmer pending registration");
+      setLoading(false);
       setFormSubmitted(true);
     }
   }, [currentJob]);
@@ -341,6 +344,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
 
   useEffect(() => {
     if (groups.length > 0) {
+      setLoading(false);
       setActiveGroup(groups[0]);
     }
   }, [groups.length]);
@@ -378,6 +382,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
           setCurrentStationID(stationId);
           setSupplierID(supplierID);
           setUserName(currentUser);
+          setLoading(true);
 
           retrieveDBdata({
             tableName: "rtc_groups",
@@ -422,6 +427,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
         setVillageChoice(null);
         setCellChoice(null);
         setErrors({});
+        setLoading(false);
         setValidationError({
           type: null,
           message: null,
@@ -579,6 +585,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
             stp2: "",
           }}
           onSubmit={async (values) => {
+            setLoading(true);
             submitFarmer(values);
           }}
         >
@@ -648,7 +655,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
                       style={{
                         position: "absolute",
                         left: screenWidth * 0.775,
-                        top: screenHeight * 0.043,
+                        top: "47%",
                         backgroundColor: "white",
                         borderRadius: screenWidth * 0.009,
                         padding: screenHeight * 0.007,
@@ -690,7 +697,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
                         style={{
                           position: "absolute",
                           left: screenWidth * 0.775,
-                          top: screenHeight * 0.043,
+                          top: "47%",
                           backgroundColor: "white",
                           borderRadius: screenWidth * 0.009,
                           padding: screenHeight * 0.007,
@@ -713,7 +720,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
                         style={{
                           position: "absolute",
                           left: screenWidth * 0.68,
-                          top: screenHeight * 0.043,
+                          top: "47%",
                           backgroundColor: "white",
                           borderRadius: screenWidth * 0.009,
                           padding: screenHeight * 0.007,
@@ -745,7 +752,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
                         style={{
                           position: "absolute",
                           left: screenWidth * 0.775,
-                          top: screenHeight * 0.043,
+                          top: "47%",
                           backgroundColor: "white",
                           borderRadius: screenWidth * 0.009,
                           padding: screenHeight * 0.007,
@@ -766,7 +773,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
                         style={{
                           position: "absolute",
                           left: screenWidth * 0.68,
-                          top: screenHeight * 0.043,
+                          top: "47%",
                           backgroundColor: "white",
                           borderRadius: screenWidth * 0.009,
                           padding: screenHeight * 0.007,
@@ -959,7 +966,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
                       style={{
                         position: "absolute",
                         left: screenWidth * 0.775,
-                        top: screenHeight * 0.043,
+                        top: "47%",
                         backgroundColor: "white",
                         borderRadius: screenWidth * 0.009,
                         padding: screenHeight * 0.007,
@@ -980,7 +987,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
                       style={{
                         position: "absolute",
                         left: screenWidth * 0.68,
-                        top: screenHeight * 0.043,
+                        top: "47%",
                         backgroundColor: "white",
                         borderRadius: screenWidth * 0.009,
                         padding: screenHeight * 0.007,
@@ -1010,7 +1017,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
                       style={{
                         position: "absolute",
                         left: screenWidth * 0.775,
-                        top: screenHeight * 0.043,
+                        top: "47%",
                         backgroundColor: "white",
                         borderRadius: screenWidth * 0.009,
                         padding: screenHeight * 0.007,
@@ -1031,7 +1038,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
                       style={{
                         position: "absolute",
                         left: screenWidth * 0.68,
-                        top: screenHeight * 0.043,
+                        top: "47%",
                         backgroundColor: "white",
                         borderRadius: screenWidth * 0.009,
                         padding: screenHeight * 0.007,
@@ -1061,7 +1068,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
                       style={{
                         position: "absolute",
                         left: screenWidth * 0.775,
-                        top: screenHeight * 0.043,
+                        top: "47%",
                         backgroundColor: "white",
                         borderRadius: screenWidth * 0.009,
                         padding: screenHeight * 0.007,
@@ -1082,7 +1089,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
                       style={{
                         position: "absolute",
                         left: screenWidth * 0.68,
-                        top: screenHeight * 0.043,
+                        top: "47%",
                         backgroundColor: "white",
                         borderRadius: screenWidth * 0.009,
                         padding: screenHeight * 0.007,
@@ -1112,7 +1119,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
                       style={{
                         position: "absolute",
                         left: screenWidth * 0.775,
-                        top: screenHeight * 0.043,
+                        top: "47%",
                         backgroundColor: "white",
                         borderRadius: screenWidth * 0.009,
                         padding: screenHeight * 0.007,
@@ -1133,7 +1140,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
                       style={{
                         position: "absolute",
                         left: screenWidth * 0.68,
-                        top: screenHeight * 0.043,
+                        top: "47%",
                         backgroundColor: "white",
                         borderRadius: screenWidth * 0.009,
                         padding: screenHeight * 0.007,
@@ -1163,7 +1170,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
                       style={{
                         position: "absolute",
                         left: screenWidth * 0.775,
-                        top: screenHeight * 0.043,
+                        top: "47%",
                         backgroundColor: "white",
                         borderRadius: screenWidth * 0.009,
                         padding: screenHeight * 0.007,
@@ -1184,7 +1191,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
                       style={{
                         position: "absolute",
                         left: screenWidth * 0.68,
-                        top: screenHeight * 0.043,
+                        top: "47%",
                         backgroundColor: "white",
                         borderRadius: screenWidth * 0.009,
                         padding: screenHeight * 0.007,
@@ -1257,6 +1264,42 @@ export const FarmerRegistrationScreen = ({ route }) => {
           )}
         </Formik>
       </View>
+
+      {/* loader */}
+      {loading && (
+        <View
+          style={{
+            position: "absolute",
+            marginTop: screenHeight * 0.12,
+            width: "100%",
+            backgroundColor: "transparent",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <View
+            style={{
+              width: "auto",
+              backgroundColor: "white",
+              borderRadius: screenHeight * 0.5,
+              elevation: 4,
+            }}
+          >
+            <LottieView
+              style={{
+                height: screenHeight * 0.05,
+                width: screenHeight * 0.05,
+                alignSelf: "center",
+              }}
+              source={require("../../assets/lottie/spinner.json")}
+              autoPlay
+              speed={1}
+              loop={true}
+              resizeMode="cover"
+            />
+          </View>
+        </View>
+      )}
     </View>
   );
 };

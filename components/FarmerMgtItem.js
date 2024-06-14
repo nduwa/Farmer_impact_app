@@ -1,14 +1,22 @@
 import { useNavigation } from "@react-navigation/native";
 import React from "react";
-import { Text, TouchableOpacity, View, Platform } from "react-native";
+import {
+  Text,
+  TouchableOpacity,
+  View,
+  Platform,
+  Dimensions,
+} from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Foundation } from "@expo/vector-icons";
-import { AntDesign } from '@expo/vector-icons';
+import { AntDesign } from "@expo/vector-icons";
 import { colors } from "../data/colors";
 
 export const FarmerMgtItem = ({ destination, label, setIsFarmerModalOpen }) => {
   const navigation = useNavigation();
+  const screenHeight = Dimensions.get("window").height;
+  const screenWidth = Dimensions.get("window").width;
 
   const handleNavigation = () => {
     setIsFarmerModalOpen(false);
@@ -19,10 +27,10 @@ export const FarmerMgtItem = ({ destination, label, setIsFarmerModalOpen }) => {
     <TouchableOpacity
       style={{
         flexDirection: "row",
-        gap: 20,
+        gap: screenWidth * 0.02,
         backgroundColor: colors.white,
-        paddingVertical: 10,
-        paddingHorizontal: 18,
+        paddingVertical: screenHeight * 0.01,
+        paddingHorizontal: screenHeight * 0.018,
         borderRadius: 12,
         ...Platform.select({
           ios: {

@@ -1,6 +1,7 @@
 import {
   Dimensions,
   FlatList,
+  Keyboard,
   ScrollView,
   Text,
   TextInput,
@@ -61,6 +62,7 @@ export const InspectionFarmerScreen = ({ route }) => {
 
   const toggleGroupsModal = () => {
     setGroupsModalOpen(true);
+    Keyboard.dismiss();
   };
 
   const displayToast = (msg) => {

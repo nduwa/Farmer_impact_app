@@ -423,29 +423,7 @@ const generateBulkValueString = (
       let name = data[i].Name || "";
       const sanitizedName = name.replace(/'/g, ""); // names like Jean D'arc will be Jean D arc for sql syntax reasons
       bulkValues += `(
-        ${data[i].id},'${data[i].__kp_Farmer}','${data[i]._kf_Group}','${
-        data[i]._kf_Household
-      }','${data[i]._kf_Location}','${data[i]._kf_Supplier}','${
-        data[i]._kf_Station
-      }','${data[i].Year_Birth}','${data[i].Gender}','${
-        data[i].farmerid
-      }','${sanitizedName}','${data[i].National_ID_t}','${data[i].Phone}','${
-        data[i].Position
-      }','${data[i].CAFE_ID}','${data[i].SAN_ID}','${data[i].UTZ_ID}','${
-        data[i].Marital_Status
-      }','${data[i].Reading_Skills}','${data[i].Math_Skills}','${
-        data[i].created_at
-      }','${data[i].created_by}','${data[i].registered_at}','${
-        data[i].updated_at
-      }','${data[i].type}',${data[i].sync_farmers},${data[i].uploaded},'${
-        data[i].uploaded_at
-      }','${data[i].Area_Small}','${data[i].Area_Smallest}',${data[i].Trees},${
-        data[i].Trees_Producing
-      },${data[i].number_of_plots_with_coffee},'${data[i].STP_Weight}','${
-        data[i].education_level
-      }',${data[i].latitude},${data[i].longitude},'${data[i].householdid}','${
-        data[i].seasonal_goal
-      }',${data[i].recordid},0,"","0000-00-00 00:00:0",${data[i].sync || 0})`;
+        ${data[i].id},'${data[i].__kp_Farmer}','${data[i]._kf_Group}','${data[i]._kf_Household}','${data[i]._kf_Location}','${data[i]._kf_Supplier}','${data[i]._kf_Station}','${data[i].Year_Birth}','${data[i].Gender}','${data[i].farmerid}','${sanitizedName}','${data[i].National_ID_t}','${data[i].Phone}','${data[i].Position}','${data[i].CAFE_ID}','${data[i].SAN_ID}','${data[i].UTZ_ID}','${data[i].Marital_Status}','${data[i].Reading_Skills}','${data[i].Math_Skills}','${data[i].created_at}','${data[i].created_by}','${data[i].registered_at}','${data[i].updated_at}','${data[i].type}',${data[i].sync_farmers},${data[i].uploaded},'${data[i].uploaded_at}','${data[i].Area_Small}','${data[i].Area_Smallest}',${data[i].Trees},${data[i].Trees_Producing},${data[i].number_of_plots_with_coffee},'${data[i].STP_Weight}','${data[i].education_level}',${data[i].latitude},${data[i].longitude},'${data[i].householdid}','${data[i].seasonal_goal}',${data[i].recordid},0,"","0000-00-00 00:00:0","1")`;
       if (i < data.length - 1) bulkValues += ",";
     }
 
@@ -731,7 +709,6 @@ export const dataTodb = ({
           extraValArr
         );
 
-        console.log(`${SyncQueries.RTC_FARMERS} ${bulkValues}`);
         db.transaction((tx) => {
           tx.executeSql(
             `${SyncQueries.RTC_FARMERS} ${bulkValues}`,
