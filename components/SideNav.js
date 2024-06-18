@@ -115,6 +115,13 @@ export const SideNav = ({
           color={isActive ? colors.secondary : colors.black_a}
         />
       )}
+      {name === "Deleted Farmers" && (
+        <MaterialCommunityIcons
+          name="delete-forever-outline"
+          size={24}
+          color={isActive ? colors.secondary : colors.black_a}
+        />
+      )}
       {name === "Pending Inspections" && (
         <Foundation
           name="page-search"

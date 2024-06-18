@@ -150,6 +150,10 @@ export const SideBar = ({ setsideBarScroll, setIsSidebarOpen }) => {
                 destination="PendingRegistrationScreen"
               />
               <SideNav
+                name={"Deleted Farmers"}
+                destination="FarmerDeletedScreen"
+              />
+              <SideNav
                 name={"Pending Inspections"}
                 destination="InspectionsScreen"
               />

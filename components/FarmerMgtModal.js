@@ -16,7 +16,7 @@ export const FarmerMgtModal = ({ setIsFarmerModalOpen }) => {
 
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
-  const modalHeight = screenHeight * 0.5;
+  const modalHeight = screenHeight * 0.6;
   const animation = new Animated.Value(0);
 
   const handleClick = () => {

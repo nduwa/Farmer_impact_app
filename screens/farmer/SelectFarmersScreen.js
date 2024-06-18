@@ -53,6 +53,7 @@ export const SelectFarmersScreen = ({ route }) => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
   const [submitted, setSubmitted] = useState(false);
+  const [deletedFarmers, setDeletedFarmers] = useState([]);
 
   const filterChecked = (id) => {
     const allChecked = selectedFarmers.filter((item) => item.farmerid !== id);
@@ -153,6 +154,8 @@ export const SelectFarmersScreen = ({ route }) => {
       i++;
     }
 
+    setDeletedFarmers(farmersToDelete);
+
     query = `UPDATE rtc_farmers SET deleted = 1, deleted_by = '${userName}', deleted_at = '${new Date()}' WHERE __kp_Farmer IN(${strIDs})`;
 
     updateDBdata({
@@ -169,9 +172,28 @@ export const SelectFarmersScreen = ({ route }) => {
   };
 
   useEffect(() => {
-    if (currentJob === "Farmers removed") {
-      displayToast("Farmers removed");
+    if (selectedFarmers.length > 0) {
+      setSubmitted(false);
+    } else {
       setSubmitted(true);
+    }
+  }, [selectedFarmers]);
+
+  useEffect(() => {
+    if (currentJob === "Farmers removed") {
+      const newDisplaydata = displayData.reduce((accumulator, currentItem) => {
+        if (!deletedFarmers.includes(currentItem.__kp_Farmer)) {
+          accumulator.push(currentItem);
+        }
+
+        return accumulator;
+      }, []);
+
+      setDisplayData(newDisplaydata);
+
+      displayToast("Farmers removed");
+      setSelectedFarmers([]);
+      setCurrentJob("");
     }
   }, [currentJob]);
 
@@ -206,7 +228,7 @@ export const SelectFarmersScreen = ({ route }) => {
       fetchFarmers();
     }
   }, [selectedGroup]);
- 
+
   useEffect(() => {
     if (activeGroup.id) {
       retrieveDBdata({
@@ -249,6 +271,7 @@ export const SelectFarmersScreen = ({ route }) => {
         setGroupsModalOpen(false);
         setActiveGroup([]);
         setSelectedFarmers([]);
+        setDeletedFarmers([]);
         setCurrentJob(null);
       };
     }, [])
