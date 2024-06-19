@@ -64,7 +64,7 @@ db.transaction((tx) => {
         created_by varchar(255) NOT NULL,
         registered_at datetime NOT NULL,
         updated_at datetime NULL,
-        type VARCHAR(255) NOT NULL CHECK (type IN ('new', 'offline')),
+        type VARCHAR(255) NOT NULL CHECK (type IN ('new','updated','offline','deleted')),
         sync_farmers int(11) NOT NULL,
         uploaded int(11) NOT NULL,
         uploaded_at datetime DEFAULT NULL,

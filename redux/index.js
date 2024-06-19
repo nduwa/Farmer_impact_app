@@ -7,6 +7,7 @@ import JournalSlice from "./journal/JournalSlice";
 import inspectionSlice from "./inspection/inspectionSlice";
 import trainingSlice from "./training/trainingSlice";
 import RegistrationSlice from "./farmer/RegistrationSlice";
+import DeletionSlice from "./farmer/DeletionSlice";
 
 const store = configureStore({
   reducer: {
@@ -18,6 +19,7 @@ const store = configureStore({
     inspection: inspectionSlice.reducer,
     training: trainingSlice.reducer,
     registration: RegistrationSlice.reducer,
+    deletion: DeletionSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

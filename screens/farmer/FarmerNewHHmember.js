@@ -184,8 +184,6 @@ export const FarmerNewHHmember = ({ route }) => {
         recordid: "",
       };
 
-      console.log(farmerInfo);
-
       setErrors({});
       let submitData = {
         ...farmerInfo,

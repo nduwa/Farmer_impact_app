@@ -4,7 +4,7 @@ import { colors } from "../data/colors";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 
-export const FarmerDeletedCard = ({ data, deleteDate, restoreFn }) => {
+export const FarmerDeletedCard = ({ data, deleteDate, restoreFn, active }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const navigation = useNavigation();
@@ -30,6 +30,11 @@ export const FarmerDeletedCard = ({ data, deleteDate, restoreFn }) => {
       <View style={{ gap: screenHeight * 0.008 }}>
         <Text style={{ fontSize: screenWidth * 0.05, fontWeight: "600" }}>
           {data.Name}
+        </Text>
+        <Text
+          style={{ fontSize: screenWidth * 0.035, color: colors.black_letter }}
+        >
+          ID: {data.farmerid}
         </Text>
         <Text
           style={{ fontSize: screenWidth * 0.035, color: colors.black_letter }}
@@ -69,6 +74,7 @@ export const FarmerDeletedCard = ({ data, deleteDate, restoreFn }) => {
       >
         <TouchableOpacity
           onPress={handleRestore}
+          disabled={!active}
           style={{
             flexDirection: "row",
             alignItems: "center",
@@ -79,6 +85,7 @@ export const FarmerDeletedCard = ({ data, deleteDate, restoreFn }) => {
             borderRadius: screenHeight * 0.045,
             width: "70%",
             elevation: 3,
+            opacity: active ? 1 : 0.4,
           }}
         >
           <MaterialIcons

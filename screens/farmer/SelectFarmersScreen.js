@@ -156,7 +156,7 @@ export const SelectFarmersScreen = ({ route }) => {
 
     setDeletedFarmers(farmersToDelete);
 
-    query = `UPDATE rtc_farmers SET deleted = 1, deleted_by = '${userName}', deleted_at = '${new Date()}' WHERE __kp_Farmer IN(${strIDs})`;
+    query = `UPDATE rtc_farmers SET deleted = 1, deleted_by = '${userName}', deleted_at = '${new Date()}', sync = 0 WHERE __kp_Farmer IN(${strIDs})`;
 
     updateDBdata({
       id: 0,

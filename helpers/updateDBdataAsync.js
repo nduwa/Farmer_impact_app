@@ -6,8 +6,6 @@ const db = SQLite.openDatabase(DB_NAME);
 export const updateDBdataAsync = ({ id, query }) => {
   if (!query || !id) return;
 
-  console.log(query);
-
   return new Promise((resolve, reject) => {
     db.transaction(
       (tx) => {
@@ -22,14 +20,12 @@ export const updateDBdataAsync = ({ id, query }) => {
             }
           },
           (_, error) => {
-            if (!error) db.closeSync(); // Close the database connection
             console.log("Error: ", error);
             reject(error);
           }
         );
       },
       (error) => {
-        if (!error) db.closeSync(); // Close the database connection
         console.log("Error: ", error);
         reject(error);
       }
