@@ -22,7 +22,7 @@ export const OpCard = ({ name, action, destination = null }) => {
   const [factor, setFactor] = useState(1);
 
   const handlePress = () => {
-    if (name == "Buy Coffee") action(true);
+    if (name == "Buy Coffee" || name == "Farmer") action(true);
     if (destination) navigation.navigate(destination, { data: null });
   };
 
@@ -70,8 +70,12 @@ export const OpCard = ({ name, action, destination = null }) => {
           gap: screenWidth * 0.02,
         }}
       >
-        {name === "Register" && (
-          <AntDesign name="adduser" size={screenWidth * 0.09} color="black" />
+        {name === "Farmer" && (
+          <FontAwesome6
+            name="people-group"
+            size={screenWidth * 0.09}
+            color="black"
+          />
         )}
         {name === "Inspection" && (
           <MaterialCommunityIcons
@@ -101,13 +105,7 @@ export const OpCard = ({ name, action, destination = null }) => {
             color="black"
           />
         )}
-        {name === "Review Purchases" && (
-          <MaterialCommunityIcons
-            name="note-search-outline"
-            size={screenWidth * 0.09}
-            color="black"
-          />
-        )}
+
         {name === "CWS Finance" && (
           <FontAwesome6
             name="sack-dollar"

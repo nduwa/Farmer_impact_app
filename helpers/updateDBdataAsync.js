@@ -20,14 +20,12 @@ export const updateDBdataAsync = ({ id, query }) => {
             }
           },
           (_, error) => {
-            if (!error) db.closeSync(); // Close the database connection
             console.log("Error: ", error);
             reject(error);
           }
         );
       },
       (error) => {
-        if (!error) db.closeSync(); // Close the database connection
         console.log("Error: ", error);
         reject(error);
       }

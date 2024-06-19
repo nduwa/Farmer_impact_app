@@ -41,15 +41,15 @@ db.transaction((tx) => {
   tx.executeSql(
     `CREATE TABLE IF NOT EXISTS rtc_farmers (
         id int(11) NOT NULL UNIQUE,
-        __kp_Farmer varchar(255) NOT NULL,
+        __kp_Farmer varchar(255) NOT NULL UNIQUE,
         _kf_Group varchar(255) NOT NULL,
         _kf_Household varchar(255) NOT NULL,
-        _kf_Location varchar(255) NOT NULL,
+        _kf_Location varchar(255),
         _kf_Supplier varchar(255) NOT NULL,
         _kf_Station varchar(255) NOT NULL,
         Year_Birth int(11) NOT NULL,
         Gender varchar(255) NOT NULL,
-        farmerid varchar(255) NOT NULL,
+        farmerid varchar(255),
         Name varchar(255) NOT NULL,
         National_ID_t varchar(255) NOT NULL,
         Phone varchar(255) NOT NULL,
@@ -64,7 +64,7 @@ db.transaction((tx) => {
         created_by varchar(255) NOT NULL,
         registered_at datetime NOT NULL,
         updated_at datetime NULL,
-        type VARCHAR(255) NOT NULL CHECK (type IN ('new', 'offline')),
+        type VARCHAR(255) NOT NULL CHECK (type IN ('new','updated','offline','deleted')),
         sync_farmers int(11) NOT NULL,
         uploaded int(11) NOT NULL,
         uploaded_at datetime DEFAULT NULL,
@@ -79,7 +79,11 @@ db.transaction((tx) => {
         longitude double NOT NULL,
         householdid varchar(255) NOT NULL,
         seasonal_goal double NOT NULL,
-        recordid int(11) NOT NULL
+        recordid int(11) NOT NULL,
+        deleted int(11) NOT NULL,
+        deleted_by varchar(255) NOT NULL,
+        deleted_at varchar(255) NOT NULL,
+        sync int(11) NOT NULL
     )`,
     [],
     () => console.log(`Table rtc_farmers created successfully`),
@@ -90,7 +94,7 @@ db.transaction((tx) => {
   tx.executeSql(
     `CREATE TABLE IF NOT EXISTS rtc_households (
         id int(11) NOT NULL UNIQUE,
-        __kp_Household varchar(255) NOT NULL,
+        __kp_Household varchar(255) NOT NULL UNIQUE,
         _kf_Group varchar(255) NOT NULL,
         _kf_Location varchar(255) NOT NULL,
         _kf_Station varchar(255) NOT NULL,
@@ -116,7 +120,8 @@ db.transaction((tx) => {
         status varchar(255) NOT NULL,
         inspectionId varchar(255) NOT NULL,
         cafeId varchar(255) NOT NULL,
-        InspectionStatus varchar(255) NOT NULL
+        InspectionStatus varchar(255) NOT NULL,
+        sync int(11) NOT NULL
     )`,
     [],
     () => console.log(`Table rtc_households created successfully`),
@@ -390,7 +395,8 @@ const generateBulkValueString = (
   tableName,
   totalRows,
   data,
-  extraVal = null
+  extraVal = null,
+  extraValArr = null
 ) => {
   if (tableName === "stations") {
     let bulkValues = "";
@@ -412,11 +418,26 @@ const generateBulkValueString = (
     return bulkValues;
   } else if (tableName === "farmers") {
     let bulkValues = "";
+
     for (let i = 0; i < data.length; i++) {
       let name = data[i].Name || "";
       const sanitizedName = name.replace(/'/g, ""); // names like Jean D'arc will be Jean D arc for sql syntax reasons
       bulkValues += `(
-        ${data[i].id},'${data[i].__kp_Farmer}','${data[i]._kf_Group}','${data[i]._kf_Household}','${data[i]._kf_Location}','${data[i]._kf_Supplier}','${data[i]._kf_Station}','${data[i].Year_Birth}','${data[i].Gender}','${data[i].farmerid}','${sanitizedName}','${data[i].National_ID_t}','${data[i].Phone}','${data[i].Position}','${data[i].CAFE_ID}','${data[i].SAN_ID}','${data[i].UTZ_ID}','${data[i].Marital_Status}','${data[i].Reading_Skills}','${data[i].Math_Skills}','${data[i].created_at}','${data[i].created_by}','${data[i].registered_at}','${data[i].updated_at}','${data[i].type}',${data[i].sync_farmers},${data[i].uploaded},'${data[i].uploaded_at}','${data[i].Area_Small}','${data[i].Area_Smallest}',${data[i].Trees},${data[i].Trees_Producing},${data[i].number_of_plots_with_coffee},'${data[i].STP_Weight}','${data[i].education_level}',${data[i].latitude},${data[i].longitude},'${data[i].householdid}',${data[i].seasonal_goal},${data[i].recordid})`;
+        ${data[i].id},'${data[i].__kp_Farmer}','${data[i]._kf_Group}','${data[i]._kf_Household}','${data[i]._kf_Location}','${data[i]._kf_Supplier}','${data[i]._kf_Station}','${data[i].Year_Birth}','${data[i].Gender}','${data[i].farmerid}','${sanitizedName}','${data[i].National_ID_t}','${data[i].Phone}','${data[i].Position}','${data[i].CAFE_ID}','${data[i].SAN_ID}','${data[i].UTZ_ID}','${data[i].Marital_Status}','${data[i].Reading_Skills}','${data[i].Math_Skills}','${data[i].created_at}','${data[i].created_by}','${data[i].registered_at}','${data[i].updated_at}','${data[i].type}',${data[i].sync_farmers},${data[i].uploaded},'${data[i].uploaded_at}','${data[i].Area_Small}','${data[i].Area_Smallest}',${data[i].Trees},${data[i].Trees_Producing},${data[i].number_of_plots_with_coffee},'${data[i].STP_Weight}','${data[i].education_level}',${data[i].latitude},${data[i].longitude},'${data[i].householdid}','${data[i].seasonal_goal}',${data[i].recordid},0,"","0000-00-00 00:00:0","1")`;
+      if (i < data.length - 1) bulkValues += ",";
+    }
+
+    return bulkValues;
+  } else if (tableName === "farmers_new") {
+    let bulkValues = "";
+    for (let i = 0; i < data.length; i++) {
+      let name = data[i].Name || "";
+      const sanitizedName = name.replace(/'/g, ""); // names like Jean D'arc will be Jean D arc for sql syntax reasons
+      const maxDigits = 99999;
+      const randomNumber = Math.floor(Math.random() * (maxDigits + 1)); // temporary id
+
+      bulkValues += `(
+        ${randomNumber},'${data[i].__kp_Farmer}','${extraValArr[0]}','${extraValArr[1]}','${extraValArr[2]}','${extraValArr[3]}','${extraValArr[4]}','${data[i].Year_Birth}','${data[i].Gender}','${data[i].farmerid}','${sanitizedName}','${data[i].National_ID_t}','${data[i].Phone}','${data[i].Position}','${data[i].CAFE_ID}','${data[i].SAN_ID}','${data[i].UTZ_ID}','${data[i].Marital_Status}','${data[i].Reading_Skills}','${data[i].Math_Skills}','${data[i].created_at}','${data[i].created_by}','${data[i].registered_at}','${data[i].updated_at}','${data[i].type}',${data[i].sync_farmers},${data[i].uploaded},'${data[i].uploaded_at}','${data[i].Area_Small}','${data[i].Area_Smallest}',${data[i].Trees},${data[i].Trees_Producing},${data[i].number_of_plots_with_coffee},'${data[i].STP_Weight}','${data[i].education_level}',${data[i].latitude},${data[i].longitude},'${data[i].householdid}','${data[i].seasonal_goal}','${data[i].recordid}',0,"","0000-00-00 00:00:0","0")`;
       if (i < data.length - 1) bulkValues += ",";
     }
 
@@ -427,7 +448,39 @@ const generateBulkValueString = (
       const z_Farmer_Primary = data[i].z_Farmer_Primary || "";
       const sanitizedValue = z_Farmer_Primary.replace(/'/g, "");
       bulkValues += `(
-        ${data[i].id},'${data[i].__kp_Household}','${data[i]._kf_Group}','${data[i]._kf_Location}','${data[i]._kf_Station}','${data[i]._kf_Supplier}','${data[i].Area_Small}','${data[i].Area_Smallest}','${data[i].householdid}','${sanitizedValue}','${data[i].created_at}','${data[i].type}','${data[i].farmerid}','${data[i].group_id}',${data[i].STP_Weight},'${data[i].number_of_plots_with_coffee}','${data[i].Trees_Producing}','${data[i].Trees}','${data[i].Longitude}','${data[i].Latitude}','${data[i].Children}','${data[i].Childen_gender}','${data[i].Childen_below_18}','${data[i].recordid}','${data[i].status}','${data[i].inspectionId}','${data[i].cafeId}','${data[i].InspectionStatus}')`;
+        ${data[i].id},'${data[i].__kp_Household}','${data[i]._kf_Group}','${
+        data[i]._kf_Location
+      }','${data[i]._kf_Station}','${data[i]._kf_Supplier}','${
+        data[i].Area_Small
+      }','${data[i].Area_Smallest}','${
+        data[i].householdid
+      }','${sanitizedValue}','${data[i].created_at}','${data[i].type}','${
+        data[i].farmerid
+      }','${data[i].group_id}','${data[i].STP_Weight}','${
+        data[i].number_of_plots_with_coffee
+      }','${data[i].Trees_Producing}','${data[i].Trees}','${
+        data[i].Longitude
+      }','${data[i].Latitude}','${data[i].Children}','${
+        data[i].Childen_gender
+      }','${data[i].Childen_below_18}','${data[i].recordid}','${
+        data[i].status
+      }','${data[i].inspectionId}','${data[i].cafeId}','${
+        data[i].InspectionStatus
+      }',${data[i].sync || 0})`;
+      if (i < data.length - 1) bulkValues += ",";
+    }
+
+    return bulkValues;
+  } else if (tableName === "households_new") {
+    const maxDigits = 99999;
+    const randomNumber = Math.floor(Math.random() * (maxDigits + 1)); // temporary id
+
+    let bulkValues = "";
+    for (let i = 0; i < data.length; i++) {
+      const z_Farmer_Primary = data[i].z_Farmer_Primary || "";
+      const sanitizedValue = z_Farmer_Primary.replace(/'/g, "");
+      bulkValues += `(
+        ${randomNumber},'${data[i].__kp_Household}','${data[i]._kf_Group}','${data[i]._kf_Location}','${data[i]._kf_Station}','${data[i]._kf_Supplier}','${data[i].Area_Small}','${data[i].Area_Smallest}','${data[i].householdid}','${sanitizedValue}','${data[i].created_at}','${data[i].type}','${data[i].farmerid}','${data[i].group_id}','${data[i].STP_Weight}','${data[i].number_of_plots_with_coffee}','${data[i].Trees_Producing}','${data[i].Trees}','${extraValArr[1]}','${extraValArr[0]}','${data[i].Children}','${data[i].Childen_gender}','${data[i].Childen_below_18}','${data[i].recordid}','${data[i].status}','${data[i].inspectionId}','${data[i].cafeId}','${data[i].InspectionStatus}',"0")`;
       if (i < data.length - 1) bulkValues += ",";
     }
 
@@ -561,6 +614,7 @@ export const dataTodb = ({
   setSyncList = null,
   setInsertId = null,
   extraVal = null,
+  extraValArr = [],
 }) => {
   try {
     if (!syncData) {
@@ -631,7 +685,12 @@ export const dataTodb = ({
           );
         });
       }
-    } else if (tableName === "farmers") {
+    } else if (tableName === "farmers" || tableName === "farmers_new") {
+      if (extraValArr.length < 1 && tableName === "farmers_new") {
+        setCurrentJob("some IDs are not provided");
+        return;
+      }
+
       for (let i = 0; i < totalPages; i++) {
         let page = i + 1;
         let start = (page - 1) * limit; // the starting index
@@ -642,7 +701,13 @@ export const dataTodb = ({
         ); /* on the last page when the rows aren't 10, it won't throw array index errors because of how slice() handles last index parameter */
         let activeRows = data.length;
 
-        let bulkValues = generateBulkValueString(tableName, totalRows, data);
+        let bulkValues = generateBulkValueString(
+          tableName,
+          totalRows,
+          data,
+          null,
+          extraValArr
+        );
 
         db.transaction((tx) => {
           tx.executeSql(
@@ -653,6 +718,9 @@ export const dataTodb = ({
               const progress = (insertedRows / totalRows) * 100;
               let jobString =
                 progress < 100 ? `data batch ${page} completed` : "completed";
+
+              if (progress >= 100 && !setIsSyncing)
+                setCurrentJob("Farmer details saved");
 
               if (setProgress) setProgress(+progress.toFixed(2));
               if (setCurrentJob) setCurrentJob(jobString);
@@ -679,7 +747,11 @@ export const dataTodb = ({
           );
         });
       }
-    } else if (tableName === "households") {
+    } else if (tableName === "households" || tableName === "households_new") {
+      if (extraValArr.length < 1 && tableName === "households_new") {
+        setCurrentJob("some IDs are not provided");
+        return;
+      }
       for (let i = 0; i < totalPages; i++) {
         let page = i + 1;
         let start = (page - 1) * limit; // the starting index
@@ -690,7 +762,13 @@ export const dataTodb = ({
         ); /* on the last page when the rows aren't 10, it won't throw array index errors because of how slice() handles last index parameter */
         let activeRows = data.length;
 
-        let bulkValues = generateBulkValueString(tableName, totalRows, data);
+        let bulkValues = generateBulkValueString(
+          tableName,
+          totalRows,
+          data,
+          null,
+          extraValArr
+        );
 
         db.transaction((tx) => {
           tx.executeSql(
@@ -704,6 +782,9 @@ export const dataTodb = ({
 
               if (setProgress) setProgress(+progress.toFixed(2));
               if (setCurrentJob) setCurrentJob(jobString);
+
+              if (progress >= 100 && !setIsSyncing)
+                setCurrentJob("Household details saved");
 
               if (setIsSyncing && setSyncList) {
                 if (progress >= 100) {

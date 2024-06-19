@@ -48,6 +48,10 @@ export const SideNav = ({
       await SecureStore.deleteItemAsync("rtc-seasons-label");
       await SecureStore.deleteItemAsync("rtc-seasons-year");
       await SecureStore.deleteItemAsync("rtc-user-name");
+      await SecureStore.deleteItemAsync("rtc-station-location-province");
+      await SecureStore.deleteItemAsync("rtc-station-location-sector");
+      await SecureStore.deleteItemAsync("rtc-station-location-cell");
+      await SecureStore.deleteItemAsync("rtc-station-location-village");
 
       dispatch(UserActions.clearUserData());
       dispatch(UserActions.setCheckedForNewUser(false));
@@ -107,6 +111,13 @@ export const SideNav = ({
       {name === "Pending Registrations" && (
         <AntDesign
           name="addusergroup"
+          size={24}
+          color={isActive ? colors.secondary : colors.black_a}
+        />
+      )}
+      {name === "Deleted Farmers" && (
+        <MaterialCommunityIcons
+          name="delete-forever-outline"
           size={24}
           color={isActive ? colors.secondary : colors.black_a}
         />

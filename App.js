@@ -21,6 +21,16 @@ import { HistoryDetails } from "./screens/history/HistoryDetails";
 import { TrainingCourses } from "./screens/training/TrainingCourses";
 import { TrainingFarmers } from "./screens/training/TrainingFarmers";
 import { TrainingScreen } from "./screens/training/TrainingScreen";
+import { FarmerRegistrationScreen } from "./screens/farmer/FarmerRegistrationScreen";
+import { FarmerUpdateHome } from "./screens/farmer/FarmerUpdateHome";
+import { FarmerUpdateScreen } from "./screens/farmer/FarmerUpdateScreen";
+import { FarmUpdateScreen } from "./screens/farmer/FarmUpdateScreen";
+import { ChooseFarmerScreen } from "./screens/farmer/ChooseFarmerScreen";
+import { SelectFarmersScreen } from "./screens/farmer/SelectFarmersScreen";
+import { PendingRegistrationsScreen } from "./screens/farmer/PendingRegistrationsScreen";
+import { FarmerEditScreen } from "./screens/farmer/FarmerEditScreen";
+import { FarmerNewHHmember } from "./screens/farmer/FarmerNewHHmember";
+import { PendingDeletionScreen } from "./screens/farmer/PendingDeletionScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -47,6 +57,8 @@ export default function App() {
             options={{ unmountOnBlur: true }}
             component={SyncScreen}
           />
+
+          {/* coffee purchase */}
           <Stack.Screen
             name="Registered_ATP_Farmer"
             options={{ unmountOnBlur: true }}
@@ -77,6 +89,8 @@ export default function App() {
             options={{ unmountOnBlur: true }}
             component={EditTransactionScreen}
           />
+
+          {/* inspection */}
           <Stack.Screen
             name="chooseInspection"
             options={{ unmountOnBlur: true }}
@@ -102,6 +116,8 @@ export default function App() {
             options={{ unmountOnBlur: true }}
             component={InspectionsScreen}
           />
+
+          {/* history */}
           <Stack.Screen
             name="HistoryScreen"
             options={{ unmountOnBlur: true }}
@@ -112,6 +128,8 @@ export default function App() {
             options={{ unmountOnBlur: true }}
             component={HistoryDetails}
           />
+
+          {/* training */}
           <Stack.Screen
             name="TrainingCourses"
             options={{ unmountOnBlur: true }}
@@ -126,6 +144,58 @@ export default function App() {
             name="TrainingScreen"
             options={{ unmountOnBlur: true }}
             component={TrainingScreen}
+          />
+
+          {/* farmer management */}
+          <Stack.Screen
+            name="FarmerRegistration"
+            options={{ unmountOnBlur: true }}
+            component={FarmerRegistrationScreen}
+          />
+          <Stack.Screen
+            name="FarmerUpdateHome"
+            options={{ unmountOnBlur: true }}
+            component={FarmerUpdateHome}
+          />
+          <Stack.Screen
+            name="FarmerUpdateScreen"
+            options={{ unmountOnBlur: true }}
+            component={FarmerUpdateScreen}
+          />
+          <Stack.Screen
+            name="FarmUpdateScreen"
+            options={{ unmountOnBlur: true }}
+            component={FarmUpdateScreen}
+          />
+          <Stack.Screen
+            name="ChooseFarmerUpdateScreen"
+            options={{ unmountOnBlur: true }}
+            component={ChooseFarmerScreen}
+          />
+          <Stack.Screen
+            name="SelectFarmerDeleteScreen"
+            options={{ unmountOnBlur: true }}
+            component={SelectFarmersScreen}
+          />
+          <Stack.Screen
+            name="PendingRegistrationScreen"
+            options={{ unmountOnBlur: true }}
+            component={PendingRegistrationsScreen}
+          />
+          <Stack.Screen
+            name="PendingFarmerEditScreen"
+            options={{ unmountOnBlur: true }}
+            component={FarmerEditScreen}
+          />
+          <Stack.Screen
+            name="FarmerNewHHmember"
+            options={{ unmountOnBlur: true }}
+            component={FarmerNewHHmember}
+          />
+          <Stack.Screen
+            name="FarmerDeletedScreen"
+            options={{ unmountOnBlur: true }}
+            component={PendingDeletionScreen}
           />
         </Stack.Navigator>
       </NavigationContainer>

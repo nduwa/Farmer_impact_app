@@ -5,28 +5,23 @@ const db = SQLite.openDatabase(DB_NAME);
 
 export const updateDBdata = ({ id, query, setCurrentJob, msgYes, msgNo }) => {
   try {
-    db.transaction(
-      (tx) => {
-        tx.executeSql(
-          query,
-          [],
-          (_, result) => {
-            if (result.rowsAffected > 0 || result.rows.length > 0) {
-              setCurrentJob(msgYes);
-            } else {
-              setCurrentJob(msgNo);
-            }
-          },
-          (_, error) => {
-            console.log("Error updating the db: ", error);
-            reject(error);
+    db.transaction((tx) => {
+      tx.executeSql(
+        query,
+        [],
+        (_, result) => {
+          if (result.rowsAffected > 0 || result.rows.length > 0) {
+            setCurrentJob(msgYes);
+          } else {
+            setCurrentJob(msgNo);
           }
-        );
-      },
-      (error) => {
-        console.log("Error performing db update operation: ", error);
-      }
-    );
+        },
+        (_, error) => {
+          console.log("Error updating the db: ", error);
+          reject(error);
+        }
+      );
+    });
   } catch (error) {
     console.log("Error updating data: ", error);
   }

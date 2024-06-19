@@ -28,6 +28,7 @@ import { detectNewUser } from "../helpers/detectNewUser";
 import { initializeLsKeys } from "../helpers/initializeLsKeys";
 import { SyncModal } from "../components/SyncModal";
 import { UserModal } from "../components/UserModal";
+import { FarmerMgtModal } from "../components/FarmerMgtModal";
 
 export const HomeScreen = ({ route }) => {
   const userState = useSelector((state) => state.user);
@@ -43,6 +44,8 @@ export const HomeScreen = ({ route }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [sidebarScrolled, setsideBarScroll] = useState(false);
   const [isBuyCoffeeModalOpen, setIsBuyCoffeeModalOpen] = useState(false);
+  const [isFarmerMgtModalOpen, setIsFarmerModalOpen] = useState(false);
+
   const [columnGapFac, setColumnGapFac] = useState(1);
   const [rowGapFac, setRowGapFac] = useState(1);
   const [newUserModalOpen, setNewUserModalOpen] = useState(false);
@@ -338,12 +341,10 @@ export const HomeScreen = ({ route }) => {
             padding: screenWidth * 0.05,
           }}
         >
-          <OpCard name={"Register"} />
+          <OpCard name={"Farmer"} action={setIsFarmerModalOpen} />
           <OpCard name={"Inspection"} destination={"chooseInspection"} />
-          <OpCard name={"Update Farmer"} />
           <OpCard name={"Training"} destination="TrainingCourses" />
           <OpCard name={"Buy Coffee"} action={setIsBuyCoffeeModalOpen} />
-          <OpCard name={"Review Purchases"} />
           <OpCard name={"CWS Finance"} />
           <OpCard name={"Wet Mill Audit"} />
         </View>
@@ -351,6 +352,10 @@ export const HomeScreen = ({ route }) => {
 
       {isBuyCoffeeModalOpen && (
         <BuyCoffeeModal setIsBuyCoffeeModalOpen={setIsBuyCoffeeModalOpen} />
+      )}
+
+      {isFarmerMgtModalOpen && (
+        <FarmerMgtModal setIsFarmerModalOpen={setIsFarmerModalOpen} />
       )}
 
       {/* new user modal */}

@@ -19,7 +19,7 @@ export const globalStyles = StyleSheet.create({
   buyCoffeeModalStyles: {
     position: "absolute",
     width: "100%",
-    height: screenHeight * 0.5,
+    height: screenHeight * 0.6,
     padding: 20,
     gap: 20,
     backgroundColor: colors.bg_variant,

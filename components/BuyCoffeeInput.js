@@ -44,8 +44,10 @@ export const BuyCoffeeInput = ({
           borderRadius: radius,
           padding: 7,
           fontWeight: "500",
-          fontSize: screenWidth * 0.05,
+          fontSize:
+            value?.length > 30 ? screenWidth * 0.03 : screenWidth * 0.05,
           color: colors.blue_font,
+          textAlign: "left",
         }}
       />
     </View>
