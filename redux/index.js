@@ -8,6 +8,7 @@ import inspectionSlice from "./inspection/inspectionSlice";
 import trainingSlice from "./training/trainingSlice";
 import RegistrationSlice from "./farmer/RegistrationSlice";
 import DeletionSlice from "./farmer/DeletionSlice";
+import accessControlSlice from "./accessControl/accessControlSlice";
 
 const store = configureStore({
   reducer: {
@@ -20,6 +21,7 @@ const store = configureStore({
     training: trainingSlice.reducer,
     registration: RegistrationSlice.reducer,
     deletion: DeletionSlice.reducer,
+    accessControl: accessControlSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

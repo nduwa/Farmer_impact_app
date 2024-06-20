@@ -17,7 +17,7 @@ import { UserActions } from "../redux/user/UserSlice";
 export const SideNav = ({
   name,
   isLogOut = false,
-  isActive = false,
+  isActive = true,
   destination = "Homepage", // by default
 }) => {
   const navigation = useNavigation();
@@ -72,6 +72,7 @@ export const SideNav = ({
   return (
     <TouchableOpacity
       onPress={handleClick}
+      disabled={!isActive}
       style={{
         flexDirection: "row",
         alignItems: "center",
@@ -81,6 +82,7 @@ export const SideNav = ({
         borderRadius: 10,
         borderRightWidth: 9,
         borderRightColor: isActive ? colors.secondary : "transparent",
+        opacity: isActive ? 1 : 0.5,
         ...Platform.select({
           ios: {
             shadowColor: "black",

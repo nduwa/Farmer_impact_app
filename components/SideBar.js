@@ -19,11 +19,13 @@ import { Ionicons } from "@expo/vector-icons";
 import { SideNav } from "./SideNav";
 import { StationLocation } from "./StationLocation";
 import { useIsFocused } from "@react-navigation/native";
+import { useSelector } from "react-redux";
 
 export const SideBar = ({ setsideBarScroll, setIsSidebarOpen }) => {
   const [stationDetails, setStationDetails] = useState(null);
   const [initClose, setInitClose] = useState(false);
   const isFocused = useIsFocused();
+  const userState = useSelector((state) => state.user);
 
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
@@ -32,6 +34,12 @@ export const SideBar = ({ setsideBarScroll, setIsSidebarOpen }) => {
 
   const handleClick = () => {
     setInitClose(true);
+  };
+
+  const isAccessable = (mod) => {
+    return userState.accessModules?.some(
+      (module) => module.module_name === mod
+    );
   };
 
   const translateX = animation.interpolate({
@@ -144,26 +152,60 @@ export const SideBar = ({ setsideBarScroll, setIsSidebarOpen }) => {
               }}
             >
               <SideNav name={"Sync Data"} destination="Sync" />
-              <SideNav name={"Pending Farms"} />
-              <SideNav
-                name={"Pending Registrations"}
-                destination="PendingRegistrationScreen"
-              />
-              <SideNav
-                name={"Deleted Farmers"}
-                destination="FarmerDeletedScreen"
-              />
-              <SideNav
-                name={"Pending Inspections"}
-                destination="InspectionsScreen"
-              />
-              <SideNav name={"Pending Children"} />
-              <SideNav name={"Pending Training"} destination="TrainingScreen" />
-              <SideNav
-                name={"SC Daily Journals"}
-                destination="ScDailyJournal"
-              />
-              <SideNav name={"CWS Finance"} />
+              {isAccessable("Register") && (
+                <SideNav
+                  name={"Pending Farms"}
+                  isActive={isAccessable("Register")}
+                />
+              )}
+              {isAccessable("Register") && (
+                <SideNav
+                  name={"Pending Registrations"}
+                  destination="PendingRegistrationScreen"
+                  isActive={isAccessable("Register")}
+                />
+              )}
+              {isAccessable("Register") && (
+                <SideNav
+                  name={"Deleted Farmers"}
+                  destination="FarmerDeletedScreen"
+                  isActive={isAccessable("Register")}
+                />
+              )}
+              {isAccessable("Inspection") && (
+                <SideNav
+                  name={"Pending Inspections"}
+                  destination="InspectionsScreen"
+                  isActive={isAccessable("Inspection")}
+                />
+              )}
+              {isAccessable("Register") && (
+                <SideNav
+                  name={"Pending Children"}
+                  isActive={isAccessable("Register")}
+                />
+              )}
+              {isAccessable("Training") && (
+                <SideNav
+                  name={"Pending Training"}
+                  destination="TrainingScreen"
+                  isActive={isAccessable("Training")}
+                />
+              )}
+              {isAccessable("Buy coffee") && (
+                <SideNav
+                  name={"SC Daily Journals"}
+                  destination="ScDailyJournal"
+                  isActive={isAccessable("Buy coffee")}
+                />
+              )}
+              {isAccessable("Finance") && (
+                <SideNav
+                  name={"CWS Finance"}
+                  isActive={isAccessable("Finance")}
+                />
+              )}
+
               <SideNav name={"History"} destination="HistoryScreen" />
               <SideNav name={"Change Settings"} />
 

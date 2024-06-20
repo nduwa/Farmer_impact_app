@@ -60,7 +60,8 @@ export const retrieveDBdataAsync = ({
                 tableName === "inspection_questions" ||
                 tableName === "trainingModules" ||
                 tableName === "inspection_responses" ||
-                tableName === "rtc_inspections"
+                tableName === "rtc_inspections" ||
+                tableName === "accessModules"
               ) {
                 resolve(data._array);
               }

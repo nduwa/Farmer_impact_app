@@ -14,7 +14,7 @@ import {
 import { colors } from "../data/colors";
 import { useNavigation } from "@react-navigation/native";
 
-export const OpCard = ({ name, action, destination = null }) => {
+export const OpCard = ({ name, action, destination = null, active = true }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const navigation = useNavigation();
@@ -41,6 +41,7 @@ export const OpCard = ({ name, action, destination = null }) => {
   return (
     <TouchableOpacity
       onPress={handlePress}
+      disabled={!active}
       style={{
         justifyContent: "center",
         alignItems: "center",
@@ -50,6 +51,7 @@ export const OpCard = ({ name, action, destination = null }) => {
         paddingHorizontal: 1,
         paddingVertical: screenHeight * 0.01,
         borderRadius: 20,
+        opacity: active ? 1 : 0.5,
         ...Platform.select({
           ios: {
             shadowColor: "black",
