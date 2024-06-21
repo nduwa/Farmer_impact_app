@@ -56,6 +56,7 @@ export const HomeScreen = ({ route }) => {
   const [accessControlOps, setAccessControlOps] = useState({
     open: false,
     granted: false,
+    refreshing: false,
   });
   const [userDetailsModalOpen, setUserDetailsModalOpen] = useState(false);
 
@@ -92,6 +93,11 @@ export const HomeScreen = ({ route }) => {
     }
   };
 
+  const refreshAccessControl = () => {
+    setUserDetailsModalOpen(false);
+    setAccessControlOps({ open: true, granted: false, refreshing: true });
+  };
+
   const isAccessable = (mod) => {
     return accessableModules?.some((module) => module.module_name === mod);
   };
@@ -106,7 +112,7 @@ export const HomeScreen = ({ route }) => {
     retrieveDBdataAsync({
       tableName: "accessModules",
       customQuery:
-        "SELECT modules.* FROM rtc_mobile_app_modules AS modules INNER JOIN rtc_mobile_app_access_control AS access ON modules.id = access.moduleid;",
+        "SELECT modules.* FROM rtc_mobile_app_modules AS modules INNER JOIN rtc_mobile_app_access_control AS access ON modules.id = access.moduleid AND access.active = '1';",
     })
       .then((data) => setAccessableModules(data))
       .catch((error) => console.log("Error:", error));
@@ -155,7 +161,7 @@ export const HomeScreen = ({ route }) => {
 
   useEffect(() => {
     if (stationDetails.location) {
-      setAccessControlOps({ open: false, granted: true });
+      setAccessControlOps({ open: false, granted: true, refreshing: false });
     }
   }, [stationDetails.location]);
 
@@ -209,7 +215,11 @@ export const HomeScreen = ({ route }) => {
         detectNewUser({ newStationId: data?.stationId || stationId })
           .then((isNewUser) => {
             if (isNewUser && !userState.checkedForNewUser) {
-              setAccessControlOps({ open: true, granted: false });
+              setAccessControlOps({
+                open: true,
+                granted: false,
+                refreshing: false,
+              });
             } else {
               console.log("old user");
               initializeLsKeys({
@@ -441,11 +451,15 @@ export const HomeScreen = ({ route }) => {
             station: stationDetails,
           }}
           CloseFn={setUserDetailsModalOpen}
+          AccessCtrlFn={refreshAccessControl}
         />
       )}
 
       {accessControlOps.open && (
-        <AccessControlModal completeFn={setAccessControlOps} />
+        <AccessControlModal
+          completeFn={setAccessControlOps}
+          isRefresh={accessControlOps.refreshing}
+        />
       )}
     </View>
   );

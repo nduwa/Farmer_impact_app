@@ -12,16 +12,23 @@ import CustomButton from "./CustomButton";
 import { MaterialIcons } from "@expo/vector-icons";
 import LottieView from "lottie-react-native";
 import { useDispatch, useSelector } from "react-redux";
-import { getAccessControlData } from "../redux/accessControl/accessControlSlice";
+import {
+  accessCtrlActions,
+  getAccessControlData,
+} from "../redux/accessControl/accessControlSlice";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { dataTodb } from "../helpers/dataTodb";
+import { updateDBdataAsync } from "../helpers/updateDBdataAsync";
+import { updateDBdata } from "../helpers/updateDBdata";
+import { UserActions } from "../redux/user/UserSlice";
 
-export const AccessControlModal = ({ completeFn }) => {
+export const AccessControlModal = ({ completeFn, isRefresh = false }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const accessControlState = useSelector((state) => state.accessControl);
   const dispatch = useDispatch();
   const navigation = useNavigation();
+  const prevAccessMods = useSelector((state) => state.user.accessModules);
 
   const [allModules, setAllModules] = useState();
   const [assignedModules, setAssignedModules] = useState();
@@ -44,15 +51,56 @@ export const AccessControlModal = ({ completeFn }) => {
   useEffect(() => {
     if (currentJob === "modules inserted") {
       setCurrentJob("Granting access to user...");
+
       dataTodb({
         tableName: "assignedModules",
         setCurrentJob,
         syncData: assignedModules,
       });
     } else if (currentJob === "modules assigned") {
-      displayToast("User granted access");
+      if (isRefresh) {
+        let prevMods = [];
+        let newMods = [];
+        let filteredMods = [];
+        for (let mod of prevAccessMods) {
+          prevMods.push(mod.id);
+        }
+        for (let mod of assignedModules) {
+          newMods.push(mod.moduleid);
+        }
+
+        filteredMods = prevMods.filter((value) => !newMods.includes(value));
+        let strIDs = "";
+        let query = "";
+        let i = 0;
+
+        for (const id of filteredMods) {
+          strIDs += `'${id}'`;
+          if (i < filteredMods.length - 1) strIDs += ",";
+          i++;
+        }
+
+        query = `UPDATE rtc_mobile_app_access_control SET active = 0 WHERE moduleid IN (${strIDs})`;
+
+        updateDBdata({
+          id: 0,
+          query,
+          setCurrentJob,
+          msgYes: "Access refreshed",
+          msgNo: "Access not refreshed",
+        });
+      } else {
+        displayToast("User granted access");
+        setCurrentJob("Complete");
+        completeFn({ open: false, granted: true, refreshing: false });
+      }
+    } else if (currentJob === "Access refreshed") {
+      displayToast("Access refreshed");
       setCurrentJob("Complete");
-      completeFn({ open: false, granted: true });
+      completeFn({ open: false, granted: true, refreshing: false });
+    } else if (currentJob === "Access not refreshed") {
+      displayToast("No changes applied");
+      completeFn({ open: false, granted: true, refreshing: false });
     }
   }, [currentJob]);
 
@@ -93,6 +141,7 @@ export const AccessControlModal = ({ completeFn }) => {
       return () => {
         setAllModules();
         setAssignedModules();
+        dispatch(accessCtrlActions.resetAccessCtrlState());
       };
     }, [])
   );

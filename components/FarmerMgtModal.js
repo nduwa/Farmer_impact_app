@@ -10,14 +10,22 @@ import {
 import { colors } from "../data/colors";
 import { globalStyles } from "../data/globalStyles";
 import { FarmerMgtItem } from "./FarmerMgtItem";
+import { useSelector } from "react-redux";
 
 export const FarmerMgtModal = ({ setIsFarmerModalOpen }) => {
   const [initClose, setInitClose] = useState(false);
+  const userState = useSelector((state) => state.user);
 
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const modalHeight = screenHeight * 0.6;
   const animation = new Animated.Value(0);
+
+  const isAccessable = (mod) => {
+    return userState.accessModules?.some(
+      (module) => module.module_name === mod
+    );
+  };
 
   const handleClick = () => {
     setInitClose(true);
@@ -87,21 +95,25 @@ export const FarmerMgtModal = ({ setIsFarmerModalOpen }) => {
               setIsFarmerModalOpen={setIsFarmerModalOpen}
               destination={"FarmerRegistration"}
               label={"New Farmer"}
+              isActive={isAccessable("Register")}
             />
             <FarmerMgtItem
               setIsFarmerModalOpen={setIsFarmerModalOpen}
               destination={"SelectFarmerDeleteScreen"}
               label={"Remove Farmers"}
+              isActive={isAccessable("Update Farmers")}
             />
             <FarmerMgtItem
               setIsFarmerModalOpen={setIsFarmerModalOpen}
               destination={"Unregistered_ATP_Farmer"}
               label={"Farmer GPS"}
+              isActive={isAccessable("Update Farmers")}
             />
             <FarmerMgtItem
               setIsFarmerModalOpen={setIsFarmerModalOpen}
               destination={"FarmerUpdateHome"}
               label={"Update Trees"}
+              isActive={isAccessable("Update Farmers")}
             />
             <FarmerMgtItem
               setIsFarmerModalOpen={setIsFarmerModalOpen}

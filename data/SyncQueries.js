@@ -30,5 +30,5 @@ export const SyncQueries = {
   RTC_MOBILE_MODULES:
     "INSERT OR REPLACE INTO rtc_mobile_app_modules (id,created_at,module_name,platform) VALUES",
   RTC_ASSIGNED_MODULES:
-    "INSERT OR REPLACE INTO rtc_mobile_app_access_control (id,created_at,moduleid,userid,view_record,add_record,delete_record,edit_record,platform) VALUES",
+    "INSERT OR REPLACE INTO rtc_mobile_app_access_control (id,created_at,moduleid,userid,view_record,add_record,delete_record,edit_record,platform,active) VALUES",
 };

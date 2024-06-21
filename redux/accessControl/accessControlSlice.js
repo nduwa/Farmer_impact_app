@@ -34,7 +34,7 @@ const accessControlSlice = createSlice({
     serverResponded: false,
   },
   reducers: {
-    resetDeletionState(state, action) {
+    resetAccessCtrlState(state, action) {
       state.response = null;
       state.loading = false;
       state.error = null;
@@ -59,5 +59,5 @@ const accessControlSlice = createSlice({
   },
 });
 
-export const deletionAction = accessControlSlice.actions;
+export const accessCtrlActions = accessControlSlice.actions;
 export default accessControlSlice;

@@ -415,7 +415,8 @@ db.transaction((tx) => {
       add_record int(11) NOT NULL,
       delete_record int(11) NOT NULL,
       edit_record int(11) NOT NULL,
-      platform varchar(45) NOT NULL
+      platform varchar(45) NOT NULL,
+      active integer NOT NULL
     )`,
     [],
     () =>
@@ -636,7 +637,7 @@ const generateBulkValueString = (
   } else if (tableName === "assignedModules") {
     let bulkValues = "";
     for (let i = 0; i < data.length; i++) {
-      bulkValues += `('${data[i].id}','${data[i].created_at}','${data[i].moduleid}','${data[i].userid}','${data[i].view_record}','${data[i].add_record}','${data[i].delete_record}','${data[i].edit_record}','${data[i].platform}')`;
+      bulkValues += `('${data[i].id}','${data[i].created_at}','${data[i].moduleid}','${data[i].userid}','${data[i].view_record}','${data[i].add_record}','${data[i].delete_record}','${data[i].edit_record}','${data[i].platform}','1')`;
       if (i < data.length - 1) bulkValues += ",";
     }
 
