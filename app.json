@@ -9,9 +9,11 @@
     "splash": {
       "image": "./assets/splash_rtc.png",
       "resizeMode": "contain",
-      "backgroundColor": "#f8e4c0f"
+      "backgroundColor": "#f8e4c0"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true
     },
@@ -22,9 +24,11 @@
       },
       "permissions": [
         "android.permission.DETECT_SCREEN_CAPTURE",
-        "CAMERA",
-        "CAMERA_ROLL"
-      ]
+        "android.permission.CAMERA",
+        "android.permission.CAMERA_ROLL",
+        "android.permission.RECORD_AUDIO"
+      ],
+      "package": "com.kwizera117.reactnativefarmerimpact"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -37,6 +41,17 @@
           "photosPermission": "The app accesses your photos to let you take pictures of files or documents when needed."
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "0ee7a64b-714f-4b2e-a4ec-e6be93f50c86"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/0ee7a64b-714f-4b2e-a4ec-e6be93f50c86"
+    }
   }
 }
