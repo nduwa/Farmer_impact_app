@@ -29,6 +29,9 @@ import { initializeLsKeys } from "../helpers/initializeLsKeys";
 import { SyncModal } from "../components/SyncModal";
 import { UserModal } from "../components/UserModal";
 import { FarmerMgtModal } from "../components/FarmerMgtModal";
+import { AccessControlModal } from "../components/AccessControlModal";
+import { retrieveDBdata } from "../helpers/retrieveDBdata";
+import { retrieveDBdataAsync } from "../helpers/retrieveDBdataAsync";
 
 export const HomeScreen = ({ route }) => {
   const userState = useSelector((state) => state.user);
@@ -46,9 +49,15 @@ export const HomeScreen = ({ route }) => {
   const [isBuyCoffeeModalOpen, setIsBuyCoffeeModalOpen] = useState(false);
   const [isFarmerMgtModalOpen, setIsFarmerModalOpen] = useState(false);
 
+  const [accessableModules, setAccessableModules] = useState([]);
   const [columnGapFac, setColumnGapFac] = useState(1);
   const [rowGapFac, setRowGapFac] = useState(1);
   const [newUserModalOpen, setNewUserModalOpen] = useState(false);
+  const [accessControlOps, setAccessControlOps] = useState({
+    open: false,
+    granted: false,
+    refreshing: false,
+  });
   const [userDetailsModalOpen, setUserDetailsModalOpen] = useState(false);
 
   const [exitApp, setExitApp] = useState(false);
@@ -84,6 +93,31 @@ export const HomeScreen = ({ route }) => {
     }
   };
 
+  const refreshAccessControl = () => {
+    setUserDetailsModalOpen(false);
+    setAccessControlOps({ open: true, granted: false, refreshing: true });
+  };
+
+  const isAccessable = (mod) => {
+    return accessableModules?.some((module) => module.module_name === mod);
+  };
+
+  useEffect(() => {
+    if (accessableModules.length > 0) {
+      dispatch(UserActions.setAccessModules(accessableModules));
+    }
+  }, [accessableModules]);
+
+  const moduleAccessControl = () => {
+    retrieveDBdataAsync({
+      tableName: "accessModules",
+      customQuery:
+        "SELECT modules.* FROM rtc_mobile_app_modules AS modules INNER JOIN rtc_mobile_app_access_control AS access ON modules.id = access.moduleid AND access.active = '1';",
+    })
+      .then((data) => setAccessableModules(data))
+      .catch((error) => console.log("Error:", error));
+  };
+
   function formatDate(date) {
     const options = {
       weekday: "long",
@@ -114,6 +148,22 @@ export const HomeScreen = ({ route }) => {
         BackHandler.removeEventListener("hardwareBackPress", onBackPress);
     }, [exitApp])
   );
+
+  useEffect(() => {
+    if (accessControlOps.granted) {
+      dispatch(UserActions.setCheckedForNewUser(true));
+      if (!userState.checkedForNewUser) {
+        setNewUserModalOpen(true);
+      }
+      moduleAccessControl();
+    }
+  }, [accessControlOps.granted]);
+
+  useEffect(() => {
+    if (stationDetails.location) {
+      setAccessControlOps({ open: false, granted: true, refreshing: false });
+    }
+  }, [stationDetails.location]);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -165,20 +215,23 @@ export const HomeScreen = ({ route }) => {
         detectNewUser({ newStationId: data?.stationId || stationId })
           .then((isNewUser) => {
             if (isNewUser && !userState.checkedForNewUser) {
-              setNewUserModalOpen(true);
+              setAccessControlOps({
+                open: true,
+                granted: false,
+                refreshing: false,
+              });
             } else {
               console.log("old user");
               initializeLsKeys({
                 stationId: data?.stationId || stationId,
                 setStationDetails,
               }); // init local storage data
+              dispatch(UserActions.setCheckedForNewUser(true));
             }
           })
           .catch((error) => {
             console.error("Error detecting new user:", error);
           });
-
-        dispatch(UserActions.setCheckedForNewUser(true));
       };
 
       calculateFactor();
@@ -341,12 +394,31 @@ export const HomeScreen = ({ route }) => {
             padding: screenWidth * 0.05,
           }}
         >
-          <OpCard name={"Farmer"} action={setIsFarmerModalOpen} />
-          <OpCard name={"Inspection"} destination={"chooseInspection"} />
-          <OpCard name={"Training"} destination="TrainingCourses" />
-          <OpCard name={"Buy Coffee"} action={setIsBuyCoffeeModalOpen} />
-          <OpCard name={"CWS Finance"} />
-          <OpCard name={"Wet Mill Audit"} />
+          <OpCard
+            name={"Farmer"}
+            action={setIsFarmerModalOpen}
+            active={isAccessable("Register")}
+          />
+          <OpCard
+            name={"Inspection"}
+            destination={"chooseInspection"}
+            active={isAccessable("Inspection")}
+          />
+          <OpCard
+            name={"Training"}
+            destination="TrainingCourses"
+            active={isAccessable("Training")}
+          />
+          <OpCard
+            name={"Buy Coffee"}
+            action={setIsBuyCoffeeModalOpen}
+            active={isAccessable("Buy coffee")}
+          />
+          <OpCard name={"CWS Finance"} active={isAccessable("Finance")} />
+          <OpCard
+            name={"Wet Mill Audit"}
+            active={isAccessable("Wet mill audit")}
+          />
         </View>
       </View>
 
@@ -366,6 +438,7 @@ export const HomeScreen = ({ route }) => {
           OnNo={handleSyncModal}
           labelYes="Ok"
           labelNo="No, maybe later"
+          mandatory={true}
         />
       )}
 
@@ -378,6 +451,14 @@ export const HomeScreen = ({ route }) => {
             station: stationDetails,
           }}
           CloseFn={setUserDetailsModalOpen}
+          AccessCtrlFn={refreshAccessControl}
+        />
+      )}
+
+      {accessControlOps.open && (
+        <AccessControlModal
+          completeFn={setAccessControlOps}
+          isRefresh={accessControlOps.refreshing}
         />
       )}
     </View>

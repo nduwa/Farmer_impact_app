@@ -5,6 +5,7 @@ const db = SQLite.openDatabase(DB_NAME);
 
 export const updateDBdata = ({ id, query, setCurrentJob, msgYes, msgNo }) => {
   try {
+    console.log(query);
     db.transaction((tx) => {
       tx.executeSql(
         query,

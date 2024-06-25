@@ -7,6 +7,7 @@ const UserSlice = createSlice({
     dataReceived: false,
     checkedForNewUser: false,
     location: null,
+    accessModules: [],
   },
   reducers: {
     setUserData(state, action) {
@@ -18,6 +19,9 @@ const UserSlice = createSlice({
     },
     setUserLocation(state, action) {
       state.location = action.payload;
+    },
+    setAccessModules(state, action) {
+      state.accessModules = action.payload;
     },
     clearUserData(state, action) {
       state.userData = {};

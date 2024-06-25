@@ -8,6 +8,7 @@ export const SyncModal = ({
   OnNo,
   labelYes = "Ok",
   labelNo = "Cancel",
+  mandatory = false,
 }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
@@ -58,11 +59,13 @@ export const SyncModal = ({
           </TouchableOpacity>
           <TouchableOpacity
             onPress={OnNo}
+            disabled={mandatory}
             style={{
               paddingVertical: 2,
               paddingHorizontal: 18,
               backgroundColor: colors.secondary,
               borderRadius: 3,
+              opacity: mandatory ? 0.4 : 1,
             }}
           >
             <Text style={{ color: "white", fontSize: 14 }}>{labelNo}</Text>

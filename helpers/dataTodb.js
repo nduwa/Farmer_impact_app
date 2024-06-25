@@ -389,6 +389,44 @@ db.transaction((tx) => {
     () => console.log(`Table rtc_seasons created successfully`),
     (_, error) => console.error(`Error creating rtc_seasons table:`, error)
   );
+
+  //access modules
+  tx.executeSql(
+    `CREATE TABLE IF NOT EXISTS rtc_mobile_app_modules (
+     id integer primary key,
+     created_at datetime NOT NULL,
+     module_name varchar(100) NOT NULL,
+     platform varchar(45) NOT NULL
+    )`,
+    [],
+    () => console.log(`Table rtc_mobile_app_modules created successfully`),
+    (_, error) =>
+      console.error(`Error creating rtc_mobile_app_modules table:`, error)
+  );
+
+  //assigned modules
+  tx.executeSql(
+    `CREATE TABLE IF NOT EXISTS rtc_mobile_app_access_control (
+      id integer primary key,
+      created_at datetime NOT NULL,
+      moduleid int(11) NOT NULL,
+      userid int(11) NOT NULL,
+      view_record int(11) NOT NULL,
+      add_record int(11) NOT NULL,
+      delete_record int(11) NOT NULL,
+      edit_record int(11) NOT NULL,
+      platform varchar(45) NOT NULL,
+      active integer NOT NULL
+    )`,
+    [],
+    () =>
+      console.log(`Table rtc_mobile_app_access_control created successfully`),
+    (_, error) =>
+      console.error(
+        `Error creating rtc_mobile_app_access_control table:`,
+        error
+      )
+  );
 });
 
 const generateBulkValueString = (
@@ -584,6 +622,22 @@ const generateBulkValueString = (
     let bulkValues = "";
     for (let i = 0; i < data.length; i++) {
       bulkValues += `('${data[i].created_at}','${data[i].training_course_id}','${data[i].__kf_farmer}','${data[i].__kf_group}','${data[i].status}','${data[i].__kf_attendance}','${data[i].username}','${data[i].password}','${data[i].uuid}','${data[i].uploaded_at}','${data[i]._kf_training}','${data[i].lo}','${data[i].la}')`;
+      if (i < data.length - 1) bulkValues += ",";
+    }
+
+    return bulkValues;
+  } else if (tableName === "mobileModules") {
+    let bulkValues = "";
+    for (let i = 0; i < data.length; i++) {
+      bulkValues += `('${data[i].id}','${data[i].created_at}','${data[i].module_name}','${data[i].platform}')`;
+      if (i < data.length - 1) bulkValues += ",";
+    }
+
+    return bulkValues;
+  } else if (tableName === "assignedModules") {
+    let bulkValues = "";
+    for (let i = 0; i < data.length; i++) {
+      bulkValues += `('${data[i].id}','${data[i].created_at}','${data[i].moduleid}','${data[i].userid}','${data[i].view_record}','${data[i].add_record}','${data[i].delete_record}','${data[i].edit_record}','${data[i].platform}','1')`;
       if (i < data.length - 1) bulkValues += ",";
     }
 
@@ -1265,6 +1319,70 @@ export const dataTodb = ({
             },
             (_, error) => {
               console.log("Error inserting Training details: ", error);
+              return;
+            }
+          );
+        });
+      }
+    } else if (tableName === "mobileModules") {
+      for (let i = 0; i < totalPages; i++) {
+        let page = i + 1;
+        let start = (page - 1) * limit; // the starting index
+        let end = start + limit; // the last index
+        let data = syncData.slice(
+          start,
+          end
+        ); /* on the last page when the rows aren't 10, it won't throw array index errors because of how slice() handles last index parameter */
+        let activeRows = data.length;
+
+        let bulkValues = generateBulkValueString(tableName, totalRows, data);
+
+        db.transaction((tx) => {
+          tx.executeSql(
+            `${SyncQueries.RTC_MOBILE_MODULES} ${bulkValues}`,
+            [],
+            () => {
+              insertedRows += activeRows;
+              const progress = (insertedRows / totalRows) * 100;
+
+              if (setProgress) setProgress(+progress.toFixed(2));
+              if (progress >= 100 && setCurrentJob)
+                setCurrentJob("modules inserted");
+            },
+            (_, error) => {
+              console.error("Error inserting modules: ", error);
+              return;
+            }
+          );
+        });
+      }
+    } else if (tableName === "assignedModules") {
+      for (let i = 0; i < totalPages; i++) {
+        let page = i + 1;
+        let start = (page - 1) * limit; // the starting index
+        let end = start + limit; // the last index
+        let data = syncData.slice(
+          start,
+          end
+        ); /* on the last page when the rows aren't 10, it won't throw array index errors because of how slice() handles last index parameter */
+        let activeRows = data.length;
+
+        let bulkValues = generateBulkValueString(tableName, totalRows, data);
+
+        db.transaction((tx) => {
+          tx.executeSql(
+            `${SyncQueries.RTC_ASSIGNED_MODULES} ${bulkValues}`,
+            [],
+            () => {
+              insertedRows += activeRows;
+              const progress = (insertedRows / totalRows) * 100;
+
+              if (setProgress) setProgress(+progress.toFixed(2));
+              if (progress >= 100 && setCurrentJob)
+                setCurrentJob("modules assigned");
+            },
+            (_, error) => {
+              console.error("Error assigning modules: ", error);
               return;
             }
           );

@@ -13,7 +13,12 @@ import { Foundation } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
 import { colors } from "../data/colors";
 
-export const FarmerMgtItem = ({ destination, label, setIsFarmerModalOpen }) => {
+export const FarmerMgtItem = ({
+  destination,
+  label,
+  setIsFarmerModalOpen,
+  isActive = true,
+}) => {
   const navigation = useNavigation();
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
@@ -25,6 +30,7 @@ export const FarmerMgtItem = ({ destination, label, setIsFarmerModalOpen }) => {
 
   return (
     <TouchableOpacity
+      disabled={!isActive}
       style={{
         flexDirection: "row",
         gap: screenWidth * 0.02,
@@ -32,6 +38,7 @@ export const FarmerMgtItem = ({ destination, label, setIsFarmerModalOpen }) => {
         paddingVertical: screenHeight * 0.01,
         paddingHorizontal: screenHeight * 0.018,
         borderRadius: 12,
+        opacity: isActive ? 1 : 0.5,
         ...Platform.select({
           ios: {
             shadowColor: "black",

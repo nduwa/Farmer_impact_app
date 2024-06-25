@@ -27,4 +27,8 @@ export const SyncQueries = {
     "INSERT OR REPLACE INTO rtc_attendance_sheets (created_at,uuid,filepath,status,uploaded_at) VALUES",
   RTC_TRAINING_ATTENDANCE:
     "INSERT OR REPLACE INTO rtc_training_attendance (created_at,training_course_id,__kf_farmer,__kf_group,status,__kf_attendance,username,password,uuid,uploaded_at,_kf_training,lo,la) VALUES",
+  RTC_MOBILE_MODULES:
+    "INSERT OR REPLACE INTO rtc_mobile_app_modules (id,created_at,module_name,platform) VALUES",
+  RTC_ASSIGNED_MODULES:
+    "INSERT OR REPLACE INTO rtc_mobile_app_access_control (id,created_at,moduleid,userid,view_record,add_record,delete_record,edit_record,platform,active) VALUES",
 };
