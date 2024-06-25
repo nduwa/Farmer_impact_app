@@ -1,0 +1,28 @@
+{
+  "build": {
+    "preview": {
+      "channel": "preview",
+      "android": {
+        "buildType": "apk",
+        "env": {
+          "API_URL": "https://wsduback.farmerimpact.rw",
+          "DB_NAME": "DB_farmerim_rtc.db",
+          "JWT_SECRET": "jmhjtyhmney5t",
+          "FARMER_TREE_WEIGHT_RATIO": "3.5"
+        }
+      }
+    },
+    "preview2": {
+      "android": {
+        "gradleCommand": ":app:assembleRelease"
+      }
+    },
+    "preview3": {
+      "developmentClient": true
+    },
+    "preview4": {
+      "distribution": "internal"
+    },
+    "production": {}
+  }
+}
