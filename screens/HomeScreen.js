@@ -30,7 +30,6 @@ import { SyncModal } from "../components/SyncModal";
 import { UserModal } from "../components/UserModal";
 import { FarmerMgtModal } from "../components/FarmerMgtModal";
 import { AccessControlModal } from "../components/AccessControlModal";
-import { retrieveDBdata } from "../helpers/retrieveDBdata";
 import { retrieveDBdataAsync } from "../helpers/retrieveDBdataAsync";
 
 export const HomeScreen = ({ route }) => {

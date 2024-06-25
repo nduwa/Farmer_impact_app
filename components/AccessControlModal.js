@@ -124,6 +124,12 @@ export const AccessControlModal = ({ completeFn, isRefresh = false }) => {
       }
     }
   }, [accessControlState.serverResponded]);
+  useEffect(() => {
+    if (accessControlState.error) {
+      setError(true);
+      displayToast("Access not granted, check your connection and try again");
+    }
+  }, [accessControlState.error]);
 
   useFocusEffect(
     React.useCallback(() => {
