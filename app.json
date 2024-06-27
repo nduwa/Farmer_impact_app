@@ -8,11 +8,20 @@
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
-      "resizeMode": "cover",
+      "resizeMode": "contain",
       "backgroundColor": "#fbf9ec"
     },
     "assetBundlePatterns": [
-      "**/*"
+      "**/*",
+      "!node_modules/**",
+      "!**/*.md",
+      "!**/README.md",
+      "!**/.git/**",
+      "!build/**",
+      "!dist/**",
+      "!**/*.config.js",
+      "!tests/**",
+      "!spec/**"
     ],
     "ios": {
       "supportsTablet": true
