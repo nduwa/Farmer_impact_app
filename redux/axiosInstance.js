@@ -9,7 +9,6 @@ const api = axios.create({
 // Add a request interceptor
 api.interceptors.request.use(
   (config) => {
-    // You can modify the request config here if needed
     return config;
   },
   (error) => {

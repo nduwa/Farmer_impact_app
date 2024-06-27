@@ -31,6 +31,10 @@ import { Ionicons } from "@expo/vector-icons";
 import { deleteDBdataAsync } from "../helpers/deleteDBdataAsync";
 import { dropTableAsync } from "../helpers/dropTableAsync";
 import LottieView from "lottie-react-native";
+import * as SplashScreen from "expo-splash-screen";
+
+// Prevent auto-hiding of the splash screen
+SplashScreen.preventAutoHideAsync();
 
 export const LoginScreen = ({ navigation }) => {
   const loginState = useSelector((state) => state.login);
@@ -234,6 +238,18 @@ export const LoginScreen = ({ navigation }) => {
 
   useFocusEffect(
     React.useCallback(() => {
+      const prepare = async () => {
+        try {
+          // Keep the splash screen visible for 5 seconds
+          await new Promise((resolve) => setTimeout(resolve, 5000));
+        } catch (e) {
+          console.warn(e);
+        } finally {
+          // Hide the splash screen after the delay
+          await SplashScreen.hideAsync();
+        }
+      };
+
       const validatedPreviousLogin = async () => {
         const userData = await tokenDecoder();
         if (userData) {
@@ -255,30 +271,10 @@ export const LoginScreen = ({ navigation }) => {
         dispatch(UserActions.setUserLocation(location));
       };
 
-      const wipeData = async (tableName, type) => {
-        if (type === "drop") {
-          dropTableAsync({ tableName })
-            .then((result) => console.log("reset: ", result))
-            .catch((error) => console.log(error));
-        } else if (type === "clean") {
-          deleteDBdataAsync({
-            tableName,
-            id: 1,
-            customQuery: `SELECT * FROM ${tableName};`,
-          })
-            .then((result) => {
-              console.log(result);
-            })
-            .catch((err) => console.log(err));
-        }
-      };
+      prepare();
 
       validatedPreviousLogin();
       getLocation();
-
-      //////////////////////// RESETTING THE APP DATABASE - FOR DEVELOPMENT PURPOSES ONLY ///////////////////////
-      // wipeData("rtc_inspections", "clean");
-      //////////////////////////////// CAUTION //////////////////////////////////////////////////////////////////
 
       return () => {
         if (formRef.current) {
