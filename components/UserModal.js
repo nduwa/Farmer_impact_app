@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Dimensions, Text, TouchableOpacity, View } from "react-native";
 import { colors } from "../data/colors";
 import CustomButton from "./CustomButton";
@@ -12,6 +12,7 @@ export const UserModal = ({ data, CloseFn, AccessCtrlFn }) => {
   const handleClose = () => {
     CloseFn(false);
   };
+
   return (
     <View
       style={{
@@ -160,7 +161,7 @@ export const UserModal = ({ data, CloseFn, AccessCtrlFn }) => {
           <Text
             style={{
               textAlign: "left",
-              fontWeight:"600",
+              fontWeight: "600",
               color: colors.black_letter,
               fontSize: screenWidth * 0.029,
             }}

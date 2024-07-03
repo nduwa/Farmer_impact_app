@@ -55,6 +55,9 @@ export const SelectFarmersScreen = ({ route }) => {
   const [submitted, setSubmitted] = useState(false);
   const [deletedFarmers, setDeletedFarmers] = useState([]);
 
+  const handleSync = () => {
+    navigation.navigate("Sync", { data: null });
+  };
   const filterChecked = (id) => {
     const allChecked = selectedFarmers.filter((item) => item.farmerid !== id);
 
@@ -207,6 +210,9 @@ export const SelectFarmersScreen = ({ route }) => {
 
     if (data.length > 0) {
       handleDataPagination(data);
+    } else {
+      setLoadingData(false);
+      setLoadingPage(false);
     }
   }, [farmers, searchResults]);
 
@@ -243,8 +249,11 @@ export const SelectFarmersScreen = ({ route }) => {
   useEffect(() => {
     if (groups.length > 0) {
       setActiveGroup(groups[0]);
+    } else {
+      setLoadingData(false);
+      setLoadingPage(false);
     }
-  }, [groups.length]);
+  }, [groups]);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -273,6 +282,7 @@ export const SelectFarmersScreen = ({ route }) => {
         setSelectedFarmers([]);
         setDeletedFarmers([]);
         setCurrentJob(null);
+        setLoadingData(false);
       };
     }, [])
   );
@@ -322,7 +332,7 @@ export const SelectFarmersScreen = ({ route }) => {
             fontSize: 19,
           }}
         >
-          Choose Farmers For Training
+          Remove Farmers
         </Text>
         <View
           style={{ width: screenWidth * 0.07, backgroundColor: "transparent" }}
@@ -351,8 +361,15 @@ export const SelectFarmersScreen = ({ route }) => {
             elevation: 6,
           }}
         >
-          <Text style={{ fontWeight: "600" }}>
-            {activeGroup.ID_GROUP || "loading.."}
+          <Text
+            style={{
+              fontWeight: "600",
+              fontSize: activeGroup.ID_GROUP
+                ? screenWidth * 0.04
+                : screenWidth * 0.03,
+            }}
+          >
+            {activeGroup.ID_GROUP || "No groups"}
           </Text>
         </TouchableOpacity>
         <View
@@ -430,7 +447,7 @@ export const SelectFarmersScreen = ({ route }) => {
         </View>
       </View>
       <View style={{ flex: 1 }}>
-        {loadingData ? (
+        {loadingData && (
           <View
             style={{
               flex: 1,
@@ -453,7 +470,9 @@ export const SelectFarmersScreen = ({ route }) => {
               resizeMode="cover"
             />
           </View>
-        ) : (
+        )}
+
+        {displayData.length > 0 ? (
           <FlatList
             ref={flatListRef}
             contentContainerStyle={{
@@ -478,6 +497,27 @@ export const SelectFarmersScreen = ({ route }) => {
             )}
             keyExtractor={(item) => item.id}
           />
+        ) : (
+          <View
+            style={{
+              gap: screenHeight * 0.02,
+            }}
+          >
+            <Text style={{ textAlign: "center" }}>No farmers found</Text>
+            <TouchableOpacity onPress={handleSync}>
+              <Text
+                style={{
+                  textAlign: "center",
+                  color: colors.secondary,
+                  fontWeight: "600",
+                  fontSize: screenWidth * 0.04,
+                  textDecorationLine: "underline",
+                }}
+              >
+                Perform data synchronization?
+              </Text>
+            </TouchableOpacity>
+          </View>
         )}
       </View>
       {currentPage > 1 && (

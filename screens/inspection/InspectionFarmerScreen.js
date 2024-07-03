@@ -56,6 +56,10 @@ export const InspectionFarmerScreen = ({ route }) => {
 
   const { data } = route.params;
 
+  const handleSync = () => {
+    navigation.navigate("Sync", { data: null });
+  };
+
   const scrollToTop = () => {
     flatListRef?.current?.scrollToOffset({ offset: 0, animated: true });
   };
@@ -141,6 +145,9 @@ export const InspectionFarmerScreen = ({ route }) => {
 
     if (data.length > 0) {
       handleDataPagination(data);
+    } else {
+      setLoadingData(false);
+      setLoadingPage(false);
     }
   }, [farmersXhouseholdsData, searchResults]);
 
@@ -199,6 +206,9 @@ export const InspectionFarmerScreen = ({ route }) => {
           setData: setHouseholds,
         });
       }
+    } else {
+      setLoadingData(false);
+      setLoadingPage(false);
     }
   }, [farmers]);
 
@@ -216,8 +226,11 @@ export const InspectionFarmerScreen = ({ route }) => {
   useEffect(() => {
     if (groups.length > 0) {
       setActiveGroup(groups[0]);
+    } else {
+      setLoadingData(false);
+      setLoadingPage(false);
     }
-  }, [groups.length]);
+  }, [groups]);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -246,6 +259,8 @@ export const InspectionFarmerScreen = ({ route }) => {
         setGroupsModalOpen(false);
         setActiveGroup([]);
         setChildrenModal({ open: false, data: null });
+        setLoadingData(false);
+        setLoadingPage(false);
       };
     }, [])
   );
@@ -324,8 +339,15 @@ export const InspectionFarmerScreen = ({ route }) => {
             elevation: 6,
           }}
         >
-          <Text style={{ fontWeight: "600" }}>
-            {activeGroup.ID_GROUP || "loading.."}
+          <Text
+            style={{
+              fontWeight: "600",
+              fontSize: activeGroup.ID_GROUP
+                ? screenWidth * 0.04
+                : screenWidth * 0.03,
+            }}
+          >
+            {activeGroup.ID_GROUP || "No groups"}
           </Text>
         </TouchableOpacity>
         <View
@@ -403,7 +425,7 @@ export const InspectionFarmerScreen = ({ route }) => {
         </View>
       </View>
       <View style={{ flex: 1 }}>
-        {loadingData ? (
+        {loadingData && (
           <View
             style={{
               flex: 1,
@@ -426,7 +448,9 @@ export const InspectionFarmerScreen = ({ route }) => {
               resizeMode="cover"
             />
           </View>
-        ) : (
+        )}
+
+        {displayData.length > 0 ? (
           <FlatList
             ref={flatListRef}
             contentContainerStyle={{
@@ -453,6 +477,27 @@ export const InspectionFarmerScreen = ({ route }) => {
             )}
             keyExtractor={(item) => item.id}
           />
+        ) : (
+          <View
+            style={{
+              gap: screenHeight * 0.02,
+            }}
+          >
+            <Text style={{ textAlign: "center" }}>No farmers found</Text>
+            <TouchableOpacity onPress={handleSync}>
+              <Text
+                style={{
+                  textAlign: "center",
+                  color: colors.secondary,
+                  fontWeight: "600",
+                  fontSize: screenWidth * 0.04,
+                  textDecorationLine: "underline",
+                }}
+              >
+                Perform data synchronization?
+              </Text>
+            </TouchableOpacity>
+          </View>
         )}
       </View>
       {currentPage > 1 && <InspectionHoverPrevBtn handlePress={handlePrevPg} />}

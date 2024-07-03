@@ -198,6 +198,10 @@ export const HomeScreen = ({ route }) => {
           setDisplayName(userName.split(" ")[1]);
         }
 
+        if (userState.checkedForNewUser) {
+          moduleAccessControl();
+        }
+
         const currentDate = new Date();
         setToday(formatDate(currentDate));
         const unsubscribe = navigation.addListener("blur", () => {
@@ -447,7 +451,7 @@ export const HomeScreen = ({ route }) => {
           data={{
             names: userState.userData.staff.Name,
             role: userState.userData.staff.Role,
-            station: stationDetails,
+            station: stationDetails.location ? stationDetails : null,
           }}
           CloseFn={setUserDetailsModalOpen}
           AccessCtrlFn={refreshAccessControl}

@@ -240,8 +240,8 @@ export const LoginScreen = ({ navigation }) => {
     React.useCallback(() => {
       const prepare = async () => {
         try {
-          // Keep the splash screen visible for 5 seconds
-          await new Promise((resolve) => setTimeout(resolve, 5000));
+          // Keep the splash screen visible for 1.2 seconds
+          await new Promise((resolve) => setTimeout(resolve, 1200));
         } catch (e) {
           console.warn(e);
         } finally {
