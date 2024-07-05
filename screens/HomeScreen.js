@@ -110,10 +110,11 @@ export const HomeScreen = ({ route }) => {
   const moduleAccessControl = () => {
     retrieveDBdataAsync({
       tableName: "accessModules",
-      customQuery:
-        "SELECT modules.* FROM rtc_mobile_app_modules AS modules INNER JOIN rtc_mobile_app_access_control AS access ON modules.id = access.moduleid AND access.active = '1';",
+      customQuery: `SELECT modules.* FROM rtc_mobile_app_modules AS modules INNER JOIN rtc_mobile_app_access_control AS access ON modules.id = access.moduleid AND access.userid = '${userState.userData.staff.id}'  AND access.active = '1';`,
     })
-      .then((data) => setAccessableModules(data))
+      .then((data) => {
+        setAccessableModules(data);
+      })
       .catch((error) => console.log("Error:", error));
   };
 
@@ -213,6 +214,7 @@ export const HomeScreen = ({ route }) => {
 
         return unsubscribe;
       };
+
       const newUserDetection = async () => {
         let stationId = userState.userData.staff._kf_Station;
         detectNewUser({ newStationId: data?.stationId || stationId })

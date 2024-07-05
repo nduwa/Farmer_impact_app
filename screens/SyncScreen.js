@@ -172,6 +172,7 @@ export const SyncScreen = ({ navigation, route }) => {
           return;
         }
 
+        setLoading(true);
         const tableExistenceResults = await checkTableExistence();
 
         if (tableExistenceResults) {
@@ -187,6 +188,7 @@ export const SyncScreen = ({ navigation, route }) => {
             })
           );
 
+          setLoading(false);
           setSyncList(updatedSyncList);
         }
       } catch (error) {
