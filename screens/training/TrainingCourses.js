@@ -9,10 +9,10 @@ import {
 } from "react-native";
 import { colors } from "../../data/colors";
 import { AntDesign } from "@expo/vector-icons";
-import { InspectionCourseCard } from "../../components/InspectionCourseCard";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { retrieveDBdataAsync } from "../../helpers/retrieveDBdataAsync";
 import { TrainingCourseCard } from "../../components/TrainingCourseCard";
+import LottieView from "lottie-react-native";
 
 export const TrainingCourses = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
@@ -22,6 +22,11 @@ export const TrainingCourses = ({ route }) => {
 
   const [courses, setCourses] = useState([]);
   const [language, setLanguage] = useState("kiny");
+  const [loadingData, setLoadingData] = useState(false);
+
+  const handleSync = () => {
+    navigation.navigate("Sync", { data: null });
+  };
 
   const handleBackButton = () => {
     navigation.navigate("Homepage", { data: null });
@@ -44,15 +49,10 @@ export const TrainingCourses = ({ route }) => {
     return str;
   };
 
-  useEffect(() => {
-    if (courses.length > 0) {
-      console.log("All courses retrieved");
-    }
-  }, [courses.length]);
-
   useFocusEffect(
     React.useCallback(() => {
       const fetchData = async () => {
+        setLoadingData(true);
         retrieveDBdataAsync({
           tableName: "trainingModules",
         })
@@ -63,8 +63,12 @@ export const TrainingCourses = ({ route }) => {
               );
               setCourses(allCourses);
             }
+            setLoadingData(false);
           })
-          .catch((err) => console.log(err));
+          .catch((err) => {
+            console.log(err);
+            setLoadingData(false);
+          });
       };
 
       fetchData();
@@ -123,24 +127,72 @@ export const TrainingCourses = ({ route }) => {
           flex: 1,
         }}
       >
-        <FlatList
-          contentContainerStyle={{
-            padding: screenWidth * 0.02,
-            gap: screenHeight * 0.01,
-          }}
-          data={courses}
-          initialNumToRender={10}
-          renderItem={({ item }) => (
-            <TrainingCourseCard
-              data={{
-                label: handleCourseLabel(item),
-                code: item.ID_COURSE,
-                id: item.__kp_Course,
+        {loadingData && (
+          <View
+            style={{
+              flex: 1,
+              width: "100%",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <LottieView
+              style={{
+                height: 160,
+                width: 160,
+                alignSelf: "center",
+                marginVertical: 30,
               }}
+              source={require("../../assets/lottie/loader.json")}
+              autoPlay
+              speed={0.8}
+              loop={true}
+              resizeMode="cover"
             />
-          )}
-          keyExtractor={(item) => item.__kp_Course}
-        />
+          </View>
+        )}
+        {courses.length > 0 ? (
+          <FlatList
+            contentContainerStyle={{
+              padding: screenWidth * 0.02,
+              gap: screenHeight * 0.01,
+            }}
+            data={courses}
+            initialNumToRender={10}
+            renderItem={({ item }) => (
+              <TrainingCourseCard
+                data={{
+                  label: handleCourseLabel(item),
+                  code: item.ID_COURSE,
+                  id: item.__kp_Course,
+                }}
+              />
+            )}
+            keyExtractor={(item) => item.__kp_Course}
+          />
+        ) : (
+          <View
+            style={{
+              padding: screenHeight * 0.04,
+              gap: screenHeight * 0.02,
+            }}
+          >
+            <Text style={{ textAlign: "center" }}>No Courses found</Text>
+            <TouchableOpacity onPress={handleSync}>
+              <Text
+                style={{
+                  textAlign: "center",
+                  color: colors.secondary,
+                  fontWeight: "600",
+                  fontSize: screenWidth * 0.04,
+                  textDecorationLine: "underline",
+                }}
+              >
+                Perform data synchronization?
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
     </View>
   );

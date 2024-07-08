@@ -53,6 +53,10 @@ export const InspectionQuestionsScreen = ({ route }) => {
 
   const [info, setInfo] = useState({});
 
+  const handleSync = () => {
+    navigation.navigate("Sync", { data: null });
+  };
+
   const scrollToTop = () => {
     flatListRef?.current?.scrollToOffset({ offset: 0, animated: true });
   };
@@ -355,7 +359,7 @@ export const InspectionQuestionsScreen = ({ route }) => {
           </Text>
         </View>
         <View style={{ flex: 1 }}>
-          {loadingData ? (
+          {loadingData && (
             <View
               style={{
                 flex: 1,
@@ -378,7 +382,9 @@ export const InspectionQuestionsScreen = ({ route }) => {
                 resizeMode="cover"
               />
             </View>
-          ) : (
+          )}
+
+          {displayQuestions.length > 0 ? (
             <FlatList
               ref={flatListRef}
               contentContainerStyle={{
@@ -402,6 +408,27 @@ export const InspectionQuestionsScreen = ({ route }) => {
               )}
               keyExtractor={(item) => item.id}
             />
+          ) : (
+            <View
+              style={{
+                gap: screenHeight * 0.02,
+              }}
+            >
+              <Text style={{ textAlign: "center" }}>No questions found</Text>
+              <TouchableOpacity onPress={handleSync}>
+                <Text
+                  style={{
+                    textAlign: "center",
+                    color: colors.secondary,
+                    fontWeight: "600",
+                    fontSize: screenWidth * 0.04,
+                    textDecorationLine: "underline",
+                  }}
+                >
+                  Perform data synchronization?
+                </Text>
+              </TouchableOpacity>
+            </View>
           )}
         </View>
       </View>

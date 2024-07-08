@@ -30,6 +30,11 @@ import { AntDesign } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
 import { deleteDBdataAsync } from "../helpers/deleteDBdataAsync";
 import { dropTableAsync } from "../helpers/dropTableAsync";
+import LottieView from "lottie-react-native";
+import * as SplashScreen from "expo-splash-screen";
+
+// Prevent auto-hiding of the splash screen
+SplashScreen.preventAutoHideAsync();
 
 export const LoginScreen = ({ navigation }) => {
   const loginState = useSelector((state) => state.login);
@@ -47,6 +52,8 @@ export const LoginScreen = ({ navigation }) => {
   const [userDataPreloaded, setUserDataPreloaded] = useState(false);
 
   const [authenticated, setAuthenticated] = useState(false);
+
+  const [loading, setLoading] = useState(false);
 
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
@@ -190,12 +197,33 @@ export const LoginScreen = ({ navigation }) => {
 
   useEffect(() => {
     setIndicatorVisibility(loginState.loading);
+
     if (isFocused) {
       if (loginState.response !== null) {
         if (loginState.response.status === "success") {
           setAuthenticated(true);
           finalizeLogin();
         }
+      }
+
+      if (loginState.error) {
+        let loginError = loginState.error;
+        let errMsg = loginError?.message;
+        let BAD_REQUEST = "400";
+        let SERVER_ERROR = "500";
+        let NOT_FOUND = "404";
+
+        if (errMsg.includes(BAD_REQUEST)) {
+          displayToast("Login failed, invalid credentials");
+        } else if (errMsg.includes(SERVER_ERROR)) {
+          displayToast("Login failed, server error");
+        } else if (errMsg.includes(NOT_FOUND)) {
+          displayToast("Login failed, network error");
+        } else {
+          displayToast("Something went wrong, contact support");
+        }
+
+        dispatch(loginActions.resetLoginState());
       }
     }
   }, [loginState.loading]);
@@ -208,20 +236,20 @@ export const LoginScreen = ({ navigation }) => {
     }
   }, [userDataPreloaded]);
 
-  useEffect(() => {
-    if (loginState.serverResponded) {
-      const loginError = loginState.error;
-      if (loginError) {
-        if (loginError?.code === "ERR_BAD_REQUEST") {
-          displayToast("wrong username or password");
-          dispatch(loginActions.resetLoginState());
-        }
-      }
-    }
-  }, [loginState.serverResponded]);
-
   useFocusEffect(
     React.useCallback(() => {
+      const prepare = async () => {
+        try {
+          // Keep the splash screen visible for 1.2 seconds
+          await new Promise((resolve) => setTimeout(resolve, 1200));
+        } catch (e) {
+          console.warn(e);
+        } finally {
+          // Hide the splash screen after the delay
+          await SplashScreen.hideAsync();
+        }
+      };
+
       const validatedPreviousLogin = async () => {
         const userData = await tokenDecoder();
         if (userData) {
@@ -243,30 +271,10 @@ export const LoginScreen = ({ navigation }) => {
         dispatch(UserActions.setUserLocation(location));
       };
 
-      const wipeData = async (tableName, type) => {
-        if (type === "drop") {
-          dropTableAsync({ tableName })
-            .then((result) => console.log("reset: ", result))
-            .catch((error) => console.log(error));
-        } else if (type === "clean") {
-          deleteDBdataAsync({
-            tableName,
-            id: 1,
-            customQuery: `SELECT * FROM ${tableName};`,
-          })
-            .then((result) => {
-              console.log(result);
-            })
-            .catch((err) => console.log(err));
-        }
-      };
+      prepare();
 
       validatedPreviousLogin();
       getLocation();
-
-      //////////////////////// RESETTING THE APP DATABASE - FOR DEVELOPMENT PURPOSES ONLY ///////////////////////
-      // wipeData("rtc_inspections", "clean");
-      //////////////////////////////// CAUTION //////////////////////////////////////////////////////////////////
 
       return () => {
         if (formRef.current) {
@@ -295,6 +303,44 @@ export const LoginScreen = ({ navigation }) => {
       on
     >
       <StatusBar style={isKeyboardActive ? "dark" : "light"} />
+
+      {/* loader */}
+      {indicatorVisible && (
+        <View
+          style={{
+            position: "absolute",
+            marginTop: screenHeight * 0.07,
+            width: "100%",
+            backgroundColor: "transparent",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 99,
+          }}
+        >
+          <View
+            style={{
+              width: "auto",
+              backgroundColor: "white",
+              borderRadius: screenHeight * 0.5,
+              elevation: 4,
+            }}
+          >
+            <LottieView
+              style={{
+                height: screenHeight * 0.05,
+                width: screenHeight * 0.05,
+                alignSelf: "center",
+              }}
+              source={require("../assets/lottie/spinner.json")}
+              autoPlay
+              speed={1}
+              loop={true}
+              resizeMode="cover"
+            />
+          </View>
+        </View>
+      )}
+
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={{ flex: 1 }}>
           {!isKeyboardActive && (

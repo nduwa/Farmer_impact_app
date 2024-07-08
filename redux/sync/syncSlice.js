@@ -23,6 +23,7 @@ export const sync = createAsyncThunk("data/sync", async (data) => {
     let routeString = `/sync/${tableName}${id ? "/" + id : ""}`;
 
     const response = await api.get(routeString);
+
     if (response.status === 200) {
       console.log(`Data received for ${tableName}`);
       if (tableName === "stations") {

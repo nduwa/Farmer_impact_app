@@ -52,11 +52,16 @@ export const AccessControlModal = ({ completeFn, isRefresh = false }) => {
     if (currentJob === "modules inserted") {
       setCurrentJob("Granting access to user...");
 
-      dataTodb({
-        tableName: "assignedModules",
-        setCurrentJob,
-        syncData: assignedModules,
-      });
+      if (assignedModules.length > 0) {
+        dataTodb({
+          tableName: "assignedModules",
+          setCurrentJob,
+          syncData: assignedModules,
+        });
+      } else {
+        displayToast("No changes applied");
+        completeFn({ open: false, granted: true, refreshing: false });
+      }
     } else if (currentJob === "modules assigned") {
       if (isRefresh) {
         let prevMods = [];
@@ -124,6 +129,12 @@ export const AccessControlModal = ({ completeFn, isRefresh = false }) => {
       }
     }
   }, [accessControlState.serverResponded]);
+  useEffect(() => {
+    if (accessControlState.error) {
+      setError(true);
+      displayToast("Access not granted, check your connection and try again");
+    }
+  }, [accessControlState.error]);
 
   useFocusEffect(
     React.useCallback(() => {

@@ -33,6 +33,10 @@ export const ChooseFarmerScreen = ({ route }) => {
 
   const { data } = route.params;
 
+  const handlePress = () => {
+    navigation.navigate("Sync", { data: null });
+  };
+
   const handleSearch = (text) => {
     if (text !== "") {
       text = text.toLowerCase();
@@ -197,8 +201,15 @@ export const ChooseFarmerScreen = ({ route }) => {
               elevation: 6,
             }}
           >
-            <Text style={{ fontWeight: "600" }}>
-              {activeGroup.ID_GROUP || "loading.."}
+            <Text
+              style={{
+                fontWeight: "600",
+                fontSize: activeGroup.ID_GROUP
+                  ? screenWidth * 0.04
+                  : screenWidth * 0.03,
+              }}
+            >
+              {activeGroup.ID_GROUP || "No groups"}
             </Text>
           </TouchableOpacity>
           <View
@@ -284,7 +295,7 @@ export const ChooseFarmerScreen = ({ route }) => {
             elevation: 6,
           }}
         >
-          {farmers.length > 0 ? (
+          {displayData.length > 0 ? (
             <FlatList
               contentContainerStyle={{
                 padding: 5,
@@ -298,7 +309,26 @@ export const ChooseFarmerScreen = ({ route }) => {
               keyExtractor={(item, index) => index}
             />
           ) : (
-            <Text style={{ textAlign: "center" }}>No farmers found</Text>
+            <View
+              style={{
+                gap: screenHeight * 0.02,
+              }}
+            >
+              <Text style={{ textAlign: "center" }}>No farmers found</Text>
+              <TouchableOpacity onPress={handlePress}>
+                <Text
+                  style={{
+                    textAlign: "center",
+                    color: colors.secondary,
+                    fontWeight: "600",
+                    fontSize: screenWidth * 0.04,
+                    textDecorationLine: "underline",
+                  }}
+                >
+                  Perform data synchronization?
+                </Text>
+              </TouchableOpacity>
+            </View>
           )}
         </View>
       </View>

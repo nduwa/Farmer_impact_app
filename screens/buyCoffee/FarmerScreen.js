@@ -29,9 +29,13 @@ export const FarmerScreen = () => {
   const [activeGroup, setActiveGroup] = useState([]);
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [searchResults, setSearchResults] = useState([]);
+  const [emptyResults, setEmptyResults] = useState(false);
 
   const navigation = useNavigation();
 
+  const handlePress = () => {
+    navigation.navigate("Sync", { data: null });
+  };
   const handleSearch = (text) => {
     if (text !== "") {
       text = text.toLowerCase();
@@ -61,11 +65,14 @@ export const FarmerScreen = () => {
 
   useEffect(() => {
     if (activeGroup.id) {
+      setEmptyResults(false);
+
       retrieveDBdata({
         tableName: "rtc_farmers",
         stationId: activeGroup._kf_Station,
         groupID: activeGroup.__kp_Group,
         setData: setFarmers,
+        setEmpty: setEmptyResults,
       });
     }
   }, [activeGroup]);
@@ -74,11 +81,14 @@ export const FarmerScreen = () => {
 
   useEffect(() => {
     const fetchFarmers = () => {
+      setEmptyResults(false);
+
       retrieveDBdata({
         tableName: "rtc_farmers",
         stationId: selectedGroup._kf_Station,
         groupID: selectedGroup.__kp_Group,
         setData: setFarmers,
+        setEmpty: setEmptyResults,
       });
     };
 
@@ -187,8 +197,15 @@ export const FarmerScreen = () => {
               elevation: 6,
             }}
           >
-            <Text style={{ fontWeight: "600" }}>
-              {activeGroup.ID_GROUP || "loading.."}
+            <Text
+              style={{
+                fontSize: activeGroup.ID_GROUP
+                  ? screenWidth * 0.04
+                  : screenWidth * 0.03,
+                fontWeight: "600",
+              }}
+            >
+              {activeGroup.ID_GROUP || "No groups"}
             </Text>
           </TouchableOpacity>
           <View
@@ -274,7 +291,7 @@ export const FarmerScreen = () => {
             elevation: 6,
           }}
         >
-          {farmers.length > 0 ? (
+          {displayData.length > 0 ? (
             <FlatList
               contentContainerStyle={{
                 padding: 5,
@@ -286,7 +303,26 @@ export const FarmerScreen = () => {
               keyExtractor={(item) => item.id}
             />
           ) : (
-            <Text style={{ textAlign: "center" }}>No farmers found</Text>
+            <View
+              style={{
+                gap: screenHeight * 0.02,
+              }}
+            >
+              <Text style={{ textAlign: "center" }}>No farmers found</Text>
+              <TouchableOpacity onPress={handlePress}>
+                <Text
+                  style={{
+                    textAlign: "center",
+                    color: colors.secondary,
+                    fontWeight: "600",
+                    fontSize: screenWidth * 0.04,
+                    textDecorationLine: "underline",
+                  }}
+                >
+                  Perform data synchronization?
+                </Text>
+              </TouchableOpacity>
+            </View>
           )}
         </View>
       </View>

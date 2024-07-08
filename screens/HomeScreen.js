@@ -30,7 +30,6 @@ import { SyncModal } from "../components/SyncModal";
 import { UserModal } from "../components/UserModal";
 import { FarmerMgtModal } from "../components/FarmerMgtModal";
 import { AccessControlModal } from "../components/AccessControlModal";
-import { retrieveDBdata } from "../helpers/retrieveDBdata";
 import { retrieveDBdataAsync } from "../helpers/retrieveDBdataAsync";
 
 export const HomeScreen = ({ route }) => {
@@ -111,10 +110,11 @@ export const HomeScreen = ({ route }) => {
   const moduleAccessControl = () => {
     retrieveDBdataAsync({
       tableName: "accessModules",
-      customQuery:
-        "SELECT modules.* FROM rtc_mobile_app_modules AS modules INNER JOIN rtc_mobile_app_access_control AS access ON modules.id = access.moduleid AND access.active = '1';",
+      customQuery: `SELECT modules.* FROM rtc_mobile_app_modules AS modules INNER JOIN rtc_mobile_app_access_control AS access ON modules.id = access.moduleid AND access.userid = '${userState.userData.staff.id}'  AND access.active = '1';`,
     })
-      .then((data) => setAccessableModules(data))
+      .then((data) => {
+        setAccessableModules(data);
+      })
       .catch((error) => console.log("Error:", error));
   };
 
@@ -199,6 +199,10 @@ export const HomeScreen = ({ route }) => {
           setDisplayName(userName.split(" ")[1]);
         }
 
+        if (userState.checkedForNewUser) {
+          moduleAccessControl();
+        }
+
         const currentDate = new Date();
         setToday(formatDate(currentDate));
         const unsubscribe = navigation.addListener("blur", () => {
@@ -210,6 +214,7 @@ export const HomeScreen = ({ route }) => {
 
         return unsubscribe;
       };
+
       const newUserDetection = async () => {
         let stationId = userState.userData.staff._kf_Station;
         detectNewUser({ newStationId: data?.stationId || stationId })
@@ -448,7 +453,7 @@ export const HomeScreen = ({ route }) => {
           data={{
             names: userState.userData.staff.Name,
             role: userState.userData.staff.Role,
-            station: stationDetails,
+            station: stationDetails.location ? stationDetails : null,
           }}
           CloseFn={setUserDetailsModalOpen}
           AccessCtrlFn={refreshAccessControl}

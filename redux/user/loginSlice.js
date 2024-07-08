@@ -41,13 +41,12 @@ const loginSlice = createSlice({
       state.loading = false;
       state.response = { ...action.payload };
       state.error = null;
-      state.serverResponded = true;
+      state.serverResponded = action.payload ? true : false;
     });
     builder.addCase(login.rejected, (state, action) => {
       state.loading = false;
       state.error = { ...action.error };
-      state.response = null;
-      state.serverResponded = true;
+      state.serverResponded = false;
     });
   },
 });

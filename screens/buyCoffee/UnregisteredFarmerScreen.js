@@ -49,6 +49,8 @@ export const UnRegisteredFarmerScreen = () => {
   const [supplierData, setSupplierData] = useState(null);
   const [submitData, setSubmitData] = useState(null);
 
+  const [submitted, setSubmitted] = useState(false);
+
   const onChange = (event, selectedDate) => {
     const currentDate = selectedDate;
     setShow(false);
@@ -227,6 +229,7 @@ export const UnRegisteredFarmerScreen = () => {
 
       usedReceipts.push({ paper_receipt: newReceipt });
       setAllReceipts(usedReceipts);
+      setSubmitted(true);
     }
   }, [currentJob]);
 
@@ -835,7 +838,7 @@ export const UnRegisteredFarmerScreen = () => {
                     isKeyboardActive ? screenHeight * 0.04 : screenHeight * 0.03
                   }
                   radius={10}
-                  disabled={indicatorVisible}
+                  disabled={submitted}
                   onPress={handleSubmit}
                 />
               </ScrollView>

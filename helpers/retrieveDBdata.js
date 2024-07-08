@@ -9,6 +9,7 @@ export const retrieveDBdata = ({
   queryArg = null,
   tableName,
   setData,
+  setEmpty = null,
 }) => {
   let query = "";
 
@@ -45,6 +46,7 @@ export const retrieveDBdata = ({
         data = rows._array; // Retrieve the data from the result set
         console.log(`Retrieved data for ${tableName}`);
         setData(data);
+        if (setEmpty && data.length == 0) setEmpty(true);
       },
       (_, error) => {
         console.error("Error retrieving data:", error);

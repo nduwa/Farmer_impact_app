@@ -1,17 +1,28 @@
 {
   "expo": {
-    "name": "react-native-farmer-impact",
-    "slug": "react-native-farmer-impact",
+    "name": "RTC Mobile",
+    "slug": "rtc-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash_rtc.png",
+      "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#f8e4c0f"
+      "backgroundColor": "#fbf9ec"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*",
+      "!node_modules/**",
+      "!**/*.md",
+      "!**/README.md",
+      "!**/.git/**",
+      "!build/**",
+      "!dist/**",
+      "!**/*.config.js",
+      "!tests/**",
+      "!spec/**"
+    ],
     "ios": {
       "supportsTablet": true
     },
@@ -22,9 +33,11 @@
       },
       "permissions": [
         "android.permission.DETECT_SCREEN_CAPTURE",
-        "CAMERA",
-        "CAMERA_ROLL"
-      ]
+        "android.permission.CAMERA",
+        "android.permission.CAMERA_ROLL",
+        "android.permission.RECORD_AUDIO"
+      ],
+      "package": "com.kwizera117.rtcmobile"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -37,6 +50,17 @@
           "photosPermission": "The app accesses your photos to let you take pictures of files or documents when needed."
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "0bfd3209-f18b-4011-94e6-6e7309fa7e46"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/0bfd3209-f18b-4011-94e6-6e7309fa7e46"
+    }
   }
 }

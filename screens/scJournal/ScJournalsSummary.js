@@ -29,6 +29,7 @@ import {
 } from "../../redux/journal/JournalSlice";
 import { updateDBdata } from "../../helpers/updateDBdata";
 import * as SecureStore from "expo-secure-store";
+import LottieView from "lottie-react-native";
 
 export const ScJournalsSummary = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
@@ -42,6 +43,7 @@ export const ScJournalsSummary = ({ route }) => {
   const [deleteModal, setDeleteModal] = useState({ open: false, id: null });
   const [currentJob, setCurrentJob] = useState(null);
   const [journalUploaded, setJournalUploaded] = useState(false);
+  const [loadingData, setLoadingData] = useState(false);
 
   const [journalData, setJournalData] = useState([]);
   const [journalDataUploadable, setJournalDataUploadable] = useState([]);
@@ -76,6 +78,7 @@ export const ScJournalsSummary = ({ route }) => {
     const twoDigitDay = ("0" + currentDate.getDate()).slice(-2);
     let DayLotNumber = `${twoDigitDay}${twoDigitMonth}${twoDigitYear}`;
 
+    setLoadingData(true);
     dispatch(
       scJournalSubmission({
         journalId,
@@ -105,7 +108,7 @@ export const ScJournalsSummary = ({ route }) => {
   const deleteTransaction = async () => {
     deleteDBdataAsync({
       tableName: "rtc_transactions",
-      id: deleteModal.id,
+      targetId: deleteModal.id,
     })
       .then((result) => {
         if (result.success) {
@@ -154,6 +157,9 @@ export const ScJournalsSummary = ({ route }) => {
     setFloatersAll(floaters);
     setCashAll(totalCash);
   };
+  const displayToast = (msg) => {
+    ToastAndroid.show(msg, ToastAndroid.SHORT);
+  };
 
   useEffect(() => {
     if (journalData.length > 0) {
@@ -181,8 +187,20 @@ export const ScJournalsSummary = ({ route }) => {
         setCurrentJob,
         query: `UPDATE rtc_transactions SET uploaded=1, uploaded_at='${uploadDate}' WHERE site_day_lot='${journalId}'`,
       });
+      setLoadingData(false);
+      displayToast("Journal Submitted");
     }
   }, [JournalState.serverResponded]);
+
+  useEffect(() => {
+    if (JournalState.error) {
+      if (JournalState.error) {
+        displayToast("Error: Journal not submitted");
+        setLoadingData(false);
+        dispatch(journalActions.resetJournalState());
+      }
+    }
+  }, [JournalState.error]);
 
   useEffect(() => {
     setIndicatorVisibility(JournalState.loading);
@@ -220,6 +238,7 @@ export const ScJournalsSummary = ({ route }) => {
         let uName = await SecureStore.getItemAsync("rtc-user-name");
 
         setUserName(uName);
+        setLoadingData(true);
         retrieveDBdataAsync({
           tableName: "rtc_transactions",
           filterValue: data.site_day_lot,
@@ -228,9 +247,11 @@ export const ScJournalsSummary = ({ route }) => {
             transactions = [...transactions, ...result];
             setJournalData(transactions);
             setSummaryData(transactions);
+            setLoadingData(false);
           })
           .catch((error) => {
             console.log("Error getting transactions for this journal: ", error);
+            setLoadingData(false);
           });
       };
 
@@ -238,6 +259,7 @@ export const ScJournalsSummary = ({ route }) => {
       return () => {
         setJournalDataUploadable([]);
         setJournalUploaded(false);
+        setLoadingData(false);
         dispatch(journalActions.resetJournalState());
       };
     }, [])
@@ -251,6 +273,43 @@ export const ScJournalsSummary = ({ route }) => {
       }}
     >
       <StatusBar style="dark" />
+
+      {loadingData && (
+        <View
+          style={{
+            position: "absolute",
+            marginTop: screenHeight * 0.07,
+            width: "100%",
+            backgroundColor: "transparent",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 99,
+          }}
+        >
+          <View
+            style={{
+              width: "auto",
+              backgroundColor: "white",
+              borderRadius: screenHeight * 0.5,
+              elevation: 4,
+            }}
+          >
+            <LottieView
+              style={{
+                height: screenHeight * 0.05,
+                width: screenHeight * 0.05,
+                alignSelf: "center",
+              }}
+              source={require("../../assets/lottie/spinner.json")}
+              autoPlay
+              speed={1}
+              loop={true}
+              resizeMode="cover"
+            />
+          </View>
+        </View>
+      )}
+
       <View
         style={{
           flexDirection: "row",

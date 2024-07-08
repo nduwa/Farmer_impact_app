@@ -64,6 +64,10 @@ export const TrainingFarmers = ({ route }) => {
 
   const { data } = route.params;
 
+  const handleSync = () => {
+    navigation.navigate("Sync", { data: null });
+  };
+
   const filterChecked = (id) => {
     const allChecked = selectedFarmers.filter((item) => item.farmerid !== id);
 
@@ -377,8 +381,15 @@ export const TrainingFarmers = ({ route }) => {
             elevation: 6,
           }}
         >
-          <Text style={{ fontWeight: "600" }}>
-            {activeGroup.ID_GROUP || "loading.."}
+          <Text
+            style={{
+              fontWeight: "600",
+              fontSize: activeGroup.ID_GROUP
+                ? screenWidth * 0.04
+                : screenWidth * 0.03,
+            }}
+          >
+            {activeGroup.ID_GROUP || "No groups"}
           </Text>
         </TouchableOpacity>
         <View
@@ -456,7 +467,7 @@ export const TrainingFarmers = ({ route }) => {
         </View>
       </View>
       <View style={{ flex: 1 }}>
-        {loadingData ? (
+        {loadingData && (
           <View
             style={{
               flex: 1,
@@ -479,7 +490,9 @@ export const TrainingFarmers = ({ route }) => {
               resizeMode="cover"
             />
           </View>
-        ) : (
+        )}
+
+        {displayData.length > 0 ? (
           <FlatList
             ref={flatListRef}
             contentContainerStyle={{
@@ -504,6 +517,27 @@ export const TrainingFarmers = ({ route }) => {
             )}
             keyExtractor={(item) => item.id}
           />
+        ) : (
+          <View
+            style={{
+              gap: screenHeight * 0.02,
+            }}
+          >
+            <Text style={{ textAlign: "center" }}>No farmers found</Text>
+            <TouchableOpacity onPress={handleSync}>
+              <Text
+                style={{
+                  textAlign: "center",
+                  color: colors.secondary,
+                  fontWeight: "600",
+                  fontSize: screenWidth * 0.04,
+                  textDecorationLine: "underline",
+                }}
+              >
+                Perform data synchronization?
+              </Text>
+            </TouchableOpacity>
+          </View>
         )}
       </View>
       {currentPage > 1 && (

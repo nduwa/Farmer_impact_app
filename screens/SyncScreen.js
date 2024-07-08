@@ -142,12 +142,16 @@ export const SyncScreen = ({ navigation, route }) => {
       });
 
       setLoading(false);
+      setProgress(0);
+      dispatch(syncActions.resetSyncState());
     }
     if (syncState.error) {
       setCurrentJob("Error");
       displayToast(`Error fetching data for ${currentTable}`);
       setIsSyncing(false);
       setLoading(false);
+      setProgress(0);
+      dispatch(syncActions.resetSyncState());
     }
   }, [syncState.loading, syncState.serverResponded]);
 
@@ -168,6 +172,7 @@ export const SyncScreen = ({ navigation, route }) => {
           return;
         }
 
+        setLoading(true);
         const tableExistenceResults = await checkTableExistence();
 
         if (tableExistenceResults) {
@@ -183,6 +188,7 @@ export const SyncScreen = ({ navigation, route }) => {
             })
           );
 
+          setLoading(false);
           setSyncList(updatedSyncList);
         }
       } catch (error) {
