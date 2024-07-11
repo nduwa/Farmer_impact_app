@@ -21,16 +21,20 @@ import { HistoryDetails } from "./screens/history/HistoryDetails";
 import { TrainingCourses } from "./screens/training/TrainingCourses";
 import { TrainingFarmers } from "./screens/training/TrainingFarmers";
 import { TrainingScreen } from "./screens/training/TrainingScreen";
-import { FarmerRegistrationScreen } from "./screens/farmer/FarmerRegistrationScreen";
-import { FarmerUpdateHome } from "./screens/farmer/FarmerUpdateHome";
-import { FarmerUpdateScreen } from "./screens/farmer/FarmerUpdateScreen";
-import { FarmUpdateScreen } from "./screens/farmer/FarmUpdateScreen";
-import { ChooseFarmerScreen } from "./screens/farmer/ChooseFarmerScreen";
-import { SelectFarmersScreen } from "./screens/farmer/SelectFarmersScreen";
-import { PendingRegistrationsScreen } from "./screens/farmer/PendingRegistrationsScreen";
-import { FarmerEditScreen } from "./screens/farmer/FarmerEditScreen";
-import { FarmerNewHHmember } from "./screens/farmer/FarmerNewHHmember";
-import { PendingDeletionScreen } from "./screens/farmer/PendingDeletionScreen";
+import { FarmerRegistrationScreen } from "./screens/farmer/register/FarmerRegistrationScreen";
+import { FarmerUpdateHome } from "./screens/farmer/updateTrees/FarmerUpdateHome";
+import { FarmerUpdateScreen } from "./screens/farmer/updateTrees/FarmerUpdateScreen";
+import { FarmUpdateScreen } from "./screens/farmer/updateTrees/FarmUpdateScreen";
+import { ChooseFarmerScreen } from "./screens/farmer/updateTrees/ChooseFarmerScreen";
+import { SelectFarmersScreen } from "./screens/farmer/removeFarmers/SelectFarmersScreen";
+import { PendingRegistrationsScreen } from "./screens/farmer/register/PendingRegistrationsScreen";
+import { FarmerEditScreen } from "./screens/farmer/register/FarmerEditScreen";
+import { FarmerNewHHmember } from "./screens/farmer/register/FarmerNewHHmember";
+import { PendingDeletionScreen } from "./screens/farmer/removeFarmers/PendingDeletionScreen";
+import { AssignFarmersScreen } from "./screens/farmer/assignGroups/AssignFarmersScreen";
+import { WeeklyReportScreen } from "./screens/farmer/weeklyReport/WeeklyReportScreen";
+import { UpdateTreesScreen } from "./screens/farmer/updateTrees/UpdateTreesScreen";
+import { ChooseGroupScreen } from "./screens/farmer/assignGroups/ChooseGroupScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -196,6 +200,26 @@ export default function App() {
             name="FarmerDeletedScreen"
             options={{ unmountOnBlur: true }}
             component={PendingDeletionScreen}
+          />
+          <Stack.Screen
+            name="FarmerAssignGroupScreen"
+            options={{ unmountOnBlur: true }}
+            component={AssignFarmersScreen}
+          />
+          <Stack.Screen
+            name="WeeklyReportScreen"
+            options={{ unmountOnBlur: true }}
+            component={WeeklyReportScreen}
+          />
+          <Stack.Screen
+            name="updateTreesScreen"
+            options={{ unmountOnBlur: true }}
+            component={UpdateTreesScreen}
+          />
+          <Stack.Screen
+            name="ChooseGroupScreen"
+            options={{ unmountOnBlur: true }}
+            component={ChooseGroupScreen}
           />
         </Stack.Navigator>
       </NavigationContainer>

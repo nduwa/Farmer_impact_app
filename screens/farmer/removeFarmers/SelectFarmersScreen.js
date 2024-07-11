@@ -8,31 +8,27 @@ import {
   View,
 } from "react-native";
 import * as SecureStore from "expo-secure-store";
-import { colors } from "../../data/colors";
+import { colors } from "../../../data/colors";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
 import { AntDesign } from "@expo/vector-icons";
 import React, { useEffect, useRef, useState } from "react";
 import { Formik } from "formik";
 import { Feather } from "@expo/vector-icons";
-import { UpdateChildrenModal } from "../../components/UpdateChildrenModal";
-import { retrieveDBdata } from "../../helpers/retrieveDBdata";
-import { GroupsModal } from "../../components/GroupsModal";
-import { InspectionHoverSubmitBtn } from "../../components/InspectionHoverSubmitBtn";
-import { InspectionHoverPrevBtn } from "../../components/InspectionHoverPrevBtn";
+import { retrieveDBdata } from "../../../helpers/retrieveDBdata";
+import { GroupsModal } from "../../../components/GroupsModal";
+import { InspectionHoverSubmitBtn } from "../../../components/InspectionHoverSubmitBtn";
+import { InspectionHoverPrevBtn } from "../../../components/InspectionHoverPrevBtn";
 import LottieView from "lottie-react-native";
-import FarmerTrainingCard from "../../components/FarmerTrainingCard";
-import { AttendanceSheetModal } from "../../components/AttendanceSheetModal";
+import FarmerTrainingCard from "../../../components/FarmerTrainingCard";
 import { useSelector } from "react-redux";
-import { generateID } from "../../helpers/generateID";
-import { dataTodb } from "../../helpers/dataTodb";
+import { SyncModal } from "../../../components/SyncModal";
+import { updateDBdata } from "../../../helpers/updateDBdata";
 
-export const TrainingFarmers = ({ route }) => {
+export const SelectFarmersScreen = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
-  const userId = useSelector((state) => state.user.userData.staff.userID);
   const userName = useSelector((state) => state.user.userData.user.Name_User);
-  const location = useSelector((state) => state.user.location);
 
   const navigation = useNavigation();
   const flatListRef = useRef(null);
@@ -45,7 +41,6 @@ export const TrainingFarmers = ({ route }) => {
   const [groupsModalOpen, setGroupsModalOpen] = useState(false);
   const [activeGroup, setActiveGroup] = useState([]);
   const [selectedFarmers, setSelectedFarmers] = useState([]);
-  const [stationName, setStationName] = useState("");
   const [currentJob, setCurrentJob] = useState(null);
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -55,19 +50,14 @@ export const TrainingFarmers = ({ route }) => {
   const [dataEnd, setDataEnd] = useState(0);
   const [loadingData, setLoadingData] = useState(false);
   const [loadingPage, setLoadingPage] = useState(false);
-
-  const [UUID, setUUID] = useState(null);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
   const [submitted, setSubmitted] = useState(false);
-  const [attendanceSheet, setAttendanceSheet] = useState(null);
-  const [sheetModalOpen, setSheetModalOpen] = useState(false);
-
-  const { data } = route.params;
+  const [deletedFarmers, setDeletedFarmers] = useState([]);
 
   const handleSync = () => {
     navigation.navigate("Sync", { data: null });
   };
-
   const filterChecked = (id) => {
     const allChecked = selectedFarmers.filter((item) => item.farmerid !== id);
 
@@ -114,7 +104,7 @@ export const TrainingFarmers = ({ route }) => {
   };
 
   const handleBackButton = () => {
-    navigation.replace("TrainingCourses", { data: null });
+    navigation.replace("Homepage", { data: null });
   };
 
   const handleSearch = (text) => {
@@ -135,7 +125,7 @@ export const TrainingFarmers = ({ route }) => {
   };
 
   const handleSubmit = () => {
-    setSheetModalOpen(true);
+    setDeleteModalOpen(true);
   };
 
   const handleCheckbox = (farmer) => {
@@ -153,69 +143,60 @@ export const TrainingFarmers = ({ route }) => {
     setCurrentPage(newpg);
   };
 
-  useEffect(() => {
-    if (attendanceSheet) {
-      const uuid = generateID({
-        type: "uuid",
-        username: userName,
-        userID: userId,
-      });
+  const handleDelete = async () => {
+    setDeleteModalOpen(false);
+    let farmersToDelete = [];
+    let strIDs = "";
+    let query = "";
+    let i = 0;
 
-      setUUID(uuid);
-
-      let submitData = [];
-      let obj = {
-        created_at: new Date(),
-        uuid,
-        filepath: `attendance/${stationName}/${userName}/${attendanceSheet}`,
-        status: 1,
-        uploaded_at: "0000-00-0",
-      };
-      submitData.push(obj);
-
-      dataTodb({
-        tableName: "attandanceSheets",
-        syncData: submitData,
-        setCurrentJob: setCurrentJob,
-      });
+    for (const farmer of selectedFarmers) {
+      farmersToDelete.push(farmer.__kf_farmer);
+      strIDs += `'${farmer.__kf_farmer}'`;
+      if (i < selectedFarmers.length - 1) strIDs += ",";
+      i++;
     }
-  }, [attendanceSheet]);
+
+    setDeletedFarmers(farmersToDelete);
+
+    query = `UPDATE rtc_farmers SET deleted = 1, deleted_by = '${userName}', deleted_at = '${new Date()}', sync = 0 WHERE __kp_Farmer IN(${strIDs})`;
+
+    updateDBdata({
+      id: 0,
+      query,
+      setCurrentJob,
+      msgYes: "Farmers removed",
+      msgNo: "not removed",
+    });
+  };
+
+  const handleSyncModal = () => {
+    setDeleteModalOpen(false);
+  };
 
   useEffect(() => {
-    if (currentJob === "Attendance sheet saved") {
-      displayToast("Attendance sheet saved");
-
-      let trainingData = [];
-      let training_id = generateID({ type: "fm_uuid" }).toUpperCase();
-
-      for (const farmer of selectedFarmers) {
-        let obj = {
-          created_at: new Date(),
-          training_course_id: data.courseId,
-          __kf_farmer: farmer.__kf_farmer,
-          __kf_group: farmer._kf_Group,
-          status: 1,
-          __kf_attendance: "",
-          username: userName,
-          password: "",
-          uuid: UUID,
-          uploaded_at: "0000-00-00",
-          _kf_training: training_id,
-          lo: location.coords.longitude,
-          la: location.coords.latitude,
-        };
-
-        trainingData.push(obj);
-      }
-
-      dataTodb({
-        tableName: "trainingAttendance",
-        syncData: trainingData,
-        setCurrentJob: setCurrentJob,
-      });
-    } else if (currentJob === "Training details saved") {
-      displayToast("Training details saved");
+    if (selectedFarmers.length > 0) {
+      setSubmitted(false);
+    } else {
       setSubmitted(true);
+    }
+  }, [selectedFarmers]);
+
+  useEffect(() => {
+    if (currentJob === "Farmers removed") {
+      const newDisplaydata = displayData.reduce((accumulator, currentItem) => {
+        if (!deletedFarmers.includes(currentItem.__kp_Farmer)) {
+          accumulator.push(currentItem);
+        }
+
+        return accumulator;
+      }, []);
+
+      setDisplayData(newDisplaydata);
+
+      displayToast("Farmers removed");
+      setSelectedFarmers([]);
+      setCurrentJob("");
     }
   }, [currentJob]);
 
@@ -229,6 +210,9 @@ export const TrainingFarmers = ({ route }) => {
 
     if (data.length > 0) {
       handleDataPagination(data);
+    } else {
+      setLoadingData(false);
+      setLoadingPage(false);
     }
   }, [farmers, searchResults]);
 
@@ -267,6 +251,7 @@ export const TrainingFarmers = ({ route }) => {
       setActiveGroup(groups[0]);
     } else {
       setLoadingData(false);
+      setLoadingPage(false);
     }
   }, [groups]);
 
@@ -274,7 +259,6 @@ export const TrainingFarmers = ({ route }) => {
     React.useCallback(() => {
       const fetchData = async () => {
         const stationId = await SecureStore.getItemAsync("rtc-station-id");
-        const station_name = await SecureStore.getItemAsync("rtc-station-name");
 
         setLoadingData(true);
         if (stationId) {
@@ -283,10 +267,6 @@ export const TrainingFarmers = ({ route }) => {
             stationId,
             setData: setGroups,
           });
-        }
-
-        if (station_name) {
-          setStationName(station_name);
         }
       };
 
@@ -300,9 +280,9 @@ export const TrainingFarmers = ({ route }) => {
         setGroupsModalOpen(false);
         setActiveGroup([]);
         setSelectedFarmers([]);
-        setAttendanceSheet(null);
-        setStationName("");
+        setDeletedFarmers([]);
         setCurrentJob(null);
+        setLoadingData(false);
       };
     }, [])
   );
@@ -352,7 +332,7 @@ export const TrainingFarmers = ({ route }) => {
             fontSize: 19,
           }}
         >
-          Choose Farmers For Training
+          Remove Farmers
         </Text>
         <View
           style={{ width: screenWidth * 0.07, backgroundColor: "transparent" }}
@@ -483,7 +463,7 @@ export const TrainingFarmers = ({ route }) => {
                 alignSelf: "center",
                 marginVertical: 30,
               }}
-              source={require("../../assets/lottie/loader.json")}
+              source={require("../../../assets/lottie/loader.json")}
               autoPlay
               speed={0.8}
               loop={true}
@@ -590,7 +570,7 @@ export const TrainingFarmers = ({ route }) => {
                 width: screenHeight * 0.05,
                 alignSelf: "center",
               }}
-              source={require("../../assets/lottie/spinner.json")}
+              source={require("../../../assets/lottie/spinner.json")}
               autoPlay
               speed={1}
               loop={true}
@@ -600,11 +580,14 @@ export const TrainingFarmers = ({ route }) => {
         </View>
       )}
 
-      {sheetModalOpen && (
-        <AttendanceSheetModal
-          setSelectedImage={setAttendanceSheet}
-          setModal={setSheetModalOpen}
-          setToast={displayToast}
+      {/* delete modal */}
+      {deleteModalOpen && (
+        <SyncModal
+          label={`You're about to remove the selected farmers, are you sure?`}
+          onYes={handleDelete}
+          OnNo={handleSyncModal}
+          labelYes="Ok"
+          labelNo="No"
         />
       )}
     </View>

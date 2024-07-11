@@ -9,20 +9,17 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { colors } from "../../data/colors";
+import { colors } from "../../../data/colors";
 import { AntDesign } from "@expo/vector-icons";
 import { Formik } from "formik";
-import { BuyCoffeeInput } from "../../components/BuyCoffeeInput";
-import RadioButtonGroup, { RadioButtonItem } from "expo-radio-button";
+import { BuyCoffeeInput } from "../../../components/BuyCoffeeInput";
 import { useNavigation } from "@react-navigation/native";
-import CustomButton from "../../components/CustomButton";
-import * as SecureStore from "expo-secure-store";
+import CustomButton from "../../../components/CustomButton";
 
-export const FarmUpdateScreen = ({ route }) => {
+export const WeeklyReportScreen = () => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
 
-  const [indicatorVisible, setIndicatorVisibility] = useState(false);
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
   const [currentJob, setCurrentJob] = useState(null);
   const [validationError, setValidationError] = useState({
@@ -30,24 +27,28 @@ export const FarmUpdateScreen = ({ route }) => {
     type: null,
     inputBox: null,
   });
+  const [reportValidated, setReportValidated] = useState(false);
+
+  const [submitted, setSubmitted] = useState(false);
 
   const navigation = useNavigation();
 
-  const { data } = route.params;
-
   const handleBackButton = () => {
-    navigation.navigate("ChooseFarmerUpdateScreen", { data: data.destination });
+    navigation.navigate("Homepage", { data: null });
+  };
+
+  const submitReport = () => {
+    try {
+      if (validateInputs(transactionData)) {
+        setReportValidated(true);
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const validateInputs = (values) => {
     return true;
-  };
-
-  const submitFarmer = async (farmerData) => {
-    try {
-    } catch (error) {
-      console.log(error);
-    }
   };
 
   useEffect(() => {
@@ -71,7 +72,6 @@ export const FarmUpdateScreen = ({ route }) => {
     };
   }, [isKeyboardActive]);
 
-
   return (
     <View
       style={{
@@ -90,7 +90,7 @@ export const FarmUpdateScreen = ({ route }) => {
           backgroundColor: colors.white,
           paddingTop: screenHeight * 0.042,
           padding: 10,
-          elevation: 3,
+          elevation: 5,
         }}
       >
         <TouchableOpacity
@@ -110,7 +110,7 @@ export const FarmUpdateScreen = ({ route }) => {
             fontSize: 19,
           }}
         >
-          Update Farm details
+          Field Weekly Report
         </Text>
         <View
           style={{ width: screenWidth * 0.07, backgroundColor: "transparent" }}
@@ -119,20 +119,16 @@ export const FarmUpdateScreen = ({ route }) => {
       <View style={{ backgroundColor: colors.bg_variant }}>
         <Formik
           initialValues={{
-            groupName: "",
-            farmerName: "",
-            birthYear: "",
-            householdID: "",
-            cell: "",
-            village: "",
-            totalPlots: "",
-            prodTrees: "",
-            totTrees: "",
-            stp1: "",
-            stp2: "",
+            nmbrTrained: "0",
+            attendedM: "0",
+            attendedF: "0",
+            groupsToTrainNextWeek: "0",
+            nmbrFarmsInspected: "0",
+            farmsToInspect: "0",
+            otherActivities: "",
           }}
           onSubmit={async (values) => {
-            submitFarmer(values);
+            submitReport(values);
           }}
         >
           {({
@@ -180,30 +176,58 @@ export const FarmUpdateScreen = ({ route }) => {
                       marginLeft: screenWidth * 0.02,
                     }}
                   >
-                    Farm information
+                    Fill the form accordingly
                   </Text>
                   <BuyCoffeeInput
                     values={values}
-                    handleChange={handleChange("farmType")}
-                    handleBlur={handleBlur("farmType")}
-                    label={"Choose farm type"}
-                    value={values.farmType}
-                    active={false}
+                    handleChange={handleChange("nmbrTrained")}
+                    handleBlur={handleBlur("nmbrTrained")}
+                    label={"Number Trained"}
+                    value={values.nmbrTrained}
+                    active={true}
+                    error={validationError.inputBox === "nmbrTrained"}
                   />
                   <BuyCoffeeInput
                     values={values}
-                    handleChange={handleChange("unitArea")}
-                    handleBlur={handleBlur("unitArea")}
-                    label={"Farm Unit Area(ha)"}
-                    value={values.unitArea}
-                    active={false}
+                    handleChange={handleChange("attendedM")}
+                    handleBlur={handleBlur("attendedM")}
+                    label={"Men Attended"}
+                    value={values.attendedM}
+                    error={validationError.inputBox === "attendedM"}
                   />
                   <BuyCoffeeInput
                     values={values}
-                    handleChange={handleChange("slope")}
-                    handleBlur={handleBlur("slope")}
-                    label={"Soil Slope"}
-                    value={values.slope}
+                    handleChange={handleChange("attendedF")}
+                    handleBlur={handleBlur("attendedF")}
+                    label={"Women Attended"}
+                    value={values.attendedF}
+                    error={validationError.inputBox === "attendedF"}
+                  />
+                  <BuyCoffeeInput
+                    values={values}
+                    handleChange={handleChange("groupsToTrainNextWeek")}
+                    handleBlur={handleBlur("groupsToTrainNextWeek")}
+                    label={"Groups planned to train next week"}
+                    value={values.groupsToTrainNextWeek}
+                    error={validationError.inputBox === "groupsToTrainNextWeek"}
+                  />
+                  <BuyCoffeeInput
+                    values={values}
+                    handleChange={handleChange("farmsToInspect")}
+                    handleBlur={handleBlur("farmsToInspect")}
+                    label={"Number of farms inspected"}
+                    value={values.farmsToInspect}
+                    error={validationError.inputBox === "farmsToInspect"}
+                  />
+
+                  <BuyCoffeeInput
+                    values={values}
+                    handleChange={handleChange("otherActivities")}
+                    handleBlur={handleBlur("otherActivities")}
+                    label={"Other activities and comment"}
+                    value={values.otherActivities}
+                    multiline={true}
+                    error={validationError.inputBox === "otherActivities"}
                   />
                 </View>
 
@@ -249,14 +273,14 @@ export const FarmUpdateScreen = ({ route }) => {
                   bg={colors.secondary}
                   color={"white"}
                   width="95%"
-                  text="Update"
+                  text="Confirm Purchase"
                   bdcolor="transparent"
                   mt={screenHeight * 0.017}
                   mb={
                     isKeyboardActive ? screenHeight * 0.04 : screenHeight * 0.03
                   }
                   radius={10}
-                  disabled={indicatorVisible}
+                  disabled={submitted}
                   onPress={handleSubmit}
                 />
               </ScrollView>

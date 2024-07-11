@@ -6,10 +6,10 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { colors } from "../../data/colors";
+import { colors } from "../../../data/colors";
 import { StatusBar } from "expo-status-bar";
 import { AntDesign } from "@expo/vector-icons";
-import { UpdateFarmerItem } from "../../components/UpdateFarmerItem";
+import { UpdateFarmerItem } from "../../../components/UpdateFarmerItem";
 
 export const FarmerUpdateHome = () => {
   const screenHeight = Dimensions.get("window").height;
@@ -76,6 +76,10 @@ export const FarmerUpdateHome = () => {
               gap: screenHeight * 0.014,
             }}
           >
+            <UpdateFarmerItem
+              label={"Trees"}
+              destination={"updateTreesScreen"}
+            />
             <UpdateFarmerItem
               label={"Farmer Details"}
               destination={"FarmerUpdateScreen"}

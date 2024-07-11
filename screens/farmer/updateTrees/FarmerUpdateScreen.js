@@ -9,13 +9,13 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { colors } from "../../data/colors";
+import { colors } from "../../../data/colors";
 import { AntDesign } from "@expo/vector-icons";
 import { Formik } from "formik";
-import { BuyCoffeeInput } from "../../components/BuyCoffeeInput";
+import { BuyCoffeeInput } from "../../../components/BuyCoffeeInput";
 import RadioButtonGroup, { RadioButtonItem } from "expo-radio-button";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
-import CustomButton from "../../components/CustomButton";
+import CustomButton from "../../../components/CustomButton";
 import * as SecureStore from "expo-secure-store";
 
 export const FarmerUpdateScreen = ({ route }) => {

@@ -11,23 +11,23 @@ import {
   View,
 } from "react-native";
 import * as SecureStore from "expo-secure-store";
-import { colors } from "../../data/colors";
+import { colors } from "../../../data/colors";
 import { AntDesign } from "@expo/vector-icons";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Formik } from "formik";
-import { BuyCoffeeInput } from "../../components/BuyCoffeeInput";
+import { BuyCoffeeInput } from "../../../components/BuyCoffeeInput";
 import RadioButtonGroup, { RadioButtonItem } from "expo-radio-button";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
-import CustomButton from "../../components/CustomButton";
+import CustomButton from "../../../components/CustomButton";
 import { FontAwesome6 } from "@expo/vector-icons";
-import { retrieveDBdata } from "../../helpers/retrieveDBdata";
-import { GroupsModal } from "../../components/GroupsModal";
-import { LocalizationModal } from "../../components/LocalizationModal";
-import { newFarmerSchema } from "../../validation/newFarmerSchema";
+import { retrieveDBdata } from "../../../helpers/retrieveDBdata";
+import { GroupsModal } from "../../../components/GroupsModal";
+import { LocalizationModal } from "../../../components/LocalizationModal";
+import { newFarmerSchema } from "../../../validation/newFarmerSchema";
 import { useSelector } from "react-redux";
-import { SyncModal } from "../../components/SyncModal";
-import { deleteDBdataAsync } from "../../helpers/deleteDBdataAsync";
-import { updateDBdataAsync } from "../../helpers/updateDBdataAsync";
+import { SyncModal } from "../../../components/SyncModal";
+import { deleteDBdataAsync } from "../../../helpers/deleteDBdataAsync";
+import { updateDBdataAsync } from "../../../helpers/updateDBdataAsync";
 import LottieView from "lottie-react-native";
 
 export const FarmerEditScreen = ({ route }) => {
@@ -1401,7 +1401,7 @@ export const FarmerEditScreen = ({ route }) => {
                 width: screenHeight * 0.05,
                 alignSelf: "center",
               }}
-              source={require("../../assets/lottie/spinner.json")}
+              source={require("../../../assets/lottie/spinner.json")}
               autoPlay
               speed={1}
               loop={true}

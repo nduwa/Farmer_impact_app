@@ -1,6 +1,7 @@
 import * as SQLite from "expo-sqlite";
 import { SyncQueries } from "../data/SyncQueries";
 import { DB_NAME } from "@env";
+import { dbQueries } from "../data/dbQueries";
 
 // Open or create the database
 const db = SQLite.openDatabase(DB_NAME);
@@ -427,6 +428,26 @@ db.transaction((tx) => {
         error
       )
   );
+
+  //temp groups
+  tx.executeSql(
+    `CREATE TABLE IF NOT EXISTS tmp_farmer_group_assignment (
+      id integer primary key AUTOINCREMENT,
+      created_at datetime NOT NULL,
+      farmerid varchar(255),
+      _kf_farmer varchar(255) NOT NULL,
+      kf_group_old varchar(255) NOT NULL,
+      kf_group_new varchar(255) NOT NULL,
+      group_id_new varchar(255) NOT NULL,
+      _kf_station varchar(255) NOT NULL,
+      assigned_by varchar(45) NOT NULL,
+      uploaded integer NOT NULL
+    )`,
+    [],
+    () => console.log(`Table tmp_farmer_group_assignment created successfully`),
+    (_, error) =>
+      console.error(`Error creating tmp_farmer_group_assignment table:`, error)
+  );
 });
 
 const generateBulkValueString = (
@@ -638,6 +659,14 @@ const generateBulkValueString = (
     let bulkValues = "";
     for (let i = 0; i < data.length; i++) {
       bulkValues += `('${data[i].id}','${data[i].created_at}','${data[i].moduleid}','${data[i].userid}','${data[i].view_record}','${data[i].add_record}','${data[i].delete_record}','${data[i].edit_record}','${data[i].platform}','1')`;
+      if (i < data.length - 1) bulkValues += ",";
+    }
+
+    return bulkValues;
+  } else if (tableName === "groupAssign") {
+    let bulkValues = "";
+    for (let i = 0; i < data.length; i++) {
+      bulkValues += `('${data[i].created_at}','${data[i].farmerid}','${data[i]._kf_farmer}','${data[i].kf_group_old}','${data[i].kf_group_new}','${data[i].group_id_new}','${extraVal}','${data[i].assigned_by}','0')`;
       if (i < data.length - 1) bulkValues += ",";
     }
 
@@ -1383,6 +1412,49 @@ export const dataTodb = ({
             },
             (_, error) => {
               console.error("Error assigning modules: ", error);
+              return;
+            }
+          );
+        });
+      }
+    } else if (tableName === "groupAssign") {
+      for (let i = 0; i < totalPages; i++) {
+        let page = i + 1;
+        let start = (page - 1) * limit; // the starting index
+        let end = start + limit; // the last index
+        let data = syncData.slice(
+          start,
+          end
+        ); /* on the last page when the rows aren't 10, it won't throw array index errors because of how slice() handles last index parameter */
+        let activeRows = data.length;
+
+        let bulkValues = generateBulkValueString(
+          tableName,
+          totalRows,
+          data,
+          extraVal
+        );
+
+        db.transaction((tx) => {
+          tx.executeSql(
+            `${dbQueries.Q_TMP_GRP_ASSIGN} ${bulkValues}`,
+            [],
+            () => {
+              insertedRows += activeRows;
+              const progress = (insertedRows / totalRows) * 100;
+
+              let jobString =
+                progress < 100
+                  ? `Group assignments Saving...`
+                  : "Group assignments saved";
+
+              if (setCurrentJob) setCurrentJob(jobString);
+
+              console.log("Group assignments saved");
+            },
+            (_, error) => {
+              setCurrentJob("Error assigning groups");
+              console.error("Error assigning groups: ", error);
               return;
             }
           );

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { colors } from "../../data/colors";
+import { colors } from "../../../data/colors";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import {
   Dimensions,
@@ -13,18 +13,16 @@ import * as SecureStore from "expo-secure-store";
 import { StatusBar } from "expo-status-bar";
 import { AntDesign } from "@expo/vector-icons";
 import { useDispatch, useSelector } from "react-redux";
-import { retrieveDBdata } from "../../helpers/retrieveDBdata";
-import { InspectionHoverSubmitBtn } from "../../components/InspectionHoverSubmitBtn";
-import { registrationAction } from "../../redux/farmer/RegistrationSlice";
+import { retrieveDBdata } from "../../../helpers/retrieveDBdata";
+import { InspectionHoverSubmitBtn } from "../../../components/InspectionHoverSubmitBtn";
 import LottieView from "lottie-react-native";
-import { SyncModal } from "../../components/SyncModal";
-import { FarmerDeletedCard } from "../../components/FarmerDeletedCard";
-import { updateDBdata } from "../../helpers/updateDBdata";
+import { SyncModal } from "../../../components/SyncModal";
+import { FarmerDeletedCard } from "../../../components/FarmerDeletedCard";
+import { updateDBdata } from "../../../helpers/updateDBdata";
 import {
   deletionAction,
   farmerDeletion,
-} from "../../redux/farmer/DeletionSlice";
-import { updateDBdataAsync } from "../../helpers/updateDBdataAsync";
+} from "../../../redux/farmer/DeletionSlice";
 
 export const PendingDeletionScreen = () => {
   const screenHeight = Dimensions.get("window").height;
@@ -275,7 +273,7 @@ export const PendingDeletionScreen = () => {
                 width: screenHeight * 0.05,
                 alignSelf: "center",
               }}
-              source={require("../../assets/lottie/spinner.json")}
+              source={require("../../../assets/lottie/spinner.json")}
               autoPlay
               speed={1}
               loop={true}

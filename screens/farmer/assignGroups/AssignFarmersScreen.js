@@ -8,24 +8,24 @@ import {
   View,
 } from "react-native";
 import * as SecureStore from "expo-secure-store";
-import { colors } from "../../data/colors";
+import { colors } from "../../../data/colors";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
 import { AntDesign } from "@expo/vector-icons";
 import React, { useEffect, useRef, useState } from "react";
 import { Formik } from "formik";
 import { Feather } from "@expo/vector-icons";
-import { retrieveDBdata } from "../../helpers/retrieveDBdata";
-import { GroupsModal } from "../../components/GroupsModal";
-import { InspectionHoverSubmitBtn } from "../../components/InspectionHoverSubmitBtn";
-import { InspectionHoverPrevBtn } from "../../components/InspectionHoverPrevBtn";
+import { retrieveDBdata } from "../../../helpers/retrieveDBdata";
+import { GroupsModal } from "../../../components/GroupsModal";
+import { InspectionHoverSubmitBtn } from "../../../components/InspectionHoverSubmitBtn";
+import { InspectionHoverPrevBtn } from "../../../components/InspectionHoverPrevBtn";
 import LottieView from "lottie-react-native";
-import FarmerTrainingCard from "../../components/FarmerTrainingCard";
+import FarmerTrainingCard from "../../../components/FarmerTrainingCard";
 import { useSelector } from "react-redux";
-import { SyncModal } from "../../components/SyncModal";
-import { updateDBdata } from "../../helpers/updateDBdata";
+import { SyncModal } from "../../../components/SyncModal";
+import { updateDBdata } from "../../../helpers/updateDBdata";
 
-export const SelectFarmersScreen = ({ route }) => {
+export const AssignFarmersScreen = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const userName = useSelector((state) => state.user.userData.user.Name_User);
@@ -125,7 +125,7 @@ export const SelectFarmersScreen = ({ route }) => {
   };
 
   const handleSubmit = () => {
-    setDeleteModalOpen(true);
+    navigation.navigate("ChooseGroupScreen", { data: selectedFarmers });
   };
 
   const handleCheckbox = (farmer) => {
@@ -332,7 +332,7 @@ export const SelectFarmersScreen = ({ route }) => {
             fontSize: 19,
           }}
         >
-          Remove Farmers
+          Assign Farmers to Groups
         </Text>
         <View
           style={{ width: screenWidth * 0.07, backgroundColor: "transparent" }}
@@ -463,7 +463,7 @@ export const SelectFarmersScreen = ({ route }) => {
                 alignSelf: "center",
                 marginVertical: 30,
               }}
-              source={require("../../assets/lottie/loader.json")}
+              source={require("../../../assets/lottie/loader.json")}
               autoPlay
               speed={0.8}
               loop={true}
@@ -493,6 +493,7 @@ export const SelectFarmersScreen = ({ route }) => {
                 filterFn={filterChecked}
                 isChecked={handleCheckbox(item) || false}
                 setChecked={setSelectedFarmers}
+                use={"assignGroups"}
               />
             )}
             keyExtractor={(item) => item.id}
@@ -570,7 +571,7 @@ export const SelectFarmersScreen = ({ route }) => {
                 width: screenHeight * 0.05,
                 alignSelf: "center",
               }}
-              source={require("../../assets/lottie/spinner.json")}
+              source={require("../../../assets/lottie/spinner.json")}
               autoPlay
               speed={1}
               loop={true}

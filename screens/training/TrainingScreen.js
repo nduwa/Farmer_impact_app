@@ -190,6 +190,8 @@ export const TrainingScreen = () => {
     if (trainingState.error) {
       const trainingError = trainingState.error;
 
+      setSubmitting(false);
+
       if (trainingError?.code === "ERR_BAD_RESPONSE") {
         displayToast("Error: Server error");
       } else if (trainingError?.code === "ERR_BAD_REQUEST") {

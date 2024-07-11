@@ -29,6 +29,7 @@ export const AccessControlModal = ({ completeFn, isRefresh = false }) => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
   const prevAccessMods = useSelector((state) => state.user.accessModules);
+  const userState = useSelector((state) => state.user);
 
   const [allModules, setAllModules] = useState();
   const [assignedModules, setAssignedModules] = useState();
@@ -59,7 +60,17 @@ export const AccessControlModal = ({ completeFn, isRefresh = false }) => {
           syncData: assignedModules,
         });
       } else {
-        displayToast("No changes applied");
+        query = `UPDATE rtc_mobile_app_access_control SET active = 0 WHERE userid = '${userState.userData.staff.id}'`;
+
+        updateDBdata({
+          id: 0,
+          query,
+          setCurrentJob,
+          msgYes: "Access refreshed",
+          msgNo: "Access not refreshed",
+        });
+
+        displayToast("You do not have access, contact support");
         completeFn({ open: false, granted: true, refreshing: false });
       }
     } else if (currentJob === "modules assigned") {

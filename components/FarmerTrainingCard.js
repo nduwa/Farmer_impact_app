@@ -3,7 +3,13 @@ import { Dimensions, Text, View } from "react-native";
 import { colors } from "../data/colors";
 import Checkbox from "expo-checkbox";
 
-const FarmerTrainingCard = ({ data, isChecked, setChecked, filterFn }) => {
+const FarmerTrainingCard = ({
+  data,
+  isChecked,
+  setChecked,
+  filterFn,
+  use = null,
+}) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
 

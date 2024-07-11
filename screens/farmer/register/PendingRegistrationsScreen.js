@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { colors } from "../../data/colors";
+import { colors } from "../../../data/colors";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import {
   Dimensions,
@@ -13,16 +13,16 @@ import * as SecureStore from "expo-secure-store";
 import { StatusBar } from "expo-status-bar";
 import { AntDesign } from "@expo/vector-icons";
 import { useDispatch, useSelector } from "react-redux";
-import { FarmerPendingCard } from "../../components/FarmerPendingCard";
-import { retrieveDBdata } from "../../helpers/retrieveDBdata";
-import { InspectionHoverSubmitBtn } from "../../components/InspectionHoverSubmitBtn";
+import { FarmerPendingCard } from "../../../components/FarmerPendingCard";
+import { retrieveDBdata } from "../../../helpers/retrieveDBdata";
+import { InspectionHoverSubmitBtn } from "../../../components/InspectionHoverSubmitBtn";
 import {
   farmerSubmission,
   registrationAction,
-} from "../../redux/farmer/RegistrationSlice";
-import { dataTodb } from "../../helpers/dataTodb";
+} from "../../../redux/farmer/RegistrationSlice";
+import { dataTodb } from "../../../helpers/dataTodb";
 import LottieView from "lottie-react-native";
-import { SyncModal } from "../../components/SyncModal";
+import { SyncModal } from "../../../components/SyncModal";
 
 export const PendingRegistrationsScreen = () => {
   const screenHeight = Dimensions.get("window").height;
@@ -239,7 +239,7 @@ export const PendingRegistrationsScreen = () => {
                 width: screenHeight * 0.05,
                 alignSelf: "center",
               }}
-              source={require("../../assets/lottie/spinner.json")}
+              source={require("../../../assets/lottie/spinner.json")}
               autoPlay
               speed={1}
               loop={true}
