@@ -32,6 +32,7 @@ import { deleteDBdataAsync } from "../helpers/deleteDBdataAsync";
 import { dropTableAsync } from "../helpers/dropTableAsync";
 import LottieView from "lottie-react-native";
 import * as SplashScreen from "expo-splash-screen";
+import { addColumnIfNotExists, prepareTables } from "../helpers/prepareDB";
 
 // Prevent auto-hiding of the splash screen
 SplashScreen.preventAutoHideAsync();
@@ -238,14 +239,19 @@ export const LoginScreen = ({ navigation }) => {
 
   useFocusEffect(
     React.useCallback(() => {
-      const prepare = async () => {
+      const handleSplashScreen = async () => {
         try {
-          // Keep the splash screen visible for 1.2 seconds
           await new Promise((resolve) => setTimeout(resolve, 1200));
         } catch (e) {
           console.warn(e);
         } finally {
-          // Hide the splash screen after the delay
+          prepareTables();
+          addColumnIfNotExists({
+            tableName: "rtc_groups",
+            columnName: "active",
+            columnType: "integer",
+            defaultValue: "0",
+          });
           await SplashScreen.hideAsync();
         }
       };
@@ -271,8 +277,7 @@ export const LoginScreen = ({ navigation }) => {
         dispatch(UserActions.setUserLocation(location));
       };
 
-      prepare();
-
+      handleSplashScreen();
       validatedPreviousLogin();
       getLocation();
 

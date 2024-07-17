@@ -65,7 +65,7 @@ export const FarmerMgtItem = ({
           color="black"
         />
       )}
-      {label === "Assign Groups" && (
+      {label === "Groups" && (
         <FontAwesome6 name="people-group" size={24} color="black" />
       )}
       {label === "Update Trees" && (

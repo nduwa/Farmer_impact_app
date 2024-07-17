@@ -6,6 +6,7 @@ import { AntDesign } from "@expo/vector-icons";
 import { Foundation } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { FontAwesome } from "@expo/vector-icons";
 import { Entypo } from "@expo/vector-icons";
 import { colors } from "../data/colors";
 import { useNavigation } from "@react-navigation/native";
@@ -120,6 +121,13 @@ export const SideNav = ({
       {name === "Deleted Farmers" && (
         <MaterialCommunityIcons
           name="delete-forever-outline"
+          size={24}
+          color={isActive ? colors.secondary : colors.black_a}
+        />
+      )}
+      {name === "Pending Groups" && (
+        <FontAwesome
+          name="group"
           size={24}
           color={isActive ? colors.secondary : colors.black_a}
         />

@@ -35,6 +35,9 @@ import { AssignFarmersScreen } from "./screens/farmer/assignGroups/AssignFarmers
 import { WeeklyReportScreen } from "./screens/farmer/weeklyReport/WeeklyReportScreen";
 import { UpdateTreesScreen } from "./screens/farmer/updateTrees/UpdateTreesScreen";
 import { ChooseGroupScreen } from "./screens/farmer/assignGroups/ChooseGroupScreen";
+import { AssignGroupsHome } from "./screens/farmer/assignGroups/AssignGroupsHome";
+import { ActiveGroupsScreen } from "./screens/farmer/assignGroups/ActiveGroupsScreen";
+import { InactiveGroupsScreen } from "./screens/farmer/assignGroups/InactiveGroupsScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -201,11 +204,7 @@ export default function App() {
             options={{ unmountOnBlur: true }}
             component={PendingDeletionScreen}
           />
-          <Stack.Screen
-            name="FarmerAssignGroupScreen"
-            options={{ unmountOnBlur: true }}
-            component={AssignFarmersScreen}
-          />
+
           <Stack.Screen
             name="WeeklyReportScreen"
             options={{ unmountOnBlur: true }}
@@ -216,10 +215,31 @@ export default function App() {
             options={{ unmountOnBlur: true }}
             component={UpdateTreesScreen}
           />
+
+          <Stack.Screen
+            name="AssignGroupsHome"
+            options={{ unmountOnBlur: true }}
+            component={AssignGroupsHome}
+          />
+          <Stack.Screen
+            name="FarmerAssignGroupScreen"
+            options={{ unmountOnBlur: true }}
+            component={AssignFarmersScreen}
+          />
           <Stack.Screen
             name="ChooseGroupScreen"
             options={{ unmountOnBlur: true }}
             component={ChooseGroupScreen}
+          />
+          <Stack.Screen
+            name="ActiveGroupsScreen"
+            options={{ unmountOnBlur: true }}
+            component={ActiveGroupsScreen}
+          />
+          <Stack.Screen
+            name="InactiveGroupsScreen"
+            options={{ unmountOnBlur: true }}
+            component={InactiveGroupsScreen}
           />
         </Stack.Navigator>
       </NavigationContainer>

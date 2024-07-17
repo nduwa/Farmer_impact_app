@@ -14,6 +14,8 @@ export const colors = {
   black_letter: "#4e4e4e",
   blue_font: "#111b54",
   thin: "#edd3b4",
+  green: "#00c462",
   green_bg: "rgba(0,150,0,0.7)",
+  red: "#c40000",
   red_bg: "rgba(160,0,0,0.7)",
 };

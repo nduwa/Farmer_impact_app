@@ -16,16 +16,13 @@ import React, { useEffect, useRef, useState } from "react";
 import { Formik } from "formik";
 import { Feather } from "@expo/vector-icons";
 import { retrieveDBdata } from "../../../helpers/retrieveDBdata";
-import { GroupsModal } from "../../../components/GroupsModal";
 import { InspectionHoverSubmitBtn } from "../../../components/InspectionHoverSubmitBtn";
 import { InspectionHoverPrevBtn } from "../../../components/InspectionHoverPrevBtn";
 import LottieView from "lottie-react-native";
-import FarmerTrainingCard from "../../../components/FarmerTrainingCard";
 import { useSelector } from "react-redux";
-import { SyncModal } from "../../../components/SyncModal";
-import { updateDBdata } from "../../../helpers/updateDBdata";
+import GroupSelectCard from "../../../components/GroupSelectCard";
 
-export const AssignFarmersScreen = ({ route }) => {
+export const InactiveGroupsScreen = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const userName = useSelector((state) => state.user.userData.user.Name_User);
@@ -33,14 +30,10 @@ export const AssignFarmersScreen = ({ route }) => {
   const navigation = useNavigation();
   const flatListRef = useRef(null);
 
-  const [farmers, setFarmers] = useState([]);
   const [groups, setGroups] = useState([]);
-  const [selectedGroup, setSelectedGroup] = useState(null);
   const [searchResults, setSearchResults] = useState([]);
   const [displayData, setDisplayData] = useState([]);
-  const [groupsModalOpen, setGroupsModalOpen] = useState(false);
-  const [activeGroup, setActiveGroup] = useState([]);
-  const [selectedFarmers, setSelectedFarmers] = useState([]);
+  const [selectedGroups, setSelectedGroups] = useState([]);
   const [currentJob, setCurrentJob] = useState(null);
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -50,26 +43,20 @@ export const AssignFarmersScreen = ({ route }) => {
   const [dataEnd, setDataEnd] = useState(0);
   const [loadingData, setLoadingData] = useState(false);
   const [loadingPage, setLoadingPage] = useState(false);
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
   const [submitted, setSubmitted] = useState(false);
-  const [deletedFarmers, setDeletedFarmers] = useState([]);
 
-  const handleSync = () => {
-    navigation.navigate("Sync", { data: null });
+  const handleDeactivateGroups = () => {
+    navigation.navigate("ActiveGroupsScreen", { data: null });
   };
   const filterChecked = (id) => {
-    const allChecked = selectedFarmers.filter((item) => item.farmerid !== id);
+    const allChecked = selectedGroups.filter((item) => item.__kp_Group !== id);
 
-    setSelectedFarmers(allChecked);
+    setSelectedGroups(allChecked);
   };
 
   const scrollToTop = () => {
     flatListRef?.current?.scrollToOffset({ offset: 0, animated: true });
-  };
-
-  const toggleGroupsModal = () => {
-    setGroupsModalOpen(true);
   };
 
   const displayToast = (msg) => {
@@ -104,7 +91,7 @@ export const AssignFarmersScreen = ({ route }) => {
   };
 
   const handleBackButton = () => {
-    navigation.replace("AssignGroupsHome", { data: null });
+    navigation.replace("ActiveGroupsScreen", { data: null });
   };
 
   const handleSearch = (text) => {
@@ -125,12 +112,12 @@ export const AssignFarmersScreen = ({ route }) => {
   };
 
   const handleSubmit = () => {
-    navigation.navigate("ChooseGroupScreen", { data: selectedFarmers });
+    navigation.navigate("ChooseGroupScreen", { data: selectedGroups });
   };
 
-  const handleCheckbox = (farmer) => {
-    const foundItem = selectedFarmers.find(
-      (item) => item?.farmerid === farmer.farmerid
+  const handleCheckbox = (group) => {
+    const foundItem = selectedGroups.find(
+      (item) => item?.__kp_Group === group.__kp_Group
     );
 
     return foundItem?.checked;
@@ -143,70 +130,21 @@ export const AssignFarmersScreen = ({ route }) => {
     setCurrentPage(newpg);
   };
 
-  const handleDelete = async () => {
-    setDeleteModalOpen(false);
-    let farmersToDelete = [];
-    let strIDs = "";
-    let query = "";
-    let i = 0;
-
-    for (const farmer of selectedFarmers) {
-      farmersToDelete.push(farmer.__kf_farmer);
-      strIDs += `'${farmer.__kf_farmer}'`;
-      if (i < selectedFarmers.length - 1) strIDs += ",";
-      i++;
-    }
-
-    setDeletedFarmers(farmersToDelete);
-
-    query = `UPDATE rtc_farmers SET deleted = 1, deleted_by = '${userName}', deleted_at = '${new Date()}', sync = 0 WHERE __kp_Farmer IN(${strIDs})`;
-
-    updateDBdata({
-      id: 0,
-      query,
-      setCurrentJob,
-      msgYes: "Farmers removed",
-      msgNo: "not removed",
-    });
-  };
-
-  const handleSyncModal = () => {
-    setDeleteModalOpen(false);
-  };
-
   useEffect(() => {
-    if (selectedFarmers.length > 0) {
+    if (selectedGroups.length > 0) {
       setSubmitted(false);
     } else {
       setSubmitted(true);
     }
-  }, [selectedFarmers]);
+  }, [selectedGroups]);
 
   useEffect(() => {
-    if (currentJob === "Farmers removed") {
-      const newDisplaydata = displayData.reduce((accumulator, currentItem) => {
-        if (!deletedFarmers.includes(currentItem.__kp_Farmer)) {
-          accumulator.push(currentItem);
-        }
-
-        return accumulator;
-      }, []);
-
-      setDisplayData(newDisplaydata);
-
-      displayToast("Farmers removed");
-      setSelectedFarmers([]);
-      setCurrentJob("");
-    }
-  }, [currentJob]);
-
-  useEffect(() => {
-    handleDataPagination(farmers);
+    handleDataPagination(groups);
     scrollToTop();
   }, [currentPage]);
 
   useEffect(() => {
-    let data = searchResults.length > 0 ? searchResults : farmers;
+    let data = searchResults.length > 0 ? searchResults : groups;
 
     if (data.length > 0) {
       handleDataPagination(data);
@@ -214,46 +152,7 @@ export const AssignFarmersScreen = ({ route }) => {
       setLoadingData(false);
       setLoadingPage(false);
     }
-  }, [farmers, searchResults]);
-
-  useEffect(() => {
-    const fetchFarmers = () => {
-      retrieveDBdata({
-        tableName: "rtc_farmers",
-        stationId: selectedGroup._kf_Station,
-        groupID: selectedGroup.__kp_Group,
-        setData: setFarmers,
-      });
-    };
-
-    if (selectedGroup) {
-      setActiveGroup(selectedGroup);
-      setLoadingData(true);
-      setLoadingPage(true);
-      setCurrentPage(1);
-      fetchFarmers();
-    }
-  }, [selectedGroup]);
-
-  useEffect(() => {
-    if (activeGroup.id) {
-      retrieveDBdata({
-        tableName: "rtc_farmers",
-        stationId: activeGroup._kf_Station,
-        groupID: activeGroup.__kp_Group,
-        setData: setFarmers,
-      });
-    }
-  }, [activeGroup]);
-
-  useEffect(() => {
-    if (groups.length > 0) {
-      setActiveGroup(groups[0]);
-    } else {
-      setLoadingData(false);
-      setLoadingPage(false);
-    }
-  }, [groups]);
+  }, [groups, searchResults]);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -266,21 +165,16 @@ export const AssignFarmersScreen = ({ route }) => {
             tableName: "rtc_groups",
             stationId,
             setData: setGroups,
+            queryArg: `SELECT * FROM rtc_groups WHERE _kf_Station='${stationId}'`,
           });
         }
       };
 
       fetchData();
       return () => {
-        setFarmers([]);
         setGroups([]);
-        setSelectedGroup(null);
         setSearchResults([]);
         setDisplayData([]);
-        setGroupsModalOpen(false);
-        setActiveGroup([]);
-        setSelectedFarmers([]);
-        setDeletedFarmers([]);
         setCurrentJob(null);
         setLoadingData(false);
       };
@@ -296,13 +190,7 @@ export const AssignFarmersScreen = ({ route }) => {
       }}
     >
       <StatusBar style="dark" />
-      {groupsModalOpen && (
-        <GroupsModal
-          setGroupChoice={setSelectedGroup}
-          data={groups}
-          setModalOpen={setGroupsModalOpen}
-        />
-      )}
+
       <View
         style={{
           flexDirection: "row",
@@ -332,7 +220,7 @@ export const AssignFarmersScreen = ({ route }) => {
             fontSize: 19,
           }}
         >
-          Assign Farmers to Groups
+          In-Active Groups
         </Text>
         <View
           style={{ width: screenWidth * 0.07, backgroundColor: "transparent" }}
@@ -340,7 +228,7 @@ export const AssignFarmersScreen = ({ route }) => {
       </View>
       <View
         style={{
-          flexDirection: "row",
+          flexDirection: "row-reverse",
           justifyContent: "space-between",
           alignItems: "center",
           width: "100%",
@@ -349,7 +237,7 @@ export const AssignFarmersScreen = ({ route }) => {
         }}
       >
         <TouchableOpacity
-          onPress={toggleGroupsModal}
+          onPress={handleDeactivateGroups}
           style={{
             backgroundColor: colors.white_variant,
             alignItems: "center",
@@ -364,12 +252,10 @@ export const AssignFarmersScreen = ({ route }) => {
           <Text
             style={{
               fontWeight: "600",
-              fontSize: activeGroup.ID_GROUP
-                ? screenWidth * 0.04
-                : screenWidth * 0.03,
+              fontSize: screenWidth * 0.04,
             }}
           >
-            {activeGroup.ID_GROUP || "No groups"}
+            {"Deactivate more"}
           </Text>
         </TouchableOpacity>
         <View
@@ -379,7 +265,7 @@ export const AssignFarmersScreen = ({ route }) => {
             paddingHorizontal: screenWidth * 0.015,
             paddingVertical: screenWidth * 0.02,
             borderRadius: screenWidth * 0.03,
-            width: "78%",
+            width: "60%",
             elevation: 6,
           }}
         >
@@ -402,7 +288,7 @@ export const AssignFarmersScreen = ({ route }) => {
                   justifyContent: "space-between",
                   gap: screenWidth * 0.01,
                   alignItems: "center",
-                  width: "80%",
+                  width: "78%",
                 }}
               >
                 <AntDesign
@@ -413,7 +299,7 @@ export const AssignFarmersScreen = ({ route }) => {
 
                 <TextInput
                   placeholderTextColor={colors.black_a}
-                  placeholder="Farmer Name, Household or Farmer ID"
+                  placeholder="Group Name or Group ID"
                   onChangeText={(text) => {
                     handleChange("search")(text);
                     handleSearch(text);
@@ -482,18 +368,12 @@ export const AssignFarmersScreen = ({ route }) => {
             data={displayData}
             initialNumToRender={6}
             renderItem={({ item }) => (
-              <FarmerTrainingCard
-                data={{
-                  farmerName: item.Name,
-                  farmerId: item.farmerid,
-                  Year_Birth: item.Year_Birth,
-                  __kf_farmer: item.__kp_Farmer,
-                  __kf_group: item._kf_Group,
-                }}
+              <GroupSelectCard
+                data={item}
                 filterFn={filterChecked}
                 isChecked={handleCheckbox(item) || false}
-                setChecked={setSelectedFarmers}
-                use={"assignGroups"}
+                setChecked={setSelectedGroups}
+                use={"activate"}
               />
             )}
             keyExtractor={(item) => item.id}
@@ -506,8 +386,10 @@ export const AssignFarmersScreen = ({ route }) => {
               gap: screenHeight * 0.02,
             }}
           >
-            <Text style={{ textAlign: "center" }}>No farmers found</Text>
-            <TouchableOpacity onPress={handleSync}>
+            <Text style={{ textAlign: "center" }}>
+              No In-Active groups found
+            </Text>
+            <TouchableOpacity onPress={handleBackButton}>
               <Text
                 style={{
                   textAlign: "center",
@@ -517,7 +399,7 @@ export const AssignFarmersScreen = ({ route }) => {
                   textDecorationLine: "underline",
                 }}
               >
-                Perform data synchronization?
+                Go back?
               </Text>
             </TouchableOpacity>
           </View>
@@ -525,7 +407,7 @@ export const AssignFarmersScreen = ({ route }) => {
       </View>
       {currentPage > 1 && (
         <InspectionHoverPrevBtn
-          topRatio={selectedFarmers.length > 0 ? 0.66 : 0.75}
+          topRatio={selectedGroups.length > 0 ? 0.66 : 0.75}
           handlePress={handlePrevPg}
         />
       )}
@@ -535,15 +417,16 @@ export const AssignFarmersScreen = ({ route }) => {
           currentPage={currentPage}
           totalPages={totalPages}
           active={currentPage < totalPages ? true : false}
-          topRatio={selectedFarmers.length > 0 ? 0.75 : 0.85}
+          topRatio={selectedGroups.length > 0 ? 0.75 : 0.85}
           mode="pagination"
         />
       )}
 
-      {selectedFarmers.length > 0 && (
+      {selectedGroups.length > 0 && (
         <InspectionHoverSubmitBtn
           handlePress={handleSubmit}
           active={!submitted}
+          positive={true}
         />
       )}
 
@@ -581,17 +464,6 @@ export const AssignFarmersScreen = ({ route }) => {
             />
           </View>
         </View>
-      )}
-
-      {/* delete modal */}
-      {deleteModalOpen && (
-        <SyncModal
-          label={`You're about to remove the selected farmers, are you sure?`}
-          onYes={handleDelete}
-          OnNo={handleSyncModal}
-          labelYes="Ok"
-          labelNo="No"
-        />
       )}
     </View>
   );
