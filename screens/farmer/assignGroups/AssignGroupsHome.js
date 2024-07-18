@@ -83,6 +83,7 @@ export const AssignGroupsHome = () => {
             <GroupMgtHomeItem
               label={"Assign Farmers to Groups"}
               destination={"FarmerAssignGroupScreen"}
+              active={false}
             />
           </View>
         </ScrollView>

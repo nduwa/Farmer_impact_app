@@ -6,7 +6,7 @@ import { AntDesign } from "@expo/vector-icons";
 import { Foundation } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { FontAwesome } from "@expo/vector-icons";
+import { MaterialIcons } from "@expo/vector-icons";
 import { Entypo } from "@expo/vector-icons";
 import { colors } from "../data/colors";
 import { useNavigation } from "@react-navigation/native";
@@ -126,8 +126,8 @@ export const SideNav = ({
         />
       )}
       {name === "Pending Groups" && (
-        <FontAwesome
-          name="group"
+        <MaterialIcons
+          name="people-outline"
           size={24}
           color={isActive ? colors.secondary : colors.black_a}
         />

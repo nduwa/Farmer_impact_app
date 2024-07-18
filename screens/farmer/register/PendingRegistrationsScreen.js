@@ -108,6 +108,14 @@ export const PendingRegistrationsScreen = () => {
   }, [submissionState.serverResponded]);
 
   useEffect(() => {
+    if (submissionState.error) {
+      setLoading(false);
+      displayToast("Error: Farmers not submitted");
+      dispatch(registrationAction.resetRegistrationState());
+    }
+  }, [submissionState.error]);
+
+  useEffect(() => {
     setLoading(false);
   }, [registrations]);
 

@@ -66,7 +66,7 @@ export const FarmerMgtItem = ({
         />
       )}
       {label === "Groups" && (
-        <FontAwesome6 name="people-group" size={24} color="black" />
+        <FontAwesome6 name="people-group" size={18} color="black" />
       )}
       {label === "Update Trees" && (
         <Foundation name="trees" size={24} color="black" />

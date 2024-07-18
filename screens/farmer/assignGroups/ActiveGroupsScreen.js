@@ -23,6 +23,7 @@ import { useSelector } from "react-redux";
 import GroupSelectCard from "../../../components/GroupSelectCard";
 import { updateDBdata } from "../../../helpers/updateDBdata";
 import { dataTodb } from "../../../helpers/dataTodb";
+import { SyncModal } from "../../../components/SyncModal";
 
 export const ActiveGroupsScreen = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
@@ -164,14 +165,18 @@ export const ActiveGroupsScreen = ({ route }) => {
   useEffect(() => {
     if (currentJob === "Groups deactivated") {
       dataTodb({
-        tableName: "groupActivate",
-        syncData: [groupsToDeactivate],
+        tableName: "groupActive",
+        syncData: deactivatedGroups,
         setCurrentJob,
         extraVal: userName,
       });
     } else if (currentJob === "Groups changes saved") {
-      const newDisplaydata = displayData.reduce((accumulator, currentItem) => {
-        if (!deactivatedGroups.includes(currentItem.__kp_Group)) {
+      const newDisplaydata = groups.reduce((accumulator, currentItem) => {
+        if (
+          !deactivatedGroups.some(
+            (group) => group.__kp_Group === currentItem.__kp_Group
+          )
+        ) {
           accumulator.push(currentItem);
         }
 
@@ -526,7 +531,7 @@ export const ActiveGroupsScreen = ({ route }) => {
         </View>
       )}
 
-      {/* delete modal */}
+      {/* submit modal */}
       {deactivateModalOpen && (
         <SyncModal
           label={`You're about to deactivate the selected groups, are you sure?`}

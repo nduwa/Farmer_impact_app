@@ -20,8 +20,7 @@ const GroupSelectCard = ({
       setChecked((prevState) => [
         ...prevState,
         {
-          ID_GROUP: data.ID_GROUP,
-          __kp_Group: data.__kp_Group,
+          ...data,
           checked: value,
         },
       ]);

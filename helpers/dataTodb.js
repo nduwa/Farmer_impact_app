@@ -26,7 +26,21 @@ const generateBulkValueString = (
     let bulkValues = "";
     for (let i = 0; i < data.length; i++) {
       bulkValues += `(
-        ${data[i].id},'${data[i].created_at}','${data[i].__kp_Group}','${data[i]._kf_Location}','${data[i]._kf_Quality}','${data[i]._kf_Staff}','${data[i]._kf_Station}','${data[i]._kf_Supplier}','${data[i]._kf_Type}','${data[i]._kf_User_g}','${data[i].Area_Big}','${data[i].Area_Biggest}','${data[i].Area_Medium}','${data[i].Coordinates}','${data[i].ID_GROUP}','${data[i].Name}','${data[i].Notes}','${data[i].Status_Program}','${data[i].Year_Started_Program}','${data[i].sync_farmers}','${data[i].sync_households}','${data[i].last_update_at}')`;
+        ${data[i].id},'${data[i].created_at}','${data[i].__kp_Group}','${
+        data[i]._kf_Location
+      }','${data[i]._kf_Quality}','${data[i]._kf_Staff}','${
+        data[i]._kf_Station
+      }','${data[i]._kf_Supplier}','${data[i]._kf_Type}','${
+        data[i]._kf_User_g
+      }','${data[i].Area_Big}','${data[i].Area_Biggest}','${
+        data[i].Area_Medium
+      }','${data[i].Coordinates}','${data[i].ID_GROUP}','${data[i].Name}','${
+        data[i].Notes
+      }','${data[i].Status_Program}','${data[i].Year_Started_Program}','${
+        data[i].sync_farmers
+      }','${data[i].sync_households}','${data[i].last_update_at}','${
+        data[i].active || 0
+      }')`;
       if (i < data.length - 1) bulkValues += ",";
     }
 
@@ -222,15 +236,15 @@ const generateBulkValueString = (
   } else if (tableName === "groupAssign") {
     let bulkValues = "";
     for (let i = 0; i < data.length; i++) {
-      bulkValues += `('${data[i].created_at}','${data[i].farmerid}','${data[i]._kf_farmer}','${data[i].kf_group_old}','${data[i].kf_group_new}','${data[i].group_id_new}','${extraVal}','${data[i].assigned_by}','0')`;
+      bulkValues += `('${data[i].created_at}','${data[i].farmerid}','${data[i].farmer_name}','${data[i]._kf_farmer}','${data[i].kf_group_old}','${data[i].group_name_old}','${data[i].group_id_old}','${data[i].kf_group_new}','${data[i].group_name_new}','${data[i].group_id_new}','${extraValArr[0]}','${extraValArr[1]}','${extraValArr[2]}','${data[i]._kf_supplier}','${data[i]._kf_Household}','${data[i].assigned_by}','0')`;
       if (i < data.length - 1) bulkValues += ",";
     }
 
     return bulkValues;
-  } else if (tableName === "groupActivate") {
+  } else if (tableName === "groupActive") {
     let bulkValues = "";
     for (let i = 0; i < data.length; i++) {
-      bulkValues += `('${data[i].created_at}','${data[i]._kf_Group}','${data[i]._kf_station}','${data[i].active}','${extraVal}','0')`;
+      bulkValues += `('${data[i].created_at}','${data[i].__kp_Group}','${data[i]._kf_Station}','${data[i].active}','${extraVal}','0')`;
       if (i < data.length - 1) bulkValues += ",";
     }
 

@@ -15,7 +15,6 @@ import { AntDesign } from "@expo/vector-icons";
 import React, { useEffect, useRef, useState } from "react";
 import { Formik } from "formik";
 import { Feather } from "@expo/vector-icons";
-import { UpdateChildrenModal } from "../../components/UpdateChildrenModal";
 import { retrieveDBdata } from "../../helpers/retrieveDBdata";
 import { GroupsModal } from "../../components/GroupsModal";
 import { InspectionHoverSubmitBtn } from "../../components/InspectionHoverSubmitBtn";

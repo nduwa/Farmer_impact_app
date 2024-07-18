@@ -107,18 +107,19 @@ export const FarmerMgtModal = ({ setIsFarmerModalOpen }) => {
               setIsFarmerModalOpen={setIsFarmerModalOpen}
               destination={"AssignGroupsHome"}
               label={"Groups"}
-              // isActive={isAccessable("Update Farmers")}
+              isActive={false}
             />
             <FarmerMgtItem
               setIsFarmerModalOpen={setIsFarmerModalOpen}
               destination={"FarmerUpdateHome"}
               label={"Update Trees"}
-              isActive={isAccessable("Update Farmers")}
+              isActive={false}
             />
             <FarmerMgtItem
               setIsFarmerModalOpen={setIsFarmerModalOpen}
               destination={"WeeklyReportScreen"}
               label={"Weekly Reports"}
+              isActive={false}
             />
           </View>
         </Animated.View>

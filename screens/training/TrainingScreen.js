@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { colors } from "../../data/colors";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import * as FileSystem from "expo-file-system";
 import {
   Dimensions,
   FlatList,
@@ -101,7 +102,7 @@ export const TrainingScreen = () => {
 
   const handleUpload = (item) => {
     setSubmitting(true);
-    const dir = "file:///data/user/0/host.exp.exponent/files/";
+    const dir = FileSystem.documentDirectory;
     const formData = new FormData();
     const fileName = getFileName(item.filepath);
     let tmpObj = {};
@@ -197,6 +198,7 @@ export const TrainingScreen = () => {
       } else if (trainingError?.code === "ERR_BAD_REQUEST") {
         displayToast("Error: Incomplete data");
       } else if (trainingError?.code === "ERR_NETWORK") {
+        console.log("ERROR: ", trainingError);
         displayToast("Error: Network error");
       } else {
         displayToast("Something went wrong");
@@ -230,6 +232,7 @@ export const TrainingScreen = () => {
         setCurrentJob(null);
         setTrainings([]);
         setAllTrainingData([]);
+        dispatch(trainingActions.resetTrainingState());
       };
     }, [])
   );

@@ -21,6 +21,9 @@ import { InspectionHoverPrevBtn } from "../../../components/InspectionHoverPrevB
 import LottieView from "lottie-react-native";
 import { useSelector } from "react-redux";
 import GroupSelectCard from "../../../components/GroupSelectCard";
+import { dataTodb } from "../../../helpers/dataTodb";
+import { SyncModal } from "../../../components/SyncModal";
+import { updateDBdata } from "../../../helpers/updateDBdata";
 
 export const InactiveGroupsScreen = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
@@ -35,6 +38,8 @@ export const InactiveGroupsScreen = ({ route }) => {
   const [displayData, setDisplayData] = useState([]);
   const [selectedGroups, setSelectedGroups] = useState([]);
   const [currentJob, setCurrentJob] = useState(null);
+  const [activateModalOpen, setActivateModalOpen] = useState(false);
+  const [activatedGroups, setActivatedGroups] = useState([]);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(10);
@@ -111,10 +116,6 @@ export const InactiveGroupsScreen = ({ route }) => {
     }
   };
 
-  const handleSubmit = () => {
-    navigation.navigate("ChooseGroupScreen", { data: selectedGroups });
-  };
-
   const handleCheckbox = (group) => {
     const foundItem = selectedGroups.find(
       (item) => item?.__kp_Group === group.__kp_Group
@@ -129,6 +130,72 @@ export const InactiveGroupsScreen = ({ route }) => {
     let newpg = (current % totalPages) + 1; // a % b statement restricts value a from ever getting bigger than b.... :)
     setCurrentPage(newpg);
   };
+
+  const handleActivation = () => {
+    setActivateModalOpen(false);
+    let groupsToActivate = [];
+    let strIDs = "";
+    let query = "";
+    let i = 0;
+
+    for (const group of selectedGroups) {
+      let tmpObj = {
+        ...group,
+        ...{ active: 1 },
+      };
+      groupsToActivate.push(tmpObj);
+      strIDs += `'${group.__kp_Group}'`;
+      if (i < selectedGroups.length - 1) strIDs += ",";
+      i++;
+    }
+
+    setActivatedGroups(groupsToActivate);
+
+    query = `UPDATE rtc_groups SET active = 1 WHERE __kp_Group IN(${strIDs})`;
+
+    updateDBdata({
+      id: 0,
+      query,
+      setCurrentJob,
+      msgYes: "Groups activated",
+      msgNo: "not activated",
+    });
+  };
+
+  useEffect(() => {
+    if (currentJob === "Groups activated") {
+      dataTodb({
+        tableName: "groupActive",
+        syncData: activatedGroups,
+        setCurrentJob,
+        extraVal: userName,
+      });
+    } else if (currentJob === "Groups changes saved") {
+      const newDisplaydata = groups.reduce((accumulator, currentItem) => {
+        if (
+          !activatedGroups.some(
+            (group) => group.__kp_Group === currentItem.__kp_Group
+          )
+        ) {
+          accumulator.push(currentItem);
+        }
+
+        return accumulator;
+      }, []);
+
+      handleDataPagination(newDisplaydata);
+
+      displayToast("Groups activated");
+      setSelectedGroups([]);
+      setCurrentJob("");
+    } else if (
+      currentJob === "not activated" ||
+      currentJob === "Error saving groups changes"
+    ) {
+      displayToast("Error: Groups not activated");
+      setCurrentJob("");
+    }
+  }, [currentJob]);
 
   useEffect(() => {
     if (selectedGroups.length > 0) {
@@ -165,7 +232,7 @@ export const InactiveGroupsScreen = ({ route }) => {
             tableName: "rtc_groups",
             stationId,
             setData: setGroups,
-            queryArg: `SELECT * FROM rtc_groups WHERE _kf_Station='${stationId}'`,
+            queryArg: `SELECT * FROM rtc_groups WHERE _kf_Station='${stationId}' AND active = 0`,
           });
         }
       };
@@ -424,7 +491,7 @@ export const InactiveGroupsScreen = ({ route }) => {
 
       {selectedGroups.length > 0 && (
         <InspectionHoverSubmitBtn
-          handlePress={handleSubmit}
+          handlePress={() => setActivateModalOpen(true)}
           active={!submitted}
           positive={true}
         />
@@ -464,6 +531,17 @@ export const InactiveGroupsScreen = ({ route }) => {
             />
           </View>
         </View>
+      )}
+
+      {/* submit modal */}
+      {activateModalOpen && (
+        <SyncModal
+          label={`You're about to activate the selected groups, are you sure?`}
+          onYes={handleActivation}
+          OnNo={() => setActivateModalOpen(false)}
+          labelYes="Ok"
+          labelNo="No"
+        />
       )}
     </View>
   );
