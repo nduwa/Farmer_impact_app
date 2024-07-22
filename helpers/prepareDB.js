@@ -450,6 +450,7 @@ export const prepareTables = async () => {
       _kf_supplier varchar(255) NOT NULL,
       _kf_Household varchar(255) NOT NULL,
       assigned_by varchar(45) NOT NULL,
+      status integer NOT NULL,
       uploaded integer NOT NULL
     )`,
       [],

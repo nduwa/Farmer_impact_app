@@ -22,10 +22,9 @@ import {
   groupStatusUpdate,
 } from "../../../redux/farmer/GroupStatusChangeSlice";
 import { updateDBdata } from "../../../helpers/updateDBdata";
-import { deleteDBdataAsync } from "../../../helpers/deleteDBdataAsync";
-import { SyncModal } from "../../../components/SyncModal";
+import { GroupAssignedFarmersItem } from "../../../components/GroupAssignedFarmersItem";
 
-export const UploadGroupChangesScreen = ({ route }) => {
+export const UploadGroupAssignments = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const navigation = useNavigation();
@@ -36,14 +35,9 @@ export const UploadGroupChangesScreen = ({ route }) => {
 
   const [changesTobeSubmitted, setChangesTobeSubmitted] = useState([]);
   const [ids, setIds] = useState("");
-  const [currentInactiveIDs, setCurrentInactiveIDs] = useState("");
-  const [currentActiveIDs, setCurrentActiveIDs] = useState("");
-
   const [currentJob, setCurrentJob] = useState(null);
-  const [undoModal, setUndoModal] = useState({ open: false, id: null });
-  const [submitModal, setSubmitModal] = useState({ open: false, id: null });
 
-  const [groupChanges, setGroupChanges] = useState([]);
+  const [groupAssignments, setGroupAssignments] = useState([]);
   const [loadingData, setLoadingData] = useState(false);
 
   const formatDate = (str) => {
@@ -53,14 +47,14 @@ export const UploadGroupChangesScreen = ({ route }) => {
     return formattedDate; // Output: 2018-09-24
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = (insertion_date) => {
     setLoadingData(true);
     let tmp = [];
     let strIDs = "";
     let i = 0;
 
     for (const change of data) {
-      if (formatDate(change.created_at) === submitModal.id) {
+      if (formatDate(change.created_at) === insertion_date) {
         tmp.push(change);
         strIDs += `'${change.id}'`;
         if (i < data.length - 1) strIDs += ",";
@@ -71,53 +65,7 @@ export const UploadGroupChangesScreen = ({ route }) => {
     setIds(strIDs);
 
     setChangesTobeSubmitted(tmp);
-    dispatch(groupStatusUpdate({ groupChanges: tmp }));
-  };
-
-  const handleReverse = () => {
-    setLoadingData(true);
-    const allChangesByDate = data.filter(
-      (item) => formatDate(item.created_at) === undoModal.id
-    );
-    let activeIDs = "";
-    let inactiveIDs = "";
-
-    let i = 0;
-    let query = "";
-
-    for (const change of allChangesByDate) {
-      if (change.active === 1) {
-        activeIDs += `'${change._kf_Group}'`;
-        if (i < allChangesByDate.length - 1) activeIDs += ",";
-      } else {
-        inactiveIDs += `'${change._kf_Group}'`;
-        if (i < allChangesByDate.length - 1) inactiveIDs += ",";
-      }
-
-      i++;
-    }
-
-    setCurrentInactiveIDs(inactiveIDs);
-    setCurrentActiveIDs(activeIDs);
-    if (activeIDs.length > 0) {
-      query = `UPDATE rtc_groups SET active = 0 WHERE __kp_Group IN(${activeIDs})`;
-      updateDBdata({
-        id: 0,
-        query,
-        setCurrentJob,
-        msgYes: "Inactive status restored",
-        msgNo: "status not restored",
-      });
-    } else if (inactiveIDs.length > 0) {
-      query = `UPDATE rtc_groups SET active = 1 WHERE __kp_Group IN(${inactiveIDs})`;
-      updateDBdata({
-        id: 0,
-        query,
-        setCurrentJob,
-        msgYes: "active status restored",
-        msgNo: "status not restored",
-      });
-    }
+    dispatch(groupStatusUpdate({ groupAssignments: tmp }));
   };
 
   const handleBackButton = () => {
@@ -136,37 +84,6 @@ export const UploadGroupChangesScreen = ({ route }) => {
     } else if (currentJob === "Groups changes not saved") {
       displayToast("Error: Groups changes not submitted");
       setCurrentJob("");
-    } else if (currentJob === "Inactive status restored") {
-      if (currentInactiveIDs.length > 0) {
-        query = `UPDATE rtc_groups SET active = 1 WHERE __kp_Group IN(${currentInactiveIDs})`;
-        updateDBdata({
-          id: 0,
-          query,
-          setCurrentJob,
-          msgYes: "active status restored",
-          msgNo: "status not restored",
-        });
-      } else {
-        displayToast("All Changes have been reversed");
-        setLoadingData(false);
-      }
-    } else if (currentJob === "active status restored") {
-      deleteDBdataAsync({
-        tableName: "tmp_group_activate",
-        targetId: "0",
-        customQuery: `DELETE FROM tmp_group_activate WHERE _kf_Group in (${currentActiveIDs},${currentInactiveIDs})`,
-      })
-        .then((result) => {
-          if (result.success) {
-            displayToast("All Changes have been reversed");
-            setUndoModal({ open: false, id: null });
-          }
-        })
-        .catch((error) => {
-          displayToast("something went wrong");
-          console.log(error);
-        });
-      setLoadingData(false);
     }
   }, [currentJob]);
 
@@ -181,7 +98,7 @@ export const UploadGroupChangesScreen = ({ route }) => {
   useEffect(() => {
     if (groupChangeState.serverResponded) {
       if (groupChangeState.response.status === "success") {
-        let query = `UPDATE tmp_group_activate SET uploaded = 1 WHERE id IN(${ids})`;
+        let query = `UPDATE tmp_farmer_group_assignment SET uploaded = 1 WHERE id IN(${ids})`;
 
         updateDBdata({
           id: 0,
@@ -199,30 +116,24 @@ export const UploadGroupChangesScreen = ({ route }) => {
 
   useEffect(() => {
     setLoadingData(false);
-    console.log(groupChanges);
-  }, [groupChanges]);
+    console.log(groupAssignments);
+  }, [groupAssignments]);
 
   useFocusEffect(
     React.useCallback(() => {
       const fetchData = async () => {
         setLoadingData(true);
         retrieveDBdata({
-          tableName: "tmp_group_activate",
-          setData: setGroupChanges,
-          queryArg: dbQueries.Q_TMP_GRP_ACTVT_LIST,
+          tableName: "tmp_farmer_group_assignment",
+          setData: setGroupAssignments,
+          queryArg: dbQueries.Q_TMP_GRP_ASSIGN_LIST,
         });
       };
 
       fetchData();
       return () => {
         setLoadingData(false);
-        setGroupChanges([]);
-        setChangesTobeSubmitted([]);
-        setCurrentInactiveIDs("");
-        setCurrentJob("");
-        setUndoModal({ open: false, id: null });
-        setSubmitModal({ open: false, id: null });
-        setIds("");
+        setGroupAssignments([]);
       };
     }, [])
   );
@@ -265,7 +176,7 @@ export const UploadGroupChangesScreen = ({ route }) => {
             fontSize: 19,
           }}
         >
-          Upload Groups Changes
+          Upload Groups Assignments
         </Text>
         <View
           style={{ width: screenWidth * 0.07, backgroundColor: "transparent" }}
@@ -274,55 +185,27 @@ export const UploadGroupChangesScreen = ({ route }) => {
       <View
         style={{
           flex: 1,
-          padding: screenWidth * 0.02,
         }}
       >
         <FlatList
-          contentContainerStyle={{ padding: 12, gap: 9 }}
-          data={groupChanges}
+          contentContainerStyle={{
+            padding: screenWidth * 0.02,
+            gap: 9,
+            flex: 1,
+            width: "100%",
+          }}
+          data={groupAssignments}
           initialNumToRender={10}
           renderItem={({ item }) => (
-            <GroupsStatusCard
+            <GroupAssignedFarmersItem
               date={item.insertion_date}
-              deactivated={item.inactive_count}
-              activated={item.active_count}
-              submitFn={() =>
-                setSubmitModal({ open: true, id: item.insertion_date })
-              }
-              undoFn={() =>
-                setUndoModal({ open: true, id: item.insertion_date })
-              }
+              records={item.record_count}
+              handlePress={null}
             />
           )}
-          keyExtractor={(item) => groupChanges.indexOf(item)}
+          keyExtractor={(item) => groupAssignments.indexOf(item)}
         />
       </View>
-
-      {/* undo modal */}
-      {undoModal.open && (
-        <SyncModal
-          label={`All groups status will be restored, reverse all changes?`}
-          onYes={handleReverse}
-          OnNo={() =>
-            setUndoModal((prevState) => ({ ...prevState, open: false }))
-          }
-          labelYes="Ok"
-          labelNo="No"
-        />
-      )}
-
-      {/* submit modal */}
-      {submitModal.open && (
-        <SyncModal
-          label={`You're about to upload all group status changes, are you sure?`}
-          onYes={handleSubmit}
-          OnNo={() =>
-            setSubmitModal((prevState) => ({ ...prevState, open: false }))
-          }
-          labelYes="Ok"
-          labelNo="No"
-        />
-      )}
 
       {/* page loader */}
       {loadingData && (

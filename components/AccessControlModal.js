@@ -78,13 +78,18 @@ export const AccessControlModal = ({ completeFn, isRefresh = false }) => {
         let prevMods = [];
         let newMods = [];
         let filteredMods = [];
+
+        //gather the previous access
         for (let mod of prevAccessMods) {
           prevMods.push(mod.id);
         }
+
+        //gather the new access
         for (let mod of assignedModules) {
           newMods.push(mod.moduleid);
         }
 
+        // server response contains all access, filterMods looks for the newly fetched access to see if any of the usual access is no longer part of the usual access
         filteredMods = prevMods.filter((value) => !newMods.includes(value));
         let strIDs = "";
         let query = "";
@@ -96,6 +101,7 @@ export const AccessControlModal = ({ completeFn, isRefresh = false }) => {
           i++;
         }
 
+        // deactivate all access that are absent in the most recent server response
         query = `UPDATE rtc_mobile_app_access_control SET active = 0 WHERE moduleid IN (${strIDs})`;
 
         updateDBdata({
@@ -111,11 +117,11 @@ export const AccessControlModal = ({ completeFn, isRefresh = false }) => {
         completeFn({ open: false, granted: true, refreshing: false });
       }
     } else if (currentJob === "Access refreshed") {
-      displayToast("Access refreshed");
+      displayToast("Access refreshed, some permissions removed");
       setCurrentJob("Complete");
       completeFn({ open: false, granted: true, refreshing: false });
     } else if (currentJob === "Access not refreshed") {
-      displayToast("No changes applied");
+      displayToast("Access refreshed, no permissions removed");
       completeFn({ open: false, granted: true, refreshing: false });
     }
   }, [currentJob]);

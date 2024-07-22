@@ -11,7 +11,7 @@ const generateBulkValueString = (
   totalRows,
   data,
   extraVal = null,
-  extraValArr = null
+  extraValArr = []
 ) => {
   if (tableName === "stations") {
     let bulkValues = "";
@@ -236,10 +236,13 @@ const generateBulkValueString = (
   } else if (tableName === "groupAssign") {
     let bulkValues = "";
     for (let i = 0; i < data.length; i++) {
-      bulkValues += `('${data[i].created_at}','${data[i].farmerid}','${data[i].farmer_name}','${data[i]._kf_farmer}','${data[i].kf_group_old}','${data[i].group_name_old}','${data[i].group_id_old}','${data[i].kf_group_new}','${data[i].group_name_new}','${data[i].group_id_new}','${extraValArr[0]}','${extraValArr[1]}','${extraValArr[2]}','${data[i]._kf_supplier}','${data[i]._kf_Household}','${data[i].assigned_by}','0')`;
+      bulkValues += `('${data[i].created_at}','${data[i].farmerid}','${data[i].farmer_name}','${data[i]._kf_farmer}','${data[i].kf_group_old}','${data[i].group_name_old}','${data[i].group_id_old}','${data[i].kf_group_new}','${data[i].group_name_new}','${data[i].group_id_new}','${extraValArr[0]}','${extraValArr[1]}','${extraValArr[2]}','${data[i]._kf_Supplier}','${data[i]._kf_Household}','${data[i].assigned_by}','${data[i].status}','0')`;
       if (i < data.length - 1) bulkValues += ",";
     }
-
+    /* extraValArr[0] -> kf station 
+       extraValArr[1] -> station name
+       extraValArr[2] -> station id
+    */
     return bulkValues;
   } else if (tableName === "groupActive") {
     let bulkValues = "";
@@ -1010,7 +1013,8 @@ export const dataTodb = ({
           tableName,
           totalRows,
           data,
-          extraVal
+          null,
+          extraValArr
         );
 
         db.transaction((tx) => {

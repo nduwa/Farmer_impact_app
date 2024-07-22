@@ -34,6 +34,7 @@ export const FarmerMgtItem = ({
       disabled={!isActive}
       style={{
         flexDirection: "row",
+        alignItems: "center",
         gap: screenWidth * 0.02,
         backgroundColor: colors.white,
         paddingVertical: screenHeight * 0.01,

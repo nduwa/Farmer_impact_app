@@ -32,6 +32,10 @@ export const sync = createAsyncThunk("data/sync", async (data) => {
           response.data.data[0].__kp_Station
         );
         await SecureStore.setItemAsync(
+          "rtc-station-readable-id",
+          response.data.data[0].StationID
+        );
+        await SecureStore.setItemAsync(
           "rtc-station-location",
           response.data.data[0].Area_Big
         );

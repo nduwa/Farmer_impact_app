@@ -52,8 +52,9 @@ export const SideNav = ({
       await SecureStore.deleteItemAsync("rtc-station-location-province");
       await SecureStore.deleteItemAsync("rtc-station-location-sector");
       await SecureStore.deleteItemAsync("rtc-station-location-cell");
-      await SecureStore.deleteItemAsync("rtc-station-location-village");
-
+      await SecureStore.deleteItemAsync("rtc-station-location-village");      
+      await SecureStore.deleteItemAsync("rtc-station-readable-id");
+      
       dispatch(UserActions.clearUserData());
       dispatch(UserActions.setCheckedForNewUser(false));
 

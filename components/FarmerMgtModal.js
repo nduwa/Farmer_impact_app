@@ -107,7 +107,7 @@ export const FarmerMgtModal = ({ setIsFarmerModalOpen }) => {
               setIsFarmerModalOpen={setIsFarmerModalOpen}
               destination={"AssignGroupsHome"}
               label={"Groups"}
-              isActive={false}
+              isActive={isAccessable("Register")}
             />
             <FarmerMgtItem
               setIsFarmerModalOpen={setIsFarmerModalOpen}

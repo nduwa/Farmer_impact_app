@@ -172,13 +172,13 @@ export const SideBar = ({ setsideBarScroll, setIsSidebarOpen }) => {
                   isActive={isAccessable("Register")}
                 />
               )}
-              {/* {isAccessable("Register") && (
+              {isAccessable("Register") && (
                 <SideNav
                   name={"Pending Groups"}
                   destination="PendingGroupsScreen"
                   isActive={isAccessable("Register")}
                 />
-              )} */}
+              )}
               {isAccessable("Inspection") && (
                 <SideNav
                   name={"Pending Inspections"}

@@ -25,10 +25,16 @@ export const PendingGroupsScreen = () => {
   };
 
   const [groupChanges, setGroupChanges] = useState([]);
+  const [groupAssignments, setGroupAssignments] = useState([]);
   const [loadingData, setLoadingData] = useState(false);
 
   useEffect(() => {
     setLoadingData(false);
+    retrieveDBdata({
+      tableName: "tmp_farmer_group_assignment",
+      setData: setGroupAssignments,
+      queryArg: `SELECT * FROM tmp_farmer_group_assignment WHERE uploaded = 0`,
+    });
   }, [groupChanges]);
   useFocusEffect(
     React.useCallback(() => {
@@ -114,10 +120,10 @@ export const PendingGroupsScreen = () => {
             />
             <GroupMgtHomeItem
               label={"Pending Farmer Assignments"}
-              destination={"UploadGroupChangesScreen"}
+              destination={"UploadGroupAssignments"}
               use={"pending"}
-              active={false}
-              badgeNum={0}
+              active={groupAssignments.length > 0}
+              badgeNum={groupAssignments.length}
             />
           </View>
         </ScrollView>

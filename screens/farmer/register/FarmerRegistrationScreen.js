@@ -182,11 +182,11 @@ export const FarmerRegistrationScreen = ({ route }) => {
         created_at: new Date(),
         created_by: userName,
         registered_at: new Date(),
-        updated_at: "0000-00-00 00:00:0",
+        updated_at: new Date(),
         type: "new",
         sync_farmers: "0",
         uploaded: "0",
-        uploaded_at: "0000-00-00 00:00:0",
+        uploaded_at: new Date(),
         Area_Small: cellChoice?.name,
         Area_Smallest: villageChoice?.name,
         Trees: farmerData?.totTrees.trim(),
@@ -196,9 +196,11 @@ export const FarmerRegistrationScreen = ({ route }) => {
         latitude: userData.location.coords.latitude,
         longitude: userData.location.coords.longitude,
         householdid: "",
-        seasonal_goal: "",
+        seasonal_goal: 0,
         recordid: "",
       };
+
+      console.log("FARMER STP WEIGHT: ", typeof farmerInfo.STP_Weight);
 
       let householdInfo = {
         _kf_Group: activeGroup.__kp_Group,

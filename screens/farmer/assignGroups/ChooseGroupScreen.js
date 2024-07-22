@@ -30,11 +30,16 @@ export const ChooseGroupScreen = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const userData = useSelector((state) => state.user);
+  const userName = useSelector((state) => state.user.userData.user.Name_User);
 
   const { data } = route.params;
 
   const [groups, setGroups] = useState([]);
-  const [stationID, setStationID] = useState();
+  const [stationData, setStationData] = useState({
+    kp: null,
+    id: null,
+    name: null,
+  });
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [searchResults, setSearchResults] = useState([]);
   const [startAssignModalOpen, setStartAssignModalOpen] = useState(false);
@@ -51,6 +56,10 @@ export const ChooseGroupScreen = ({ route }) => {
   const flatListRef = useRef(null);
 
   const navigation = useNavigation();
+
+  const handleActivateGroups = () => {
+    navigation.navigate("InactiveGroupsScreen", { data: null });
+  };
 
   const displayToast = (msg) => {
     ToastAndroid.show(msg, ToastAndroid.SHORT);
@@ -92,31 +101,43 @@ export const ChooseGroupScreen = ({ route }) => {
 
   const handleAssignment = () => {
     setLoadingPage(true);
-    let farmersToAssign = [];
-    let selectedFarmers = data;
-    let strIDs = "";
-    let query = "";
-    let i = 0;
+    let submitData = [];
 
-    for (const farmer of selectedFarmers) {
-      farmersToAssign.push(farmer.__kf_farmer);
-      strIDs += `'${farmer.__kf_farmer}'`;
-      if (i < selectedFarmers.length - 1) strIDs += ",";
-      i++;
+    for (const farmer of data) {
+      let date = new Date();
+      let formattedDate = date.toISOString().split("T")[0];
+      let formattedTime = date.toISOString().split("T")[1].split(".")[0];
+
+      let tmpObj = {
+        _kf_farmer: farmer.__kp_Farmer,
+        farmerid: farmer.farmerid,
+        farmer_name: farmer.Name,
+        _kf_Household: farmer._kf_Household,
+        _kf_Supplier: farmer._kf_Supplier,
+        _kf_station: farmer._kf_Station,
+        station_name: stationData.name,
+        station_id: stationData.id,
+        kf_group_old: farmer._kf_Group,
+        group_name_old: farmer.group_name_old,
+        group_id_old: farmer.group_id_old,
+        kf_group_new: selectedGroup.__kp_Group,
+        group_name_new: selectedGroup.Name,
+        group_id_new: selectedGroup.ID_GROUP,
+        assigned_by: userData.userData.user.Name_User,
+        status: "new",
+        created_at: `${formattedDate} ${formattedTime}`,
+      };
+
+      submitData.push(tmpObj);
     }
-    query = `UPDATE rtc_farmers SET _kf_Group = '${selectedGroup.__kp_Group}' WHERE __kp_Farmer IN(${strIDs})`;
 
-    updateDBdata({
-      id: 0,
-      query,
+    console.log(submitData);
+    dataTodb({
+      tableName: "groupAssign",
+      syncData: submitData,
+      extraValArr: [stationData.kp, stationData.name, stationData.id],
       setCurrentJob,
-      msgYes: "Farmers updated",
-      msgNo: "not updated",
     });
-  };
-
-  const handlePress = () => {
-    navigation.navigate("Sync", { data: null });
   };
 
   const handleSearch = (text) => {
@@ -142,34 +163,10 @@ export const ChooseGroupScreen = ({ route }) => {
   };
 
   useEffect(() => {
-    if (currentJob === "Farmers updated") {
-      const farmersSelected = data;
-      let assignedFarmers = [];
-
-      for (const farmer of farmersSelected) {
-        let tmpobj = {
-          created_at: new Date(),
-          farmerid: farmer.farmerid,
-          _kf_farmer: farmer.__kf_farmer,
-          kf_group_old: farmer._kf_Group,
-          kf_group_new: selectedGroup.__kp_Group,
-          group_id_new: selectedGroup.ID_GROUP,
-          _kf_station: stationID,
-          assigned_by: userData.userData.user.Name_User,
-        };
-
-        assignedFarmers.push(tmpobj);
-      }
-
-      dataTodb({
-        tableName: "groupAssign",
-        syncData: assignedFarmers,
-        extraVal: stationID,
-        setCurrentJob,
-      });
-    } else if (currentJob === "Group assignments saved") {
+    if (currentJob === "Group assignments saved") {
       setLoadingPage(false);
-      displayToast("Farmer(s) assigned to new groups");
+      displayToast("Assignments to new groups are now pending");
+      navigation.navigate("FarmerAssignGroupScreen", { data: null });
     } else if (currentJob === "Error assigning modules") {
       setLoadingPage(false);
       displayToast("Error assigning groups");
@@ -202,25 +199,35 @@ export const ChooseGroupScreen = ({ route }) => {
     React.useCallback(() => {
       const fetchData = async () => {
         const stationId = await SecureStore.getItemAsync("rtc-station-id");
+        const stationReadableId = await SecureStore.getItemAsync(
+          "rtc-station-readable-id"
+        );
+        const stationName = await SecureStore.getItemAsync("rtc-station-name");
 
         setLoadingData(true);
         if (stationId) {
-          setStationID(stationId);
+          setStationData({
+            kp: stationId,
+            name: stationName,
+            id: stationReadableId,
+          });
           retrieveDBdata({
             tableName: "rtc_groups",
             stationId,
             setData: setGroups,
+            queryArg: `SELECT * FROM rtc_groups WHERE _kf_Station='${stationId}' AND active = "1"`,
           });
         }
       };
 
-      console.log(data);
       fetchData();
 
       return () => {
         setGroups([]);
         setSelectedGroup(null);
         setSearchResults([]);
+        setStartAssignModalOpen(false);
+        setCurrentJob(null);
       };
     }, [])
   );
@@ -240,7 +247,10 @@ export const ChooseGroupScreen = ({ route }) => {
             "You are about to assign the selected farmers to this group, proceed?"
           }
           onYes={handleAssignment}
-          OnNo={() => setStartAssignModalOpen(false)}
+          OnNo={() => {
+            setStartAssignModalOpen(false);
+            setSelectedGroup(null);
+          }}
         />
       )}
       <View
@@ -426,8 +436,10 @@ export const ChooseGroupScreen = ({ route }) => {
                 gap: screenHeight * 0.02,
               }}
             >
-              <Text style={{ textAlign: "center" }}>No Groups found</Text>
-              <TouchableOpacity onPress={handlePress}>
+              <Text style={{ textAlign: "center" }}>
+                No Active Groups found
+              </Text>
+              <TouchableOpacity onPress={handleActivateGroups}>
                 <Text
                   style={{
                     textAlign: "center",
@@ -437,7 +449,7 @@ export const ChooseGroupScreen = ({ route }) => {
                     textDecorationLine: "underline",
                   }}
                 >
-                  Perform data synchronization?
+                  Activate groups?
                 </Text>
               </TouchableOpacity>
             </View>

@@ -8,6 +8,7 @@ export const GroupsStatusCard = ({
   activated,
   deactivated,
   submitFn,
+  undoFn,
 }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
@@ -95,9 +96,23 @@ export const GroupsStatusCard = ({
         }}
       >
         <CustomButton
+          bg={colors.secondary}
+          color={"white"}
+          width="45%"
+          text="Undo"
+          bdcolor="transparent"
+          mt={8}
+          mb={8}
+          radius={7}
+          paddingRatio={0.01}
+          disabled={false}
+          fontSizeRatio={0.05}
+          onPress={undoFn}
+        />
+        <CustomButton
           bg={colors.blue_font}
           color={"white"}
-          width="80%"
+          width="45%"
           text="Upload"
           bdcolor="transparent"
           mt={8}

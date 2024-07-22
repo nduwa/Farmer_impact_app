@@ -124,9 +124,13 @@ export const ActiveGroupsScreen = ({ route }) => {
     let i = 0;
 
     for (const group of selectedGroups) {
+      let date = new Date();
+      let formattedDate = date.toISOString().split("T")[0];
+      let formattedTime = date.toISOString().split("T")[1].split(".")[0];
+
       let tmpObj = {
         ...group,
-        ...{ active: 0 },
+        ...{ active: 0, created_at: `${formattedDate} ${formattedTime}` },
       };
       groupsToDeactivate.push(tmpObj);
       strIDs += `'${group.__kp_Group}'`;

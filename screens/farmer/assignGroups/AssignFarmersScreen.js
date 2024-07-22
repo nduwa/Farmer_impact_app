@@ -20,15 +20,14 @@ import { GroupsModal } from "../../../components/GroupsModal";
 import { InspectionHoverSubmitBtn } from "../../../components/InspectionHoverSubmitBtn";
 import { InspectionHoverPrevBtn } from "../../../components/InspectionHoverPrevBtn";
 import LottieView from "lottie-react-native";
-import FarmerTrainingCard from "../../../components/FarmerTrainingCard";
 import { useSelector } from "react-redux";
 import { SyncModal } from "../../../components/SyncModal";
 import { updateDBdata } from "../../../helpers/updateDBdata";
+import FarmerAssignCard from "../../../components/FarmerAssignCard";
 
 export const AssignFarmersScreen = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
-  const userName = useSelector((state) => state.user.userData.user.Name_User);
 
   const navigation = useNavigation();
   const flatListRef = useRef(null);
@@ -50,7 +49,6 @@ export const AssignFarmersScreen = ({ route }) => {
   const [dataEnd, setDataEnd] = useState(0);
   const [loadingData, setLoadingData] = useState(false);
   const [loadingPage, setLoadingPage] = useState(false);
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
   const [submitted, setSubmitted] = useState(false);
   const [deletedFarmers, setDeletedFarmers] = useState([]);
@@ -141,37 +139,6 @@ export const AssignFarmersScreen = ({ route }) => {
     let current = currentPage;
     let newpg = (current % totalPages) + 1; // a % b statement restricts value a from ever getting bigger than b.... :)
     setCurrentPage(newpg);
-  };
-
-  const handleDelete = async () => {
-    setDeleteModalOpen(false);
-    let farmersToDelete = [];
-    let strIDs = "";
-    let query = "";
-    let i = 0;
-
-    for (const farmer of selectedFarmers) {
-      farmersToDelete.push(farmer.__kf_farmer);
-      strIDs += `'${farmer.__kf_farmer}'`;
-      if (i < selectedFarmers.length - 1) strIDs += ",";
-      i++;
-    }
-
-    setDeletedFarmers(farmersToDelete);
-
-    query = `UPDATE rtc_farmers SET deleted = 1, deleted_by = '${userName}', deleted_at = '${new Date()}', sync = 0 WHERE __kp_Farmer IN(${strIDs})`;
-
-    updateDBdata({
-      id: 0,
-      query,
-      setCurrentJob,
-      msgYes: "Farmers removed",
-      msgNo: "not removed",
-    });
-  };
-
-  const handleSyncModal = () => {
-    setDeleteModalOpen(false);
   };
 
   useEffect(() => {
@@ -482,18 +449,12 @@ export const AssignFarmersScreen = ({ route }) => {
             data={displayData}
             initialNumToRender={6}
             renderItem={({ item }) => (
-              <FarmerTrainingCard
-                data={{
-                  farmerName: item.Name,
-                  farmerId: item.farmerid,
-                  Year_Birth: item.Year_Birth,
-                  __kf_farmer: item.__kp_Farmer,
-                  __kf_group: item._kf_Group,
-                }}
+              <FarmerAssignCard
+                data={item}
                 filterFn={filterChecked}
                 isChecked={handleCheckbox(item) || false}
                 setChecked={setSelectedFarmers}
-                use={"assignGroups"}
+                groupData={activeGroup}
               />
             )}
             keyExtractor={(item) => item.id}
@@ -581,17 +542,6 @@ export const AssignFarmersScreen = ({ route }) => {
             />
           </View>
         </View>
-      )}
-
-      {/* delete modal */}
-      {deleteModalOpen && (
-        <SyncModal
-          label={`You're about to remove the selected farmers, are you sure?`}
-          onYes={handleDelete}
-          OnNo={handleSyncModal}
-          labelYes="Ok"
-          labelNo="No"
-        />
       )}
     </View>
   );
