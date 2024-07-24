@@ -36,7 +36,10 @@ export const InspectionHoverSubmitBtn = ({
       disabled={!active}
       style={{
         position: "absolute",
-        backgroundColor: color,
+        backgroundColor:
+          currentPage >= totalPages && mode === "submit"
+            ? color
+            : colors.blue_font,
         borderColor: colors.white,
         borderWidth: screenHeight * 0.003,
         borderRadius: screenWidth * 0.5,

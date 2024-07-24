@@ -23,6 +23,7 @@ import {
   inspectionSubmission,
 } from "../../redux/inspection/inspectionSlice";
 import { updateDBdata } from "../../helpers/updateDBdata";
+import { getCurrentDate } from "../../helpers/getCurrentDate";
 
 export const InspectionsScreen = () => {
   const screenHeight = Dimensions.get("window").height;
@@ -164,7 +165,7 @@ export const InspectionsScreen = () => {
 
   useEffect(() => {
     if (inspectionState.serverResponded) {
-      const uploadDate = new Date();
+      const uploadDate = getCurrentDate();
       let inspectionId = inspectionModal.id;
 
       updateDBdata({

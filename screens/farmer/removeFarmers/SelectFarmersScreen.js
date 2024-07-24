@@ -24,6 +24,7 @@ import FarmerTrainingCard from "../../../components/FarmerTrainingCard";
 import { useSelector } from "react-redux";
 import { SyncModal } from "../../../components/SyncModal";
 import { updateDBdata } from "../../../helpers/updateDBdata";
+import { getCurrentDate } from "../../../helpers/getCurrentDate";
 
 export const SelectFarmersScreen = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
@@ -159,7 +160,7 @@ export const SelectFarmersScreen = ({ route }) => {
 
     setDeletedFarmers(farmersToDelete);
 
-    query = `UPDATE rtc_farmers SET deleted = 1, deleted_by = '${userName}', deleted_at = '${new Date()}', sync = 0 WHERE __kp_Farmer IN(${strIDs})`;
+    query = `UPDATE rtc_farmers SET deleted = 1, deleted_by = '${userName}', deleted_at = '${getCurrentDate()}', sync = 0 WHERE __kp_Farmer IN(${strIDs})`;
 
     updateDBdata({
       id: 0,

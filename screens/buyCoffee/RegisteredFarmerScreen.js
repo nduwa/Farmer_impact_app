@@ -22,6 +22,7 @@ import { generateID } from "../../helpers/generateID";
 import { retrieveDBdata } from "../../helpers/retrieveDBdata";
 import { dataTodb } from "../../helpers/dataTodb";
 import { validateTransaction } from "../../helpers/validateTransaction";
+import { getCurrentDate } from "../../helpers/getCurrentDate";
 
 export const RegisteredFarmerScreen = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
@@ -30,7 +31,6 @@ export const RegisteredFarmerScreen = ({ route }) => {
   const [currentCertificationType, setCurrentCertificationType] =
     useState("CP");
   const [currentCoffeeType, setCurrentCoffeeType] = useState("Cherry");
-  const [indicatorVisible, setIndicatorVisibility] = useState(false);
   const [date, setDate] = useState(new Date());
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
   const [currentJob, setCurrentJob] = useState(null);
@@ -54,6 +54,7 @@ export const RegisteredFarmerScreen = ({ route }) => {
   const [currentHousehold, setCurrentHousehold] = useState(null);
   const [farmerCertified, setFarmerCertified] = useState(false);
   const [certifications, setCertifications] = useState([]);
+  const [submitted, setSubmitted] = useState(false);
 
   const onChange = (event, selectedDate) => {
     const currentDate = selectedDate;
@@ -153,13 +154,13 @@ export const RegisteredFarmerScreen = ({ route }) => {
         parchment_lot_id,
         bad_cherry_lot_id,
         bad_parch_lot_id,
-        created_at: transactionData.transactionDate.toISOString(),
+        created_at: getCurrentDate(transactionData.transactionDate),
         farmerid: transactionData.farmerID,
         farmername: transactionData.farmerName,
         coffee_type: transactionData.coffeeType,
         kilograms: transactionData.kgGood,
         unitprice: transactionData.priceGood,
-        transaction_date: transactionData.transactionDate.toISOString(),
+        transaction_date: getCurrentDate(transactionData.transactionDate),
         certification: transactionData.certificationType,
         _kf_Staff: staffKf,
         _kf_Station: stationId,
@@ -244,6 +245,7 @@ export const RegisteredFarmerScreen = ({ route }) => {
 
       usedReceipts.push({ paper_receipt: newReceipt });
       setAllReceipts(usedReceipts);
+      setSubmitted(true);
     }
   }, [currentJob]);
 
@@ -887,7 +889,7 @@ export const RegisteredFarmerScreen = ({ route }) => {
                     isKeyboardActive ? screenHeight * 0.04 : screenHeight * 0.03
                   }
                   radius={10}
-                  disabled={indicatorVisible}
+                  disabled={submitted}
                   onPress={handleSubmit}
                 />
               </ScrollView>

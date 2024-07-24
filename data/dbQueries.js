@@ -10,5 +10,5 @@ export const dbQueries = {
   Q_TMP_GRP_ACTVT_LIST:
     "SELECT SUM(CASE WHEN active = 1 THEN 1 ELSE 0 END) AS active_count,SUM(CASE WHEN active = 0 THEN 1 ELSE 0 END) AS inactive_count,DATE(created_at) AS insertion_date,COUNT(*) OVER (PARTITION BY DATE(created_at)) AS record_count FROM tmp_group_activate WHERE uploaded = 0 GROUP BY insertion_date ORDER BY insertion_date;",
   Q_TMP_GRP_ASSIGN_LIST:
-    "SELECT DATE(created_at) as insertion_date,COUNT(DATE(created_at)) AS record_count FROM tmp_farmer_group_assignment GROUP BY insertion_date",
+    "SELECT DATE(created_at) as insertion_date,COUNT(DATE(created_at)) AS record_count FROM tmp_farmer_group_assignment WHERE uploaded = 0 GROUP BY insertion_date",
 };

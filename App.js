@@ -41,6 +41,7 @@ import { InactiveGroupsScreen } from "./screens/farmer/assignGroups/InactiveGrou
 import { PendingGroupsScreen } from "./screens/farmer/assignGroups/PendingGroupsScreen";
 import { UploadGroupChangesScreen } from "./screens/farmer/assignGroups/UploadGroupChangesScreen";
 import { UploadGroupAssignments } from "./screens/farmer/assignGroups/UploadGroupAssignments";
+import { AssignedFarmerDetailsScreen } from "./screens/farmer/assignGroups/AssignedFarmersDetailsScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -259,6 +260,11 @@ export default function App() {
             name="UploadGroupAssignments"
             options={{ unmountOnBlur: true }}
             component={UploadGroupAssignments}
+          />
+          <Stack.Screen
+            name="AssignedFarmerDetailsScreen"
+            options={{ unmountOnBlur: true }}
+            component={AssignedFarmerDetailsScreen}
           />
         </Stack.Navigator>
       </NavigationContainer>

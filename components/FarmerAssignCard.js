@@ -9,6 +9,7 @@ const FarmerAssignCard = ({
   setChecked,
   filterFn,
   groupData,
+  pending = null,
 }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
@@ -44,6 +45,8 @@ const FarmerAssignCard = ({
         width: "100%",
         backgroundColor: colors.white_variant,
         borderRadius: screenHeight * 0.015,
+        borderLeftColor: pending ? colors.primary : "transparent",
+        borderLeftWidth: pending ? screenWidth * 0.02 : 0,
         padding: screenWidth * 0.03,
         elevation: 3,
       }}
@@ -62,6 +65,17 @@ const FarmerAssignCard = ({
         >
           Date of birth: {data.Year_Birth}
         </Text>
+        {pending && (
+          <Text
+            style={{
+              fontSize: screenWidth * 0.03,
+              fontWeight: "800",
+              color: colors.primary,
+            }}
+          >
+            Pending move to group {pending}
+          </Text>
+        )}
       </View>
       <View
         style={{
@@ -69,14 +83,16 @@ const FarmerAssignCard = ({
           justifyContent: "center",
         }}
       >
-        <Checkbox
-          style={{
-            margin: 8,
-          }}
-          value={selected}
-          onValueChange={(value) => handleCheck(value)}
-          color={isChecked ? colors.secondary : colors.blue_font}
-        />
+        {!pending && (
+          <Checkbox
+            style={{
+              margin: 8,
+            }}
+            value={selected}
+            onValueChange={(value) => handleCheck(value)}
+            color={isChecked ? colors.secondary : colors.blue_font}
+          />
+        )}
       </View>
     </View>
   );

@@ -19,6 +19,7 @@ import { InspectionHoverPrevBtn } from "../../components/InspectionHoverPrevBtn"
 import { dataTodb } from "../../helpers/dataTodb";
 import { useDispatch, useSelector } from "react-redux";
 import LottieView from "lottie-react-native";
+import { getCurrentDate } from "../../helpers/getCurrentDate";
 
 export const InspectionQuestionsScreen = ({ route }) => {
   const screenWidth = Dimensions.get("window").width;
@@ -100,7 +101,7 @@ export const InspectionQuestionsScreen = ({ route }) => {
       return;
     }
 
-    let inspectionDate = new Date();
+    let inspectionDate = getCurrentDate();
     let kfHousehold = info._kf_Household;
     let submitData = [
       {
@@ -108,8 +109,8 @@ export const InspectionQuestionsScreen = ({ route }) => {
         _kf_Course: data.courseId || "",
         __kp_Inspection: "",
         uploaded: 0,
-        inspection_at: inspectionDate.toISOString(),
-        created_at: inspectionDate.toISOString(),
+        inspection_at: inspectionDate,
+        created_at: inspectionDate,
         uploaded_at: "0000-00-00",
         Score_n: handleScoreStr(data.inspectionType),
       },
@@ -199,7 +200,7 @@ export const InspectionQuestionsScreen = ({ route }) => {
           inspection_answer_id: answer.answer,
           deleted: 0,
           __kp_InspectionLog: "",
-          created_at: new Date(),
+          created_at: getCurrentDate(),
         };
 
         responseSubmitData.push(response);

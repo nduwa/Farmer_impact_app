@@ -20,9 +20,6 @@ import { GroupsModal } from "../../../components/GroupsModal";
 import { InspectionHoverSubmitBtn } from "../../../components/InspectionHoverSubmitBtn";
 import { InspectionHoverPrevBtn } from "../../../components/InspectionHoverPrevBtn";
 import LottieView from "lottie-react-native";
-import { useSelector } from "react-redux";
-import { SyncModal } from "../../../components/SyncModal";
-import { updateDBdata } from "../../../helpers/updateDBdata";
 import FarmerAssignCard from "../../../components/FarmerAssignCard";
 
 export const AssignFarmersScreen = ({ route }) => {
@@ -34,6 +31,7 @@ export const AssignFarmersScreen = ({ route }) => {
 
   const [farmers, setFarmers] = useState([]);
   const [groups, setGroups] = useState([]);
+  const [pendingAssigns, setPendingAssigns] = useState([]);
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [searchResults, setSearchResults] = useState([]);
   const [displayData, setDisplayData] = useState([]);
@@ -141,6 +139,17 @@ export const AssignFarmersScreen = ({ route }) => {
     setCurrentPage(newpg);
   };
 
+  const checkPending = (farmerid) => {
+    if (pendingAssigns.length == 0) return null;
+
+    for (const assign of pendingAssigns) {
+      if (assign.farmerid === farmerid)
+        return `${assign.group_id_new}${
+          assign.group_name_new.length > 0 ? " | " + assign.group_name_new : ""
+        }`;
+    }
+  };
+
   useEffect(() => {
     if (selectedFarmers.length > 0) {
       setSubmitted(false);
@@ -237,7 +246,18 @@ export const AssignFarmersScreen = ({ route }) => {
         }
       };
 
+      const fetchPendings = async () => {
+        retrieveDBdata({
+          tableName: "tmp_farmer_group_assignment",
+          setData: setPendingAssigns,
+          queryArg:
+            "SELECT * FROM tmp_farmer_group_assignment WHERE uploaded = 0",
+        });
+      };
+
       fetchData();
+      fetchPendings();
+
       return () => {
         setFarmers([]);
         setGroups([]);
@@ -455,6 +475,7 @@ export const AssignFarmersScreen = ({ route }) => {
                 isChecked={handleCheckbox(item) || false}
                 setChecked={setSelectedFarmers}
                 groupData={activeGroup}
+                pending={checkPending(item.farmerid)}
               />
             )}
             keyExtractor={(item) => item.id}

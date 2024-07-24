@@ -10,7 +10,7 @@ import {
   View,
 } from "react-native";
 import * as SecureStore from "expo-secure-store";
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
 import { AntDesign } from "@expo/vector-icons";
 import { Feather } from "@expo/vector-icons";
@@ -18,6 +18,7 @@ import { Formik } from "formik";
 import { FarmerCard } from "../../components/FarmerCard";
 import { GroupsModal } from "../../components/GroupsModal";
 import { retrieveDBdata } from "../../helpers/retrieveDBdata";
+import LottieView from "lottie-react-native";
 
 export const FarmerScreen = () => {
   const screenHeight = Dimensions.get("window").height;
@@ -30,8 +31,13 @@ export const FarmerScreen = () => {
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [searchResults, setSearchResults] = useState([]);
   const [emptyResults, setEmptyResults] = useState(false);
+  const [loadingData, setLoadingData] = useState(false);
 
   const navigation = useNavigation();
+
+  const handleActivateGroups = () => {
+    navigation.navigate("InactiveGroupsScreen", { data: null });
+  };
 
   const handlePress = () => {
     navigation.navigate("Sync", { data: null });
@@ -58,10 +64,8 @@ export const FarmerScreen = () => {
   };
 
   useEffect(() => {
-    if (groups.length > 0) {
-      setActiveGroup(groups[0]);
-    }
-  }, [groups.length]);
+    setLoadingData(false);
+  }, [farmers]);
 
   useEffect(() => {
     if (activeGroup.id) {
@@ -99,20 +103,41 @@ export const FarmerScreen = () => {
   }, [selectedGroup]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      const stationId = await SecureStore.getItemAsync("rtc-station-id");
+    setLoadingData(false);
 
-      if (stationId) {
-        retrieveDBdata({
-          tableName: "rtc_groups",
-          stationId,
-          setData: setGroups,
-        });
-      }
-    };
+    if (groups.length > 0) {
+      setActiveGroup(groups[0]);
+    }
+  }, [groups]);
 
-    fetchData();
-  }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      const fetchData = async () => {
+        const stationId = await SecureStore.getItemAsync("rtc-station-id");
+
+        setLoadingData(true);
+        if (stationId) {
+          retrieveDBdata({
+            tableName: "rtc_groups",
+            stationId,
+            setData: setGroups,
+            queryArg: `SELECT * FROM rtc_groups WHERE _kf_Station='${stationId}' AND active = "1"`,
+          });
+        }
+      };
+
+      fetchData();
+      return () => {
+        setLoadingData(false);
+        setFarmers([]);
+        setGroups([]);
+        setSelectedGroup(null);
+        setGroupsModalOpen(false);
+        setSearchResults([]);
+        setEmptyResults(false);
+      };
+    }, [])
+  );
 
   return (
     <View
@@ -291,7 +316,32 @@ export const FarmerScreen = () => {
             elevation: 6,
           }}
         >
-          {displayData.length > 0 ? (
+          {loadingData && (
+            <View
+              style={{
+                flex: 1,
+                width: "100%",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <LottieView
+                style={{
+                  height: 160,
+                  width: 160,
+                  alignSelf: "center",
+                  marginVertical: 30,
+                }}
+                source={require("../../assets/lottie/loader.json")}
+                autoPlay
+                speed={0.8}
+                loop={true}
+                resizeMode="cover"
+              />
+            </View>
+          )}
+
+          {displayData.length > 0 && (
             <FlatList
               contentContainerStyle={{
                 padding: 5,
@@ -302,7 +352,9 @@ export const FarmerScreen = () => {
               renderItem={({ item }) => <FarmerCard data={item} />}
               keyExtractor={(item) => item.id}
             />
-          ) : (
+          )}
+
+          {displayData.length < 1 && groups.length > 0 && (
             <View
               style={{
                 gap: screenHeight * 0.02,
@@ -320,6 +372,31 @@ export const FarmerScreen = () => {
                   }}
                 >
                   Perform data synchronization?
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
+          
+          {groups.length < 1 && !loadingData && (
+            <View
+              style={{
+                gap: screenHeight * 0.02,
+              }}
+            >
+              <Text style={{ textAlign: "center" }}>
+                No active groups found
+              </Text>
+              <TouchableOpacity onPress={handleActivateGroups}>
+                <Text
+                  style={{
+                    textAlign: "center",
+                    color: colors.secondary,
+                    fontWeight: "600",
+                    fontSize: screenWidth * 0.04,
+                    textDecorationLine: "underline",
+                  }}
+                >
+                  Activate groups?
                 </Text>
               </TouchableOpacity>
             </View>

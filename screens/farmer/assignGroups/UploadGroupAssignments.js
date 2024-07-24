@@ -23,6 +23,7 @@ import {
 } from "../../../redux/farmer/GroupStatusChangeSlice";
 import { updateDBdata } from "../../../helpers/updateDBdata";
 import { GroupAssignedFarmersItem } from "../../../components/GroupAssignedFarmersItem";
+import { deleteDBdataAsync } from "../../../helpers/deleteDBdataAsync";
 
 export const UploadGroupAssignments = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
@@ -45,6 +46,12 @@ export const UploadGroupAssignments = ({ route }) => {
     const formattedDate = date.toISOString().split("T")[0];
 
     return formattedDate; // Output: 2018-09-24
+  };
+
+  const handleActivityDetails = (insertion_date) => {
+    navigation.navigate("AssignedFarmerDetailsScreen", {
+      data: { insertion_date },
+    });
   };
 
   const handleSubmit = (insertion_date) => {
@@ -116,7 +123,6 @@ export const UploadGroupAssignments = ({ route }) => {
 
   useEffect(() => {
     setLoadingData(false);
-    console.log(groupAssignments);
   }, [groupAssignments]);
 
   useFocusEffect(
@@ -200,7 +206,7 @@ export const UploadGroupAssignments = ({ route }) => {
             <GroupAssignedFarmersItem
               date={item.insertion_date}
               records={item.record_count}
-              handlePress={null}
+              handlePress={() => handleActivityDetails(item.insertion_date)}
             />
           )}
           keyExtractor={(item) => groupAssignments.indexOf(item)}

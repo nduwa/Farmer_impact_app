@@ -34,7 +34,7 @@ export const GroupsStatusCard = ({
           textAlign: "center",
         }}
       >
-        {`Activities - ${date}`}
+        {`Activities | ${date}`}
       </Text>
       <View
         style={{

@@ -38,6 +38,7 @@ export const UploadGroupChangesScreen = ({ route }) => {
   const [ids, setIds] = useState("");
   const [currentInactiveIDs, setCurrentInactiveIDs] = useState("");
   const [currentActiveIDs, setCurrentActiveIDs] = useState("");
+  const [reverseComplete, setReverseComplete] = useState(false);
 
   const [currentJob, setCurrentJob] = useState(null);
   const [undoModal, setUndoModal] = useState({ open: false, id: null });
@@ -55,6 +56,8 @@ export const UploadGroupChangesScreen = ({ route }) => {
 
   const handleSubmit = () => {
     setLoadingData(true);
+    setSubmitModal((prevState) => ({ ...prevState, open: false }));
+
     let tmp = [];
     let strIDs = "";
     let i = 0;
@@ -129,13 +132,43 @@ export const UploadGroupChangesScreen = ({ route }) => {
   };
 
   useEffect(() => {
+    if (reverseComplete) {
+      let idsToDelete = `${
+        currentActiveIDs.length > 0 ? currentActiveIDs : ""
+      }${
+        currentActiveIDs.length > 0 && currentInactiveIDs.length > 0 ? "," : ""
+      }${currentInactiveIDs.length > 0 ? currentInactiveIDs : ""}`;
+
+      deleteDBdataAsync({
+        tableName: "tmp_group_activate",
+        targetId: "0",
+        customQuery: `DELETE FROM tmp_group_activate WHERE _kf_Group in (${idsToDelete})`,
+      })
+        .then((result) => {
+          if (result.success) {
+            displayToast("All Changes have been reversed");
+            setUndoModal({ open: false, id: null });
+            navigation.navigate("PendingGroupsScreen", { data: null });
+          }
+        })
+        .catch((error) => {
+          displayToast("something went wrong");
+          console.log(error);
+        });
+      setLoadingData(false);
+    }
+  }, [reverseComplete]);
+
+  useEffect(() => {
     if (currentJob === "Groups changes saved") {
       displayToast("Groups changes submitted");
       setCurrentJob("");
+      setLoadingData(false);
       navigation.navigate("PendingGroupsScreen", { data: null });
     } else if (currentJob === "Groups changes not saved") {
       displayToast("Error: Groups changes not submitted");
       setCurrentJob("");
+      setLoadingData(false);
     } else if (currentJob === "Inactive status restored") {
       if (currentInactiveIDs.length > 0) {
         query = `UPDATE rtc_groups SET active = 1 WHERE __kp_Group IN(${currentInactiveIDs})`;
@@ -147,26 +180,10 @@ export const UploadGroupChangesScreen = ({ route }) => {
           msgNo: "status not restored",
         });
       } else {
-        displayToast("All Changes have been reversed");
-        setLoadingData(false);
+        setReverseComplete(true);
       }
     } else if (currentJob === "active status restored") {
-      deleteDBdataAsync({
-        tableName: "tmp_group_activate",
-        targetId: "0",
-        customQuery: `DELETE FROM tmp_group_activate WHERE _kf_Group in (${currentActiveIDs},${currentInactiveIDs})`,
-      })
-        .then((result) => {
-          if (result.success) {
-            displayToast("All Changes have been reversed");
-            setUndoModal({ open: false, id: null });
-          }
-        })
-        .catch((error) => {
-          displayToast("something went wrong");
-          console.log(error);
-        });
-      setLoadingData(false);
+      setReverseComplete(true);
     }
   }, [currentJob]);
 
@@ -199,7 +216,6 @@ export const UploadGroupChangesScreen = ({ route }) => {
 
   useEffect(() => {
     setLoadingData(false);
-    console.log(groupChanges);
   }, [groupChanges]);
 
   useFocusEffect(
@@ -223,6 +239,7 @@ export const UploadGroupChangesScreen = ({ route }) => {
         setUndoModal({ open: false, id: null });
         setSubmitModal({ open: false, id: null });
         setIds("");
+        setReverseComplete(false);
       };
     }, [])
   );

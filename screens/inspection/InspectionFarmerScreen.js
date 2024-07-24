@@ -56,6 +56,10 @@ export const InspectionFarmerScreen = ({ route }) => {
 
   const { data } = route.params;
 
+  const handleActivateGroups = () => {
+    navigation.navigate("InactiveGroupsScreen", { data: null });
+  };
+
   const handleSync = () => {
     navigation.navigate("Sync", { data: null });
   };
@@ -226,10 +230,9 @@ export const InspectionFarmerScreen = ({ route }) => {
   useEffect(() => {
     if (groups.length > 0) {
       setActiveGroup(groups[0]);
-    } else {
-      setLoadingData(false);
-      setLoadingPage(false);
     }
+    setLoadingData(false);
+    setLoadingPage(false);
   }, [groups]);
 
   useFocusEffect(
@@ -243,6 +246,7 @@ export const InspectionFarmerScreen = ({ route }) => {
             tableName: "rtc_groups",
             stationId,
             setData: setGroups,
+            queryArg: `SELECT * FROM rtc_groups WHERE _kf_Station='${stationId}' AND active = "1"`,
           });
         }
       };
@@ -450,7 +454,7 @@ export const InspectionFarmerScreen = ({ route }) => {
           </View>
         )}
 
-        {displayData.length > 0 ? (
+        {displayData.length > 0 && (
           <FlatList
             ref={flatListRef}
             contentContainerStyle={{
@@ -477,14 +481,16 @@ export const InspectionFarmerScreen = ({ route }) => {
             )}
             keyExtractor={(item) => item.id}
           />
-        ) : (
+        )}
+
+        {displayData.length < 1 && groups.length > 0 && (
           <View
             style={{
               gap: screenHeight * 0.02,
             }}
           >
             <Text style={{ textAlign: "center" }}>No farmers found</Text>
-            <TouchableOpacity onPress={handleSync}>
+            <TouchableOpacity onPress={handlePress}>
               <Text
                 style={{
                   textAlign: "center",
@@ -495,6 +501,29 @@ export const InspectionFarmerScreen = ({ route }) => {
                 }}
               >
                 Perform data synchronization?
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {groups.length < 1 && !loadingData && (
+          <View
+            style={{
+              gap: screenHeight * 0.02,
+            }}
+          >
+            <Text style={{ textAlign: "center" }}>No active groups found</Text>
+            <TouchableOpacity onPress={handleActivateGroups}>
+              <Text
+                style={{
+                  textAlign: "center",
+                  color: colors.secondary,
+                  fontWeight: "600",
+                  fontSize: screenWidth * 0.04,
+                  textDecorationLine: "underline",
+                }}
+              >
+                Activate groups?
               </Text>
             </TouchableOpacity>
           </View>

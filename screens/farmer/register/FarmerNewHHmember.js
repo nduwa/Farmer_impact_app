@@ -25,6 +25,7 @@ import { LocalizationModal } from "../../../components/LocalizationModal";
 import { useSelector } from "react-redux";
 import { FarmerOnlySchema } from "../../../validation/FarmerOnlySchema";
 import LottieView from "lottie-react-native";
+import { getCurrentDate } from "../../../helpers/getCurrentDate";
 
 export const FarmerNewHHmember = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
@@ -161,9 +162,9 @@ export const FarmerNewHHmember = ({ route }) => {
         CAFE_ID: "",
         SAN_ID: "",
         UTZ_ID: "",
-        created_at: new Date(),
+        created_at: getCurrentDate(),
         created_by: userName,
-        registered_at: new Date(),
+        registered_at: getCurrentDate(),
         updated_at: "0000-00-00 00:00:0",
         type: "new",
         sync_farmers: "0",

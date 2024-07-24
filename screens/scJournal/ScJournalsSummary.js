@@ -30,6 +30,7 @@ import {
 import { updateDBdata } from "../../helpers/updateDBdata";
 import * as SecureStore from "expo-secure-store";
 import LottieView from "lottie-react-native";
+import { getCurrentDate } from "../../helpers/getCurrentDate";
 
 export const ScJournalsSummary = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
@@ -72,7 +73,7 @@ export const ScJournalsSummary = ({ route }) => {
 
   const handleSubmitJournal = () => {
     const journalId = data.site_day_lot;
-    const currentDate = new Date();
+    const currentDate = getCurrentDate();
     const twoDigitYear = currentDate.getFullYear().toString().slice(-2);
     const twoDigitMonth = ("0" + (currentDate.getMonth() + 1)).slice(-2);
     const twoDigitDay = ("0" + currentDate.getDate()).slice(-2);
@@ -178,7 +179,7 @@ export const ScJournalsSummary = ({ route }) => {
 
   useEffect(() => {
     if (JournalState.serverResponded) {
-      const uploadDate = new Date();
+      const uploadDate = getCurrentDate();
       let journalId = data.site_day_lot;
 
       updateDBdata({

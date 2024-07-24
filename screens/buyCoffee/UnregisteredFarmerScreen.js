@@ -21,6 +21,7 @@ import * as SecureStore from "expo-secure-store";
 import { generateID } from "../../helpers/generateID";
 import { retrieveDBdata } from "../../helpers/retrieveDBdata";
 import { dataTodb } from "../../helpers/dataTodb";
+import { getCurrentDate } from "../../helpers/getCurrentDate";
 
 export const UnRegisteredFarmerScreen = () => {
   const screenHeight = Dimensions.get("window").height;
@@ -146,13 +147,13 @@ export const UnRegisteredFarmerScreen = () => {
         parchment_lot_id,
         bad_cherry_lot_id,
         bad_parch_lot_id,
-        created_at: transactionData.transactionDate.toISOString(),
+        created_at: getCurrentDate(transactionData.transactionDate),
         farmerid: "",
         farmername: transactionData.farmerName,
         coffee_type: transactionData.coffeeType,
         kilograms: transactionData.kgGood,
         unitprice: transactionData.priceGood,
-        transaction_date: transactionData.transactionDate.toISOString(),
+        transaction_date: getCurrentDate(transactionData.transactionDate),
         certification: transactionData.certificationType,
         _kf_Staff: staffKf,
         _kf_Station: stationId,

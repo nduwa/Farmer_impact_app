@@ -24,6 +24,7 @@ import {
 import { updateDBdata } from "../../helpers/updateDBdata";
 import { deleteDBdataAsync } from "../../helpers/deleteDBdataAsync";
 import { SyncModal } from "../../components/SyncModal";
+import { getCurrentDate } from "../../helpers/getCurrentDate";
 
 export const TrainingScreen = () => {
   const screenHeight = Dimensions.get("window").height;
@@ -173,7 +174,7 @@ export const TrainingScreen = () => {
   useEffect(() => {
     if (trainingState.serverResponded) {
       setSubmitting(false);
-      const uploadDate = new Date();
+      const uploadDate = getCurrentDate();
       const { _kf_training, uuid, status } = trainingState.response;
 
       if (status !== "success") return;

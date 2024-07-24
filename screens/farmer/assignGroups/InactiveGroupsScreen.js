@@ -24,6 +24,7 @@ import GroupSelectCard from "../../../components/GroupSelectCard";
 import { dataTodb } from "../../../helpers/dataTodb";
 import { SyncModal } from "../../../components/SyncModal";
 import { updateDBdata } from "../../../helpers/updateDBdata";
+import { getCurrentDate } from "../../../helpers/getCurrentDate";
 
 export const InactiveGroupsScreen = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
@@ -139,13 +140,9 @@ export const InactiveGroupsScreen = ({ route }) => {
     let i = 0;
 
     for (const group of selectedGroups) {
-      let date = new Date();
-      let formattedDate = date.toISOString().split("T")[0];
-      let formattedTime = date.toISOString().split("T")[1].split(".")[0];
-
       let tmpObj = {
         ...group,
-        ...{ active: 1, created_at: `${formattedDate} ${formattedTime}` },
+        ...{ active: 1, created_at: getCurrentDate() },
       };
       groupsToActivate.push(tmpObj);
       strIDs += `'${group.__kp_Group}'`;

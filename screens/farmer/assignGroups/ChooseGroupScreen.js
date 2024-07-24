@@ -25,6 +25,7 @@ import { InspectionHoverPrevBtn } from "../../../components/InspectionHoverPrevB
 import { updateDBdata } from "../../../helpers/updateDBdata";
 import { dataTodb } from "../../../helpers/dataTodb";
 import { useSelector } from "react-redux";
+import { getCurrentDate } from "../../../helpers/getCurrentDate";
 
 export const ChooseGroupScreen = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
@@ -104,10 +105,6 @@ export const ChooseGroupScreen = ({ route }) => {
     let submitData = [];
 
     for (const farmer of data) {
-      let date = new Date();
-      let formattedDate = date.toISOString().split("T")[0];
-      let formattedTime = date.toISOString().split("T")[1].split(".")[0];
-
       let tmpObj = {
         _kf_farmer: farmer.__kp_Farmer,
         farmerid: farmer.farmerid,
@@ -125,13 +122,12 @@ export const ChooseGroupScreen = ({ route }) => {
         group_id_new: selectedGroup.ID_GROUP,
         assigned_by: userData.userData.user.Name_User,
         status: "new",
-        created_at: `${formattedDate} ${formattedTime}`,
+        created_at: getCurrentDate(),
       };
 
       submitData.push(tmpObj);
     }
 
-    console.log(submitData);
     dataTodb({
       tableName: "groupAssign",
       syncData: submitData,

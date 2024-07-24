@@ -29,6 +29,7 @@ import { SyncModal } from "../../../components/SyncModal";
 import { deleteDBdataAsync } from "../../../helpers/deleteDBdataAsync";
 import { updateDBdataAsync } from "../../../helpers/updateDBdataAsync";
 import LottieView from "lottie-react-native";
+import { getCurrentDate } from "../../../helpers/getCurrentDate";
 
 export const FarmerEditScreen = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
@@ -178,9 +179,9 @@ export const FarmerEditScreen = ({ route }) => {
         CAFE_ID: "",
         SAN_ID: "",
         UTZ_ID: "",
-        created_at: new Date(),
+        created_at: getCurrentDate(),
         created_by: userName,
-        registered_at: new Date(),
+        registered_at: getCurrentDate(),
         updated_at: "0000-00-00 00:00:0",
         type: "new",
         sync_farmers: "0",
@@ -213,7 +214,7 @@ export const FarmerEditScreen = ({ route }) => {
         STP_Weight: `${farmerData?.stp1.trim()} ${farmerData?.stp2.trim()}`,
         householdid: "",
         z_Farmer_Primary: "",
-        created_at: new Date(),
+        created_at: getCurrentDate(),
         type: "new",
         farmerid: "", // generated on the server
         group_id: activeGroup.ID_GROUP,
@@ -241,29 +242,7 @@ export const FarmerEditScreen = ({ route }) => {
 
       setHouseholdSubmitData(householdInfo);
 
-      let updateQuery = `UPDATE rtc_farmers SET _kf_Group = '${
-        activeGroup.__kp_Group
-      }', Name='${farmerInfo.Name}', Phone='${farmerInfo.Phone}', Gender='${
-        farmerInfo.Gender
-      }',Year_Birth='${farmerInfo.Year_Birth}', National_ID_t = '${
-        farmerInfo.National_ID_t
-      }', Position = '${farmerInfo.Position}', Marital_Status = '${
-        farmerInfo.Marital_Status
-      }', Math_Skills = '${farmerInfo.Math_Skills}', Reading_Skills = '${
-        farmerInfo.Reading_Skills
-      }', education_level = '${
-        farmerInfo.education_level
-      }', updated_at = '${new Date()}', Area_Small = '${
-        farmerInfo.Area_Small
-      }', Area_Smallest = '${farmerInfo.Area_Smallest}', Trees = '${
-        farmerInfo.Trees
-      }', Trees_Producing = '${
-        farmerInfo.Trees_Producing
-      }', number_of_plots_with_coffee = '${
-        farmerInfo.number_of_plots_with_coffee
-      }',STP_Weight = '${farmerInfo.STP_Weight}' WHERE __kp_Farmer = '${
-        farmerInfo.__kp_Farmer
-      }' `;
+      let updateQuery = `UPDATE rtc_farmers SET _kf_Group = '${activeGroup.__kp_Group}', Name='${farmerInfo.Name}', Phone='${farmerInfo.Phone}', Gender='${farmerInfo.Gender}',Year_Birth='${farmerInfo.Year_Birth}', National_ID_t = '${farmerInfo.National_ID_t}', Position = '${farmerInfo.Position}', Marital_Status = '${farmerInfo.Marital_Status}', Math_Skills = '${farmerInfo.Math_Skills}', Reading_Skills = '${farmerInfo.Reading_Skills}', education_level = '${farmerInfo.education_level}', updated_at = '${getCurrentDate}', Area_Small = '${farmerInfo.Area_Small}', Area_Smallest = '${farmerInfo.Area_Smallest}', Trees = '${farmerInfo.Trees}', Trees_Producing = '${farmerInfo.Trees_Producing}', number_of_plots_with_coffee = '${farmerInfo.number_of_plots_with_coffee}',STP_Weight = '${farmerInfo.STP_Weight}' WHERE __kp_Farmer = '${farmerInfo.__kp_Farmer}' `;
 
       updateDBdataAsync({ id: data.farmerData.__kp_Farmer, query: updateQuery })
         .then((result) => {
