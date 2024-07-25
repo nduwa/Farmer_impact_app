@@ -6,12 +6,12 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { colors } from "../../data/colors";
+import { colors } from "../../../data/colors";
 import { StatusBar } from "expo-status-bar";
 import { AntDesign } from "@expo/vector-icons";
-import { UpdateFarmerItem } from "../../components/UpdateFarmerItem";
+import { GroupMgtHomeItem } from "../../../components/GroupMgtHomeItem";
 
-export const FarmerUpdateHome = () => {
+export const AssignGroupsHome = () => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const navigation = useNavigation();
@@ -58,7 +58,7 @@ export const FarmerUpdateHome = () => {
             fontSize: 19,
           }}
         >
-          Update Trees
+          Groups management
         </Text>
         <View
           style={{ width: screenWidth * 0.07, backgroundColor: "transparent" }}
@@ -76,13 +76,13 @@ export const FarmerUpdateHome = () => {
               gap: screenHeight * 0.014,
             }}
           >
-            <UpdateFarmerItem
-              label={"Farmer Details"}
-              destination={"FarmerUpdateScreen"}
+            <GroupMgtHomeItem
+              label={"Activate/De-activate Groups"}
+              destination={"ActiveGroupsScreen"}
             />
-            <UpdateFarmerItem
-              label={"Farm Details"}
-              destination={"FarmUpdateScreen"}
+            <GroupMgtHomeItem
+              label={"Assign Farmers to Groups"}
+              destination={"FarmerAssignGroupScreen"}
             />
           </View>
         </ScrollView>

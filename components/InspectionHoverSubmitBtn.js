@@ -10,6 +10,7 @@ export const InspectionHoverSubmitBtn = ({
   topRatio = 0.85,
   active = true,
   mode = "submit",
+  positive = true,
 }) => {
   const screenWidth = Dimensions.get("window").width;
   const screenHeight = Dimensions.get("window").height;
@@ -18,7 +19,13 @@ export const InspectionHoverSubmitBtn = ({
 
   useEffect(() => {
     if (mode === "submit") {
-      setColor(active ? colors.secondary : colors.black_letter);
+      let clr =
+        active && positive
+          ? colors.green
+          : active && !positive
+          ? colors.red
+          : colors.black_letter;
+      setColor(clr);
     } else if (mode === "pagination") {
       setColor(active ? colors.blue_font : colors.black_letter);
     }
@@ -29,7 +36,10 @@ export const InspectionHoverSubmitBtn = ({
       disabled={!active}
       style={{
         position: "absolute",
-        backgroundColor: color,
+        backgroundColor:
+          currentPage >= totalPages && mode === "submit"
+            ? color
+            : colors.blue_font,
         borderColor: colors.white,
         borderWidth: screenHeight * 0.003,
         borderRadius: screenWidth * 0.5,
@@ -42,11 +52,13 @@ export const InspectionHoverSubmitBtn = ({
       onPress={handlePress}
     >
       {currentPage >= totalPages && mode === "submit" ? (
-        <MaterialCommunityIcons
-          name="folder-check"
-          size={35}
-          color={colors.white}
-        />
+        <>
+          {positive ? (
+            <MaterialCommunityIcons name="check" size={35} color="white" />
+          ) : (
+            <MaterialCommunityIcons name="close" size={35} color="white" />
+          )}
+        </>
       ) : (
         <Text
           style={{

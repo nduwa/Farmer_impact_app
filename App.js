@@ -21,16 +21,27 @@ import { HistoryDetails } from "./screens/history/HistoryDetails";
 import { TrainingCourses } from "./screens/training/TrainingCourses";
 import { TrainingFarmers } from "./screens/training/TrainingFarmers";
 import { TrainingScreen } from "./screens/training/TrainingScreen";
-import { FarmerRegistrationScreen } from "./screens/farmer/FarmerRegistrationScreen";
-import { FarmerUpdateHome } from "./screens/farmer/FarmerUpdateHome";
-import { FarmerUpdateScreen } from "./screens/farmer/FarmerUpdateScreen";
-import { FarmUpdateScreen } from "./screens/farmer/FarmUpdateScreen";
-import { ChooseFarmerScreen } from "./screens/farmer/ChooseFarmerScreen";
-import { SelectFarmersScreen } from "./screens/farmer/SelectFarmersScreen";
-import { PendingRegistrationsScreen } from "./screens/farmer/PendingRegistrationsScreen";
-import { FarmerEditScreen } from "./screens/farmer/FarmerEditScreen";
-import { FarmerNewHHmember } from "./screens/farmer/FarmerNewHHmember";
-import { PendingDeletionScreen } from "./screens/farmer/PendingDeletionScreen";
+import { FarmerRegistrationScreen } from "./screens/farmer/register/FarmerRegistrationScreen";
+import { FarmerUpdateHome } from "./screens/farmer/updateTrees/FarmerUpdateHome";
+import { FarmerUpdateScreen } from "./screens/farmer/updateTrees/FarmerUpdateScreen";
+import { FarmUpdateScreen } from "./screens/farmer/updateTrees/FarmUpdateScreen";
+import { ChooseFarmerScreen } from "./screens/farmer/updateTrees/ChooseFarmerScreen";
+import { SelectFarmersScreen } from "./screens/farmer/removeFarmers/SelectFarmersScreen";
+import { PendingRegistrationsScreen } from "./screens/farmer/register/PendingRegistrationsScreen";
+import { FarmerEditScreen } from "./screens/farmer/register/FarmerEditScreen";
+import { FarmerNewHHmember } from "./screens/farmer/register/FarmerNewHHmember";
+import { PendingDeletionScreen } from "./screens/farmer/removeFarmers/PendingDeletionScreen";
+import { AssignFarmersScreen } from "./screens/farmer/assignGroups/AssignFarmersScreen";
+import { WeeklyReportScreen } from "./screens/farmer/weeklyReport/WeeklyReportScreen";
+import { UpdateTreesScreen } from "./screens/farmer/updateTrees/UpdateTreesScreen";
+import { ChooseGroupScreen } from "./screens/farmer/assignGroups/ChooseGroupScreen";
+import { AssignGroupsHome } from "./screens/farmer/assignGroups/AssignGroupsHome";
+import { ActiveGroupsScreen } from "./screens/farmer/assignGroups/ActiveGroupsScreen";
+import { InactiveGroupsScreen } from "./screens/farmer/assignGroups/InactiveGroupsScreen";
+import { PendingGroupsScreen } from "./screens/farmer/assignGroups/PendingGroupsScreen";
+import { UploadGroupChangesScreen } from "./screens/farmer/assignGroups/UploadGroupChangesScreen";
+import { UploadGroupAssignments } from "./screens/farmer/assignGroups/UploadGroupAssignments";
+import { AssignedFarmerDetailsScreen } from "./screens/farmer/assignGroups/AssignedFarmersDetailsScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -196,6 +207,64 @@ export default function App() {
             name="FarmerDeletedScreen"
             options={{ unmountOnBlur: true }}
             component={PendingDeletionScreen}
+          />
+
+          <Stack.Screen
+            name="WeeklyReportScreen"
+            options={{ unmountOnBlur: true }}
+            component={WeeklyReportScreen}
+          />
+          <Stack.Screen
+            name="updateTreesScreen"
+            options={{ unmountOnBlur: true }}
+            component={UpdateTreesScreen}
+          />
+
+          {/* assign groups */}
+          <Stack.Screen
+            name="AssignGroupsHome"
+            options={{ unmountOnBlur: true }}
+            component={AssignGroupsHome}
+          />
+          <Stack.Screen
+            name="FarmerAssignGroupScreen"
+            options={{ unmountOnBlur: true }}
+            component={AssignFarmersScreen}
+          />
+          <Stack.Screen
+            name="ChooseGroupScreen"
+            options={{ unmountOnBlur: true }}
+            component={ChooseGroupScreen}
+          />
+          <Stack.Screen
+            name="ActiveGroupsScreen"
+            options={{ unmountOnBlur: true }}
+            component={ActiveGroupsScreen}
+          />
+          <Stack.Screen
+            name="InactiveGroupsScreen"
+            options={{ unmountOnBlur: true }}
+            component={InactiveGroupsScreen}
+          />
+          <Stack.Screen
+            name="PendingGroupsScreen"
+            options={{ unmountOnBlur: true }}
+            component={PendingGroupsScreen}
+          />
+          <Stack.Screen
+            name="UploadGroupChangesScreen"
+            options={{ unmountOnBlur: true }}
+            component={UploadGroupChangesScreen}
+          />
+          <Stack.Screen
+            name="UploadGroupAssignments"
+            options={{ unmountOnBlur: true }}
+            component={UploadGroupAssignments}
+          />
+          <Stack.Screen
+            name="AssignedFarmerDetailsScreen"
+            options={{ unmountOnBlur: true }}
+            component={AssignedFarmerDetailsScreen}
           />
         </Stack.Navigator>
       </NavigationContainer>

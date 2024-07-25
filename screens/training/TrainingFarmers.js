@@ -15,7 +15,6 @@ import { AntDesign } from "@expo/vector-icons";
 import React, { useEffect, useRef, useState } from "react";
 import { Formik } from "formik";
 import { Feather } from "@expo/vector-icons";
-import { UpdateChildrenModal } from "../../components/UpdateChildrenModal";
 import { retrieveDBdata } from "../../helpers/retrieveDBdata";
 import { GroupsModal } from "../../components/GroupsModal";
 import { InspectionHoverSubmitBtn } from "../../components/InspectionHoverSubmitBtn";
@@ -26,6 +25,7 @@ import { AttendanceSheetModal } from "../../components/AttendanceSheetModal";
 import { useSelector } from "react-redux";
 import { generateID } from "../../helpers/generateID";
 import { dataTodb } from "../../helpers/dataTodb";
+import { getCurrentDate } from "../../helpers/getCurrentDate";
 
 export const TrainingFarmers = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
@@ -63,6 +63,10 @@ export const TrainingFarmers = ({ route }) => {
   const [sheetModalOpen, setSheetModalOpen] = useState(false);
 
   const { data } = route.params;
+
+  const handleActivateGroups = () => {
+    navigation.navigate("InactiveGroupsScreen", { data: null });
+  };
 
   const handleSync = () => {
     navigation.navigate("Sync", { data: null });
@@ -165,7 +169,7 @@ export const TrainingFarmers = ({ route }) => {
 
       let submitData = [];
       let obj = {
-        created_at: new Date(),
+        created_at: getCurrentDate(),
         uuid,
         filepath: `attendance/${stationName}/${userName}/${attendanceSheet}`,
         status: 1,
@@ -190,7 +194,7 @@ export const TrainingFarmers = ({ route }) => {
 
       for (const farmer of selectedFarmers) {
         let obj = {
-          created_at: new Date(),
+          created_at: getCurrentDate(),
           training_course_id: data.courseId,
           __kf_farmer: farmer.__kf_farmer,
           __kf_group: farmer._kf_Group,
@@ -265,8 +269,10 @@ export const TrainingFarmers = ({ route }) => {
   useEffect(() => {
     if (groups.length > 0) {
       setActiveGroup(groups[0]);
+    } else {
+      setLoadingData(false);
     }
-  }, [groups.length]);
+  }, [groups]);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -280,14 +286,13 @@ export const TrainingFarmers = ({ route }) => {
             tableName: "rtc_groups",
             stationId,
             setData: setGroups,
+            queryArg: `SELECT * FROM rtc_groups WHERE _kf_Station='${stationId}' AND active = "1"`,
           });
         }
 
         if (station_name) {
           setStationName(station_name);
         }
-
-        console.log("train farme ", data);
       };
 
       fetchData();
@@ -492,7 +497,7 @@ export const TrainingFarmers = ({ route }) => {
           </View>
         )}
 
-        {displayData.length > 0 ? (
+        {displayData.length > 0 && (
           <FlatList
             ref={flatListRef}
             contentContainerStyle={{
@@ -517,14 +522,16 @@ export const TrainingFarmers = ({ route }) => {
             )}
             keyExtractor={(item) => item.id}
           />
-        ) : (
+        )}
+
+        {displayData.length < 1 && groups.length > 0 && (
           <View
             style={{
               gap: screenHeight * 0.02,
             }}
           >
             <Text style={{ textAlign: "center" }}>No farmers found</Text>
-            <TouchableOpacity onPress={handleSync}>
+            <TouchableOpacity onPress={handlePress}>
               <Text
                 style={{
                   textAlign: "center",
@@ -535,6 +542,29 @@ export const TrainingFarmers = ({ route }) => {
                 }}
               >
                 Perform data synchronization?
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {groups.length < 1 && !loadingData && (
+          <View
+            style={{
+              gap: screenHeight * 0.02,
+            }}
+          >
+            <Text style={{ textAlign: "center" }}>No active groups found</Text>
+            <TouchableOpacity onPress={handleActivateGroups}>
+              <Text
+                style={{
+                  textAlign: "center",
+                  color: colors.secondary,
+                  fontWeight: "600",
+                  fontSize: screenWidth * 0.04,
+                  textDecorationLine: "underline",
+                }}
+              >
+                Activate groups?
               </Text>
             </TouchableOpacity>
           </View>

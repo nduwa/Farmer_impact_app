@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { colors } from "../../data/colors";
+import { colors } from "../../../data/colors";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import {
   Dimensions,
@@ -13,29 +13,27 @@ import * as SecureStore from "expo-secure-store";
 import { StatusBar } from "expo-status-bar";
 import { AntDesign } from "@expo/vector-icons";
 import { useDispatch, useSelector } from "react-redux";
-import { retrieveDBdata } from "../../helpers/retrieveDBdata";
-import { InspectionHoverSubmitBtn } from "../../components/InspectionHoverSubmitBtn";
-import { registrationAction } from "../../redux/farmer/RegistrationSlice";
-import LottieView from "lottie-react-native";
-import { SyncModal } from "../../components/SyncModal";
-import { FarmerDeletedCard } from "../../components/FarmerDeletedCard";
-import { updateDBdata } from "../../helpers/updateDBdata";
+import { FarmerPendingCard } from "../../../components/FarmerPendingCard";
+import { retrieveDBdata } from "../../../helpers/retrieveDBdata";
+import { InspectionHoverSubmitBtn } from "../../../components/InspectionHoverSubmitBtn";
 import {
-  deletionAction,
-  farmerDeletion,
-} from "../../redux/farmer/DeletionSlice";
-import { updateDBdataAsync } from "../../helpers/updateDBdataAsync";
+  farmerSubmission,
+  registrationAction,
+} from "../../../redux/farmer/RegistrationSlice";
+import { dataTodb } from "../../../helpers/dataTodb";
+import LottieView from "lottie-react-native";
+import { SyncModal } from "../../../components/SyncModal";
 
-export const PendingDeletionScreen = () => {
+export const PendingRegistrationsScreen = () => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
-  const deletionState = useSelector((state) => state.deletion);
+  const submissionState = useSelector((state) => state.registration);
   const navigation = useNavigation();
   const dispatch = useDispatch();
 
-  const [deletions, setDeletions] = useState([]);
+  const [registrations, setRegistrations] = useState([]);
   const [Submitted, setSubmitted] = useState(false);
-  const [restoreModal, setRestoreModal] = useState({ open: false, id: null });
+  const [newHHs, setNewHHs] = useState([]);
   const [currentJob, setCurrentJob] = useState();
 
   const [loading, setLoading] = useState(false);
@@ -43,7 +41,7 @@ export const PendingDeletionScreen = () => {
 
   const handleUpload = () => {
     setLoading(true);
-    dispatch(farmerDeletion({ farmersToDelete: deletions }));
+    dispatch(farmerSubmission(registrations));
     setSubmitModal(false);
   };
 
@@ -67,71 +65,59 @@ export const PendingDeletionScreen = () => {
     return theDate.toLocaleDateString("en-US", options);
   }
 
-  const handleRestore = () => {
-    let id = restoreModal.id;
-    let query = `UPDATE rtc_farmers SET deleted = 0, deleted_by = '', deleted_at = '0000-00-00' WHERE __kp_Farmer = '${id}'`;
-
-    setRestoreModal((prevState) => ({ ...prevState, open: false }));
-    updateDBdata({
-      id,
-      query,
-      setCurrentJob,
-      msgYes: "Farmers restored",
-      msgNo: "not restored",
-    });
-  };
-
   useEffect(() => {
-    if (currentJob === "Farmers restored") {
-      displayToast("Farmers restored");
-      const newDeletions = deletions.filter(
-        (item) => item.__kp_Farmer !== restoreModal.id
-      );
-
-      setDeletions(newDeletions);
-      setCurrentJob("");
-    } else if (currentJob === "Changes uploaded") {
-      displayToast("Changes uploaded");
+    if (currentJob === "Farmer details saved") {
+      dataTodb({ tableName: "households", setCurrentJob, syncData: newHHs });
+    } else if (currentJob === "Household details saved") {
+      displayToast("Done");
       setLoading(false);
     }
   }, [currentJob]);
 
   useEffect(() => {
-    if (deletionState.serverResponded) {
+    if (submissionState.serverResponded) {
       setSubmitted(true);
 
-      if (deletionState.response.status === "success") {
-        let { processedData } = deletionState.response;
-        let query = "";
-        let strIDs = "";
-        let i = 0;
+      if (submissionState.response.status === "success") {
+        let { uploadedFarmers, uploadedHH } = submissionState.response;
+        let newFarmers = [];
+        let newHouseholds = [];
 
-        if (processedData.length > 1) {
-          for (const farmer of processedData) {
-            strIDs += `'${farmer}'`;
-            if (i < processedData.length - 1) strIDs += ",";
-            i++;
-          }
-          query = `UPDATE rtc_farmers SET sync = 1 WHERE __kp_Farmer IN(${strIDs})`;
-        } else {
-          query = `UPDATE rtc_farmers SET sync = 1 WHERE __kp_Farmer = '${processedData[0]}'`;
+        for (let farmer of uploadedFarmers) {
+          farmer = {
+            ...farmer,
+            ...{ deleted: "0", deleted_by: "", deleted_at: "", sync: 1 },
+          };
+          newFarmers.push(farmer);
         }
 
-        // setCurrentJob("Changes uploaded");
-        updateDBdata({
-          id: 0,
-          query,
+        for (let hh of uploadedHH) {
+          hh = { ...hh, ...{ sync: 1 } };
+          newHouseholds.push(hh);
+        }
+
+        setNewHHs(newHouseholds);
+
+        dataTodb({
+          tableName: "farmers",
           setCurrentJob,
-          msgYes: "Changes uploaded",
-          msgNo: "not uploaded",
+          syncData: newFarmers,
         });
       }
     }
-  }, [deletionState.serverResponded]);
+  }, [submissionState.serverResponded]);
+
+  useEffect(() => {
+    if (submissionState.error) {
+      setLoading(false);
+      displayToast("Error: Farmers not submitted");
+      dispatch(registrationAction.resetRegistrationState());
+    }
+  }, [submissionState.error]);
 
   useEffect(() => {
     setLoading(false);
-  }, [deletions]);
+  }, [registrations]);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -142,19 +128,18 @@ export const PendingDeletionScreen = () => {
           setLoading(true);
           retrieveDBdata({
             tableName: "rtc_farmers",
-            setData: setDeletions,
-            queryArg: `SELECT * FROM rtc_farmers WHERE deleted = 1 AND deleted_by = '${currentUser}' AND sync = 0`,
+            setData: setRegistrations,
+            queryArg: `SELECT household.*,farmer.* FROM rtc_farmers AS farmer INNER JOIN rtc_households AS household ON farmer._kf_Household = household.__kp_Household AND farmer.sync = 0 AND farmer.deleted = 0 AND farmer.created_by = '${currentUser}'`,
           });
         }
       };
 
       fetchData();
       return () => {
-        setDeletions([]);
+        setRegistrations([]);
         setSubmitted(false);
         setLoading(false);
-        setLoading(false);
-        dispatch(deletionAction.resetDeletionState());
+        dispatch(registrationAction.resetRegistrationState());
       };
     }, [])
   );
@@ -197,55 +182,42 @@ export const PendingDeletionScreen = () => {
             fontSize: 19,
           }}
         >
-          Farmers to be deleted
+          Pending Registration
         </Text>
         <View
           style={{ width: screenWidth * 0.07, backgroundColor: "transparent" }}
         />
       </View>
-      {deletions.length > 0 && (
+      {registrations.length > 0 && (
         <FlatList
           contentContainerStyle={{ padding: 12, gap: 9 }}
-          data={deletions}
+          data={registrations}
           initialNumToRender={10}
           renderItem={({ item }) => (
-            <FarmerDeletedCard
+            <FarmerPendingCard
               data={item}
-              deleteDate={formatDate(item.deleted_at)}
-              restoreFn={setRestoreModal}
-              active={!deletionState.loading && !Submitted}
+              registrationDate={formatDate(item.registered_at)}
             />
           )}
           keyExtractor={(item) => item.__kp_Farmer}
         />
       )}
 
-      {deletions.length > 0 && (
+      {registrations.length > 0 && (
         <InspectionHoverSubmitBtn
-          topRatio={0.87}
+          topRatio={0.93}
           handlePress={() => setSubmitModal(true)}
-          active={!deletionState.loading && !Submitted}
+          active={!submissionState.loading && !Submitted}
         />
       )}
 
       {submitModal && (
         <SyncModal
           label={
-            "You are about to submit all the pending deleted farmers, Are you sure?"
+            "You are about to upload all the pending registered farmers, Are you sure?"
           }
           onYes={handleUpload}
           OnNo={() => setSubmitModal(false)}
-        />
-      )}
-
-      {/* restore modal */}
-      {restoreModal.open && (
-        <SyncModal
-          label={`You're about to restore this farmer, are you sure?`}
-          onYes={handleRestore}
-          OnNo={() => setRestoreModal({ open: false, id: null })}
-          labelYes="Ok"
-          labelNo="No"
         />
       )}
 
@@ -275,7 +247,7 @@ export const PendingDeletionScreen = () => {
                 width: screenHeight * 0.05,
                 alignSelf: "center",
               }}
-              source={require("../../assets/lottie/spinner.json")}
+              source={require("../../../assets/lottie/spinner.json")}
               autoPlay
               speed={1}
               loop={true}

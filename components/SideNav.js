@@ -6,6 +6,7 @@ import { AntDesign } from "@expo/vector-icons";
 import { Foundation } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { MaterialIcons } from "@expo/vector-icons";
 import { Entypo } from "@expo/vector-icons";
 import { colors } from "../data/colors";
 import { useNavigation } from "@react-navigation/native";
@@ -51,8 +52,9 @@ export const SideNav = ({
       await SecureStore.deleteItemAsync("rtc-station-location-province");
       await SecureStore.deleteItemAsync("rtc-station-location-sector");
       await SecureStore.deleteItemAsync("rtc-station-location-cell");
-      await SecureStore.deleteItemAsync("rtc-station-location-village");
-
+      await SecureStore.deleteItemAsync("rtc-station-location-village");      
+      await SecureStore.deleteItemAsync("rtc-station-readable-id");
+      
       dispatch(UserActions.clearUserData());
       dispatch(UserActions.setCheckedForNewUser(false));
 
@@ -120,6 +122,13 @@ export const SideNav = ({
       {name === "Deleted Farmers" && (
         <MaterialCommunityIcons
           name="delete-forever-outline"
+          size={24}
+          color={isActive ? colors.secondary : colors.black_a}
+        />
+      )}
+      {name === "Pending Groups" && (
+        <MaterialIcons
+          name="people-outline"
           size={24}
           color={isActive ? colors.secondary : colors.black_a}
         />

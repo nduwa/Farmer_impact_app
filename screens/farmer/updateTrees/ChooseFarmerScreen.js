@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { colors } from "../../data/colors";
+import { colors } from "../../../data/colors";
 import {
   Dimensions,
   FlatList,
@@ -14,9 +14,9 @@ import { StatusBar } from "expo-status-bar";
 import { AntDesign } from "@expo/vector-icons";
 import { Feather } from "@expo/vector-icons";
 import { Formik } from "formik";
-import { GroupsModal } from "../../components/GroupsModal";
-import { retrieveDBdata } from "../../helpers/retrieveDBdata";
-import { FarmerUpdateCard } from "../../components/FarmerUpdateCard";
+import { GroupsModal } from "../../../components/GroupsModal";
+import { retrieveDBdata } from "../../../helpers/retrieveDBdata";
+import { FarmerUpdateCard } from "../../../components/FarmerUpdateCard";
 
 export const ChooseFarmerScreen = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
@@ -304,7 +304,10 @@ export const ChooseFarmerScreen = ({ route }) => {
               initialNumToRender={12}
               data={displayData}
               renderItem={({ item }) => (
-                <FarmerUpdateCard data={item} destination={data} />
+                <FarmerUpdateCard
+                  data={{ ...item, ...{ farmerGroupID: activeGroup.ID_GROUP } }}
+                  destination={data}
+                />
               )}
               keyExtractor={(item, index) => index}
             />

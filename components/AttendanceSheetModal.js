@@ -13,7 +13,6 @@ import * as FileSystem from "expo-file-system";
 import { colors } from "../data/colors";
 import { globalStyles } from "../data/globalStyles";
 import { SheetItem } from "./SheetItem";
-import { Foundation } from "@expo/vector-icons";
 import { useSelector } from "react-redux";
 
 export const AttendanceSheetModal = ({

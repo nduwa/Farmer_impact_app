@@ -80,29 +80,32 @@ export const GroupsModal = ({ setModalOpen, data, setGroupChoice }) => {
             />
           </TouchableOpacity>
         </View>
-
-        <FlatList
-          style={{
-            width: "100%",
-            marginTop: screenHeight * 0.015,
-          }}
-          initialNumToRender={15}
-          contentContainerStyle={{
-            marginBottom: 25,
-            padding: screenWidth * 0.03,
-          }}
-          data={data}
-          renderItem={({ item }) => (
-            <GroupCard
-              setGroupChoice={setSelectedGroupID}
-              groupID={item.ID_GROUP.trim()}
-              groupName={item.Name.trim() || null}
-              groupKpID={item.__kp_Group}
-              setModalOpen={setModalOpen}
-            />
-          )}
-          keyExtractor={(item) => item.id}
-        />
+        {data.length > 0 ? (
+          <FlatList
+            style={{
+              width: "100%",
+              marginTop: screenHeight * 0.015,
+            }}
+            initialNumToRender={15}
+            contentContainerStyle={{
+              marginBottom: 25,
+              padding: screenWidth * 0.03,
+            }}
+            data={data}
+            renderItem={({ item }) => (
+              <GroupCard
+                setGroupChoice={setSelectedGroupID}
+                groupID={item.ID_GROUP.trim()}
+                groupName={item.Name.trim() || null}
+                groupKpID={item.__kp_Group}
+                setModalOpen={setModalOpen}
+              />
+            )}
+            keyExtractor={(item) => item.id}
+          />
+        ) : (
+          <Text style={{ textAlign: "center" }}>No active groups found</Text>
+        )}
       </View>
     </View>
   );

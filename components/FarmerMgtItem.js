@@ -8,6 +8,7 @@ import {
   Dimensions,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
+import { FontAwesome6 } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Foundation } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
@@ -33,6 +34,7 @@ export const FarmerMgtItem = ({
       disabled={!isActive}
       style={{
         flexDirection: "row",
+        alignItems: "center",
         gap: screenWidth * 0.02,
         backgroundColor: colors.white,
         paddingVertical: screenHeight * 0.01,
@@ -64,8 +66,8 @@ export const FarmerMgtItem = ({
           color="black"
         />
       )}
-      {label === "Farmer GPS" && (
-        <MaterialCommunityIcons name="crosshairs-gps" size={24} color="black" />
+      {label === "Groups" && (
+        <FontAwesome6 name="people-group" size={18} color="black" />
       )}
       {label === "Update Trees" && (
         <Foundation name="trees" size={24} color="black" />
@@ -74,7 +76,9 @@ export const FarmerMgtItem = ({
         <AntDesign name="barchart" size={24} color="black" />
       )}
 
-      <Text style={{ fontWeight: "600", fontSize: 20 }}>{label}</Text>
+      <Text style={{ fontWeight: "600", fontSize: 20, textAlign: "left" }}>
+        {label}
+      </Text>
     </TouchableOpacity>
   );
 };

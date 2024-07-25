@@ -17,23 +17,24 @@ import {
   View,
 } from "react-native";
 import * as SecureStore from "expo-secure-store";
-import { colors } from "../../data/colors";
+import { colors } from "../../../data/colors";
 import { AntDesign } from "@expo/vector-icons";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Formik } from "formik";
-import { BuyCoffeeInput } from "../../components/BuyCoffeeInput";
+import { BuyCoffeeInput } from "../../../components/BuyCoffeeInput";
 import RadioButtonGroup, { RadioButtonItem } from "expo-radio-button";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
-import CustomButton from "../../components/CustomButton";
+import CustomButton from "../../../components/CustomButton";
 import { FontAwesome6 } from "@expo/vector-icons";
-import { retrieveDBdata } from "../../helpers/retrieveDBdata";
-import { GroupsModal } from "../../components/GroupsModal";
-import { generateID } from "../../helpers/generateID";
-import { dataTodb } from "../../helpers/dataTodb";
-import { LocalizationModal } from "../../components/LocalizationModal";
-import { newFarmerSchema } from "../../validation/newFarmerSchema";
+import { retrieveDBdata } from "../../../helpers/retrieveDBdata";
+import { GroupsModal } from "../../../components/GroupsModal";
+import { generateID } from "../../../helpers/generateID";
+import { dataTodb } from "../../../helpers/dataTodb";
+import { LocalizationModal } from "../../../components/LocalizationModal";
+import { newFarmerSchema } from "../../../validation/newFarmerSchema";
 import { useSelector } from "react-redux";
 import LottieView from "lottie-react-native";
+import { getCurrentDate } from "../../../helpers/getCurrentDate";
 
 export const FarmerRegistrationScreen = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
@@ -179,14 +180,14 @@ export const FarmerRegistrationScreen = ({ route }) => {
         CAFE_ID: "",
         SAN_ID: "",
         UTZ_ID: "",
-        created_at: new Date(),
+        created_at: getCurrentDate(),
         created_by: userName,
-        registered_at: new Date(),
-        updated_at: "0000-00-00 00:00:0",
+        registered_at: getCurrentDate(),
+        updated_at: getCurrentDate(),
         type: "new",
         sync_farmers: "0",
         uploaded: "0",
-        uploaded_at: "0000-00-00 00:00:0",
+        uploaded_at: getCurrentDate(),
         Area_Small: cellChoice?.name,
         Area_Smallest: villageChoice?.name,
         Trees: farmerData?.totTrees.trim(),
@@ -196,9 +197,11 @@ export const FarmerRegistrationScreen = ({ route }) => {
         latitude: userData.location.coords.latitude,
         longitude: userData.location.coords.longitude,
         householdid: "",
-        seasonal_goal: "",
+        seasonal_goal: 0,
         recordid: "",
       };
+
+      console.log("FARMER STP WEIGHT: ", typeof farmerInfo.STP_Weight);
 
       let householdInfo = {
         _kf_Group: activeGroup.__kp_Group,
@@ -214,7 +217,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
         STP_Weight: `${farmerData?.stp1.trim()} ${farmerData?.stp2.trim()}`,
         householdid: "",
         z_Farmer_Primary: "",
-        created_at: new Date(),
+        created_at: getCurrentDate(),
         type: "new",
         farmerid: "1", // generated on the server, 1 means the primary member of the household
         group_id: activeGroup.ID_GROUP,
@@ -344,10 +347,10 @@ export const FarmerRegistrationScreen = ({ route }) => {
 
   useEffect(() => {
     if (groups.length > 0) {
-      setLoading(false);
       setActiveGroup(groups[0]);
     }
-  }, [groups.length]);
+    setLoading(false);
+  }, [groups]);
 
   useEffect(() => {
     if (selectedGroup) {
@@ -388,6 +391,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
             tableName: "rtc_groups",
             stationId,
             setData: setGroups,
+            queryArg: `SELECT * FROM rtc_groups WHERE _kf_Station='${stationId}' AND active = "1"`,
           });
         }
       };
@@ -1291,7 +1295,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
                 width: screenHeight * 0.05,
                 alignSelf: "center",
               }}
-              source={require("../../assets/lottie/spinner.json")}
+              source={require("../../../assets/lottie/spinner.json")}
               autoPlay
               speed={1}
               loop={true}

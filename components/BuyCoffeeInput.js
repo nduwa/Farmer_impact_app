@@ -9,6 +9,7 @@ export const BuyCoffeeInput = ({
   label,
   error = false,
   active = true,
+  multiline = false,
   radius = 10,
 }) => {
   const screenHeight = Dimensions.get("window").height;
@@ -37,6 +38,7 @@ export const BuyCoffeeInput = ({
         onBlur={handleBlur}
         value={value}
         editable={active}
+        multiline={multiline}
         style={{
           borderColor: error ? "red" : colors.bg_variant_font,
           backgroundColor: colors.white_variant,

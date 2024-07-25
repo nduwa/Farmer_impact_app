@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { colors } from "../../data/colors";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import * as FileSystem from "expo-file-system";
 import {
   Dimensions,
   FlatList,
@@ -23,6 +24,7 @@ import {
 import { updateDBdata } from "../../helpers/updateDBdata";
 import { deleteDBdataAsync } from "../../helpers/deleteDBdataAsync";
 import { SyncModal } from "../../components/SyncModal";
+import { getCurrentDate } from "../../helpers/getCurrentDate";
 
 export const TrainingScreen = () => {
   const screenHeight = Dimensions.get("window").height;
@@ -101,7 +103,7 @@ export const TrainingScreen = () => {
 
   const handleUpload = (item) => {
     setSubmitting(true);
-    const dir = "file:///data/user/0/host.exp.exponent/files/";
+    const dir = FileSystem.documentDirectory;
     const formData = new FormData();
     const fileName = getFileName(item.filepath);
     let tmpObj = {};
@@ -172,7 +174,7 @@ export const TrainingScreen = () => {
   useEffect(() => {
     if (trainingState.serverResponded) {
       setSubmitting(false);
-      const uploadDate = new Date();
+      const uploadDate = getCurrentDate();
       const { _kf_training, uuid, status } = trainingState.response;
 
       if (status !== "success") return;
@@ -190,11 +192,14 @@ export const TrainingScreen = () => {
     if (trainingState.error) {
       const trainingError = trainingState.error;
 
+      setSubmitting(false);
+
       if (trainingError?.code === "ERR_BAD_RESPONSE") {
         displayToast("Error: Server error");
       } else if (trainingError?.code === "ERR_BAD_REQUEST") {
         displayToast("Error: Incomplete data");
       } else if (trainingError?.code === "ERR_NETWORK") {
+        console.log("ERROR: ", trainingError);
         displayToast("Error: Network error");
       } else {
         displayToast("Something went wrong");
@@ -228,6 +233,7 @@ export const TrainingScreen = () => {
         setCurrentJob(null);
         setTrainings([]);
         setAllTrainingData([]);
+        dispatch(trainingActions.resetTrainingState());
       };
     }, [])
   );

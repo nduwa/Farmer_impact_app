@@ -1,8 +1,6 @@
 import {
   Dimensions,
   FlatList,
-  Keyboard,
-  ScrollView,
   Text,
   TextInput,
   ToastAndroid,
@@ -10,40 +8,39 @@ import {
   View,
 } from "react-native";
 import * as SecureStore from "expo-secure-store";
-import { colors } from "../../data/colors";
+import { colors } from "../../../data/colors";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
 import { AntDesign } from "@expo/vector-icons";
 import React, { useEffect, useRef, useState } from "react";
 import { Formik } from "formik";
 import { Feather } from "@expo/vector-icons";
-import FarmerInspectionCard from "../../components/FarmerInspectionCard";
-import { UpdateChildrenModal } from "../../components/UpdateChildrenModal";
-import { retrieveDBdata } from "../../helpers/retrieveDBdata";
-import { GroupsModal } from "../../components/GroupsModal";
-import { InspectionHoverSubmitBtn } from "../../components/InspectionHoverSubmitBtn";
-import { InspectionHoverPrevBtn } from "../../components/InspectionHoverPrevBtn";
+import { retrieveDBdata } from "../../../helpers/retrieveDBdata";
+import { InspectionHoverSubmitBtn } from "../../../components/InspectionHoverSubmitBtn";
+import { InspectionHoverPrevBtn } from "../../../components/InspectionHoverPrevBtn";
 import LottieView from "lottie-react-native";
+import { useSelector } from "react-redux";
+import GroupSelectCard from "../../../components/GroupSelectCard";
+import { dataTodb } from "../../../helpers/dataTodb";
+import { SyncModal } from "../../../components/SyncModal";
+import { updateDBdata } from "../../../helpers/updateDBdata";
+import { getCurrentDate } from "../../../helpers/getCurrentDate";
 
-export const InspectionFarmerScreen = ({ route }) => {
+export const InactiveGroupsScreen = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
+  const userName = useSelector((state) => state.user.userData.user.Name_User);
+
   const navigation = useNavigation();
   const flatListRef = useRef(null);
 
-  const [farmers, setFarmers] = useState([]);
-  const [farmersXhouseholdsData, setFarmersXhouseholdsData] = useState([]); // each farmer info is merged with their corresponding household data
   const [groups, setGroups] = useState([]);
-  const [households, setHouseholds] = useState([]);
-  const [selectedGroup, setSelectedGroup] = useState(null);
   const [searchResults, setSearchResults] = useState([]);
   const [displayData, setDisplayData] = useState([]);
-  const [groupsModalOpen, setGroupsModalOpen] = useState(false);
-  const [activeGroup, setActiveGroup] = useState([]);
-  const [childrenModal, setChildrenModal] = useState({
-    open: false,
-    data: null,
-  });
+  const [selectedGroups, setSelectedGroups] = useState([]);
+  const [currentJob, setCurrentJob] = useState(null);
+  const [activateModalOpen, setActivateModalOpen] = useState(false);
+  const [activatedGroups, setActivatedGroups] = useState([]);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(10);
@@ -52,25 +49,20 @@ export const InspectionFarmerScreen = ({ route }) => {
   const [dataEnd, setDataEnd] = useState(0);
   const [loadingData, setLoadingData] = useState(false);
   const [loadingPage, setLoadingPage] = useState(false);
-  const [searchQueryLength, setSearchQueryLength] = useState(0);
 
-  const { data } = route.params;
+  const [submitted, setSubmitted] = useState(false);
 
-  const handleActivateGroups = () => {
-    navigation.navigate("InactiveGroupsScreen", { data: null });
+  const handleDeactivateGroups = () => {
+    navigation.navigate("ActiveGroupsScreen", { data: null });
   };
+  const filterChecked = (id) => {
+    const allChecked = selectedGroups.filter((item) => item.__kp_Group !== id);
 
-  const handleSync = () => {
-    navigation.navigate("Sync", { data: null });
+    setSelectedGroups(allChecked);
   };
 
   const scrollToTop = () => {
     flatListRef?.current?.scrollToOffset({ offset: 0, animated: true });
-  };
-
-  const toggleGroupsModal = () => {
-    setGroupsModalOpen(true);
-    Keyboard.dismiss();
   };
 
   const displayToast = (msg) => {
@@ -101,21 +93,19 @@ export const InspectionFarmerScreen = ({ route }) => {
     setLoadingData(false);
     setLoadingPage(false);
 
-    if (searchQueryLength > 0) return;
     if (pages > 0) displayToast(`Page ${currentPage} of ${pages} loaded`);
   };
 
   const handleBackButton = () => {
-    navigation.replace("chooseInspection");
+    navigation.replace("ActiveGroupsScreen", { data: null });
   };
 
   const handleSearch = (text) => {
-    setSearchQueryLength(text.length);
     setCurrentPage(1);
 
     if (text !== "") {
       text = text.toLowerCase();
-      const results = farmersXhouseholdsData.filter((item) => {
+      const results = farmers.filter((item) => {
         return Object.values(item).some((value) => {
           return String(value).toLowerCase().includes(text);
         });
@@ -127,8 +117,12 @@ export const InspectionFarmerScreen = ({ route }) => {
     }
   };
 
-  const formatDisplayStr = (text) => {
-    return text === "" ? "0" : text;
+  const handleCheckbox = (group) => {
+    const foundItem = selectedGroups.find(
+      (item) => item?.__kp_Group === group.__kp_Group
+    );
+
+    return foundItem?.checked;
   };
 
   const handlePress = () => {
@@ -138,14 +132,87 @@ export const InspectionFarmerScreen = ({ route }) => {
     setCurrentPage(newpg);
   };
 
+  const handleActivation = () => {
+    setActivateModalOpen(false);
+    let groupsToActivate = [];
+    let strIDs = "";
+    let query = "";
+    let i = 0;
+
+    for (const group of selectedGroups) {
+      let tmpObj = {
+        ...group,
+        ...{ active: 1, created_at: getCurrentDate() },
+      };
+      groupsToActivate.push(tmpObj);
+      strIDs += `'${group.__kp_Group}'`;
+      if (i < selectedGroups.length - 1) strIDs += ",";
+      i++;
+    }
+
+    setActivatedGroups(groupsToActivate);
+
+    query = `UPDATE rtc_groups SET active = 1 WHERE __kp_Group IN(${strIDs})`;
+
+    updateDBdata({
+      id: 0,
+      query,
+      setCurrentJob,
+      msgYes: "Groups activated",
+      msgNo: "not activated",
+    });
+  };
+
   useEffect(() => {
-    handleDataPagination(farmersXhouseholdsData);
+    if (currentJob === "Groups activated") {
+      dataTodb({
+        tableName: "groupActive",
+        syncData: activatedGroups,
+        setCurrentJob,
+        extraVal: userName,
+      });
+    } else if (currentJob === "Groups changes saved") {
+      const newDisplaydata = groups.reduce((accumulator, currentItem) => {
+        if (
+          !activatedGroups.some(
+            (group) => group.__kp_Group === currentItem.__kp_Group
+          )
+        ) {
+          accumulator.push(currentItem);
+        }
+
+        return accumulator;
+      }, []);
+
+      handleDataPagination(newDisplaydata);
+
+      displayToast("Groups activated");
+      setSelectedGroups([]);
+      setCurrentJob("");
+    } else if (
+      currentJob === "not activated" ||
+      currentJob === "Error saving groups changes"
+    ) {
+      displayToast("Error: Groups not activated");
+      setCurrentJob("");
+    }
+  }, [currentJob]);
+
+  useEffect(() => {
+    if (selectedGroups.length > 0) {
+      setSubmitted(false);
+    } else {
+      setSubmitted(true);
+    }
+  }, [selectedGroups]);
+
+  useEffect(() => {
+    handleDataPagination(groups);
     scrollToTop();
   }, [currentPage]);
 
   useEffect(() => {
-    let data =
-      searchResults.length > 0 ? searchResults : farmersXhouseholdsData;
+    let data = searchResults.length > 0 ? searchResults : groups;
 
     if (data.length > 0) {
       handleDataPagination(data);
@@ -153,87 +220,7 @@ export const InspectionFarmerScreen = ({ route }) => {
       setLoadingData(false);
       setLoadingPage(false);
     }
-  }, [farmersXhouseholdsData, searchResults]);
-
-  useEffect(() => {
-    const fetchFarmers = () => {
-      retrieveDBdata({
-        tableName: "rtc_farmers",
-        stationId: selectedGroup._kf_Station,
-        groupID: selectedGroup.__kp_Group,
-        setData: setFarmers,
-      });
-    };
-
-    if (selectedGroup) {
-      setActiveGroup(selectedGroup);
-      setLoadingData(true);
-      setLoadingPage(true);
-      setCurrentPage(1);
-      fetchFarmers();
-    }
-  }, [selectedGroup]);
-
-  useEffect(() => {
-    if (households.length > 0) {
-      let thisGroupFarmers = farmers;
-      let newFarmersData = [];
-      for (const farmer of thisGroupFarmers) {
-        let extendedFarmerData = {};
-        let farmerHouseholdData = households.filter(
-          (item) => item.__kp_Household === farmer._kf_Household
-        );
-        if (farmerHouseholdData && farmerHouseholdData.length > 0) {
-          let neededHouseholdInfo = {
-            prodTrees: formatDisplayStr(farmerHouseholdData[0].Trees_Producing),
-            totalTrees: formatDisplayStr(farmerHouseholdData[0].Trees),
-            cell: formatDisplayStr(farmerHouseholdData[0].Area_Small),
-            village: formatDisplayStr(farmerHouseholdData[0].Area_Smallest),
-            children: formatDisplayStr(farmerHouseholdData[0].Children),
-            householdId: farmerHouseholdData[0].__kp_Household,
-          };
-          extendedFarmerData = { ...farmer, ...neededHouseholdInfo };
-          newFarmersData.push(extendedFarmerData);
-        }
-      }
-
-      setFarmersXhouseholdsData(newFarmersData);
-    }
-  }, [households]);
-
-  useEffect(() => {
-    if (farmers.length > 0) {
-      if (activeGroup.id) {
-        retrieveDBdata({
-          tableName: "rtc_households",
-          groupID: activeGroup.ID_GROUP,
-          setData: setHouseholds,
-        });
-      }
-    } else {
-      setLoadingData(false);
-      setLoadingPage(false);
-    }
-  }, [farmers]);
-
-  useEffect(() => {
-    if (activeGroup.id) {
-      retrieveDBdata({
-        tableName: "rtc_farmers",
-        stationId: activeGroup._kf_Station,
-        groupID: activeGroup.__kp_Group,
-        setData: setFarmers,
-      });
-    }
-  }, [activeGroup]);
-
-  useEffect(() => {
-    if (groups.length > 0) {
-      setActiveGroup(groups[0]);
-    }
-    setLoadingData(false);
-    setLoadingPage(false);
-  }, [groups]);
+  }, [groups, searchResults]);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -246,25 +233,18 @@ export const InspectionFarmerScreen = ({ route }) => {
             tableName: "rtc_groups",
             stationId,
             setData: setGroups,
-            queryArg: `SELECT * FROM rtc_groups WHERE _kf_Station='${stationId}' AND active = "1"`,
+            queryArg: `SELECT * FROM rtc_groups WHERE _kf_Station='${stationId}' AND active = 0`,
           });
         }
       };
 
       fetchData();
       return () => {
-        setFarmers([]);
-        setFarmersXhouseholdsData([]); // each farmer info is merged with their corresponding household data
         setGroups([]);
-        setHouseholds([]);
-        setSelectedGroup(null);
         setSearchResults([]);
         setDisplayData([]);
-        setGroupsModalOpen(false);
-        setActiveGroup([]);
-        setChildrenModal({ open: false, data: null });
+        setCurrentJob(null);
         setLoadingData(false);
-        setLoadingPage(false);
       };
     }, [])
   );
@@ -278,13 +258,7 @@ export const InspectionFarmerScreen = ({ route }) => {
       }}
     >
       <StatusBar style="dark" />
-      {groupsModalOpen && (
-        <GroupsModal
-          setGroupChoice={setSelectedGroup}
-          data={groups}
-          setModalOpen={setGroupsModalOpen}
-        />
-      )}
+
       <View
         style={{
           flexDirection: "row",
@@ -314,7 +288,7 @@ export const InspectionFarmerScreen = ({ route }) => {
             fontSize: 19,
           }}
         >
-          Choose Farmer For Inspection
+          In-Active Groups
         </Text>
         <View
           style={{ width: screenWidth * 0.07, backgroundColor: "transparent" }}
@@ -322,7 +296,7 @@ export const InspectionFarmerScreen = ({ route }) => {
       </View>
       <View
         style={{
-          flexDirection: "row",
+          flexDirection: "row-reverse",
           justifyContent: "space-between",
           alignItems: "center",
           width: "100%",
@@ -331,7 +305,7 @@ export const InspectionFarmerScreen = ({ route }) => {
         }}
       >
         <TouchableOpacity
-          onPress={toggleGroupsModal}
+          onPress={handleDeactivateGroups}
           style={{
             backgroundColor: colors.white_variant,
             alignItems: "center",
@@ -346,12 +320,10 @@ export const InspectionFarmerScreen = ({ route }) => {
           <Text
             style={{
               fontWeight: "600",
-              fontSize: activeGroup.ID_GROUP
-                ? screenWidth * 0.04
-                : screenWidth * 0.03,
+              fontSize: screenWidth * 0.04,
             }}
           >
-            {activeGroup.ID_GROUP || "No groups"}
+            {"Deactivate more"}
           </Text>
         </TouchableOpacity>
         <View
@@ -361,7 +333,7 @@ export const InspectionFarmerScreen = ({ route }) => {
             paddingHorizontal: screenWidth * 0.015,
             paddingVertical: screenWidth * 0.02,
             borderRadius: screenWidth * 0.03,
-            width: "78%",
+            width: "60%",
             elevation: 6,
           }}
         >
@@ -384,7 +356,7 @@ export const InspectionFarmerScreen = ({ route }) => {
                   justifyContent: "space-between",
                   gap: screenWidth * 0.01,
                   alignItems: "center",
-                  width: "80%",
+                  width: "78%",
                 }}
               >
                 <AntDesign
@@ -395,7 +367,7 @@ export const InspectionFarmerScreen = ({ route }) => {
 
                 <TextInput
                   placeholderTextColor={colors.black_a}
-                  placeholder="Farmer Name, Household or Farmer ID"
+                  placeholder="Group Name or Group ID"
                   onChangeText={(text) => {
                     handleChange("search")(text);
                     handleSearch(text);
@@ -445,7 +417,7 @@ export const InspectionFarmerScreen = ({ route }) => {
                 alignSelf: "center",
                 marginVertical: 30,
               }}
-              source={require("../../assets/lottie/loader.json")}
+              source={require("../../../assets/lottie/loader.json")}
               autoPlay
               speed={0.8}
               loop={true}
@@ -464,33 +436,28 @@ export const InspectionFarmerScreen = ({ route }) => {
             data={displayData}
             initialNumToRender={6}
             renderItem={({ item }) => (
-              <FarmerInspectionCard
-                data={{
-                  farmerName: item.Name,
-                  farmerId: item.farmerid,
-                  householdKey: item._kf_Household,
-                  cell: item.cell,
-                  village: item.village,
-                  prodTrees: item.prodTrees,
-                  totTrees: item.totalTrees,
-                  children: item.children,
-                  destination: data,
-                }}
-                setModal={setChildrenModal}
+              <GroupSelectCard
+                data={item}
+                filterFn={filterChecked}
+                isChecked={handleCheckbox(item) || false}
+                setChecked={setSelectedGroups}
+                use={"activate"}
               />
             )}
             keyExtractor={(item) => item.id}
           />
         )}
 
-        {displayData.length < 1 && groups.length > 0 && (
+        {displayData.length < 1 && !loadingData && (
           <View
             style={{
               gap: screenHeight * 0.02,
             }}
           >
-            <Text style={{ textAlign: "center" }}>No farmers found</Text>
-            <TouchableOpacity onPress={handlePress}>
+            <Text style={{ textAlign: "center" }}>
+              No In-Active groups found
+            </Text>
+            <TouchableOpacity onPress={handleBackButton}>
               <Text
                 style={{
                   textAlign: "center",
@@ -500,50 +467,34 @@ export const InspectionFarmerScreen = ({ route }) => {
                   textDecorationLine: "underline",
                 }}
               >
-                Perform data synchronization?
-              </Text>
-            </TouchableOpacity>
-          </View>
-        )}
-
-        {groups.length < 1 && !loadingData && (
-          <View
-            style={{
-              gap: screenHeight * 0.02,
-            }}
-          >
-            <Text style={{ textAlign: "center" }}>No active groups found</Text>
-            <TouchableOpacity onPress={handleActivateGroups}>
-              <Text
-                style={{
-                  textAlign: "center",
-                  color: colors.secondary,
-                  fontWeight: "600",
-                  fontSize: screenWidth * 0.04,
-                  textDecorationLine: "underline",
-                }}
-              >
-                Activate groups?
+                Go back?
               </Text>
             </TouchableOpacity>
           </View>
         )}
       </View>
-      {currentPage > 1 && <InspectionHoverPrevBtn handlePress={handlePrevPg} />}
+      {currentPage > 1 && (
+        <InspectionHoverPrevBtn
+          topRatio={selectedGroups.length > 0 ? 0.66 : 0.75}
+          handlePress={handlePrevPg}
+        />
+      )}
       {displayData.length > 0 && (
         <InspectionHoverSubmitBtn
           handlePress={handlePress}
           currentPage={currentPage}
           totalPages={totalPages}
           active={currentPage < totalPages ? true : false}
+          topRatio={selectedGroups.length > 0 ? 0.75 : 0.85}
           mode="pagination"
         />
       )}
 
-      {childrenModal.open && (
-        <UpdateChildrenModal
-          setModal={setChildrenModal}
-          data={childrenModal.data}
+      {selectedGroups.length > 0 && (
+        <InspectionHoverSubmitBtn
+          handlePress={() => setActivateModalOpen(true)}
+          active={!submitted}
+          positive={true}
         />
       )}
 
@@ -573,7 +524,7 @@ export const InspectionFarmerScreen = ({ route }) => {
                 width: screenHeight * 0.05,
                 alignSelf: "center",
               }}
-              source={require("../../assets/lottie/spinner.json")}
+              source={require("../../../assets/lottie/spinner.json")}
               autoPlay
               speed={1}
               loop={true}
@@ -581,6 +532,17 @@ export const InspectionFarmerScreen = ({ route }) => {
             />
           </View>
         </View>
+      )}
+
+      {/* submit modal */}
+      {activateModalOpen && (
+        <SyncModal
+          label={`You're about to activate the selected groups, are you sure?`}
+          onYes={handleActivation}
+          OnNo={() => setActivateModalOpen(false)}
+          labelYes="Ok"
+          labelNo="No"
+        />
       )}
     </View>
   );

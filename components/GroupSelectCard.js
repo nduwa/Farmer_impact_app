@@ -3,7 +3,7 @@ import { Dimensions, Text, View } from "react-native";
 import { colors } from "../data/colors";
 import Checkbox from "expo-checkbox";
 
-const FarmerTrainingCard = ({
+const GroupSelectCard = ({
   data,
   isChecked,
   setChecked,
@@ -20,14 +20,12 @@ const FarmerTrainingCard = ({
       setChecked((prevState) => [
         ...prevState,
         {
-          farmerid: data.farmerId,
-          __kf_farmer: data.__kf_farmer,
-          _kf_Group: data.__kf_group,
+          ...data,
           checked: value,
         },
       ]);
     } else {
-      filterFn(data.farmerId);
+      filterFn(data.__kp_Group);
     }
 
     setSelected(value);
@@ -48,25 +46,43 @@ const FarmerTrainingCard = ({
     >
       <View style={{ gap: screenHeight * 0.008 }}>
         <Text style={{ fontSize: screenWidth * 0.05, fontWeight: "600" }}>
-          {data.farmerName}
+          {data?.ID_GROUP.length > 0 ? data.ID_GROUP : "[NO GROUP ID]"}
         </Text>
         <Text
           style={{ fontSize: screenWidth * 0.035, color: colors.black_letter }}
         >
-          ID: {data.farmerId}
+          Name: {data?.Name.length > 0 ? data.Name : "N/A"}
         </Text>
         <Text
           style={{ fontSize: screenWidth * 0.035, color: colors.black_letter }}
         >
-          Date of birth: {data.Year_Birth}
+          Location: {data?.Area_Medium.length > 0 ? data.Area_Medium : "N/A"}
+        </Text>
+        <Text
+          style={{ fontSize: screenWidth * 0.035, color: colors.black_letter }}
+        >
+          Started:{" "}
+          {data?.Year_Started_Program.length > 0
+            ? data.Year_Started_Program
+            : "N/A"}
         </Text>
       </View>
       <View
         style={{
+          flexDirection: "row",
           alignItems: "center",
           justifyContent: "center",
         }}
       >
+        <Text
+          style={{
+            fontSize: screenWidth * 0.035,
+            fontWeight: "700",
+            color: colors.secondary,
+          }}
+        >
+          {use === "deactivate" ? "De-activate?" : "Activate?"}
+        </Text>
         <Checkbox
           style={{
             margin: 8,
@@ -80,4 +96,4 @@ const FarmerTrainingCard = ({
   );
 };
 
-export default memo(FarmerTrainingCard);
+export default memo(GroupSelectCard);
