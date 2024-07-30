@@ -37,23 +37,35 @@ export const SyncScreen = ({ navigation, route }) => {
   const [isSyncing, setIsSyncing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [sycnList, setSyncList] = useState([
-    { table: "stations", status: false },
-    { table: "groups", status: false },
-    { table: "farmers", status: false },
-    { table: "households", status: false },
-    { table: "cells", status: false },
-    { table: "trainingModules", status: false },
-    { table: "inspectionQuestions", status: false },
-    { table: "inspectionAnswers", status: false },
-    { table: "crops", status: false },
-    { table: "suppliers", status: false },
-    { table: "seasons", status: false },
+    { table: "stations", label: "Stations", status: false },
+    { table: "groups", label: "Groups", status: false },
+    { table: "farmers", label: "Farmers", status: false },
+    { table: "households", label: "Households", status: false },
+    { table: "cells", label: "Cells", status: false },
+    { table: "trainingModules", label: "Training modules", status: false },
+    {
+      table: "inspectionQuestions",
+      label: "Inspection questions",
+      status: false,
+    },
+    { table: "inspectionAnswers", label: "Inspection answers", status: false },
+    { table: "crops", label: "Crops", status: false },
+    { table: "suppliers", label: "Suppliers", status: false },
+    { table: "seasons", label: "Seasons", status: false },
   ]);
 
   const dispatch = useDispatch();
   const syncState = useSelector((state) => state.sync);
 
   const { data = null } = route.params;
+
+  const getTableLabel = (name) => {
+    for (const table of sycnList) {
+      if (table.table === name) {
+        return table.label;
+      }
+    }
+  };
 
   const handleExit = () => {
     setIsSyncing(false);
@@ -183,6 +195,7 @@ export const SyncScreen = ({ navigation, route }) => {
               console.log(`${storageKey}: ${syncValue}`);
               return {
                 table: item.table,
+                label: item.label,
                 status: syncValue === "1",
               };
             })
@@ -218,6 +231,7 @@ export const SyncScreen = ({ navigation, route }) => {
           paddingTop: screenHeight * 0.042,
           padding: 10,
           elevation: 5,
+          zIndex: 10,
         }}
       >
         <TouchableOpacity
@@ -251,6 +265,8 @@ export const SyncScreen = ({ navigation, route }) => {
       >
         <View
           style={{
+            position: "relative",
+            top: -screenHeight * 0.025,
             alignItems: "center",
             justifyContent: "center",
             marginVertical: screenHeight * 0.02,
@@ -277,7 +293,7 @@ export const SyncScreen = ({ navigation, route }) => {
                   fontSize: 24,
                 }}
               >
-                {currentTable?.replace(/^\w/, (c) => c.toUpperCase()) || "N/A"}
+                {getTableLabel(currentTable) || "N/A"}
               </Text>
               <Text
                 style={{ textAlign: "center", fontWeight: "300", fontSize: 12 }}

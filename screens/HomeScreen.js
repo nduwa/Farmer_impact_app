@@ -36,6 +36,7 @@ export const HomeScreen = ({ route }) => {
   const userState = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const navigation = useNavigation();
+  
   const [today, setToday] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [stationDetails, setStationDetails] = useState({

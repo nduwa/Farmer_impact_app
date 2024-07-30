@@ -29,7 +29,6 @@ import { ChooseFarmerScreen } from "./screens/farmer/updateTrees/ChooseFarmerScr
 import { SelectFarmersScreen } from "./screens/farmer/removeFarmers/SelectFarmersScreen";
 import { PendingRegistrationsScreen } from "./screens/farmer/register/PendingRegistrationsScreen";
 import { FarmerEditScreen } from "./screens/farmer/register/FarmerEditScreen";
-import { FarmerNewHHmember } from "./screens/farmer/register/FarmerNewHHmember";
 import { PendingDeletionScreen } from "./screens/farmer/removeFarmers/PendingDeletionScreen";
 import { AssignFarmersScreen } from "./screens/farmer/assignGroups/AssignFarmersScreen";
 import { WeeklyReportScreen } from "./screens/farmer/weeklyReport/WeeklyReportScreen";
@@ -197,11 +196,6 @@ export default function App() {
             name="PendingFarmerEditScreen"
             options={{ unmountOnBlur: true }}
             component={FarmerEditScreen}
-          />
-          <Stack.Screen
-            name="FarmerNewHHmember"
-            options={{ unmountOnBlur: true }}
-            component={FarmerNewHHmember}
           />
           <Stack.Screen
             name="FarmerDeletedScreen"

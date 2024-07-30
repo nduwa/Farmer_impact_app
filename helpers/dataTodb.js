@@ -57,20 +57,6 @@ const generateBulkValueString = (
     }
 
     return bulkValues;
-  } else if (tableName === "farmers_new") {
-    let bulkValues = "";
-    for (let i = 0; i < data.length; i++) {
-      let name = data[i].Name || "";
-      const sanitizedName = name.replace(/'/g, ""); // names like Jean D'arc will be Jean D arc for sql syntax reasons
-      const maxDigits = 99999;
-      const randomNumber = Math.floor(Math.random() * (maxDigits + 1)); // temporary id
-
-      bulkValues += `(
-        ${randomNumber},'${data[i].__kp_Farmer}','${extraValArr[0]}','${extraValArr[1]}','${extraValArr[2]}','${extraValArr[3]}','${extraValArr[4]}','${data[i].Year_Birth}','${data[i].Gender}','${data[i].farmerid}','${sanitizedName}','${data[i].National_ID_t}','${data[i].Phone}','${data[i].Position}','${data[i].CAFE_ID}','${data[i].SAN_ID}','${data[i].UTZ_ID}','${data[i].Marital_Status}','${data[i].Reading_Skills}','${data[i].Math_Skills}','${data[i].created_at}','${data[i].created_by}','${data[i].registered_at}','${data[i].updated_at}','${data[i].type}',${data[i].sync_farmers},${data[i].uploaded},'${data[i].uploaded_at}','${data[i].Area_Small}','${data[i].Area_Smallest}',${data[i].Trees},${data[i].Trees_Producing},${data[i].number_of_plots_with_coffee},'${data[i].STP_Weight}','${data[i].education_level}',${data[i].latitude},${data[i].longitude},'${data[i].householdid}','${data[i].seasonal_goal}','${data[i].recordid}',0,"","0000-00-00 00:00:0","0")`;
-      if (i < data.length - 1) bulkValues += ",";
-    }
-
-    return bulkValues;
   } else if (tableName === "households") {
     let bulkValues = "";
     for (let i = 0; i < data.length; i++) {
@@ -96,20 +82,6 @@ const generateBulkValueString = (
       }','${data[i].inspectionId}','${data[i].cafeId}','${
         data[i].InspectionStatus
       }',${data[i].sync || 0})`;
-      if (i < data.length - 1) bulkValues += ",";
-    }
-
-    return bulkValues;
-  } else if (tableName === "households_new") {
-    const maxDigits = 99999;
-    const randomNumber = Math.floor(Math.random() * (maxDigits + 1)); // temporary id
-
-    let bulkValues = "";
-    for (let i = 0; i < data.length; i++) {
-      const z_Farmer_Primary = data[i].z_Farmer_Primary || "";
-      const sanitizedValue = z_Farmer_Primary.replace(/'/g, "");
-      bulkValues += `(
-        ${randomNumber},'${data[i].__kp_Household}','${data[i]._kf_Group}','${data[i]._kf_Location}','${data[i]._kf_Station}','${data[i]._kf_Supplier}','${data[i].Area_Small}','${data[i].Area_Smallest}','${data[i].householdid}','${sanitizedValue}','${data[i].created_at}','${data[i].type}','${data[i].farmerid}','${data[i].group_id}','${data[i].STP_Weight}','${data[i].number_of_plots_with_coffee}','${data[i].Trees_Producing}','${data[i].Trees}','${extraValArr[1]}','${extraValArr[0]}','${data[i].Children}','${data[i].Childen_gender}','${data[i].Childen_below_18}','${data[i].recordid}','${data[i].status}','${data[i].inspectionId}','${data[i].cafeId}','${data[i].InspectionStatus}',"0")`;
       if (i < data.length - 1) bulkValues += ",";
     }
 
@@ -252,6 +224,20 @@ const generateBulkValueString = (
     }
 
     return bulkValues;
+  } else if (tableName === "fieldFarmers") {
+    let bulkValues = "";
+    for (let i = 0; i < data.length; i++) {
+      bulkValues += `('${extraValArr[0]}','${data[i]._kf_Staff}','${data[i]._kf_User}','${data[i].user_code}','${extraValArr[1]}','${extraValArr[2]}','${data[i].farmer_name}','${data[i].Gender}','${data[i].Year_Birth}','${data[i].phone}','${data[i].National_ID}','${data[i].Marital_Status}','${extraValArr[3]}','${data[i].village}','${data[i].cell}','${data[i].sector}','${data[i].Trees}','${data[i].Trees_Producing}','${data[i].number_of_plots}','${data[i].Skills}','${data[i].Math_Skills}','${data[i].education_level}','${data[i].created_at}','${data[i].full_name}','${data[i].farm_GPS}','0')`;
+      if (i < data.length - 1) bulkValues += ",";
+    }
+
+    /* extraValArr[0] -> kf supplier 
+       extraValArr[1] -> kf station
+       extraValArr[2] -> station name
+       extraValArr[3] -> group id
+    */
+
+    return bulkValues;
   }
 };
 
@@ -349,7 +335,7 @@ export const dataTodb = ({
           );
         });
       }
-    } else if (tableName === "farmers" || tableName === "farmers_new") {
+    } else if (tableName === "farmers") {
       if (extraValArr.length < 1 && tableName === "farmers_new") {
         setCurrentJob("some IDs are not provided");
         return;
@@ -411,7 +397,7 @@ export const dataTodb = ({
           );
         });
       }
-    } else if (tableName === "households" || tableName === "households_new") {
+    } else if (tableName === "households") {
       if (extraValArr.length < 1 && tableName === "households_new") {
         setCurrentJob("some IDs are not provided");
         return;
@@ -1080,6 +1066,50 @@ export const dataTodb = ({
             (_, error) => {
               setCurrentJob("Error saving groups changes");
               console.error("Error saving groups changes: ", error);
+              return;
+            }
+          );
+        });
+      }
+    } else if (tableName === "fieldFarmers") {
+      for (let i = 0; i < totalPages; i++) {
+        let page = i + 1;
+        let start = (page - 1) * limit; // the starting index
+        let end = start + limit; // the last index
+        let data = syncData.slice(
+          start,
+          end
+        ); /* on the last page when the rows aren't 10, it won't throw array index errors because of how slice() handles last index parameter */
+        let activeRows = data.length;
+
+        let bulkValues = generateBulkValueString(
+          tableName,
+          totalRows,
+          data,
+          null,
+          extraValArr
+        );
+
+        db.transaction((tx) => {
+          tx.executeSql(
+            `${SyncQueries.RTC_FIELD_FARMERS} ${bulkValues}`,
+            [],
+            () => {
+              insertedRows += activeRows;
+              const progress = (insertedRows / totalRows) * 100;
+
+              let jobString =
+                progress < 100
+                  ? `Saving Farmer information...`
+                  : "Farmer information saved";
+
+              if (setCurrentJob) setCurrentJob(jobString);
+
+              console.log("Farmer information saved");
+            },
+            (_, error) => {
+              setCurrentJob("Error saving Farmer information");
+              console.error("Error saving Farmer information: ", error);
               return;
             }
           );

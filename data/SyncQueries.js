@@ -31,4 +31,6 @@ export const SyncQueries = {
     "INSERT OR REPLACE INTO rtc_mobile_app_modules (id,created_at,module_name,platform) VALUES",
   RTC_ASSIGNED_MODULES:
     "INSERT OR REPLACE INTO rtc_mobile_app_access_control (id,created_at,moduleid,userid,view_record,add_record,delete_record,edit_record,platform,active) VALUES",
+  RTC_FIELD_FARMERS:
+    "INSERT OR REPLACE INTO rtc_field_farmers (_kf_Supplier, _kf_Staff, _kf_User, user_code, _kf_Station, CW_Name, farmer_name, Gender, Year_Birth, phone, National_ID, Marital_Status, Group_ID, village, cell, sector, Trees, Trees_Producing, number_of_plots, Skills, Math_Skills, education_level, created_at, full_name, farm_GPS, uploaded) VALUES"
 };

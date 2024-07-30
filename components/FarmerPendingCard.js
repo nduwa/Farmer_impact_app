@@ -31,17 +31,17 @@ export const FarmerPendingCard = ({ data, registrationDate }) => {
     >
       <View style={{ gap: screenHeight * 0.008 }}>
         <Text style={{ fontSize: screenWidth * 0.05, fontWeight: "600" }}>
-          {data.Name}
+          {data.farmer_name}
         </Text>
         <Text
           style={{ fontSize: screenWidth * 0.035, color: colors.black_letter }}
         >
-          Cell: {data.Area_Small.length > 0 ? data.Area_Small : "N/A"}
+          Cell: {data.cell.length > 0 ? data.cell : "N/A"}
         </Text>
         <Text
           style={{ fontSize: screenWidth * 0.035, color: colors.black_letter }}
         >
-          Village: {data.Area_Smallest.length > 0 ? data.Area_Smallest : "N/A"}
+          Village: {data.village.length > 0 ? data.village : "N/A"}
         </Text>
         <Text
           style={{ fontSize: screenWidth * 0.035, color: colors.black_letter }}
@@ -51,7 +51,7 @@ export const FarmerPendingCard = ({ data, registrationDate }) => {
         <Text
           style={{ fontSize: screenWidth * 0.035, color: colors.black_letter }}
         >
-          Phone: {data.Phone.length > 0 ? data.Phone : "N/A"}
+          Phone: {data.phone.length > 0 ? data.phone : "N/A"}
         </Text>
 
         <Text

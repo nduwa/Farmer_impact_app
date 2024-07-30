@@ -450,6 +450,7 @@ export const LoginScreen = ({ navigation }) => {
                             pwdInput.current.focus();
                           }}
                           blurOnSubmit={false}
+                          editable={!indicatorVisible}
                           style={{
                             borderBottomColor: colors.black_a,
                             borderBottomWidth: 1.5,
@@ -491,6 +492,7 @@ export const LoginScreen = ({ navigation }) => {
                             onChangeText={handleChange("password")}
                             onBlur={handleBlur("password")}
                             value={values.password}
+                            editable={!indicatorVisible}
                             style={{
                               borderBottomColor: colors.black_a,
                               borderBottomWidth: 1.5,
