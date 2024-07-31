@@ -1,12 +1,6 @@
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useState } from "react";
-import {
-  districts,
-  sectors,
-  provinces,
-  cells,
-  villages,
-} from "rwanda-relational";
+import { sectors, cells, villages } from "rwanda-relational";
 import {
   Dimensions,
   Keyboard,
@@ -28,7 +22,6 @@ import CustomButton from "../../../components/CustomButton";
 import { FontAwesome6 } from "@expo/vector-icons";
 import { retrieveDBdata } from "../../../helpers/retrieveDBdata";
 import { GroupsModal } from "../../../components/GroupsModal";
-import { generateID } from "../../../helpers/generateID";
 import { dataTodb } from "../../../helpers/dataTodb";
 import { LocalizationModal } from "../../../components/LocalizationModal";
 import { newFarmerSchema } from "../../../validation/newFarmerSchema";
@@ -39,16 +32,16 @@ import { getCurrentDate } from "../../../helpers/getCurrentDate";
 export const FarmerRegistrationScreen = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
-  const userData = useSelector((state) => state.user);
+  const userData = useSelector((state) => state.user.userData);
 
   const [currentStationID, setCurrentStationID] = useState();
   const [supplierID, setSupplierID] = useState();
-  const [userName, setUserName] = useState();
+
+  const [CWname, setCWName] = useState();
 
   const [groupsModalOpen, setGroupsModalOpen] = useState(false);
   const [cellsModalOpen, setCellsModalOpen] = useState(false);
   const [villagesModalOpen, setvillagesModalOpen] = useState(false);
-  const [positionModalOpen, setPositionModalOpen] = useState(false);
   const [readingModalOpen, setReadingModalOpen] = useState(false);
   const [mathModalOpen, setMathModalOpen] = useState(false);
   const [maritalModalOpen, setMaritalModalOpen] = useState(false);
@@ -59,7 +52,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
   const [cellList, setCellList] = useState([]);
   const [villageList, setVillageList] = useState([]);
 
-  const [positionChoice, setPositionChoice] = useState(null);
+  const [sector, setSector] = useState(null);
   const [maritalChoice, setMaritalChoice] = useState(null);
   const [readingChoice, setReadingChoice] = useState(null);
   const [educationChoice, setEducationChoice] = useState(null);
@@ -68,8 +61,6 @@ export const FarmerRegistrationScreen = ({ route }) => {
   const [activeGroup, setActiveGroup] = useState([]);
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [groups, setGroups] = useState([]);
-
-  const [householdSubmitData, setHouseholdSubmitData] = useState();
 
   const [gender, setGender] = useState("");
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
@@ -85,43 +76,41 @@ export const FarmerRegistrationScreen = ({ route }) => {
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const farmerPositions = [
-    { id: 1, name: "Member" },
-    { id: 2, name: "President" },
-    { id: 3, name: "Secretary" },
-    { id: 4, name: "Promoted Farmer" },
-    { id: 5, name: "Site Collector" },
-    { id: 6, name: "Savings Group Treasurer" },
-    { id: 7, name: "Farm Advisor" },
-  ];
-
   const farmerMarital = [
-    { id: 1, name: "Single" },
-    { id: 2, name: "Married" },
-    { id: 3, name: "Widowed" },
-    { id: 4, name: "Divorced" },
+    { id: 1, name: "Single", value: "S" },
+    { id: 2, name: "Married", value: "M" },
+    { id: 3, name: "Widowed", value: "W" },
+    { id: 4, name: "Divorced", value: "D" },
   ];
 
   const farmerReading = [
-    { id: 1, name: "Cannot Read" },
-    { id: 2, name: "Can read with some assistance" },
-    { id: 3, name: "Can read without some assistance from others" },
+    { id: 1, name: "Cannot Read", value: "A" },
+    { id: 2, name: "Can read with some assistance", value: "B" },
+    { id: 3, name: "Can read without some assistance from others", value: "C" },
   ];
 
   const farmerEducation = [
-    { id: 1, name: "No formal education" },
-    { id: 2, name: "Some primary" },
-    { id: 3, name: "Complete primary" },
-    { id: 4, name: "Some secondary" },
-    { id: 5, name: "Complete secondary" },
-    { id: 6, name: "Some technical school or university" },
-    { id: 7, name: "Complete technical school or university" },
+    { id: 1, name: "No formal education", value: "A" },
+    { id: 2, name: "Some primary", value: "B" },
+    { id: 3, name: "Complete primary", value: "C" },
+    { id: 4, name: "Some secondary", value: "D" },
+    { id: 5, name: "Complete secondary", value: "E" },
+    { id: 6, name: "Some technical school or university", value: "F" },
+    { id: 7, name: "Complete technical school or university", value: "G" },
   ];
 
   const farmerMath = [
-    { id: 1, name: "No math skills" },
-    { id: 2, name: "Can do basic math with assistance from others" },
-    { id: 3, name: "Can do basic math without assistance from others" },
+    { id: 1, name: "No math skills", value: "A" },
+    {
+      id: 2,
+      name: "Can do basic math with assistance from others",
+      value: "B",
+    },
+    {
+      id: 3,
+      name: "Can do basic math without assistance from others",
+      value: "C",
+    },
   ];
 
   const navigation = useNavigation();
@@ -164,98 +153,54 @@ export const FarmerRegistrationScreen = ({ route }) => {
 
   const submitFarmer = async (farmerData) => {
     try {
+      let nameFull = userData.user.Name_Full;
+      let userId = userData.user.__kp_User;
+      let userCode = userData.staff.userID;
+      let staffKf = userData.staff.__kp_Staff;
+
       let farmerInfo = {
-        __kp_Farmer: generateID({ type: "fm_uuid" }).toUpperCase(),
-        Name: farmerData?.farmerName.trim(),
-        Phone: farmerData?.phoneNumber.trim(),
+        farmer_name: farmerData?.farmerName.trim(),
+        phone: farmerData?.phoneNumber.trim(),
         Gender: gender,
         Year_Birth: farmerData?.birthYear.trim(),
-        National_ID_t: farmerData?.nationalID.trim(),
-        Position: positionChoice?.name || farmerData?.position,
-        Marital_Status: maritalChoice?.name || farmerData?.maritalStatus,
-        Math_Skills: mathChoice?.name || farmerData?.basicMathSkills,
-        Reading_Skills: readingChoice?.name || farmerData?.readingSkills,
-        education_level: educationChoice?.name || farmerData?.educationalLevel,
-        farmerid: "1", // generated on the server, 1 means the primary member of the household
-        CAFE_ID: "",
-        SAN_ID: "",
-        UTZ_ID: "",
+        National_ID: farmerData?.nationalID.trim(),
+        Marital_Status: maritalChoice?.value || farmerData?.maritalStatus,
+        Math_Skills: mathChoice?.value || farmerData?.basicMathSkills,
+        Skills: readingChoice?.value || farmerData?.readingSkills,
+        education_level: educationChoice?.value || farmerData?.educationalLevel,
         created_at: getCurrentDate(),
-        created_by: userName,
-        registered_at: getCurrentDate(),
-        updated_at: getCurrentDate(),
-        type: "new",
-        sync_farmers: "0",
-        uploaded: "0",
-        uploaded_at: getCurrentDate(),
-        Area_Small: cellChoice?.name,
-        Area_Smallest: villageChoice?.name,
+        cell: cellChoice?.name,
+        village: villageChoice?.name,
+        sector,
         Trees: farmerData?.totTrees.trim(),
         Trees_Producing: farmerData?.prodTrees.trim(),
-        number_of_plots_with_coffee: farmerData?.totalPlots.trim(),
-        STP_Weight: `${farmerData?.stp1.trim()} ${farmerData?.stp2.trim()}`,
-        latitude: userData.location.coords.latitude,
-        longitude: userData.location.coords.longitude,
-        householdid: "",
-        seasonal_goal: 0,
-        recordid: "",
-      };
-
-      console.log("FARMER STP WEIGHT: ", typeof farmerInfo.STP_Weight);
-
-      let householdInfo = {
-        _kf_Group: activeGroup.__kp_Group,
-        __kp_Household: generateID({ type: "fm_uuid" }).toUpperCase(),
-        _kf_Location: "",
-        _kf_Supplier: supplierID,
-        _kf_Station: currentStationID,
-        Area_Small: cellChoice?.name,
-        Area_Smallest: villageChoice?.name,
-        Trees_Producing: farmerData?.prodTrees.trim(),
-        Trees: farmerData?.totTrees.trim(),
-        number_of_plots_with_coffee: farmerData?.totalPlots.trim(),
-        STP_Weight: `${farmerData?.stp1.trim()} ${farmerData?.stp2.trim()}`,
-        householdid: "",
-        z_Farmer_Primary: "",
-        created_at: getCurrentDate(),
-        type: "new",
-        farmerid: "1", // generated on the server, 1 means the primary member of the household
-        group_id: activeGroup.ID_GROUP,
-        latitude: userData.location.coords.latitude,
-        longitude: userData.location.coords.longitude,
-        Children: "",
-        Childen_gender: "",
-        Childen_below_18: "",
-        recordid: "",
-        status: "Active",
-        inspectionId: "",
-        cafeId: "0",
-        InspectionStatus: "Inactive",
-        sync: "0",
+        number_of_plots: farmerData?.totalPlots.trim(),
+        full_name: nameFull,
+        _kf_User: userId,
+        user_code: userCode,
+        _kf_Staff: staffKf,
+        farm_GPS: "",
       };
 
       setErrors({});
       let submitData = {
         ...farmerInfo,
-        ...householdInfo,
-        ...{ _kf_Household: householdInfo.__kp_Household },
       };
 
       if (!validateForm(submitData, newFarmerSchema)) return;
 
-      let kfgroup = householdInfo._kf_Group;
-      let kphousehold = householdInfo.__kp_Household;
-      let kflocation = "";
       let kfsupplier = supplierID;
       let kfstation = currentStationID;
-
-      setHouseholdSubmitData(householdInfo);
+      let groupid = selectedGroup
+        ? selectedGroup.ID_GROUP
+        : activeGroup.ID_GROUP;
+      let stationName = CWname;
 
       dataTodb({
-        tableName: "farmers_new",
+        tableName: "fieldFarmers",
         syncData: [farmerInfo],
         setCurrentJob,
-        extraValArr: [kfgroup, kphousehold, kflocation, kfsupplier, kfstation],
+        extraValArr: [kfsupplier, kfstation, stationName, groupid],
       });
     } catch (error) {
       console.log(error);
@@ -305,17 +250,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
   }, [errors]);
 
   useEffect(() => {
-    if (currentJob === "Farmer details saved") {
-      let latitude = userData.location.coords.latitude;
-      let longitude = userData.location.coords.longitude;
-
-      dataTodb({
-        tableName: "households_new",
-        syncData: [householdSubmitData],
-        setCurrentJob,
-        extraValArr: [latitude, longitude],
-      });
-    } else if (currentJob === "Household details saved") {
+    if (currentJob === "Farmer information saved") {
       displayToast("Farmer pending registration");
       setLoading(false);
       setFormSubmitted(true);
@@ -379,12 +314,12 @@ export const FarmerRegistrationScreen = ({ route }) => {
       const fetchData = async () => {
         const stationId = await SecureStore.getItemAsync("rtc-station-id");
         const supplierID = await SecureStore.getItemAsync("rtc-supplier-id");
-        const currentUser = await SecureStore.getItemAsync("rtc-user-name");
+        const stationName = await SecureStore.getItemAsync("rtc-station-name");
 
         if (stationId) {
           setCurrentStationID(stationId);
           setSupplierID(supplierID);
-          setUserName(currentUser);
+          setCWName(stationName);
           setLoading(true);
 
           retrieveDBdata({
@@ -400,6 +335,10 @@ export const FarmerRegistrationScreen = ({ route }) => {
         const stationSector = await SecureStore.getItemAsync(
           "rtc-station-location-sector"
         );
+
+        if (stationSector) {
+          setSector(stationSector);
+        }
 
         const allSectors = sectors();
         const allCells = cells();
@@ -474,16 +413,6 @@ export const FarmerRegistrationScreen = ({ route }) => {
           setModalOpen={setvillagesModalOpen}
           heightRatio={isKeyboardActive ? 0.5 : 0.8}
           title={"Villages"}
-        />
-      )}
-
-      {positionModalOpen && (
-        <LocalizationModal
-          setChoice={setPositionChoice}
-          data={farmerPositions}
-          setModalOpen={setPositionModalOpen}
-          heightRatio={isKeyboardActive ? 0.5 : 0.8}
-          title={"Positions"}
         />
       )}
 
@@ -573,7 +502,6 @@ export const FarmerRegistrationScreen = ({ route }) => {
             phoneNumber: "",
             gender,
             nationalID: "",
-            position: "",
             maritalStatus: "",
             basicMathSkills: "",
             readingSkills: "",
@@ -652,7 +580,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
                           : activeGroup?.ID_GROUP
                       }
                       active={false}
-                      error={errors._kf_Group}
+                      error={errors.Group_ID}
                     />
                     <TouchableOpacity
                       onPress={() => setGroupsModalOpen(true)}
@@ -677,23 +605,12 @@ export const FarmerRegistrationScreen = ({ route }) => {
                   <View>
                     <BuyCoffeeInput
                       values={values}
-                      handleChange={handleChange("householdID")}
-                      handleBlur={handleBlur("householdID")}
-                      label={"Household ID(if any)"}
-                      value={values.householdID}
-                      active={false}
-                    />
-                  </View>
-
-                  <View>
-                    <BuyCoffeeInput
-                      values={values}
                       handleChange={handleChange("cell")}
                       handleBlur={handleBlur("cell")}
                       label={"Cell"}
                       value={cellChoice?.name}
                       active={false}
-                      error={errors.Area_Small}
+                      error={errors.cell}
                     />
                     <>
                       <TouchableOpacity
@@ -748,7 +665,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
                       label={"Village"}
                       value={villageChoice?.name}
                       active={false}
-                      error={errors.Area_Smallest}
+                      error={errors.village}
                     />
                     <>
                       <TouchableOpacity
@@ -800,7 +717,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
                     label={"Total plots of land with coffee"}
                     value={values.totalPlots}
                     active={true}
-                    error={errors.number_of_plots_with_coffee}
+                    error={errors.number_of_plots}
                   />
                   <BuyCoffeeInput
                     values={values}
@@ -819,24 +736,6 @@ export const FarmerRegistrationScreen = ({ route }) => {
                     value={values.totTrees}
                     active={true}
                     error={errors.Trees}
-                  />
-                  <BuyCoffeeInput
-                    values={values}
-                    handleChange={handleChange("stp1")}
-                    handleBlur={handleBlur("stp1")}
-                    label={"Seasonal Total produced for previous year"}
-                    value={values.stp1}
-                    active={true}
-                    error={errors.STP_Weight}
-                  />
-                  <BuyCoffeeInput
-                    values={values}
-                    handleChange={handleChange("stp2")}
-                    handleBlur={handleBlur("stp2")}
-                    label={"Seasonal Total produced for current year"}
-                    value={values.stp2}
-                    active={true}
-                    error={errors.STP_Weight}
                   />
                 </View>
 
@@ -877,7 +776,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
                     handleBlur={handleBlur("phoneNumber")}
                     label={"Phone number"}
                     value={values.phoneNumber}
-                    error={errors.Phone}
+                    error={errors.phone}
                   />
 
                   <View
@@ -953,58 +852,8 @@ export const FarmerRegistrationScreen = ({ route }) => {
                     handleBlur={handleBlur("nationalID")}
                     label={"National ID"}
                     value={values.nationalID}
-                    error={errors.National_ID_t}
+                    error={errors.National_ID}
                   />
-                  <View>
-                    <BuyCoffeeInput
-                      values={values}
-                      handleChange={handleChange("position")}
-                      handleBlur={handleBlur("position")}
-                      label={"Position"}
-                      value={positionChoice?.name || values.position}
-                      error={errors.Position}
-                      active={false}
-                    />
-                    <TouchableOpacity
-                      onPress={() => setPositionModalOpen(true)}
-                      style={{
-                        position: "absolute",
-                        left: screenWidth * 0.775,
-                        top: "47%",
-                        backgroundColor: "white",
-                        borderRadius: screenWidth * 0.009,
-                        padding: screenHeight * 0.007,
-                        elevation: 3,
-                      }}
-                    >
-                      <FontAwesome6
-                        name="expand"
-                        size={screenWidth * 0.05}
-                        color="black"
-                      />
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      onPress={() => {
-                        setFieldValue("position", "");
-                        setPositionChoice(null);
-                      }}
-                      style={{
-                        position: "absolute",
-                        left: screenWidth * 0.68,
-                        top: "47%",
-                        backgroundColor: "white",
-                        borderRadius: screenWidth * 0.009,
-                        padding: screenHeight * 0.007,
-                        elevation: 3,
-                      }}
-                    >
-                      <MaterialIcons
-                        name="clear"
-                        size={screenWidth * 0.05}
-                        color="black"
-                      />
-                    </TouchableOpacity>
-                  </View>
 
                   <View>
                     <BuyCoffeeInput
@@ -1115,7 +964,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
                       handleBlur={handleBlur("readingSkills")}
                       label={"Reading Skills"}
                       value={readingChoice?.name || values.readingSkills}
-                      error={errors.Reading_Skills}
+                      error={errors.Skills}
                       active={false}
                     />
                     <TouchableOpacity

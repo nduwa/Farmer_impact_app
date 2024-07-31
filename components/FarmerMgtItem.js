@@ -10,7 +10,7 @@ import {
 import { Feather } from "@expo/vector-icons";
 import { FontAwesome6 } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { Foundation } from "@expo/vector-icons";
+import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import { AntDesign } from "@expo/vector-icons";
 import { colors } from "../data/colors";
 
@@ -55,9 +55,7 @@ export const FarmerMgtItem = ({
       }}
       onPress={handleNavigation}
     >
-      {label === "New Farmer" && (
-        <Feather name="save" size={24} color="black" />
-      )}
+      {label === "Register" && <Feather name="save" size={24} color="black" />}
 
       {label === "Remove Farmers" && (
         <MaterialCommunityIcons
@@ -69,8 +67,8 @@ export const FarmerMgtItem = ({
       {label === "Groups" && (
         <FontAwesome6 name="people-group" size={18} color="black" />
       )}
-      {label === "Update Trees" && (
-        <Foundation name="trees" size={24} color="black" />
+      {label === "Update Farmer" && (
+        <FontAwesome5 name="user-edit" size={20} color="black" />
       )}
       {label === "Weekly Reports" && (
         <AntDesign name="barchart" size={24} color="black" />

@@ -20,9 +20,9 @@ import {
   farmerSubmission,
   registrationAction,
 } from "../../../redux/farmer/RegistrationSlice";
-import { dataTodb } from "../../../helpers/dataTodb";
 import LottieView from "lottie-react-native";
 import { SyncModal } from "../../../components/SyncModal";
+import { updateDBdata } from "../../../helpers/updateDBdata";
 
 export const PendingRegistrationsScreen = () => {
   const screenHeight = Dimensions.get("window").height;
@@ -33,7 +33,6 @@ export const PendingRegistrationsScreen = () => {
 
   const [registrations, setRegistrations] = useState([]);
   const [Submitted, setSubmitted] = useState(false);
-  const [newHHs, setNewHHs] = useState([]);
   const [currentJob, setCurrentJob] = useState();
 
   const [loading, setLoading] = useState(false);
@@ -66,10 +65,11 @@ export const PendingRegistrationsScreen = () => {
   }
 
   useEffect(() => {
-    if (currentJob === "Farmer details saved") {
-      dataTodb({ tableName: "households", setCurrentJob, syncData: newHHs });
-    } else if (currentJob === "Household details saved") {
+    if (currentJob === "Farmers uploaded") {
       displayToast("Done");
+      setLoading(false);
+    } else if (currentJob === "not uploaded") {
+      displayToast("Error farmers not uploaded");
       setLoading(false);
     }
   }, [currentJob]);
@@ -79,29 +79,28 @@ export const PendingRegistrationsScreen = () => {
       setSubmitted(true);
 
       if (submissionState.response.status === "success") {
-        let { uploadedFarmers, uploadedHH } = submissionState.response;
-        let newFarmers = [];
-        let newHouseholds = [];
+        let registeredFarmers = registrations;
+        let query = "";
+        let strIDs = "";
+        let i = 0;
 
-        for (let farmer of uploadedFarmers) {
-          farmer = {
-            ...farmer,
-            ...{ deleted: "0", deleted_by: "", deleted_at: "", sync: 1 },
-          };
-          newFarmers.push(farmer);
+        if (registeredFarmers.length > 1) {
+          for (const farmer of registeredFarmers) {
+            strIDs += `'${farmer.id}'`;
+            if (i < registeredFarmers.length - 1) strIDs += ",";
+            i++;
+          }
+          query = `UPDATE rtc_field_farmers SET uploaded = 1 WHERE id IN(${strIDs})`;
+        } else {
+          query = `UPDATE rtc_field_farmers SET uploaded = 1 WHERE id = '${registeredFarmers[0].id}'`;
         }
 
-        for (let hh of uploadedHH) {
-          hh = { ...hh, ...{ sync: 1 } };
-          newHouseholds.push(hh);
-        }
-
-        setNewHHs(newHouseholds);
-
-        dataTodb({
-          tableName: "farmers",
+        updateDBdata({
+          id: 0,
+          query,
           setCurrentJob,
-          syncData: newFarmers,
+          msgYes: "Farmers uploaded",
+          msgNo: "not uploaded",
         });
       }
     }
@@ -122,14 +121,14 @@ export const PendingRegistrationsScreen = () => {
   useFocusEffect(
     React.useCallback(() => {
       const fetchData = async () => {
-        const currentUser = await SecureStore.getItemAsync("rtc-user-name");
+        const currentUser = await SecureStore.getItemAsync("rtc-name-full");
 
         if (currentUser) {
           setLoading(true);
           retrieveDBdata({
-            tableName: "rtc_farmers",
+            tableName: "rtc_field_farmers",
             setData: setRegistrations,
-            queryArg: `SELECT household.*,farmer.* FROM rtc_farmers AS farmer INNER JOIN rtc_households AS household ON farmer._kf_Household = household.__kp_Household AND farmer.sync = 0 AND farmer.deleted = 0 AND farmer.created_by = '${currentUser}'`,
+            queryArg: `SELECT * FROM rtc_field_farmers WHERE uploaded = 0 AND full_name = '${currentUser}'`,
           });
         }
       };
@@ -196,10 +195,10 @@ export const PendingRegistrationsScreen = () => {
           renderItem={({ item }) => (
             <FarmerPendingCard
               data={item}
-              registrationDate={formatDate(item.registered_at)}
+              registrationDate={formatDate(item.created_at)}
             />
           )}
-          keyExtractor={(item) => item.__kp_Farmer}
+          keyExtractor={(item) => item.id}
         />
       )}
 

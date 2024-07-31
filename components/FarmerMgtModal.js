@@ -94,14 +94,8 @@ export const FarmerMgtModal = ({ setIsFarmerModalOpen }) => {
             <FarmerMgtItem
               setIsFarmerModalOpen={setIsFarmerModalOpen}
               destination={"FarmerRegistration"}
-              label={"New Farmer"}
+              label={"Register"}
               isActive={isAccessable("Register")}
-            />
-            <FarmerMgtItem
-              setIsFarmerModalOpen={setIsFarmerModalOpen}
-              destination={"SelectFarmerDeleteScreen"}
-              label={"Remove Farmers"}
-              isActive={isAccessable("Update Farmers")}
             />
             <FarmerMgtItem
               setIsFarmerModalOpen={setIsFarmerModalOpen}
@@ -112,8 +106,14 @@ export const FarmerMgtModal = ({ setIsFarmerModalOpen }) => {
             <FarmerMgtItem
               setIsFarmerModalOpen={setIsFarmerModalOpen}
               destination={"FarmerUpdateHome"}
-              label={"Update Trees"}
+              label={"Update Farmer"}
               isActive={false}
+            />
+            <FarmerMgtItem
+              setIsFarmerModalOpen={setIsFarmerModalOpen}
+              destination={"SelectFarmerDeleteScreen"}
+              label={"Remove Farmers"}
+              isActive={isAccessable("Update Farmers")}
             />
             <FarmerMgtItem
               setIsFarmerModalOpen={setIsFarmerModalOpen}
