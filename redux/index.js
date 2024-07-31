@@ -11,6 +11,7 @@ import DeletionSlice from "./farmer/DeletionSlice";
 import accessControlSlice from "./accessControl/accessControlSlice";
 import GroupStatusChangeSlice from "./farmer/GroupStatusChangeSlice";
 import GroupAssignSlice from "./farmer/FarmerAssignsSlice";
+import ReportSlice from "./farmer/ReportSlice";
 
 const store = configureStore({
   reducer: {
@@ -26,6 +27,7 @@ const store = configureStore({
     accessControl: accessControlSlice.reducer,
     groupStatus: GroupStatusChangeSlice.reducer,
     groupAssign: GroupAssignSlice.reducer,
+    report: ReportSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

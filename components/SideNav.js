@@ -8,6 +8,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Entypo } from "@expo/vector-icons";
+import Octicons from '@expo/vector-icons/Octicons';
 import { colors } from "../data/colors";
 import { useNavigation } from "@react-navigation/native";
 import { useDispatch } from "react-redux";
@@ -52,8 +53,8 @@ export const SideNav = ({
       await SecureStore.deleteItemAsync("rtc-station-location-province");
       await SecureStore.deleteItemAsync("rtc-station-location-sector");
       await SecureStore.deleteItemAsync("rtc-station-location-cell");
-      await SecureStore.deleteItemAsync("rtc-station-location-village");      
-      
+      await SecureStore.deleteItemAsync("rtc-station-location-village");
+
       dispatch(UserActions.clearUserData());
       dispatch(UserActions.setCheckedForNewUser(false));
 
@@ -139,9 +140,9 @@ export const SideNav = ({
           color={isActive ? colors.secondary : colors.black_a}
         />
       )}
-      {name === "Pending Children" && (
-        <Feather
-          name="users"
+      {name === "Pending Weekly Reports" && (
+        <Octicons
+          name="report"
           size={24}
           color={isActive ? colors.secondary : colors.black_a}
         />

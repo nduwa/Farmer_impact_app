@@ -14,22 +14,16 @@ import { colors } from "../../../data/colors";
 import { AntDesign } from "@expo/vector-icons";
 import { Formik } from "formik";
 import { BuyCoffeeInput } from "../../../components/BuyCoffeeInput";
-import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import CustomButton from "../../../components/CustomButton";
 import { WeeklyReportSchema } from "../../../validation/WeeklyReportSchema";
-import { getCurrentDate } from "../../../helpers/getCurrentDate";
-import { dataTodb } from "../../../helpers/dataTodb";
 import LottieView from "lottie-react-native";
-import { useSelector } from "react-redux";
+import { updateDBdataAsync } from "../../../helpers/updateDBdataAsync";
 
-export const WeeklyReportScreen = () => {
+export const EditReportScreen = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
-  const userData = useSelector((state) => state.user.userData);
-
-  const [currentStationID, setCurrentStationID] = useState();
-  const [supplierID, setSupplierID] = useState();
-  const [CWname, setCWName] = useState();
+  const { data } = route.params;
 
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
   const [currentJob, setCurrentJob] = useState(null);
@@ -45,7 +39,7 @@ export const WeeklyReportScreen = () => {
   const navigation = useNavigation();
 
   const handleBackButton = () => {
-    navigation.navigate("Homepage", { data: null });
+    navigation.navigate("PendingReportsScreen", { data: null });
   };
 
   const displayToast = (msg) => {
@@ -54,17 +48,12 @@ export const WeeklyReportScreen = () => {
 
   const submitReport = (formData) => {
     try {
-      let nameFull = userData.user.Name_Full;
-      let userkf = userData.user.__kp_User;
-      let userCode = userData.staff.userID;
-      let staffKf = userData.staff.__kp_Staff;
-
       let submitData = {
-        createdAt: getCurrentDate(),
-        _kf_Staff: staffKf,
-        _kf_User: userkf,
-        full_name: nameFull,
-        user_code: userCode,
+        createdAt: data.createdAt,
+        _kf_Staff: data._kf_Staff,
+        _kf_User: data._kf_User,
+        full_name: data.full_name,
+        user_code: data.user_code,
         trained_number: formData.nmbrTrained,
         men_attended: formData.attendedM,
         women_attended: formData.attendedF,
@@ -76,16 +65,20 @@ export const WeeklyReportScreen = () => {
 
       if (!validateInputs(submitData, WeeklyReportSchema)) return;
 
-      let kfsupplier = supplierID;
-      let kfstation = currentStationID;
-      let stationName = CWname;
+      let updateQuery = `UPDATE rtc_field_weekly_report SET trained_number = '${submitData.trained_number}', men_attended='${submitData.men_attended}', women_attended='${submitData.women_attended}', planned_groups='${submitData.planned_groups}',farm_inspected='${submitData.farm_inspected}', planned_inspected = '${submitData.planned_inspected}', comments = '${submitData.comments}' WHERE id = '${data.id}' `;
 
-      dataTodb({
-        tableName: "weeklyReports",
-        syncData: [submitData],
-        setCurrentJob,
-        extraValArr: [kfstation, kfsupplier, stationName],
-      });
+      updateDBdataAsync({ id: data.id, query: updateQuery })
+        .then((result) => {
+          if (result.success) {
+            setCurrentJob("report details updated");
+          } else {
+            setCurrentJob("Failed to update report details");
+          }
+        })
+        .catch((error) => {
+          setCurrentJob("Failed to update farmer details");
+          console.log("Failed to update farmer details: ", error);
+        });
     } catch (error) {
       console.log(error);
     }
@@ -143,10 +136,14 @@ export const WeeklyReportScreen = () => {
   }, [errors]);
 
   useEffect(() => {
-    if (currentJob === "Report saved") {
-      displayToast("Report saved, pending upload");
+    if (currentJob === "report details updated") {
+      displayToast("Report details updated");
       setLoading(false);
       setFormSubmitted(true);
+      navigation.navigate("PendingReportsScreen", { data: null });
+    } else if (currentJob === "Failed to update report details") {
+      displayToast("Failed to update report details");
+      setLoading(false);
     }
   }, [currentJob]);
 
@@ -170,29 +167,6 @@ export const WeeklyReportScreen = () => {
       keyboardDidHideListener.remove();
     };
   }, [isKeyboardActive]);
-
-  useFocusEffect(
-    React.useCallback(() => {
-      const fetchData = async () => {
-        const stationId = await SecureStore.getItemAsync("rtc-station-id");
-        const supplierID = await SecureStore.getItemAsync("rtc-supplier-id");
-        const stationName = await SecureStore.getItemAsync("rtc-station-name");
-
-        if (stationId) {
-          setCurrentStationID(stationId);
-          setSupplierID(supplierID);
-          setCWName(stationName);
-        }
-      };
-
-      fetchData();
-      return () => {
-        setLoading(false);
-        setFormSubmitted(false);
-        setErrors({});
-      };
-    }, [])
-  );
 
   return (
     <View
@@ -232,7 +206,7 @@ export const WeeklyReportScreen = () => {
             fontSize: 19,
           }}
         >
-          Field Weekly Report
+          Edit Report
         </Text>
         <View
           style={{ width: screenWidth * 0.07, backgroundColor: "transparent" }}
@@ -241,13 +215,13 @@ export const WeeklyReportScreen = () => {
       <View style={{ backgroundColor: colors.bg_variant }}>
         <Formik
           initialValues={{
-            nmbrTrained: "0",
-            attendedM: "0",
-            attendedF: "0",
-            groupsToTrainNextWeek: "0",
-            nmbrFarmsInspected: "0",
-            farmsToInspect: "0",
-            otherActivities: "",
+            nmbrTrained: data.trained_number,
+            attendedM: data.men_attended,
+            attendedF: data.women_attended,
+            groupsToTrainNextWeek: data.planned_groups,
+            nmbrFarmsInspected: data.farm_inspected,
+            farmsToInspect: data.planned_inspected,
+            otherActivities: data.comments,
           }}
           onSubmit={async (values) => {
             submitReport(values);
@@ -405,10 +379,10 @@ export const WeeklyReportScreen = () => {
                 )}
 
                 <CustomButton
-                  bg={colors.secondary}
+                  bg={colors.blue_font}
                   color={"white"}
                   width="95%"
-                  text="Submit"
+                  text="Edit"
                   bdcolor="transparent"
                   mt={screenHeight * 0.017}
                   mb={

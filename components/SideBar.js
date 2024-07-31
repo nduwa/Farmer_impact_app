@@ -188,7 +188,8 @@ export const SideBar = ({ setsideBarScroll, setIsSidebarOpen }) => {
               )}
               {isAccessable("Register") && (
                 <SideNav
-                  name={"Pending Children"}
+                  name={"Pending Weekly Reports"}
+                  destination="PendingReportsScreen"
                   isActive={isAccessable("Register")}
                 />
               )}

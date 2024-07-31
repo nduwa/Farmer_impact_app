@@ -238,6 +238,19 @@ const generateBulkValueString = (
     */
 
     return bulkValues;
+  } else if (tableName === "weeklyReports") {
+    let bulkValues = "";
+    for (let i = 0; i < data.length; i++) {
+      bulkValues += `('${data[i]._kf_Staff}','${data[i]._kf_User}','${extraValArr[0]}','${extraValArr[1]}','${extraValArr[2]}','${data[i].full_name}','${data[i].user_code}','${data[i].trained_number}','${data[i].men_attended}','${data[i].women_attended}','${data[i].planned_groups}','${data[i].farm_inspected}','${data[i].planned_inspected}','${data[i].comments}','${data[i].createdAt}','0')`;
+      if (i < data.length - 1) bulkValues += ",";
+    }
+
+    /* extraValArr[0] -> _kf_Station
+       extraValArr[1] -> _kf_Supplier
+       extraValArr[2] -> CW_Name
+    */
+
+    return bulkValues;
   }
 };
 
@@ -1110,6 +1123,48 @@ export const dataTodb = ({
             (_, error) => {
               setCurrentJob("Error saving Farmer information");
               console.error("Error saving Farmer information: ", error);
+              return;
+            }
+          );
+        });
+      }
+    } else if (tableName === "weeklyReports") {
+      for (let i = 0; i < totalPages; i++) {
+        let page = i + 1;
+        let start = (page - 1) * limit; // the starting index
+        let end = start + limit; // the last index
+        let data = syncData.slice(
+          start,
+          end
+        ); /* on the last page when the rows aren't 10, it won't throw array index errors because of how slice() handles last index parameter */
+        let activeRows = data.length;
+
+        let bulkValues = generateBulkValueString(
+          tableName,
+          totalRows,
+          data,
+          null,
+          extraValArr
+        );
+
+        db.transaction((tx) => {
+          tx.executeSql(
+            `${SyncQueries.RTC_WEEKLY_REPORTS} ${bulkValues}`,
+            [],
+            () => {
+              insertedRows += activeRows;
+              const progress = (insertedRows / totalRows) * 100;
+
+              let jobString =
+                progress < 100 ? `Saving report...` : "Report saved";
+
+              if (setCurrentJob) setCurrentJob(jobString);
+
+              console.log("Report saved");
+            },
+            (_, error) => {
+              setCurrentJob("Error saving Report saved");
+              console.error("Error saving Report saved: ", error);
               return;
             }
           );
