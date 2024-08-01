@@ -433,11 +433,12 @@ export const SyncScreen = ({ navigation, route }) => {
         <View
           style={{
             position: "absolute",
-            marginTop: screenHeight * 0.12,
+            marginTop: screenHeight * 0.1,
             width: "100%",
             backgroundColor: "transparent",
             alignItems: "center",
             justifyContent: "center",
+            zIndex: 11,
           }}
         >
           <View

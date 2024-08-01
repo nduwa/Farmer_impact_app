@@ -119,7 +119,7 @@ export const FarmerMgtModal = ({ setIsFarmerModalOpen }) => {
               setIsFarmerModalOpen={setIsFarmerModalOpen}
               destination={"WeeklyReportScreen"}
               label={"Weekly Reports"}
-              isActive={false}
+              isActive={true}
             />
           </View>
         </Animated.View>

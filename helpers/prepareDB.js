@@ -516,6 +516,33 @@ export const prepareTables = async () => {
       (_, error) =>
         console.error(`Error creating rtc_field_farmers table:`, error)
     );
+
+    // field reports
+    tx.executeSql(
+      `CREATE TABLE IF NOT EXISTS rtc_field_weekly_report (
+       id integer primary key AUTOINCREMENT,
+       _kf_Staff varchar(222) NOT NULL,
+       _kf_User varchar(222) NOT NULL,
+       _kf_Station varchar(222) NOT NULL,
+       _kf_Supplier varchar(255) NOT NULL,
+       CW_Name varchar(255) NOT NULL,
+       full_name varchar(255) NOT NULL,
+       user_code varchar(255) NOT NULL,
+       trained_number varchar(255) NOT NULL,
+       men_attended varchar(255) NOT NULL,
+       women_attended varchar(255) NOT NULL,
+       planned_groups varchar(255) NOT NULL,
+       farm_inspected varchar(255) NOT NULL,
+       planned_inspected varchar(255) NOT NULL,
+       comments varchar(2505) NOT NULL,
+       createdAt datetime NOT NULL,
+       uploaded integer NOT NULL
+      )`,
+      [],
+      () => console.log(`Table rtc_field_weekly_report created successfully`),
+      (_, error) =>
+        console.error(`Error creating rtc_field_weekly_report table:`, error)
+    );
   });
 };
 
