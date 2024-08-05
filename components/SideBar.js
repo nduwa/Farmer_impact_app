@@ -152,9 +152,17 @@ export const SideBar = ({ setsideBarScroll, setIsSidebarOpen }) => {
               }}
             >
               <SideNav name={"Sync Data"} destination="Sync" />
+
               {isAccessable("Register") && (
                 <SideNav
                   name={"Pending Farms"}
+                  isActive={isAccessable("Register")}
+                />
+              )}
+              {isAccessable("Register") && (
+                <SideNav
+                  name={"Pending Trees"}
+                  destination="PendingTreesScreen"
                   isActive={isAccessable("Register")}
                 />
               )}

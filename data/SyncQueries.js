@@ -35,4 +35,6 @@ export const SyncQueries = {
     "INSERT OR REPLACE INTO rtc_field_farmers (_kf_Supplier, _kf_Staff, _kf_User, user_code, _kf_Station, CW_Name, farmer_name, Gender, Year_Birth, phone, National_ID, Marital_Status, Group_ID, village, cell, sector, Trees, Trees_Producing, number_of_plots, Skills, Math_Skills, education_level, created_at, full_name, farm_GPS, uploaded) VALUES",
   RTC_WEEKLY_REPORTS:
     "INSERT OR REPLACE INTO rtc_field_weekly_report (_kf_Staff, _kf_User, _kf_Station, _kf_Supplier, CW_Name, full_name, user_code, trained_number, men_attended, women_attended, planned_groups, farm_inspected, planned_inspected, comments, createdAt,uploaded) VALUES",
+  RTC_HOUSEHOLD_TREES:
+    "INSERT INTO rtc_household_trees (full_name, _kf_Staff, _kf_User, _kf_Station, _kf_Supplier, CW_Name, Group_ID, farmer_ID, farmer_name, national_ID, received_seedling, survived_seedling, planted_year, old_trees, old_trees_planted_year, coffee_plot, nitrogen, natural_shade, shade_trees, created_at, uploaded) VALUES",
 };

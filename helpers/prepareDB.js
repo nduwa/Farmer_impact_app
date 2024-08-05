@@ -543,6 +543,38 @@ export const prepareTables = async () => {
       (_, error) =>
         console.error(`Error creating rtc_field_weekly_report table:`, error)
     );
+
+    // household trees
+    tx.executeSql(
+      `CREATE TABLE IF NOT EXISTS rtc_household_trees (
+        id integer primary key AUTOINCREMENT,
+        full_name varchar(222) NOT NULL,
+        _kf_Staff varchar(222) NOT NULL,
+        _kf_User varchar(222) NOT NULL,
+        _kf_Station varchar(255) NOT NULL,
+        _kf_Supplier varchar(255) NOT NULL,
+        CW_Name varchar(255) NOT NULL,
+        Group_ID varchar(255) NOT NULL,
+        farmer_ID varchar(255) NOT NULL,
+        farmer_name varchar(255) NOT NULL,
+        national_ID varchar(255) NOT NULL,
+        received_seedling varchar(255) NOT NULL,
+        survived_seedling varchar(255) NOT NULL,
+        planted_year varchar(255) NOT NULL,
+        old_trees varchar(255) NOT NULL,
+        old_trees_planted_year varchar(255) NOT NULL,
+        coffee_plot varchar(255) NOT NULL,
+        nitrogen varchar(255) NOT NULL,
+        natural_shade varchar(255) NOT NULL,
+        shade_trees varchar(255) NOT NULL,
+        created_at datetime NOT NULL,
+        uploaded integer NOT NULL
+      )`,
+      [],
+      () => console.log(`Table rtc_household_trees created successfully`),
+      (_, error) =>
+        console.error(`Error creating rtc_household_trees table:`, error)
+    );
   });
 };
 

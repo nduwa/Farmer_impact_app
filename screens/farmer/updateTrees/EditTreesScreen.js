@@ -1,6 +1,5 @@
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useState } from "react";
-import * as SecureStore from "expo-secure-store";
 import {
   Dimensions,
   Keyboard,
@@ -16,21 +15,16 @@ import { Formik } from "formik";
 import { BuyCoffeeInput } from "../../../components/BuyCoffeeInput";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import CustomButton from "../../../components/CustomButton";
-import { WeeklyReportSchema } from "../../../validation/WeeklyReportSchema";
-import { getCurrentDate } from "../../../helpers/getCurrentDate";
-import { dataTodb } from "../../../helpers/dataTodb";
+import { FarmerTressSchema } from "../../../validation/FarmerTreesSchema";
 import LottieView from "lottie-react-native";
-import { useSelector } from "react-redux";
+import { updateDBdataAsync } from "../../../helpers/updateDBdataAsync";
 
-export const WeeklyReportScreen = () => {
+export const EditTreesScreen = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
-  const userData = useSelector((state) => state.user.userData);
+  const { data } = route.params;
 
-  const [currentStationID, setCurrentStationID] = useState();
-  const [supplierID, setSupplierID] = useState();
-  const [CWname, setCWName] = useState();
-
+  const [errors, setErrors] = useState({}); // validation errors
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
   const [currentJob, setCurrentJob] = useState(null);
   const [validationError, setValidationError] = useState({
@@ -38,54 +32,57 @@ export const WeeklyReportScreen = () => {
     type: null,
     inputBox: null,
   });
-  const [errors, setErrors] = useState({}); // validation errors
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const navigation = useNavigation();
 
   const handleBackButton = () => {
-    navigation.navigate("Homepage", { data: null });
+    navigation.navigate("PendingTreesScreen", { data: null });
   };
 
   const displayToast = (msg) => {
     ToastAndroid.show(msg, ToastAndroid.SHORT);
   };
 
-  const submitReport = (formData) => {
+  const submitTreesDetails = (formData) => {
     try {
-      let nameFull = userData.user.Name_Full;
-      let userkf = userData.user.__kp_User;
-      let userCode = userData.staff.userID;
-      let staffKf = userData.staff.__kp_Staff;
-
       let submitData = {
-        createdAt: getCurrentDate(),
-        _kf_Staff: staffKf,
-        _kf_User: userkf,
-        full_name: nameFull,
-        user_code: userCode,
-        trained_number: formData.nmbrTrained,
-        men_attended: formData.attendedM,
-        women_attended: formData.attendedF,
-        planned_groups: formData.groupsToTrainNextWeek,
-        farm_inspected: formData.nmbrFarmsInspected,
-        planned_inspected: formData.farmsToInspect,
-        comments: formData.otherActivities,
+        _kf_Staff: data.farmerData._kf_Staff,
+        _kf_User: data.farmerData._kf_User,
+        Group_ID: data.farmerData.Group_ID,
+        farmer_ID: data.farmerData.farmer_ID,
+        farmer_name: data.farmerData.farmer_name,
+        national_ID: data.farmerData.national_ID,
+        full_name: data.farmerData.full_name,
+        created_at: data.farmerData.created_at,
+        received_seedling: formData.nmbrReceivedSeedlings,
+        survived_seedling: formData.nmbrSurvivedSeedlings,
+        planted_year: formData.yearPlantedReceivedSeedlings,
+        old_trees: formData.nmbrOldTrees,
+        old_trees_planted_year: formData.yearPlantedOldTrees,
+        coffee_plot: formData.nmbrCoffeeFarms,
+        nitrogen: formData.totalNitrogenFixingShadeTrees,
+        natural_shade: formData.totalNaturalShadeTrees,
+        shade_trees: formData.totalNbrShadeTrees,
       };
 
-      if (!validateInputs(submitData, WeeklyReportSchema)) return;
+      if (!validateInputs(submitData, FarmerTressSchema)) return;
 
-      let kfsupplier = supplierID;
-      let kfstation = currentStationID;
-      let stationName = CWname;
+      let updateQuery = `UPDATE rtc_household_trees SET received_seedling = '${submitData.received_seedling}', survived_seedling='${submitData.survived_seedling}', planted_year='${submitData.planted_year}', old_trees='${submitData.old_trees}',old_trees_planted_year='${submitData.old_trees_planted_year}', coffee_plot = '${submitData.coffee_plot}', nitrogen = '${submitData.nitrogen}', natural_shade = '${submitData.natural_shade}',shade_trees = '${submitData.shade_trees}' WHERE id = '${data.farmerData.id}' `;
 
-      dataTodb({
-        tableName: "weeklyReports",
-        syncData: [submitData],
-        setCurrentJob,
-        extraValArr: [kfstation, kfsupplier, stationName],
-      });
+      updateDBdataAsync({ id: data.farmerData.id, query: updateQuery })
+        .then((result) => {
+          if (result.success) {
+            setCurrentJob("trees details updated");
+          } else {
+            setCurrentJob("Failed to update trees details");
+          }
+        })
+        .catch((error) => {
+          setCurrentJob("Failed to update trees details");
+          console.log("Failed to update trees details: ", error);
+        });
     } catch (error) {
       console.log(error);
     }
@@ -117,14 +114,16 @@ export const WeeklyReportScreen = () => {
     let tmp = input.split("_");
     output = tmp.join(" ");
 
-    if (input === "trained_number") output = "Number Trained";
-    if (input === "men_attended") output = "Men Attended";
-    if (input === "women_attended") output = "Women Attended";
-    if (input === "planned_groups")
-      output = "Groups planned to train next week";
-    if (input === "farm_inspected") output = "Number of farms inspected";
-    if (input === "planned_inspected") output = "Farms planned to be inspected";
-    if (input === "comments") output = "Other activities and comments";
+    if (input === "received_seedling") output = "received seedlings";
+    if (input === "survived_seedling") output = "Survived seedlings";
+    if (input === "planted_year")
+      output = "Year planted of the received seedlings";
+    if (input === "old_trees") output = "Old trees";
+    if (input === "old_trees_planted_year") output = "Year of the old trees";
+    if (input === "coffee_plot") output = "Number of coffee plots";
+    if (input === "nitrogen") output = "Total of nitrogen  fixing shade trees";
+    if (input === "natural_shade") output = "Total of natural shade";
+    if (input === "shade_trees") output = "Total number of shade trees";
 
     return output;
   };
@@ -143,10 +142,13 @@ export const WeeklyReportScreen = () => {
   }, [errors]);
 
   useEffect(() => {
-    if (currentJob === "Report saved") {
-      displayToast("Report saved, pending upload");
+    if (currentJob === "trees details updated") {
+      displayToast("Tree Details updated, pending upload");
       setLoading(false);
       setFormSubmitted(true);
+    } else if (currentJob === "Failed to update trees details") {
+      displayToast("Failed to update trees details");
+      setLoading(false);
     }
   }, [currentJob]);
 
@@ -173,19 +175,6 @@ export const WeeklyReportScreen = () => {
 
   useFocusEffect(
     React.useCallback(() => {
-      const fetchData = async () => {
-        const stationId = await SecureStore.getItemAsync("rtc-station-id");
-        const supplierID = await SecureStore.getItemAsync("rtc-supplier-id");
-        const stationName = await SecureStore.getItemAsync("rtc-station-name");
-
-        if (stationId) {
-          setCurrentStationID(stationId);
-          setSupplierID(supplierID);
-          setCWName(stationName);
-        }
-      };
-
-      fetchData();
       return () => {
         setLoading(false);
         setFormSubmitted(false);
@@ -202,7 +191,6 @@ export const WeeklyReportScreen = () => {
       }}
     >
       <StatusBar style="dark" />
-
       <View
         style={{
           flexDirection: "row",
@@ -232,7 +220,7 @@ export const WeeklyReportScreen = () => {
             fontSize: 19,
           }}
         >
-          Field Weekly Report
+          Update Trees
         </Text>
         <View
           style={{ width: screenWidth * 0.07, backgroundColor: "transparent" }}
@@ -241,16 +229,22 @@ export const WeeklyReportScreen = () => {
       <View style={{ backgroundColor: colors.bg_variant }}>
         <Formik
           initialValues={{
-            nmbrTrained: "0",
-            attendedM: "0",
-            attendedF: "0",
-            groupsToTrainNextWeek: "0",
-            nmbrFarmsInspected: "0",
-            farmsToInspect: "0",
-            otherActivities: "",
+            farmerID: data.farmerData.farmer_ID,
+            farmerName: data.farmerData.farmer_name,
+            nationalID: data.farmerData.national_ID,
+            groupID: data.farmerData.Group_ID,
+            nmbrReceivedSeedlings: data.farmerData.received_seedling,
+            nmbrSurvivedSeedlings: data.farmerData.survived_seedling,
+            yearPlantedReceivedSeedlings: data.farmerData.planted_year,
+            nmbrOldTrees: data.farmerData.old_trees,
+            yearPlantedOldTrees: data.farmerData.old_trees_planted_year,
+            nmbrCoffeeFarms: data.farmerData.coffee_plot,
+            totalNitrogenFixingShadeTrees: data.farmerData.nitrogen,
+            totalNaturalShadeTrees: data.farmerData.natural_shade,
+            totalNbrShadeTrees: data.farmerData.shade_trees,
           }}
           onSubmit={async (values) => {
-            submitReport(values);
+            submitTreesDetails(values);
           }}
         >
           {({
@@ -284,7 +278,7 @@ export const WeeklyReportScreen = () => {
                     backgroundColor: colors.white,
                     elevation: 2,
                     borderRadius: 15,
-                    marginTop: screenHeight * 0.01,
+                    marginTop: screenHeight * 0.025,
                     paddingHorizontal: screenWidth * 0.04,
                     paddingVertical: screenHeight * 0.03,
                     gap: screenHeight * 0.01,
@@ -302,67 +296,118 @@ export const WeeklyReportScreen = () => {
                   </Text>
                   <BuyCoffeeInput
                     values={values}
-                    handleChange={handleChange("nmbrTrained")}
-                    handleBlur={handleBlur("nmbrTrained")}
-                    label={"Number Trained"}
-                    value={values.nmbrTrained}
-                    active={true}
-                    error={errors.trained_number}
+                    handleChange={handleChange("farmerID")}
+                    handleBlur={handleBlur("farmerID")}
+                    label={"Farmer ID"}
+                    value={values.farmerID}
+                    active={false}
+                    error={errors.farmer_ID === "farmer_ID"}
+                  />
+                  <BuyCoffeeInput
+                    values={values}
+                    handleChange={handleChange("farmerName")}
+                    handleBlur={handleBlur("farmerName")}
+                    label={"Farmer name"}
+                    value={values.farmerName}
+                    active={false}
+                    error={errors.farmer_name}
+                  />
+                  <BuyCoffeeInput
+                    values={values}
+                    handleChange={handleChange("nationalID")}
+                    handleBlur={handleBlur("nationalID")}
+                    label={"National ID"}
+                    value={values.nationalID}
+                    active={false}
+                    error={errors.national_ID}
+                  />
+                  <BuyCoffeeInput
+                    values={values}
+                    handleChange={handleChange("groupID")}
+                    handleBlur={handleBlur("groupID")}
+                    label={"Group ID"}
+                    value={values.groupID}
+                    active={false}
+                    error={errors.Group_ID}
+                  />
+                  <BuyCoffeeInput
+                    values={values}
+                    handleChange={handleChange("nmbrReceivedSeedlings")}
+                    handleBlur={handleBlur("nmbrReceivedSeedlings")}
+                    label={"Number of received seedlings"}
+                    value={values.nmbrReceivedSeedlings}
+                    error={errors.received_seedling}
                   />
 
                   <BuyCoffeeInput
                     values={values}
-                    handleChange={handleChange("attendedM")}
-                    handleBlur={handleBlur("attendedM")}
-                    label={"Men Attended"}
-                    value={values.attendedM}
-                    error={errors.men_attended}
+                    handleChange={handleChange("nmbrSurvivedSeedlings")}
+                    handleBlur={handleBlur("nmbrSurvivedSeedlings")}
+                    label={"Number of survived seedlings"}
+                    value={values.nmbrSurvivedSeedlings}
+                    error={errors.survived_seedling}
                   />
 
                   <BuyCoffeeInput
                     values={values}
-                    handleChange={handleChange("attendedF")}
-                    handleBlur={handleBlur("attendedF")}
-                    label={"Women Attended"}
-                    value={values.attendedF}
-                    error={errors.women_attended}
+                    handleChange={handleChange("yearPlantedReceivedSeedlings")}
+                    handleBlur={handleBlur("yearPlantedReceivedSeedlings")}
+                    label={"Year planted of the received seedlings"}
+                    value={values.yearPlantedReceivedSeedlings}
+                    error={errors.planted_year}
                   />
 
                   <BuyCoffeeInput
                     values={values}
-                    handleChange={handleChange("groupsToTrainNextWeek")}
-                    handleBlur={handleBlur("groupsToTrainNextWeek")}
-                    label={"Groups planned to train next week"}
-                    value={values.groupsToTrainNextWeek}
-                    error={errors.planned_groups}
+                    handleChange={handleChange("nmbrOldTrees")}
+                    handleBlur={handleBlur("nmbrOldTrees")}
+                    label={"Number of old trees"}
+                    value={values.nmbrOldTrees}
+                    error={errors.old_trees}
+                  />
+                  <BuyCoffeeInput
+                    values={values}
+                    handleChange={handleChange("yearPlantedOldTrees")}
+                    handleBlur={handleBlur("yearPlantedOldTrees")}
+                    label={"Year of planted for the old trees"}
+                    value={values.yearPlantedOldTrees}
+                    error={errors.old_trees_planted_year}
                   />
 
                   <BuyCoffeeInput
                     values={values}
-                    handleChange={handleChange("nmbrFarmsInspected")}
-                    handleBlur={handleBlur("nmbrFarmsInspected")}
-                    label={"Number of farms inspected"}
-                    value={values.nmbrFarmsInspected}
-                    error={errors.farm_inspected}
+                    handleChange={handleChange("nmbrCoffeeFarms")}
+                    handleBlur={handleBlur("nmbrCoffeeFarms")}
+                    label={"Number of coffee plots/Farms in general"}
+                    value={values.nmbrCoffeeFarms}
+                    error={errors.coffee_plot}
                   />
 
                   <BuyCoffeeInput
                     values={values}
-                    handleChange={handleChange("farmsToInspect")}
-                    handleBlur={handleBlur("farmsToInspect")}
-                    label={"Farms planned to be inspected"}
-                    value={values.farmsToInspect}
-                    error={errors.planned_inspected}
+                    handleChange={handleChange("totalNitrogenFixingShadeTrees")}
+                    handleBlur={handleBlur("totalNitrogenFixingShadeTrees")}
+                    label={"Total of nitrogen fixing shade trees"}
+                    value={values.totalNitrogenFixingShadeTrees}
+                    error={errors.nitrogen}
                   />
 
                   <BuyCoffeeInput
                     values={values}
-                    handleChange={handleChange("otherActivities")}
-                    handleBlur={handleBlur("otherActivities")}
-                    label={"Other activities and comment"}
-                    value={values.otherActivities}
-                    multiline={true}
-                    error={errors.comments}
+                    handleChange={handleChange("totalNaturalShadeTrees")}
+                    handleBlur={handleBlur("totalNaturalShadeTrees")}
+                    label={"Total of natural shade trees"}
+                    value={values.totalNaturalShadeTrees}
+                    error={errors.natural_shade}
+                  />
+
+                  <BuyCoffeeInput
+                    values={values}
+                    handleChange={handleChange("totalNbrShadeTrees")}
+                    handleBlur={handleBlur("totalNbrShadeTrees")}
+                    label={"Total number of shade trees"}
+                    value={values.totalNbrShadeTrees}
+                    error={errors.shade_trees}
                   />
                 </View>
 
@@ -405,10 +450,10 @@ export const WeeklyReportScreen = () => {
                 )}
 
                 <CustomButton
-                  bg={colors.secondary}
+                  bg={colors.blue_font}
                   color={"white"}
                   width="95%"
-                  text="Submit"
+                  text="Edit"
                   bdcolor="transparent"
                   mt={screenHeight * 0.017}
                   mb={

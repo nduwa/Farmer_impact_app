@@ -251,6 +251,19 @@ const generateBulkValueString = (
     */
 
     return bulkValues;
+  } else if (tableName === "householdTrees") {
+    let bulkValues = "";
+    for (let i = 0; i < data.length; i++) {
+      bulkValues += `('${data[i].full_name}','${data[i]._kf_Staff}','${data[i]._kf_User}','${extraValArr[0]}','${extraValArr[1]}','${extraValArr[2]}','${data[i].Group_ID}','${data[i].farmer_ID}','${data[i].farmer_name}','${data[i].national_ID}','${data[i].received_seedling}','${data[i].survived_seedling}','${data[i].planted_year}','${data[i].old_trees}','${data[i].old_trees_planted_year}','${data[i].coffee_plot}','${data[i].nitrogen}','${data[i].natural_shade}','${data[i].shade_trees}','${data[i].created_at}','0')`;
+      if (i < data.length - 1) bulkValues += ",";
+    }
+
+    /* extraValArr[0] -> _kf_Station
+       extraValArr[1] -> _kf_Supplier
+       extraValArr[2] -> CW_Name
+    */
+
+    return bulkValues;
   }
 };
 
@@ -1163,8 +1176,52 @@ export const dataTodb = ({
               console.log("Report saved");
             },
             (_, error) => {
-              setCurrentJob("Error saving Report saved");
-              console.error("Error saving Report saved: ", error);
+              setCurrentJob("Error saving Report");
+              console.error("Error saving Report: ", error);
+              return;
+            }
+          );
+        });
+      }
+    } else if (tableName === "householdTrees") {
+      for (let i = 0; i < totalPages; i++) {
+        let page = i + 1;
+        let start = (page - 1) * limit; // the starting index
+        let end = start + limit; // the last index
+        let data = syncData.slice(
+          start,
+          end
+        ); /* on the last page when the rows aren't 10, it won't throw array index errors because of how slice() handles last index parameter */
+        let activeRows = data.length;
+
+        let bulkValues = generateBulkValueString(
+          tableName,
+          totalRows,
+          data,
+          null,
+          extraValArr
+        );
+
+        db.transaction((tx) => {
+          tx.executeSql(
+            `${SyncQueries.RTC_HOUSEHOLD_TREES} ${bulkValues}`,
+            [],
+            () => {
+              insertedRows += activeRows;
+              const progress = (insertedRows / totalRows) * 100;
+
+              let jobString =
+                progress < 100
+                  ? `Saving tree details...`
+                  : "tree details saved";
+
+              if (setCurrentJob) setCurrentJob(jobString);
+
+              console.log("tree details saved");
+            },
+            (_, error) => {
+              setCurrentJob("Error saving tree details");
+              console.error("Error saving tree details: ", error);
               return;
             }
           );

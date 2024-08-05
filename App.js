@@ -43,6 +43,8 @@ import { UploadGroupAssignments } from "./screens/farmer/assignGroups/UploadGrou
 import { AssignedFarmerDetailsScreen } from "./screens/farmer/assignGroups/AssignedFarmersDetailsScreen";
 import PendingReportsScreen from "./screens/farmer/weeklyReport/PendingReportsScreen";
 import { EditReportScreen } from "./screens/farmer/weeklyReport/EditReportScreen";
+import { PendingTreesScreen } from "./screens/farmer/updateTrees/PendingTreesScreen";
+import { EditTreesScreen } from "./screens/farmer/updateTrees/EditTreesScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -222,9 +224,19 @@ export default function App() {
           />
 
           <Stack.Screen
-            name="updateTreesScreen"
+            name="UpdateTreesScreen"
             options={{ unmountOnBlur: true }}
             component={UpdateTreesScreen}
+          />
+          <Stack.Screen
+            name="PendingTreesScreen"
+            options={{ unmountOnBlur: true }}
+            component={PendingTreesScreen}
+          />
+          <Stack.Screen
+            name="EditTreesScreen"
+            options={{ unmountOnBlur: true }}
+            component={EditTreesScreen}
           />
 
           {/* assign groups */}

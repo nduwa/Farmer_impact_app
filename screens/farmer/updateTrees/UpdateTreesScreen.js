@@ -1,5 +1,6 @@
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useState } from "react";
+import * as SecureStore from "expo-secure-store";
 import {
   Dimensions,
   Keyboard,
@@ -13,13 +14,24 @@ import { colors } from "../../../data/colors";
 import { AntDesign } from "@expo/vector-icons";
 import { Formik } from "formik";
 import { BuyCoffeeInput } from "../../../components/BuyCoffeeInput";
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import CustomButton from "../../../components/CustomButton";
+import { FarmerTressSchema } from "../../../validation/FarmerTreesSchema";
+import { getCurrentDate } from "../../../helpers/getCurrentDate";
+import { dataTodb } from "../../../helpers/dataTodb";
+import { useSelector } from "react-redux";
+import LottieView from "lottie-react-native";
 
 export const UpdateTreesScreen = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const { data } = route.params;
+  const userData = useSelector((state) => state.user.userData);
+
+  const [currentStationID, setCurrentStationID] = useState();
+  const [supplierID, setSupplierID] = useState();
+  const [CWname, setCWName] = useState();
+  const [errors, setErrors] = useState({}); // validation errors
 
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
   const [currentJob, setCurrentJob] = useState(null);
@@ -28,29 +40,122 @@ export const UpdateTreesScreen = ({ route }) => {
     type: null,
     inputBox: null,
   });
-  const [reportValidated, setReportValidated] = useState(false);
-
-  const [submitted, setSubmitted] = useState(false);
+  const [formSubmitted, setFormSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const navigation = useNavigation();
 
   const handleBackButton = () => {
-    navigation.navigate("Homepage", { data: null });
+    navigation.navigate("FarmerUpdateHome", { data: null });
   };
 
-  const submitTreesDetails = () => {
+  const displayToast = (msg) => {
+    ToastAndroid.show(msg, ToastAndroid.SHORT);
+  };
+
+  const submitTreesDetails = (formData) => {
     try {
-      if (validateInputs(transactionData)) {
-        setReportValidated(true);
-      }
+      let nameFull = userData.user.Name_Full;
+      let userkf = userData.user.__kp_User;
+      let staffKf = userData.staff.__kp_Staff;
+
+      let submitData = {
+        _kf_Staff: staffKf,
+        _kf_User: userkf,
+        Group_ID: formData.groupID,
+        farmer_ID: formData.farmerID,
+        farmer_name: formData.farmerName,
+        national_ID: formData.nationalID,
+        full_name: nameFull,
+        created_at: getCurrentDate(),
+        received_seedling: formData.nmbrReceivedSeedlings,
+        survived_seedling: formData.nmbrSurvivedSeedlings,
+        planted_year: formData.yearPlantedReceivedSeedlings,
+        old_trees: formData.nmbrOldTrees,
+        old_trees_planted_year: formData.yearPlantedOldTrees,
+        coffee_plot: formData.nmbrCoffeeFarms,
+        nitrogen: formData.totalNitrogenFixingShadeTrees,
+        natural_shade: formData.totalNaturalShadeTrees,
+        shade_trees: formData.totalNbrShadeTrees,
+      };
+
+      if (!validateInputs(submitData, FarmerTressSchema)) return;
+
+      let kfsupplier = supplierID;
+      let kfstation = currentStationID;
+      let stationName = CWname;
+
+      dataTodb({
+        tableName: "householdTrees",
+        syncData: [submitData],
+        setCurrentJob,
+        extraValArr: [kfstation, kfsupplier, stationName],
+      });
     } catch (error) {
       console.log(error);
     }
   };
 
-  const validateInputs = (values) => {
-    return true;
+  const validateInputs = (data, schema) => {
+    const { error } = schema.validate(data, { abortEarly: false });
+    if (!error) {
+      setErrors({});
+      setValidationError({
+        type: null,
+        message: null,
+        inputBox: null,
+      });
+
+      return true;
+    }
+
+    const newErrors = {};
+    error.details.forEach((detail) => {
+      newErrors[detail.path[0]] = detail.message;
+    });
+    setErrors(newErrors);
+    return false;
   };
+
+  const getInputLabel = (input) => {
+    let output = "";
+    let tmp = input.split("_");
+    output = tmp.join(" ");
+
+    if (input === "received_seedling") output = "received seedlings";
+    if (input === "survived_seedling") output = "Survived seedlings";
+    if (input === "planted_year")
+      output = "Year planted of the received seedlings";
+    if (input === "old_trees") output = "Old trees";
+    if (input === "old_trees_planted_year") output = "Year of the old trees";
+    if (input === "coffee_plot") output = "Number of coffee plots";
+    if (input === "nitrogen") output = "Total of nitrogen  fixing shade trees";
+    if (input === "natural_shade") output = "Total of natural shade";
+    if (input === "shade_trees") output = "Total number of shade trees";
+
+    return output;
+  };
+
+  useEffect(() => {
+    if (Object.keys(errors).length > 0) {
+      setLoading(false);
+      setValidationError({
+        type: "emptyOrInvalidData",
+        message: `Invalid input in '${getInputLabel(
+          Object.keys(errors)[0]
+        )}', check the inputs highlighted in red`,
+        inputBox: null,
+      });
+    }
+  }, [errors]);
+
+  useEffect(() => {
+    if (currentJob === "tree details saved") {
+      displayToast("Tree Details saved, pending upload");
+      setLoading(false);
+      setFormSubmitted(true);
+    }
+  }, [currentJob]);
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
@@ -72,6 +177,29 @@ export const UpdateTreesScreen = ({ route }) => {
       keyboardDidHideListener.remove();
     };
   }, [isKeyboardActive]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const fetchData = async () => {
+        const stationId = await SecureStore.getItemAsync("rtc-station-id");
+        const supplierID = await SecureStore.getItemAsync("rtc-supplier-id");
+        const stationName = await SecureStore.getItemAsync("rtc-station-name");
+
+        if (stationId) {
+          setCurrentStationID(stationId);
+          setSupplierID(supplierID);
+          setCWName(stationName);
+        }
+      };
+
+      fetchData();
+      return () => {
+        setLoading(false);
+        setFormSubmitted(false);
+        setErrors({});
+      };
+    }, [])
+  );
 
   return (
     <View
@@ -191,8 +319,8 @@ export const UpdateTreesScreen = ({ route }) => {
                     handleBlur={handleBlur("farmerID")}
                     label={"Farmer ID"}
                     value={values.farmerID}
-                    active={true}
-                    error={validationError.inputBox === "farmerID"}
+                    active={false}
+                    error={errors.farmer_ID === "farmer_ID"}
                   />
                   <BuyCoffeeInput
                     values={values}
@@ -200,7 +328,8 @@ export const UpdateTreesScreen = ({ route }) => {
                     handleBlur={handleBlur("farmerName")}
                     label={"Farmer name"}
                     value={values.farmerName}
-                    error={validationError.inputBox === "farmerName"}
+                    active={false}
+                    error={errors.farmer_name}
                   />
                   <BuyCoffeeInput
                     values={values}
@@ -208,7 +337,8 @@ export const UpdateTreesScreen = ({ route }) => {
                     handleBlur={handleBlur("nationalID")}
                     label={"National ID"}
                     value={values.nationalID}
-                    error={validationError.inputBox === "nationalID"}
+                    active={false}
+                    error={errors.national_ID}
                   />
                   <BuyCoffeeInput
                     values={values}
@@ -216,7 +346,8 @@ export const UpdateTreesScreen = ({ route }) => {
                     handleBlur={handleBlur("groupID")}
                     label={"Group ID"}
                     value={values.groupID}
-                    error={validationError.inputBox === "groupID"}
+                    active={false}
+                    error={errors.Group_ID}
                   />
                   <BuyCoffeeInput
                     values={values}
@@ -224,7 +355,7 @@ export const UpdateTreesScreen = ({ route }) => {
                     handleBlur={handleBlur("nmbrReceivedSeedlings")}
                     label={"Number of received seedlings"}
                     value={values.nmbrReceivedSeedlings}
-                    error={validationError.inputBox === "nmbrReceivedSeedlings"}
+                    error={errors.received_seedling}
                   />
 
                   <BuyCoffeeInput
@@ -233,20 +364,16 @@ export const UpdateTreesScreen = ({ route }) => {
                     handleBlur={handleBlur("nmbrSurvivedSeedlings")}
                     label={"Number of survived seedlings"}
                     value={values.nmbrSurvivedSeedlings}
-                    multiline={true}
-                    error={validationError.inputBox === "nmbrSurvivedSeedlings"}
+                    error={errors.survived_seedling}
                   />
 
                   <BuyCoffeeInput
                     values={values}
-                    handleChange={handleChange("yearPlantedReceivedSeedings")}
-                    handleBlur={handleBlur("yearPlantedReceivedSeedings")}
+                    handleChange={handleChange("yearPlantedReceivedSeedlings")}
+                    handleBlur={handleBlur("yearPlantedReceivedSeedlings")}
                     label={"Year planted of the received seedlings"}
                     value={values.yearPlantedReceivedSeedlings}
-                    multiline={true}
-                    error={
-                      validationError.inputBox === "yearPlantedReceivedSeedings"
-                    }
+                    error={errors.planted_year}
                   />
 
                   <BuyCoffeeInput
@@ -255,8 +382,7 @@ export const UpdateTreesScreen = ({ route }) => {
                     handleBlur={handleBlur("nmbrOldTrees")}
                     label={"Number of old trees"}
                     value={values.nmbrOldTrees}
-                    multiline={true}
-                    error={validationError.inputBox === "nmbrOldTrees"}
+                    error={errors.old_trees}
                   />
                   <BuyCoffeeInput
                     values={values}
@@ -264,8 +390,7 @@ export const UpdateTreesScreen = ({ route }) => {
                     handleBlur={handleBlur("yearPlantedOldTrees")}
                     label={"Year of planted for the old trees"}
                     value={values.yearPlantedOldTrees}
-                    multiline={true}
-                    error={validationError.inputBox === "yearPlantedOldTrees"}
+                    error={errors.old_trees_planted_year}
                   />
 
                   <BuyCoffeeInput
@@ -274,8 +399,7 @@ export const UpdateTreesScreen = ({ route }) => {
                     handleBlur={handleBlur("nmbrCoffeeFarms")}
                     label={"Number of coffee plots/Farms in general"}
                     value={values.nmbrCoffeeFarms}
-                    multiline={true}
-                    error={validationError.inputBox === "nmbrCoffeeFarms"}
+                    error={errors.coffee_plot}
                   />
 
                   <BuyCoffeeInput
@@ -284,11 +408,7 @@ export const UpdateTreesScreen = ({ route }) => {
                     handleBlur={handleBlur("totalNitrogenFixingShadeTrees")}
                     label={"Total of nitrogen fixing shade trees"}
                     value={values.totalNitrogenFixingShadeTrees}
-                    multiline={true}
-                    error={
-                      validationError.inputBox ===
-                      "totalNitrogenFixingShadeTrees"
-                    }
+                    error={errors.nitrogen}
                   />
 
                   <BuyCoffeeInput
@@ -297,10 +417,7 @@ export const UpdateTreesScreen = ({ route }) => {
                     handleBlur={handleBlur("totalNaturalShadeTrees")}
                     label={"Total of natural shade trees"}
                     value={values.totalNaturalShadeTrees}
-                    multiline={true}
-                    error={
-                      validationError.inputBox === "totalNaturalShadeTrees"
-                    }
+                    error={errors.natural_shade}
                   />
 
                   <BuyCoffeeInput
@@ -309,8 +426,7 @@ export const UpdateTreesScreen = ({ route }) => {
                     handleBlur={handleBlur("totalNbrShadeTrees")}
                     label={"Total number of shade trees"}
                     value={values.totalNbrShadeTrees}
-                    multiline={true}
-                    error={validationError.inputBox === "totalNbrShadeTrees"}
+                    error={errors.shade_trees}
                   />
                 </View>
 
@@ -363,7 +479,7 @@ export const UpdateTreesScreen = ({ route }) => {
                     isKeyboardActive ? screenHeight * 0.04 : screenHeight * 0.03
                   }
                   radius={10}
-                  disabled={submitted}
+                  disabled={formSubmitted}
                   onPress={handleSubmit}
                 />
               </ScrollView>
@@ -371,6 +487,42 @@ export const UpdateTreesScreen = ({ route }) => {
           )}
         </Formik>
       </View>
+
+      {/* loader */}
+      {loading && (
+        <View
+          style={{
+            position: "absolute",
+            marginTop: screenHeight * 0.12,
+            width: "100%",
+            backgroundColor: "transparent",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <View
+            style={{
+              width: "auto",
+              backgroundColor: "white",
+              borderRadius: screenHeight * 0.5,
+              elevation: 4,
+            }}
+          >
+            <LottieView
+              style={{
+                height: screenHeight * 0.05,
+                width: screenHeight * 0.05,
+                alignSelf: "center",
+              }}
+              source={require("../../../assets/lottie/spinner.json")}
+              autoPlay
+              speed={1}
+              loop={true}
+              resizeMode="cover"
+            />
+          </View>
+        </View>
+      )}
     </View>
   );
 };

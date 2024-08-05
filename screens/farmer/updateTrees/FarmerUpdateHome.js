@@ -58,7 +58,7 @@ export const FarmerUpdateHome = () => {
             fontSize: 19,
           }}
         >
-          Update Trees
+          Update Farmer
         </Text>
         <View
           style={{ width: screenWidth * 0.07, backgroundColor: "transparent" }}
@@ -77,8 +77,8 @@ export const FarmerUpdateHome = () => {
             }}
           >
             <UpdateFarmerItem
-              label={"Trees"}
-              destination={"updateTreesScreen"}
+              label={"Farmer Trees"}
+              destination={"UpdateTreesScreen"}
             />
             <UpdateFarmerItem
               label={"Farmer Details"}

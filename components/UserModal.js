@@ -154,8 +154,7 @@ export const UserModal = ({ data, CloseFn, AccessCtrlFn }) => {
               }}
             >
               In case your permissions have been updated, use the button below
-              to refresh the app for the new changes. This action needs internet
-              connectivity.
+              to refresh the app for the new changes.
             </Text>
           </View>
           <Text

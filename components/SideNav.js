@@ -8,7 +8,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Entypo } from "@expo/vector-icons";
-import Octicons from '@expo/vector-icons/Octicons';
+import Octicons from "@expo/vector-icons/Octicons";
 import { colors } from "../data/colors";
 import { useNavigation } from "@react-navigation/native";
 import { useDispatch } from "react-redux";
@@ -102,6 +102,13 @@ export const SideNav = ({
         <FontAwesome5
           name="sync"
           size={20}
+          color={isActive ? colors.secondary : colors.black_a}
+        />
+      )}
+      {name === "Pending Trees" && (
+        <FontAwesome5
+          name="seedling"
+          size={24}
           color={isActive ? colors.secondary : colors.black_a}
         />
       )}
