@@ -575,6 +575,38 @@ export const prepareTables = async () => {
       (_, error) =>
         console.error(`Error creating rtc_household_trees table:`, error)
     );
+
+    // farm details
+    tx.executeSql(
+      `CREATE TABLE IF NOT EXISTS tmp_farm_details (
+        id integer primary key AUTOINCREMENT,
+        _kf_Staff varchar(222) NOT NULL,
+        _kf_User varchar(222) NOT NULL,
+        user_code varchar(255) NOT NULL,
+        _kf_Station varchar(255) NOT NULL,
+        _kf_Supplier varchar(255) NOT NULL,
+        CW_Name varchar(255) NOT NULL,
+        farmer_ID varchar(255) NOT NULL,
+        farmer_name varchar(255) NOT NULL,
+        national_ID varchar(255) NOT NULL,
+        longitude double NOT NULL,
+        latitude double NOT NULL,
+        status int(11) NOT NULL,
+        uploaded_at datetime NOT NULL DEFAULT '0000-00-00',
+        cropNameId int(11) NOT NULL,
+        farm_unit_area double NOT NULL,
+        soil_slope double NOT NULL,
+        uuid varchar(45) NOT NULL,
+        created_at datetime NOT NULL,
+        created_by varchar(45) NOT NULL,
+        full_name varchar(45) NOT NULL,
+        uploaded integer NOT NULL
+      )`,
+      [],
+      () => console.log(`Table tmp_farm_details created successfully`),
+      (_, error) =>
+        console.error(`Error creating tmp_farm_details table:`, error)
+    );
   });
 };
 

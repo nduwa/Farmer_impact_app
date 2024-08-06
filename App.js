@@ -45,6 +45,7 @@ import PendingReportsScreen from "./screens/farmer/weeklyReport/PendingReportsSc
 import { EditReportScreen } from "./screens/farmer/weeklyReport/EditReportScreen";
 import { PendingTreesScreen } from "./screens/farmer/updateTrees/PendingTreesScreen";
 import { EditTreesScreen } from "./screens/farmer/updateTrees/EditTreesScreen";
+import { PendingFarmScreen } from "./screens/farmer/updateTrees/PendingFarmScreens";
 
 const Stack = createNativeStackNavigator();
 
@@ -180,6 +181,11 @@ export default function App() {
             name="FarmUpdateScreen"
             options={{ unmountOnBlur: true }}
             component={FarmUpdateScreen}
+          />
+          <Stack.Screen
+            name="PendingFarmScreen"
+            options={{ unmountOnBlur: true }}
+            component={PendingFarmScreen}
           />
           <Stack.Screen
             name="ChooseFarmerUpdateScreen"

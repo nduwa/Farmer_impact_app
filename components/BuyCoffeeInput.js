@@ -41,7 +41,7 @@ export const BuyCoffeeInput = ({
         multiline={multiline}
         style={{
           borderColor: error ? "red" : colors.bg_variant_font,
-          backgroundColor: active ? colors.white_variant : colors.white,
+          backgroundColor: active ? colors.white_variant : colors.white_a,
           borderWidth: error || !active ? 1 : 0.3,
           borderRadius: radius,
           padding: 7,

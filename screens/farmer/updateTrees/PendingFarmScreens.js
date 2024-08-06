@@ -15,27 +15,30 @@ import React, { useEffect, useState } from "react";
 import { FarmerTreesCard } from "../../../components/FarmerTreesCard";
 import { retrieveDBdata } from "../../../helpers/retrieveDBdata";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  treesSubmit,
-  updateTreesAction,
-} from "../../../redux/farmer/UpdateTreesSlice";
 import { updateDBdata } from "../../../helpers/updateDBdata";
 import LottieView from "lottie-react-native";
 import { SyncModal } from "../../../components/SyncModal";
 import { InspectionHoverSubmitBtn } from "../../../components/InspectionHoverSubmitBtn";
+import {
+  FarmActions,
+  farmSubmit,
+} from "../../../redux/farmer/FarmCoordinateSlice";
+import { FarmCoordinatesCard } from "../../../components/FarmCoordinatesCard";
+import { deleteDBdataAsync } from "../../../helpers/deleteDBdataAsync";
 
-export const PendingTreesScreen = () => {
+export const PendingFarmScreen = () => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const navigation = useNavigation();
   const dispatch = useDispatch();
-  const submissionState = useSelector((state) => state.trees);
+  const submissionState = useSelector((state) => state.farms);
 
-  const [treeRecords, setTreeRecords] = useState([]);
+  const [farmRecords, setFarmRecords] = useState([]);
   const [Submitted, setSubmitted] = useState(false);
   const [currentJob, setCurrentJob] = useState();
   const [loading, setLoading] = useState(false);
   const [submitModal, setSubmitModal] = useState(false);
+  const [deleteModal, setDeleteModal] = useState({ open: false, id: null });
 
   const handleBackButton = () => {
     navigation.navigate("Homepage", { data: null });
@@ -59,16 +62,36 @@ export const PendingTreesScreen = () => {
 
   const handleUpload = () => {
     setLoading(true);
-    dispatch(treesSubmit({ trees: treeRecords }));
+    dispatch(farmSubmit({ farms: farmRecords }));
     setSubmitModal(false);
   };
 
+  const handleDelete = () => {
+    setDeleteModal((prevState) => ({ ...prevState, open: false }));
+
+    let id = deleteModal.id;
+    deleteDBdataAsync({
+      tableName: "tmp_farm_details",
+      targetId: id,
+      customQuery: `DELETE FROM tmp_farm_details WHERE id = '${id}';`,
+    })
+      .then((result) => {
+        if (result.success) {
+          displayToast("Farmer deleted");
+          setSubmitted(true);
+        } else {
+          displayToast("Deletion failed");
+        }
+      })
+      .catch((error) => console.log(error));
+  };
+
   useEffect(() => {
-    if (currentJob === "Trees uploaded") {
+    if (currentJob === "Farms uploaded") {
       displayToast("Done");
       setLoading(false);
     } else if (currentJob === "not uploaded") {
-      displayToast("Error Trees not uploaded");
+      displayToast("Error coordinates not uploaded");
       setLoading(false);
     }
   }, [currentJob]);
@@ -78,7 +101,7 @@ export const PendingTreesScreen = () => {
       setSubmitted(true);
 
       if (submissionState.response.status === "success") {
-        let allRecords = treeRecords;
+        let allRecords = farmRecords;
         let query = "";
         let strIDs = "";
         let i = 0;
@@ -89,16 +112,16 @@ export const PendingTreesScreen = () => {
             if (i < allRecords.length - 1) strIDs += ",";
             i++;
           }
-          query = `UPDATE rtc_household_trees SET uploaded = 1 WHERE id IN(${strIDs})`;
+          query = `UPDATE tmp_farm_details SET uploaded = 1 WHERE id IN(${strIDs})`;
         } else {
-          query = `UPDATE rtc_household_trees SET uploaded = 1 WHERE id = '${allRecords[0].id}'`;
+          query = `UPDATE tmp_farm_details SET uploaded = 1 WHERE id = '${allRecords[0].id}'`;
         }
 
         updateDBdata({
           id: 0,
           query,
           setCurrentJob,
-          msgYes: "Trees uploaded",
+          msgYes: "Farms uploaded",
           msgNo: "not uploaded",
         });
       }
@@ -108,14 +131,14 @@ export const PendingTreesScreen = () => {
   useEffect(() => {
     if (submissionState.error) {
       setLoading(false);
-      displayToast("Error: Trees not submitted");
-      dispatch(updateTreesAction.resetTreesState());
+      displayToast("Error: Farm coordinates not submitted");
+      dispatch(FarmActions.resetFarmsState());
     }
   }, [submissionState.error]);
 
   useEffect(() => {
     setLoading(false);
-  }, [treeRecords]);
+  }, [farmRecords]);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -125,19 +148,19 @@ export const PendingTreesScreen = () => {
         if (currentUser) {
           setLoading(true);
           retrieveDBdata({
-            tableName: "rtc_household_trees",
-            setData: setTreeRecords,
-            queryArg: `SELECT * FROM rtc_household_trees WHERE uploaded = 0 AND full_name = '${currentUser}'`,
+            tableName: "tmp_farm_details",
+            setData: setFarmRecords,
+            queryArg: `SELECT * FROM tmp_farm_details WHERE uploaded = 0 AND full_name = '${currentUser}'`,
           });
         }
       };
 
       fetchData();
       return () => {
-        setTreeRecords([]);
+        setFarmRecords([]);
         setSubmitted(false);
         setLoading(false);
-        dispatch(updateTreesAction.resetTreesState());
+        dispatch(FarmActions.resetFarmsState());
       };
     }, [])
   );
@@ -180,29 +203,30 @@ export const PendingTreesScreen = () => {
             fontSize: 19,
           }}
         >
-          Pending Trees
+          Saved Farm Coordinates
         </Text>
         <View
           style={{ width: screenWidth * 0.07, backgroundColor: "transparent" }}
         />
       </View>
-      {treeRecords.length > 0 && (
+      {farmRecords.length > 0 && (
         <FlatList
           contentContainerStyle={{ padding: 12, gap: 9 }}
-          data={treeRecords}
+          data={farmRecords}
           initialNumToRender={10}
           renderItem={({ item }) => (
-            <FarmerTreesCard
+            <FarmCoordinatesCard
               data={item}
               registrationDate={formatDate(item.created_at)}
               active={!Submitted}
+              deleteFn={() => setDeleteModal({ id: item.id, open: true })}
             />
           )}
           keyExtractor={(item) => item.id}
         />
       )}
 
-      {treeRecords.length > 0 && (
+      {farmRecords.length > 0 && (
         <InspectionHoverSubmitBtn
           topRatio={0.93}
           handlePress={() => setSubmitModal(true)}
@@ -212,9 +236,19 @@ export const PendingTreesScreen = () => {
 
       {submitModal && (
         <SyncModal
-          label={"You are about to upload all the pending trees, Are you sure?"}
+          label={"You are about to upload all the pending farms, Are you sure?"}
           onYes={handleUpload}
           OnNo={() => setSubmitModal(false)}
+        />
+      )}
+
+      {deleteModal.open && (
+        <SyncModal
+          label={"Are you sure you want to delete this farm details?"}
+          onYes={handleDelete}
+          OnNo={() =>
+            setDeleteModal((prevState) => ({ ...prevState, open: false }))
+          }
         />
       )}
 

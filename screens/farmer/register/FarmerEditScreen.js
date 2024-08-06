@@ -255,7 +255,6 @@ export const FarmerEditScreen = ({ route }) => {
         if (result.success) {
           displayToast("Farmer deleted");
           setCurrentJob("Farmer deleted");
-          navigation.navigate();
         } else {
           displayToast("Deletion failed");
         }

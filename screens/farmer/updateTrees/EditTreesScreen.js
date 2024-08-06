@@ -18,6 +18,8 @@ import CustomButton from "../../../components/CustomButton";
 import { FarmerTressSchema } from "../../../validation/FarmerTreesSchema";
 import LottieView from "lottie-react-native";
 import { updateDBdataAsync } from "../../../helpers/updateDBdataAsync";
+import { deleteDBdataAsync } from "../../../helpers/deleteDBdataAsync";
+import { SyncModal } from "../../../components/SyncModal";
 
 export const EditTreesScreen = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
@@ -34,6 +36,7 @@ export const EditTreesScreen = ({ route }) => {
   });
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [deleteModal, setDeleteModal] = useState({ open: false, id: null });
 
   const navigation = useNavigation();
 
@@ -128,6 +131,26 @@ export const EditTreesScreen = ({ route }) => {
     return output;
   };
 
+  const handleDelete = () => {
+    setDeleteModal((prevState) => ({ ...prevState, open: false }));
+
+    let id = deleteModal.id;
+    deleteDBdataAsync({
+      tableName: "rtc_household_trees",
+      targetId: id,
+      customQuery: `DELETE FROM rtc_household_trees WHERE id = '${id}';`,
+    })
+      .then((result) => {
+        if (result.success) {
+          displayToast("record deleted");
+          setCurrentJob("record deleted");
+        } else {
+          displayToast("Deletion failed");
+        }
+      })
+      .catch((error) => console.log(error));
+  };
+
   useEffect(() => {
     if (Object.keys(errors).length > 0) {
       setLoading(false);
@@ -149,6 +172,9 @@ export const EditTreesScreen = ({ route }) => {
     } else if (currentJob === "Failed to update trees details") {
       displayToast("Failed to update trees details");
       setLoading(false);
+    } else if (currentJob === "record deleted") {
+      displayToast("Trees Details deleted");
+      navigation.navigate("PendingTreesScreen");
     }
   }, [currentJob]);
 
@@ -449,25 +475,68 @@ export const EditTreesScreen = ({ route }) => {
                   </View>
                 )}
 
-                <CustomButton
-                  bg={colors.blue_font}
-                  color={"white"}
-                  width="95%"
-                  text="Edit"
-                  bdcolor="transparent"
-                  mt={screenHeight * 0.017}
-                  mb={
-                    isKeyboardActive ? screenHeight * 0.04 : screenHeight * 0.03
-                  }
-                  radius={10}
-                  disabled={formSubmitted}
-                  onPress={handleSubmit}
-                />
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-evenly",
+                    width: screenWidth * 0.98,
+                  }}
+                >
+                  <CustomButton
+                    bg={colors.secondary}
+                    color={"white"}
+                    width="48%"
+                    text="Delete"
+                    bdcolor="transparent"
+                    fontSizeRatio={0.043}
+                    mt={screenHeight * 0.017}
+                    mb={
+                      isKeyboardActive
+                        ? screenHeight * 0.04
+                        : screenHeight * 0.03
+                    }
+                    radius={10}
+                    disabled={formSubmitted}
+                    onPress={() =>
+                      setDeleteModal({
+                        id: data?.farmerData?.id,
+                        open: true,
+                      })
+                    }
+                  />
+                  <CustomButton
+                    bg={colors.blue_font}
+                    color={"white"}
+                    width="48%"
+                    text="Edit"
+                    bdcolor="transparent"
+                    fontSizeRatio={0.043}
+                    mt={screenHeight * 0.017}
+                    mb={
+                      isKeyboardActive
+                        ? screenHeight * 0.04
+                        : screenHeight * 0.03
+                    }
+                    radius={10}
+                    disabled={formSubmitted}
+                    onPress={handleSubmit}
+                  />
+                </View>
               </ScrollView>
             </View>
           )}
         </Formik>
       </View>
+
+      {deleteModal.open && (
+        <SyncModal
+          label={"Are you sure you want to delete this record?"}
+          onYes={handleDelete}
+          OnNo={() =>
+            setDeleteModal((prevState) => ({ ...prevState, open: false }))
+          }
+        />
+      )}
 
       {/* loader */}
       {loading && (

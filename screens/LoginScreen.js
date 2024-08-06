@@ -28,8 +28,6 @@ import * as Location from "expo-location";
 import { UserActions } from "../redux/user/UserSlice";
 import { AntDesign } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
-import { deleteDBdataAsync } from "../helpers/deleteDBdataAsync";
-import { dropTableAsync } from "../helpers/dropTableAsync";
 import LottieView from "lottie-react-native";
 import * as SplashScreen from "expo-splash-screen";
 import { addColumnIfNotExists, prepareTables } from "../helpers/prepareDB";
