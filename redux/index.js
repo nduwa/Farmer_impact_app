@@ -14,6 +14,7 @@ import GroupAssignSlice from "./farmer/FarmerAssignsSlice";
 import ReportSlice from "./farmer/ReportSlice";
 import UpdateTreesSlice from "./farmer/UpdateTreesSlice";
 import FarmCoordinateSlice from "./farmer/FarmCoordinateSlice";
+import FarmerUpdateSlice from "./farmer/FarmerUpdateSlice";
 
 const store = configureStore({
   reducer: {
@@ -32,6 +33,7 @@ const store = configureStore({
     report: ReportSlice.reducer,
     trees: UpdateTreesSlice.reducer,
     farms: FarmCoordinateSlice.reducer,
+    update: FarmerUpdateSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

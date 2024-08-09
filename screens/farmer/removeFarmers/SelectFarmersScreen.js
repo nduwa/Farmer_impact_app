@@ -25,11 +25,13 @@ import { useSelector } from "react-redux";
 import { SyncModal } from "../../../components/SyncModal";
 import { updateDBdata } from "../../../helpers/updateDBdata";
 import { getCurrentDate } from "../../../helpers/getCurrentDate";
+import { dataTodb } from "../../../helpers/dataTodb";
+import FarmerAssignCard from "../../../components/FarmerAssignCard";
 
 export const SelectFarmersScreen = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
-  const userName = useSelector((state) => state.user.userData.user.Name_User);
+  const userData = useSelector((state) => state.user.userData);
 
   const navigation = useNavigation();
   const flatListRef = useRef(null);
@@ -52,9 +54,11 @@ export const SelectFarmersScreen = ({ route }) => {
   const [loadingData, setLoadingData] = useState(false);
   const [loadingPage, setLoadingPage] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [CWname, setCWName] = useState();
+  const [pendingFarmerUpdates, setPendingFarmerUpdates] = useState([]);
 
   const [submitted, setSubmitted] = useState(false);
-  const [deletedFarmers, setDeletedFarmers] = useState([]);
+  const [deletedIDs, setDeletedIDs] = useState("");
 
   const handleSync = () => {
     navigation.navigate("Sync", { data: null });
@@ -146,33 +150,60 @@ export const SelectFarmersScreen = ({ route }) => {
 
   const handleDelete = async () => {
     setDeleteModalOpen(false);
-    let farmersToDelete = [];
+
+    let kfstaff = userData.staff.__kp_Staff;
+    let nameFull = userData.user.Name_Full;
+    let userCode = userData.staff.userID;
     let strIDs = "";
-    let query = "";
     let i = 0;
 
+    let farmersToDelete = [];
+
     for (const farmer of selectedFarmers) {
-      farmersToDelete.push(farmer.__kf_farmer);
-      strIDs += `'${farmer.__kf_farmer}'`;
+      let tmpObj = {
+        _kf_Farmer: farmer.__kp_Farmer,
+        _kf_Staff: kfstaff,
+        user_code: userCode,
+        CW_Name: CWname,
+        farmer_ID: farmer.farmerid,
+        farmer_name: farmer.Name,
+        national_ID: farmer.National_ID_t,
+        cell: farmer.Area_Small,
+        village: farmer.Area_Smallest,
+        created_at: getCurrentDate(),
+        full_name: nameFull,
+        status: "delete",
+      };
+
+      farmersToDelete.push({ ...farmer, ...tmpObj });
+
+      strIDs += `'${farmer.__kp_Farmer}'`;
       if (i < selectedFarmers.length - 1) strIDs += ",";
       i++;
     }
 
-    setDeletedFarmers(farmersToDelete);
+    setDeletedIDs(strIDs);
 
-    query = `UPDATE rtc_farmers SET deleted = 1, deleted_by = '${userName}', deleted_at = '${getCurrentDate()}', sync = 0 WHERE __kp_Farmer IN(${strIDs})`;
+    let stationName = CWname;
 
-    updateDBdata({
-      id: 0,
-      query,
+    dataTodb({
+      tableName: "farmUpdates",
+      syncData: farmersToDelete,
       setCurrentJob,
-      msgYes: "Farmers removed",
-      msgNo: "not removed",
+      extraValArr: [stationName],
     });
   };
 
   const handleSyncModal = () => {
     setDeleteModalOpen(false);
+  };
+
+  const checkPending = (farmerid) => {
+    if (pendingFarmerUpdates.length == 0) return null;
+
+    for (const farmer of pendingFarmerUpdates) {
+      if (farmer.farmer_ID === farmerid) return true;
+    }
   };
 
   useEffect(() => {
@@ -184,20 +215,10 @@ export const SelectFarmersScreen = ({ route }) => {
   }, [selectedFarmers]);
 
   useEffect(() => {
-    if (currentJob === "Farmers removed") {
-      const newDisplaydata = displayData.reduce((accumulator, currentItem) => {
-        if (!deletedFarmers.includes(currentItem.__kp_Farmer)) {
-          accumulator.push(currentItem);
-        }
-
-        return accumulator;
-      }, []);
-
-      setDisplayData(newDisplaydata);
-
-      displayToast("Farmers removed");
+    if (currentJob === "farmer details saved") {
+      displayToast("Farmers status updated");
       setSelectedFarmers([]);
-      setCurrentJob("");
+      navigation.replace("Homepage", { data: null });
     }
   }, [currentJob]);
 
@@ -260,9 +281,12 @@ export const SelectFarmersScreen = ({ route }) => {
     React.useCallback(() => {
       const fetchData = async () => {
         const stationId = await SecureStore.getItemAsync("rtc-station-id");
+        const stationName = await SecureStore.getItemAsync("rtc-station-name");
 
         setLoadingData(true);
         if (stationId) {
+          setCWName(stationName);
+
           retrieveDBdata({
             tableName: "rtc_groups",
             stationId,
@@ -271,6 +295,15 @@ export const SelectFarmersScreen = ({ route }) => {
         }
       };
 
+      const fetchPendings = async () => {
+        retrieveDBdata({
+          tableName: "tmp_farmer_updates",
+          setData: setPendingFarmerUpdates,
+          queryArg: "SELECT * FROM tmp_farmer_updates WHERE uploaded = 0",
+        });
+      };
+
+      fetchPendings();
       fetchData();
       return () => {
         setFarmers([]);
@@ -281,7 +314,7 @@ export const SelectFarmersScreen = ({ route }) => {
         setGroupsModalOpen(false);
         setActiveGroup([]);
         setSelectedFarmers([]);
-        setDeletedFarmers([]);
+        setDeletedIDs([]);
         setCurrentJob(null);
         setLoadingData(false);
       };
@@ -483,17 +516,14 @@ export const SelectFarmersScreen = ({ route }) => {
             data={displayData}
             initialNumToRender={6}
             renderItem={({ item }) => (
-              <FarmerTrainingCard
-                data={{
-                  farmerName: item.Name,
-                  farmerId: item.farmerid,
-                  Year_Birth: item.Year_Birth,
-                  __kf_farmer: item.__kp_Farmer,
-                  __kf_group: item._kf_Group,
-                }}
+              <FarmerAssignCard
+                data={item}
                 filterFn={filterChecked}
                 isChecked={handleCheckbox(item) || false}
                 setChecked={setSelectedFarmers}
+                groupData={activeGroup}
+                pending={checkPending(item.farmerid)}
+                use="farmerDelete"
               />
             )}
             keyExtractor={(item) => item.id}

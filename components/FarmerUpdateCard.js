@@ -4,7 +4,7 @@ import { colors } from "../data/colors";
 import { AntDesign } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 
-export const FarmerUpdateCard = ({ data, destination }) => {
+export const FarmerUpdateCard = ({ data, destination, pending = false }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const navigation = useNavigation();
@@ -18,6 +18,7 @@ export const FarmerUpdateCard = ({ data, destination }) => {
   return (
     <TouchableOpacity
       onPress={handleNavigation}
+      disabled={pending}
       style={{
         flexDirection: "row",
         alignContent: "center",
@@ -25,6 +26,9 @@ export const FarmerUpdateCard = ({ data, destination }) => {
         width: "100%",
         backgroundColor: colors.white_variant,
         borderRadius: screenHeight * 0.015,
+        borderRadius: screenHeight * 0.015,
+        borderLeftColor: pending ? colors.primary : "transparent",
+        borderLeftWidth: pending ? screenWidth * 0.02 : 0,
         padding: screenWidth * 0.03,
         elevation: 3,
       }}
@@ -59,6 +63,17 @@ export const FarmerUpdateCard = ({ data, destination }) => {
         >
           Date of birth: {data.Year_Birth}
         </Text>
+        {pending && (
+          <Text
+            style={{
+              fontSize: screenWidth * 0.03,
+              fontWeight: "800",
+              color: colors.primary,
+            }}
+          >
+            Pending update
+          </Text>
+        )}
       </View>
       <View
         style={{
@@ -66,7 +81,9 @@ export const FarmerUpdateCard = ({ data, destination }) => {
           justifyContent: "center",
         }}
       >
-        <AntDesign name="right" size={screenHeight * 0.034} color="black" />
+        {!pending && (
+          <AntDesign name="right" size={screenHeight * 0.034} color="black" />
+        )}
       </View>
     </TouchableOpacity>
   );

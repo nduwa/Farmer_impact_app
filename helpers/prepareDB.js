@@ -607,6 +607,43 @@ export const prepareTables = async () => {
       (_, error) =>
         console.error(`Error creating tmp_farm_details table:`, error)
     );
+
+    // farmer updates
+    tx.executeSql(
+      `CREATE TABLE IF NOT EXISTS tmp_farmer_updates (
+        id integer primary key AUTOINCREMENT,
+        __kp_Farmer varchar(255) NOT NULL,
+        _kf_Group varchar(255) NOT NULL,
+        _kf_Staff varchar(222) NOT NULL,
+        user_code varchar(255) NOT NULL,
+        _kf_Station varchar(255) NOT NULL,
+        Year_Birth int(11) NOT NULL,
+        Gender varchar(255) NOT NULL,
+        CW_Name varchar(255) NOT NULL,
+        farmer_ID varchar(255) NOT NULL,
+        farmer_name varchar(255) NOT NULL,
+        national_ID varchar(255) NOT NULL,
+        Phone varchar(255) NOT NULL,
+        Position varchar(255) NOT NULL,
+        Marital_Status varchar(255) NOT NULL,
+        Reading_Skills varchar(255) NOT NULL,
+        Math_Skills varchar(255) NOT NULL,
+        education_level varchar(255) NOT NULL,
+        cell varchar(255) NOT NULL,
+        village varchar(255) NOT NULL,
+        Trees double NOT NULL,
+        Trees_Producing double NOT NULL,
+        number_of_plots_with_coffee double NOT NULL,
+        status varchar(45) NOT NULL,
+        created_at datetime NOT NULL,
+        full_name varchar(45) NOT NULL,
+        uploaded integer NOT NULL
+      )`,
+      [],
+      () => console.log(`Table tmp_farmer_updates created successfully`),
+      (_, error) =>
+        console.error(`Error creating tmp_farmer_updates table:`, error)
+    );
   });
 };
 
