@@ -4,13 +4,19 @@ import { colors } from "../data/colors";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 
-export const FarmerDeletedCard = ({ data, deleteDate, restoreFn, active }) => {
+export const FarmerDeletedCard = ({
+  data,
+  deleteDate,
+  restoreFn,
+  active,
+  use = "delete",
+}) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const navigation = useNavigation();
 
   const handleRestore = () => {
-    restoreFn({ open: true, id: data.__kp_Farmer });
+    restoreFn({ open: true, id: data.id });
   };
 
   return (
@@ -23,18 +29,26 @@ export const FarmerDeletedCard = ({ data, deleteDate, restoreFn, active }) => {
         gap: screenHeight * 0.02,
         backgroundColor: colors.white,
         borderRadius: screenHeight * 0.015,
+        borderLeftColor:
+          use === "delete"
+            ? colors.red
+            : use === "update"
+            ? colors.primary
+            : "transparent",
+        borderLeftWidth:
+          use === "delete" || use === "update" ? screenWidth * 0.02 : 0,
         padding: screenWidth * 0.03,
         elevation: 3,
       }}
     >
       <View style={{ gap: screenHeight * 0.008 }}>
         <Text style={{ fontSize: screenWidth * 0.05, fontWeight: "600" }}>
-          {data.Name}
+          {data.farmer_name}
         </Text>
         <Text
           style={{ fontSize: screenWidth * 0.035, color: colors.black_letter }}
         >
-          ID: {data.farmerid}
+          ID: {data.farmer_ID}
         </Text>
         <Text
           style={{ fontSize: screenWidth * 0.035, color: colors.black_letter }}
@@ -44,7 +58,7 @@ export const FarmerDeletedCard = ({ data, deleteDate, restoreFn, active }) => {
         <Text
           style={{ fontSize: screenWidth * 0.035, color: colors.black_letter }}
         >
-          Phone: {data.Phone.length > 0 ? data.Phone : "N/A"}
+          Phone: {data?.Phone?.length > 0 ? data?.Phone : "N/A"}
         </Text>
 
         <Text

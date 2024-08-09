@@ -277,6 +277,18 @@ const generateBulkValueString = (
     */
 
     return bulkValues;
+  } else if (tableName === "farmUpdates") {
+    let bulkValues = "";
+    for (let i = 0; i < data.length; i++) {
+      bulkValues += `('${data[i].__kp_Farmer}','${data[i]._kf_Group}','${data[i]._kf_Staff}','${data[i].user_code}','${data[i]._kf_Station}','${extraValArr[0]}','${data[i].Year_Birth}','${data[i].Gender}','${data[i].farmer_ID}','${data[i].farmer_name}','${data[i].national_ID}','${data[i].Phone}','${data[i].Position}','${data[i].Marital_Status}','${data[i].Reading_Skills}','${data[i].Math_Skills}','${data[i].education_level}','${data[i].cell}','${data[i].village}','${data[i].Trees}','${data[i].Trees_Producing}','${data[i].number_of_plots_with_coffee}','${data[i].created_at}','${data[i].full_name}','${data[i].status}','0')`;
+      if (i < data.length - 1) bulkValues += ",";
+    }
+
+    /* 
+      extraValArr[0] -> CW_Name
+    */
+
+    return bulkValues;
   }
 };
 
@@ -1279,6 +1291,50 @@ export const dataTodb = ({
             (_, error) => {
               setCurrentJob("Error saving farm details");
               console.error("Error saving farm details: ", error);
+              return;
+            }
+          );
+        });
+      }
+    } else if (tableName === "farmUpdates") {
+      for (let i = 0; i < totalPages; i++) {
+        let page = i + 1;
+        let start = (page - 1) * limit; // the starting index
+        let end = start + limit; // the last index
+        let data = syncData.slice(
+          start,
+          end
+        ); /* on the last page when the rows aren't 10, it won't throw array index errors because of how slice() handles last index parameter */
+        let activeRows = data.length;
+
+        let bulkValues = generateBulkValueString(
+          tableName,
+          totalRows,
+          data,
+          null,
+          extraValArr
+        );
+
+        db.transaction((tx) => {
+          tx.executeSql(
+            `${dbQueries.Q_TMP_FARMER_UPDATES} ${bulkValues}`,
+            [],
+            () => {
+              insertedRows += activeRows;
+              const progress = (insertedRows / totalRows) * 100;
+
+              let jobString =
+                progress < 100
+                  ? `Saving farmer details...`
+                  : "farmer details saved";
+
+              if (setCurrentJob) setCurrentJob(jobString);
+
+              console.log("farmer details saved");
+            },
+            (_, error) => {
+              setCurrentJob("Error saving farmer details");
+              console.error("Error saving farmer details: ", error);
               return;
             }
           );

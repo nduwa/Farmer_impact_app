@@ -126,7 +126,14 @@ export const SideNav = ({
           color={isActive ? colors.secondary : colors.black_a}
         />
       )}
-      {name === "Deleted Farmers" && (
+      {name === "Updated Farmers" && (
+        <MaterialIcons
+          name="edit-note"
+          size={24}
+          color={isActive ? colors.secondary : colors.black_a}
+        />
+      )}
+      {name === "Removed Farmers" && (
         <MaterialCommunityIcons
           name="delete-forever-outline"
           size={24}
@@ -182,9 +189,9 @@ export const SideNav = ({
           color={isActive ? colors.secondary : colors.black_a}
         />
       )}
-      {name === "Change Settings" && (
-        <Feather
-          name="settings"
+      {name === "Change Language" && (
+        <Ionicons
+          name="language-sharp"
           size={24}
           color={isActive ? colors.secondary : colors.black_a}
         />

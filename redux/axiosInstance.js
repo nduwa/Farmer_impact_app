@@ -3,7 +3,7 @@ import { API_URL } from "@env";
 
 // Create a new Axios instance
 const api = axios.create({
-  baseURL: `https://7c69-196-12-131-214.ngrok-free.app`,
+  baseURL: API_URL,
 });
 
 // Add a request interceptor

@@ -54,27 +54,6 @@ export const UploadGroupAssignments = ({ route }) => {
     });
   };
 
-  const handleSubmit = (insertion_date) => {
-    setLoadingData(true);
-    let tmp = [];
-    let strIDs = "";
-    let i = 0;
-
-    for (const change of data) {
-      if (formatDate(change.created_at) === insertion_date) {
-        tmp.push(change);
-        strIDs += `'${change.id}'`;
-        if (i < data.length - 1) strIDs += ",";
-        i++;
-      }
-    }
-
-    setIds(strIDs);
-
-    setChangesTobeSubmitted(tmp);
-    dispatch(groupStatusUpdate({ groupAssignments: tmp }));
-  };
-
   const handleBackButton = () => {
     navigation.navigate("PendingGroupsScreen", { data: null });
   };
