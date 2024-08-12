@@ -1,0 +1,15 @@
+{
+  "login": {
+    "title": "Kwinjira",
+    "username": "Izina",
+    "password": "Ijambo banga",
+    "button": "injira",
+    "name_error": "Shyiramo izina 'username'",
+    "pwd_error": "Shyiramo ijambo banga 'password'",
+    "toast_error": "Ntago byakozwe",
+    "name_placeholder": "urugero: pndayizeye"
+  },
+  "settings": {
+    "title": "Hindura ururimi"
+  }
+}

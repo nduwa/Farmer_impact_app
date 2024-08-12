@@ -231,7 +231,7 @@ export const SideBar = ({ setsideBarScroll, setIsSidebarOpen }) => {
               )}
 
               <SideNav name={"History"} destination="HistoryScreen" />
-              <SideNav name={"Change Language"} />
+              <SideNav name={"Change Language"} destination="LanguageScreen" />
 
               <SideNav name={"Log out"} isLogOut={true} destination={"Login"} />
             </View>

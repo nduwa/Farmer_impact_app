@@ -47,258 +47,269 @@ import { PendingTreesScreen } from "./screens/farmer/updateTrees/PendingTreesScr
 import { EditTreesScreen } from "./screens/farmer/updateTrees/EditTreesScreen";
 import { PendingFarmScreen } from "./screens/farmer/updateTrees/PendingFarmScreens";
 import { PendingFarmerUpdatesScreen } from "./screens/farmer/updateTrees/PendingFarmerUpdatesScreen";
+import { I18nextProvider } from "react-i18next";
+import i18n from "./i18n";
+import { LanguageScreen } from "./screens/language/LanguageScreen";
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
     <Provider store={store}>
-      <NavigationContainer>
-        <Stack.Navigator
-          initialRouteName="Login"
-          screenOptions={{ headerShown: false }}
-        >
-          <Stack.Screen
-            name="Login"
-            options={{ unmountOnBlur: true }}
-            component={LoginScreen}
-          />
-          <Stack.Screen
-            name="Homepage"
-            options={{ unmountOnBlur: true }}
-            component={HomeScreen}
-          />
-          <Stack.Screen
-            name="Sync"
-            options={{ unmountOnBlur: true }}
-            component={SyncScreen}
-          />
+      <I18nextProvider i18n={i18n}>
+        <NavigationContainer>
+          <Stack.Navigator
+            initialRouteName="Login"
+            screenOptions={{ headerShown: false }}
+          >
+            <Stack.Screen
+              name="Login"
+              options={{ unmountOnBlur: true }}
+              component={LoginScreen}
+            />
+            <Stack.Screen
+              name="Homepage"
+              options={{ unmountOnBlur: true }}
+              component={HomeScreen}
+            />
+            <Stack.Screen
+              name="Sync"
+              options={{ unmountOnBlur: true }}
+              component={SyncScreen}
+            />
 
-          {/* coffee purchase */}
-          <Stack.Screen
-            name="Registered_ATP_Farmer"
-            options={{ unmountOnBlur: true }}
-            component={RegisteredFarmerScreen}
-          />
-          <Stack.Screen
-            name="Unregistered_ATP_Farmer"
-            options={{ unmountOnBlur: true }}
-            component={UnRegisteredFarmerScreen}
-          />
-          <Stack.Screen
-            name="FarmerScreen"
-            options={{ unmountOnBlur: true }}
-            component={FarmerScreen}
-          />
-          <Stack.Screen
-            name="ScDailyJournal"
-            options={{ unmountOnBlur: true }}
-            component={ScJournal}
-          />
-          <Stack.Screen
-            name="ScDailySummary"
-            options={{ unmountOnBlur: true }}
-            component={ScJournalsSummary}
-          />
-          <Stack.Screen
-            name="EditTransaction"
-            options={{ unmountOnBlur: true }}
-            component={EditTransactionScreen}
-          />
+            {/* coffee purchase */}
+            <Stack.Screen
+              name="Registered_ATP_Farmer"
+              options={{ unmountOnBlur: true }}
+              component={RegisteredFarmerScreen}
+            />
+            <Stack.Screen
+              name="Unregistered_ATP_Farmer"
+              options={{ unmountOnBlur: true }}
+              component={UnRegisteredFarmerScreen}
+            />
+            <Stack.Screen
+              name="FarmerScreen"
+              options={{ unmountOnBlur: true }}
+              component={FarmerScreen}
+            />
+            <Stack.Screen
+              name="ScDailyJournal"
+              options={{ unmountOnBlur: true }}
+              component={ScJournal}
+            />
+            <Stack.Screen
+              name="ScDailySummary"
+              options={{ unmountOnBlur: true }}
+              component={ScJournalsSummary}
+            />
+            <Stack.Screen
+              name="EditTransaction"
+              options={{ unmountOnBlur: true }}
+              component={EditTransactionScreen}
+            />
 
-          {/* inspection */}
-          <Stack.Screen
-            name="chooseInspection"
-            options={{ unmountOnBlur: true }}
-            component={ChooseInspectionScreen}
-          />
-          <Stack.Screen
-            name="inspectionFarmer"
-            options={{ unmountOnBlur: true }}
-            component={InspectionFarmerScreen}
-          />
-          <Stack.Screen
-            name="inspectionQuestions"
-            options={{ unmountOnBlur: true }}
-            component={InspectionQuestionsScreen}
-          />
-          <Stack.Screen
-            name="inspectionCourses"
-            options={{ unmountOnBlur: true }}
-            component={InspectionCoursesScreen}
-          />
-          <Stack.Screen
-            name="InspectionsScreen"
-            options={{ unmountOnBlur: true }}
-            component={InspectionsScreen}
-          />
+            {/* inspection */}
+            <Stack.Screen
+              name="chooseInspection"
+              options={{ unmountOnBlur: true }}
+              component={ChooseInspectionScreen}
+            />
+            <Stack.Screen
+              name="inspectionFarmer"
+              options={{ unmountOnBlur: true }}
+              component={InspectionFarmerScreen}
+            />
+            <Stack.Screen
+              name="inspectionQuestions"
+              options={{ unmountOnBlur: true }}
+              component={InspectionQuestionsScreen}
+            />
+            <Stack.Screen
+              name="inspectionCourses"
+              options={{ unmountOnBlur: true }}
+              component={InspectionCoursesScreen}
+            />
+            <Stack.Screen
+              name="InspectionsScreen"
+              options={{ unmountOnBlur: true }}
+              component={InspectionsScreen}
+            />
 
-          {/* history */}
-          <Stack.Screen
-            name="HistoryScreen"
-            options={{ unmountOnBlur: true }}
-            component={HistoryScreen}
-          />
-          <Stack.Screen
-            name="HistoryDetails"
-            options={{ unmountOnBlur: true }}
-            component={HistoryDetails}
-          />
+            {/* history */}
+            <Stack.Screen
+              name="HistoryScreen"
+              options={{ unmountOnBlur: true }}
+              component={HistoryScreen}
+            />
+            <Stack.Screen
+              name="HistoryDetails"
+              options={{ unmountOnBlur: true }}
+              component={HistoryDetails}
+            />
 
-          {/* training */}
-          <Stack.Screen
-            name="TrainingCourses"
-            options={{ unmountOnBlur: true }}
-            component={TrainingCourses}
-          />
-          <Stack.Screen
-            name="TrainingFarmers"
-            options={{ unmountOnBlur: true }}
-            component={TrainingFarmers}
-          />
-          <Stack.Screen
-            name="TrainingScreen"
-            options={{ unmountOnBlur: true }}
-            component={TrainingScreen}
-          />
+            {/* training */}
+            <Stack.Screen
+              name="TrainingCourses"
+              options={{ unmountOnBlur: true }}
+              component={TrainingCourses}
+            />
+            <Stack.Screen
+              name="TrainingFarmers"
+              options={{ unmountOnBlur: true }}
+              component={TrainingFarmers}
+            />
+            <Stack.Screen
+              name="TrainingScreen"
+              options={{ unmountOnBlur: true }}
+              component={TrainingScreen}
+            />
 
-          {/* farmer management */}
-          <Stack.Screen
-            name="FarmerRegistration"
-            options={{ unmountOnBlur: true }}
-            component={FarmerRegistrationScreen}
-          />
-          <Stack.Screen
-            name="FarmerUpdateHome"
-            options={{ unmountOnBlur: true }}
-            component={FarmerUpdateHome}
-          />
-          <Stack.Screen
-            name="FarmerUpdateScreen"
-            options={{ unmountOnBlur: true }}
-            component={FarmerUpdateScreen}
-          />
-          <Stack.Screen
-            name="FarmUpdateScreen"
-            options={{ unmountOnBlur: true }}
-            component={FarmUpdateScreen}
-          />
-          <Stack.Screen
-            name="PendingFarmScreen"
-            options={{ unmountOnBlur: true }}
-            component={PendingFarmScreen}
-          />
-          <Stack.Screen
-            name="ChooseFarmerUpdateScreen"
-            options={{ unmountOnBlur: true }}
-            component={ChooseFarmerScreen}
-          />
-          <Stack.Screen
-            name="SelectFarmerDeleteScreen"
-            options={{ unmountOnBlur: true }}
-            component={SelectFarmersScreen}
-          />
-          <Stack.Screen
-            name="PendingRegistrationScreen"
-            options={{ unmountOnBlur: true }}
-            component={PendingRegistrationsScreen}
-          />
-          <Stack.Screen
-            name="PendingFarmerEditScreen"
-            options={{ unmountOnBlur: true }}
-            component={FarmerEditScreen}
-          />
-          <Stack.Screen
-            name="FarmerDeletedScreen"
-            options={{ unmountOnBlur: true }}
-            component={PendingDeletionScreen}
-          />
-          <Stack.Screen
-            name="PendingFarmerUpdatesScreen"
-            options={{ unmountOnBlur: true }}
-            component={PendingFarmerUpdatesScreen}
-          />
+            {/* farmer management */}
+            <Stack.Screen
+              name="FarmerRegistration"
+              options={{ unmountOnBlur: true }}
+              component={FarmerRegistrationScreen}
+            />
+            <Stack.Screen
+              name="FarmerUpdateHome"
+              options={{ unmountOnBlur: true }}
+              component={FarmerUpdateHome}
+            />
+            <Stack.Screen
+              name="FarmerUpdateScreen"
+              options={{ unmountOnBlur: true }}
+              component={FarmerUpdateScreen}
+            />
+            <Stack.Screen
+              name="FarmUpdateScreen"
+              options={{ unmountOnBlur: true }}
+              component={FarmUpdateScreen}
+            />
+            <Stack.Screen
+              name="PendingFarmScreen"
+              options={{ unmountOnBlur: true }}
+              component={PendingFarmScreen}
+            />
+            <Stack.Screen
+              name="ChooseFarmerUpdateScreen"
+              options={{ unmountOnBlur: true }}
+              component={ChooseFarmerScreen}
+            />
+            <Stack.Screen
+              name="SelectFarmerDeleteScreen"
+              options={{ unmountOnBlur: true }}
+              component={SelectFarmersScreen}
+            />
+            <Stack.Screen
+              name="PendingRegistrationScreen"
+              options={{ unmountOnBlur: true }}
+              component={PendingRegistrationsScreen}
+            />
+            <Stack.Screen
+              name="PendingFarmerEditScreen"
+              options={{ unmountOnBlur: true }}
+              component={FarmerEditScreen}
+            />
+            <Stack.Screen
+              name="FarmerDeletedScreen"
+              options={{ unmountOnBlur: true }}
+              component={PendingDeletionScreen}
+            />
+            <Stack.Screen
+              name="PendingFarmerUpdatesScreen"
+              options={{ unmountOnBlur: true }}
+              component={PendingFarmerUpdatesScreen}
+            />
 
-          <Stack.Screen
-            name="WeeklyReportScreen"
-            options={{ unmountOnBlur: true }}
-            component={WeeklyReportScreen}
-          />
-          <Stack.Screen
-            name="PendingReportsScreen"
-            options={{ unmountOnBlur: true }}
-            component={PendingReportsScreen}
-          />
-          <Stack.Screen
-            name="EditReportScreen"
-            options={{ unmountOnBlur: true }}
-            component={EditReportScreen}
-          />
+            <Stack.Screen
+              name="WeeklyReportScreen"
+              options={{ unmountOnBlur: true }}
+              component={WeeklyReportScreen}
+            />
+            <Stack.Screen
+              name="PendingReportsScreen"
+              options={{ unmountOnBlur: true }}
+              component={PendingReportsScreen}
+            />
+            <Stack.Screen
+              name="EditReportScreen"
+              options={{ unmountOnBlur: true }}
+              component={EditReportScreen}
+            />
 
-          <Stack.Screen
-            name="UpdateTreesScreen"
-            options={{ unmountOnBlur: true }}
-            component={UpdateTreesScreen}
-          />
-          <Stack.Screen
-            name="PendingTreesScreen"
-            options={{ unmountOnBlur: true }}
-            component={PendingTreesScreen}
-          />
-          <Stack.Screen
-            name="EditTreesScreen"
-            options={{ unmountOnBlur: true }}
-            component={EditTreesScreen}
-          />
+            <Stack.Screen
+              name="UpdateTreesScreen"
+              options={{ unmountOnBlur: true }}
+              component={UpdateTreesScreen}
+            />
+            <Stack.Screen
+              name="PendingTreesScreen"
+              options={{ unmountOnBlur: true }}
+              component={PendingTreesScreen}
+            />
+            <Stack.Screen
+              name="EditTreesScreen"
+              options={{ unmountOnBlur: true }}
+              component={EditTreesScreen}
+            />
 
-          {/* assign groups */}
-          <Stack.Screen
-            name="AssignGroupsHome"
-            options={{ unmountOnBlur: true }}
-            component={AssignGroupsHome}
-          />
-          <Stack.Screen
-            name="FarmerAssignGroupScreen"
-            options={{ unmountOnBlur: true }}
-            component={AssignFarmersScreen}
-          />
-          <Stack.Screen
-            name="ChooseGroupScreen"
-            options={{ unmountOnBlur: true }}
-            component={ChooseGroupScreen}
-          />
-          <Stack.Screen
-            name="ActiveGroupsScreen"
-            options={{ unmountOnBlur: true }}
-            component={ActiveGroupsScreen}
-          />
-          <Stack.Screen
-            name="InactiveGroupsScreen"
-            options={{ unmountOnBlur: true }}
-            component={InactiveGroupsScreen}
-          />
-          <Stack.Screen
-            name="PendingGroupsScreen"
-            options={{ unmountOnBlur: true }}
-            component={PendingGroupsScreen}
-          />
-          <Stack.Screen
-            name="UploadGroupChangesScreen"
-            options={{ unmountOnBlur: true }}
-            component={UploadGroupChangesScreen}
-          />
-          <Stack.Screen
-            name="UploadGroupAssignments"
-            options={{ unmountOnBlur: true }}
-            component={UploadGroupAssignments}
-          />
-          <Stack.Screen
-            name="AssignedFarmerDetailsScreen"
-            options={{ unmountOnBlur: true }}
-            component={AssignedFarmerDetailsScreen}
-          />
-        </Stack.Navigator>
-      </NavigationContainer>
+            {/* assign groups */}
+            <Stack.Screen
+              name="AssignGroupsHome"
+              options={{ unmountOnBlur: true }}
+              component={AssignGroupsHome}
+            />
+            <Stack.Screen
+              name="FarmerAssignGroupScreen"
+              options={{ unmountOnBlur: true }}
+              component={AssignFarmersScreen}
+            />
+            <Stack.Screen
+              name="ChooseGroupScreen"
+              options={{ unmountOnBlur: true }}
+              component={ChooseGroupScreen}
+            />
+            <Stack.Screen
+              name="ActiveGroupsScreen"
+              options={{ unmountOnBlur: true }}
+              component={ActiveGroupsScreen}
+            />
+            <Stack.Screen
+              name="InactiveGroupsScreen"
+              options={{ unmountOnBlur: true }}
+              component={InactiveGroupsScreen}
+            />
+            <Stack.Screen
+              name="PendingGroupsScreen"
+              options={{ unmountOnBlur: true }}
+              component={PendingGroupsScreen}
+            />
+            <Stack.Screen
+              name="UploadGroupChangesScreen"
+              options={{ unmountOnBlur: true }}
+              component={UploadGroupChangesScreen}
+            />
+            <Stack.Screen
+              name="UploadGroupAssignments"
+              options={{ unmountOnBlur: true }}
+              component={UploadGroupAssignments}
+            />
+            <Stack.Screen
+              name="AssignedFarmerDetailsScreen"
+              options={{ unmountOnBlur: true }}
+              component={AssignedFarmerDetailsScreen}
+            />
+
+            <Stack.Screen
+              name="LanguageScreen"
+              options={{ unmountOnBlur: true }}
+              component={LanguageScreen}
+            />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </I18nextProvider>
     </Provider>
   );
 }

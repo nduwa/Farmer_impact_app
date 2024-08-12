@@ -31,6 +31,8 @@ import { Ionicons } from "@expo/vector-icons";
 import LottieView from "lottie-react-native";
 import * as SplashScreen from "expo-splash-screen";
 import { addColumnIfNotExists, prepareTables } from "../helpers/prepareDB";
+import { useTranslation } from "react-i18next";
+import { initLanguage } from "../helpers/initLanguage";
 
 // Prevent auto-hiding of the splash screen
 SplashScreen.preventAutoHideAsync();
@@ -40,6 +42,8 @@ export const LoginScreen = ({ navigation }) => {
   const dispatch = useDispatch();
   const isFocused = useIsFocused();
   const formRef = useRef(null);
+
+  const { t } = useTranslation();
 
   const [pwdVisible, setPwdVisible] = useState(false);
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
@@ -51,8 +55,6 @@ export const LoginScreen = ({ navigation }) => {
   const [userDataPreloaded, setUserDataPreloaded] = useState(false);
 
   const [authenticated, setAuthenticated] = useState(false);
-
-  const [loading, setLoading] = useState(false);
 
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
@@ -276,6 +278,7 @@ export const LoginScreen = ({ navigation }) => {
       };
 
       handleSplashScreen();
+      initLanguage();
       validatedPreviousLogin();
       getLocation();
 
@@ -395,7 +398,7 @@ export const LoginScreen = ({ navigation }) => {
                       fontWeight: "bold",
                     }}
                   >
-                    Log-in
+                    {t("login.title")}
                   </Text>
                 )}
 
@@ -435,10 +438,10 @@ export const LoginScreen = ({ navigation }) => {
                             fontSize: screenWidth * 0.053,
                           }}
                         >
-                          User name
+                          {t("login.username")}
                         </Text>
                         <TextInput
-                          placeholder="e.g jdoe"
+                          placeholder={t("login.name_placeholder")}
                           placeholderTextColor={colors.black_a}
                           onChangeText={handleChange("uname")}
                           onBlur={handleBlur("uname")}
@@ -462,7 +465,7 @@ export const LoginScreen = ({ navigation }) => {
                               color: colors.secondary,
                             }}
                           >
-                            *Invalid user name
+                            *{t("login.name_error")}
                           </Text>
                         )}
                       </View>
@@ -478,7 +481,7 @@ export const LoginScreen = ({ navigation }) => {
                             fontSize: screenWidth * 0.053,
                           }}
                         >
-                          Password
+                          {t("login.password")}
                         </Text>
                         <View>
                           <TextInput
@@ -523,7 +526,7 @@ export const LoginScreen = ({ navigation }) => {
                               color: colors.secondary,
                             }}
                           >
-                            *Invalid password
+                            *{t("login.pwd_error")}
                           </Text>
                         )}
                       </View>
@@ -532,7 +535,7 @@ export const LoginScreen = ({ navigation }) => {
                         bg={colors.black}
                         color={colors.white}
                         width="100%"
-                        text="Login"
+                        text={t("login.button")}
                         bdcolor="transparent"
                         mt={5}
                         disabled={indicatorVisible}

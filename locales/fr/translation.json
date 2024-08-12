@@ -1,0 +1,15 @@
+{
+  "login": {
+    "title": "Log-In",
+    "username": "User name",
+    "password": "Password",
+    "button": "Login",
+    "name_error": "Invalid username",
+    "pwd_error": "Invalid password",
+    "toast_error": "Something went wrong",
+    "name_placeholder": "e.g jdoe"
+  },
+  "settings": {
+    "title": "Changer la languee"
+  }
+}
