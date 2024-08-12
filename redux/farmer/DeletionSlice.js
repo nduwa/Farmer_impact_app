@@ -5,7 +5,7 @@ export const farmerDeletion = createAsyncThunk(
   "farmers/delete",
   async (data) => {
     try {
-      const response = await api.patch(`/sync/farmers/deletion`, data);
+      const response = await api.post(`/sync/farmer/update`, data);
 
       let resp = null;
       if (response.status === 200) {

@@ -284,7 +284,7 @@ export const WeeklyReportScreen = () => {
                     backgroundColor: colors.white,
                     elevation: 2,
                     borderRadius: 15,
-                    marginTop: screenHeight * 0.025,
+                    marginTop: screenHeight * 0.01,
                     paddingHorizontal: screenWidth * 0.04,
                     paddingVertical: screenHeight * 0.03,
                     gap: screenHeight * 0.01,

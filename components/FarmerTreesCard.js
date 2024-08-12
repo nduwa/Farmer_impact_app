@@ -4,21 +4,21 @@ import { colors } from "../data/colors";
 import { AntDesign } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 
-export const FarmerUpdateCard = ({ data, destination, pending = false }) => {
+export const FarmerTreesCard = ({ data, registrationDate, active = true }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const navigation = useNavigation();
 
   const handleNavigation = () => {
-    navigation.navigate(destination, {
-      data: { farmerData: data, destination: destination },
+    navigation.replace("EditTreesScreen", {
+      data: { farmerData: data },
     });
   };
 
   return (
     <TouchableOpacity
       onPress={handleNavigation}
-      disabled={pending}
+      disabled={!active}
       style={{
         flexDirection: "row",
         alignContent: "center",
@@ -26,54 +26,45 @@ export const FarmerUpdateCard = ({ data, destination, pending = false }) => {
         width: "100%",
         backgroundColor: colors.white_variant,
         borderRadius: screenHeight * 0.015,
-        borderRadius: screenHeight * 0.015,
-        borderLeftColor: pending ? colors.primary : "transparent",
-        borderLeftWidth: pending ? screenWidth * 0.02 : 0,
         padding: screenWidth * 0.03,
         elevation: 3,
       }}
     >
       <View style={{ gap: screenHeight * 0.008 }}>
         <Text style={{ fontSize: screenWidth * 0.05, fontWeight: "600" }}>
-          {data.Name}
+          {data.farmer_name}
         </Text>
         <Text
           style={{ fontSize: screenWidth * 0.035, color: colors.black_letter }}
         >
-          Phone: {data.Phone.length > 0 ? data.Phone : "N/A"}
+          Received Seedling: {data.received_seedling}
         </Text>
         <Text
           style={{ fontSize: screenWidth * 0.035, color: colors.black_letter }}
         >
-          Gender: {data.Gender}
+          Survived Seedling: {data.survived_seedling}
         </Text>
         <Text
           style={{ fontSize: screenWidth * 0.035, color: colors.black_letter }}
         >
-          National ID:{" "}
-          {data.National_ID_t.length > 0 ? data.National_ID_t : "N/A"}
+          Old trees: {data.old_trees}
         </Text>
         <Text
           style={{ fontSize: screenWidth * 0.035, color: colors.black_letter }}
         >
-          ID: {data.farmerid}
+          Plots/Farms: {data.coffee_plot}
+        </Text>
+
+        <Text
+          style={{ fontSize: screenWidth * 0.035, color: colors.black_letter }}
+        >
+          Shade Trees: {data.shade_trees}
         </Text>
         <Text
           style={{ fontSize: screenWidth * 0.035, color: colors.black_letter }}
         >
-          Date of birth: {data.Year_Birth}
+          Pending since: {registrationDate}
         </Text>
-        {pending && (
-          <Text
-            style={{
-              fontSize: screenWidth * 0.03,
-              fontWeight: "800",
-              color: colors.primary,
-            }}
-          >
-            Pending update
-          </Text>
-        )}
       </View>
       <View
         style={{
@@ -81,7 +72,7 @@ export const FarmerUpdateCard = ({ data, destination, pending = false }) => {
           justifyContent: "center",
         }}
       >
-        {!pending && (
+        {active && (
           <AntDesign name="right" size={screenHeight * 0.034} color="black" />
         )}
       </View>

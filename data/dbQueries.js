@@ -11,4 +11,8 @@ export const dbQueries = {
     "SELECT SUM(CASE WHEN active = 1 THEN 1 ELSE 0 END) AS active_count,SUM(CASE WHEN active = 0 THEN 1 ELSE 0 END) AS inactive_count,DATE(created_at) AS insertion_date,COUNT(*) OVER (PARTITION BY DATE(created_at)) AS record_count FROM tmp_group_activate WHERE uploaded = 0 GROUP BY insertion_date ORDER BY insertion_date;",
   Q_TMP_GRP_ASSIGN_LIST:
     "SELECT DATE(created_at) as insertion_date,COUNT(DATE(created_at)) AS record_count FROM tmp_farmer_group_assignment WHERE uploaded = 0 GROUP BY insertion_date",
+  Q_TMP_FARM_DETAILS:
+    "INSERT INTO tmp_farm_details(_kf_Supplier, _kf_Staff, _kf_User, user_code, _kf_Station,CW_Name,farmer_name,farmer_ID,national_ID,latitude,longitude,status,uploaded_at,cropNameId,farm_unit_area,soil_slope,uuid,created_at,created_by,full_name,uploaded) VALUES",
+  Q_TMP_FARMER_UPDATES:
+    "INSERT INTO tmp_farmer_updates(__kp_Farmer,_kf_Group,_kf_Staff,user_code,_kf_Station,CW_Name,Year_Birth,Gender,farmer_ID,farmer_name,national_ID,Phone,Position,Marital_Status,Reading_Skills,Math_Skills,education_level,cell,village,Trees,Trees_Producing,number_of_plots_with_coffee,created_at,full_name,status,uploaded) VALUES",
 };

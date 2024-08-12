@@ -43,6 +43,10 @@ import { UploadGroupAssignments } from "./screens/farmer/assignGroups/UploadGrou
 import { AssignedFarmerDetailsScreen } from "./screens/farmer/assignGroups/AssignedFarmersDetailsScreen";
 import PendingReportsScreen from "./screens/farmer/weeklyReport/PendingReportsScreen";
 import { EditReportScreen } from "./screens/farmer/weeklyReport/EditReportScreen";
+import { PendingTreesScreen } from "./screens/farmer/updateTrees/PendingTreesScreen";
+import { EditTreesScreen } from "./screens/farmer/updateTrees/EditTreesScreen";
+import { PendingFarmScreen } from "./screens/farmer/updateTrees/PendingFarmScreens";
+import { PendingFarmerUpdatesScreen } from "./screens/farmer/updateTrees/PendingFarmerUpdatesScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -180,6 +184,11 @@ export default function App() {
             component={FarmUpdateScreen}
           />
           <Stack.Screen
+            name="PendingFarmScreen"
+            options={{ unmountOnBlur: true }}
+            component={PendingFarmScreen}
+          />
+          <Stack.Screen
             name="ChooseFarmerUpdateScreen"
             options={{ unmountOnBlur: true }}
             component={ChooseFarmerScreen}
@@ -204,6 +213,11 @@ export default function App() {
             options={{ unmountOnBlur: true }}
             component={PendingDeletionScreen}
           />
+          <Stack.Screen
+            name="PendingFarmerUpdatesScreen"
+            options={{ unmountOnBlur: true }}
+            component={PendingFarmerUpdatesScreen}
+          />
 
           <Stack.Screen
             name="WeeklyReportScreen"
@@ -222,9 +236,19 @@ export default function App() {
           />
 
           <Stack.Screen
-            name="updateTreesScreen"
+            name="UpdateTreesScreen"
             options={{ unmountOnBlur: true }}
             component={UpdateTreesScreen}
+          />
+          <Stack.Screen
+            name="PendingTreesScreen"
+            options={{ unmountOnBlur: true }}
+            component={PendingTreesScreen}
+          />
+          <Stack.Screen
+            name="EditTreesScreen"
+            options={{ unmountOnBlur: true }}
+            component={EditTreesScreen}
           />
 
           {/* assign groups */}

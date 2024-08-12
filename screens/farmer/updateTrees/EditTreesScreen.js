@@ -1,6 +1,5 @@
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useState } from "react";
-import * as SecureStore from "expo-secure-store";
 import {
   Dimensions,
   Keyboard,
@@ -17,22 +16,17 @@ import { BuyCoffeeInput } from "../../../components/BuyCoffeeInput";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import CustomButton from "../../../components/CustomButton";
 import { FarmerTressSchema } from "../../../validation/FarmerTreesSchema";
-import { getCurrentDate } from "../../../helpers/getCurrentDate";
-import { dataTodb } from "../../../helpers/dataTodb";
-import { useSelector } from "react-redux";
 import LottieView from "lottie-react-native";
+import { updateDBdataAsync } from "../../../helpers/updateDBdataAsync";
+import { deleteDBdataAsync } from "../../../helpers/deleteDBdataAsync";
+import { SyncModal } from "../../../components/SyncModal";
 
-export const UpdateTreesScreen = ({ route }) => {
+export const EditTreesScreen = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const { data } = route.params;
-  const userData = useSelector((state) => state.user.userData);
 
-  const [currentStationID, setCurrentStationID] = useState();
-  const [supplierID, setSupplierID] = useState();
-  const [CWname, setCWName] = useState();
   const [errors, setErrors] = useState({}); // validation errors
-
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
   const [currentJob, setCurrentJob] = useState(null);
   const [validationError, setValidationError] = useState({
@@ -42,11 +36,12 @@ export const UpdateTreesScreen = ({ route }) => {
   });
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [deleteModal, setDeleteModal] = useState({ open: false, id: null });
 
   const navigation = useNavigation();
 
   const handleBackButton = () => {
-    navigation.navigate("FarmerUpdateHome", { data: null });
+    navigation.navigate("PendingTreesScreen", { data: null });
   };
 
   const displayToast = (msg) => {
@@ -55,19 +50,15 @@ export const UpdateTreesScreen = ({ route }) => {
 
   const submitTreesDetails = (formData) => {
     try {
-      let nameFull = userData.user.Name_Full;
-      let userkf = userData.user.__kp_User;
-      let staffKf = userData.staff.__kp_Staff;
-
       let submitData = {
-        _kf_Staff: staffKf,
-        _kf_User: userkf,
-        Group_ID: formData.groupID,
-        farmer_ID: formData.farmerID,
-        farmer_name: formData.farmerName,
-        national_ID: formData.nationalID,
-        full_name: nameFull,
-        created_at: getCurrentDate(),
+        _kf_Staff: data.farmerData._kf_Staff,
+        _kf_User: data.farmerData._kf_User,
+        Group_ID: data.farmerData.Group_ID,
+        farmer_ID: data.farmerData.farmer_ID,
+        farmer_name: data.farmerData.farmer_name,
+        national_ID: data.farmerData.national_ID,
+        full_name: data.farmerData.full_name,
+        created_at: data.farmerData.created_at,
         received_seedling: formData.nmbrReceivedSeedlings,
         survived_seedling: formData.nmbrSurvivedSeedlings,
         planted_year: formData.yearPlantedReceivedSeedlings,
@@ -81,16 +72,20 @@ export const UpdateTreesScreen = ({ route }) => {
 
       if (!validateInputs(submitData, FarmerTressSchema)) return;
 
-      let kfsupplier = supplierID;
-      let kfstation = currentStationID;
-      let stationName = CWname;
+      let updateQuery = `UPDATE rtc_household_trees SET received_seedling = '${submitData.received_seedling}', survived_seedling='${submitData.survived_seedling}', planted_year='${submitData.planted_year}', old_trees='${submitData.old_trees}',old_trees_planted_year='${submitData.old_trees_planted_year}', coffee_plot = '${submitData.coffee_plot}', nitrogen = '${submitData.nitrogen}', natural_shade = '${submitData.natural_shade}',shade_trees = '${submitData.shade_trees}' WHERE id = '${data.farmerData.id}' `;
 
-      dataTodb({
-        tableName: "householdTrees",
-        syncData: [submitData],
-        setCurrentJob,
-        extraValArr: [kfstation, kfsupplier, stationName],
-      });
+      updateDBdataAsync({ id: data.farmerData.id, query: updateQuery })
+        .then((result) => {
+          if (result.success) {
+            setCurrentJob("trees details updated");
+          } else {
+            setCurrentJob("Failed to update trees details");
+          }
+        })
+        .catch((error) => {
+          setCurrentJob("Failed to update trees details");
+          console.log("Failed to update trees details: ", error);
+        });
     } catch (error) {
       console.log(error);
     }
@@ -136,6 +131,26 @@ export const UpdateTreesScreen = ({ route }) => {
     return output;
   };
 
+  const handleDelete = () => {
+    setDeleteModal((prevState) => ({ ...prevState, open: false }));
+
+    let id = deleteModal.id;
+    deleteDBdataAsync({
+      tableName: "rtc_household_trees",
+      targetId: id,
+      customQuery: `DELETE FROM rtc_household_trees WHERE id = '${id}';`,
+    })
+      .then((result) => {
+        if (result.success) {
+          displayToast("record deleted");
+          setCurrentJob("record deleted");
+        } else {
+          displayToast("Deletion failed");
+        }
+      })
+      .catch((error) => console.log(error));
+  };
+
   useEffect(() => {
     if (Object.keys(errors).length > 0) {
       setLoading(false);
@@ -150,10 +165,16 @@ export const UpdateTreesScreen = ({ route }) => {
   }, [errors]);
 
   useEffect(() => {
-    if (currentJob === "tree details saved") {
-      displayToast("Tree Details saved, pending upload");
+    if (currentJob === "trees details updated") {
+      displayToast("Tree Details updated, pending upload");
       setLoading(false);
       setFormSubmitted(true);
+    } else if (currentJob === "Failed to update trees details") {
+      displayToast("Failed to update trees details");
+      setLoading(false);
+    } else if (currentJob === "record deleted") {
+      displayToast("Trees Details deleted");
+      navigation.navigate("PendingTreesScreen");
     }
   }, [currentJob]);
 
@@ -180,19 +201,6 @@ export const UpdateTreesScreen = ({ route }) => {
 
   useFocusEffect(
     React.useCallback(() => {
-      const fetchData = async () => {
-        const stationId = await SecureStore.getItemAsync("rtc-station-id");
-        const supplierID = await SecureStore.getItemAsync("rtc-supplier-id");
-        const stationName = await SecureStore.getItemAsync("rtc-station-name");
-
-        if (stationId) {
-          setCurrentStationID(stationId);
-          setSupplierID(supplierID);
-          setCWName(stationName);
-        }
-      };
-
-      fetchData();
       return () => {
         setLoading(false);
         setFormSubmitted(false);
@@ -209,7 +217,6 @@ export const UpdateTreesScreen = ({ route }) => {
       }}
     >
       <StatusBar style="dark" />
-
       <View
         style={{
           flexDirection: "row",
@@ -248,19 +255,19 @@ export const UpdateTreesScreen = ({ route }) => {
       <View style={{ backgroundColor: colors.bg_variant }}>
         <Formik
           initialValues={{
-            farmerID: data.farmerData.farmerid,
-            farmerName: data.farmerData.Name,
-            nationalID: data.farmerData.National_ID_t,
-            groupID: data.farmerData.farmerGroupID,
-            nmbrReceivedSeedlings: "0",
-            nmbrSurvivedSeedlings: "0",
-            yearPlantedReceivedSeedlings: "",
-            nmbrOldTrees: "0",
-            yearPlantedOldTrees: "",
-            nmbrCoffeeFarms: "0",
-            totalNitrogenFixingShadeTrees: "0",
-            totalNaturalShadeTrees: "0",
-            totalNbrShadeTrees: "0",
+            farmerID: data.farmerData.farmer_ID,
+            farmerName: data.farmerData.farmer_name,
+            nationalID: data.farmerData.national_ID,
+            groupID: data.farmerData.Group_ID,
+            nmbrReceivedSeedlings: data.farmerData.received_seedling,
+            nmbrSurvivedSeedlings: data.farmerData.survived_seedling,
+            yearPlantedReceivedSeedlings: data.farmerData.planted_year,
+            nmbrOldTrees: data.farmerData.old_trees,
+            yearPlantedOldTrees: data.farmerData.old_trees_planted_year,
+            nmbrCoffeeFarms: data.farmerData.coffee_plot,
+            totalNitrogenFixingShadeTrees: data.farmerData.nitrogen,
+            totalNaturalShadeTrees: data.farmerData.natural_shade,
+            totalNbrShadeTrees: data.farmerData.shade_trees,
           }}
           onSubmit={async (values) => {
             submitTreesDetails(values);
@@ -468,25 +475,68 @@ export const UpdateTreesScreen = ({ route }) => {
                   </View>
                 )}
 
-                <CustomButton
-                  bg={colors.secondary}
-                  color={"white"}
-                  width="95%"
-                  text="Submit"
-                  bdcolor="transparent"
-                  mt={screenHeight * 0.017}
-                  mb={
-                    isKeyboardActive ? screenHeight * 0.04 : screenHeight * 0.03
-                  }
-                  radius={10}
-                  disabled={formSubmitted}
-                  onPress={handleSubmit}
-                />
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-evenly",
+                    width: screenWidth * 0.98,
+                  }}
+                >
+                  <CustomButton
+                    bg={colors.secondary}
+                    color={"white"}
+                    width="48%"
+                    text="Delete"
+                    bdcolor="transparent"
+                    fontSizeRatio={0.043}
+                    mt={screenHeight * 0.017}
+                    mb={
+                      isKeyboardActive
+                        ? screenHeight * 0.04
+                        : screenHeight * 0.03
+                    }
+                    radius={10}
+                    disabled={formSubmitted}
+                    onPress={() =>
+                      setDeleteModal({
+                        id: data?.farmerData?.id,
+                        open: true,
+                      })
+                    }
+                  />
+                  <CustomButton
+                    bg={colors.blue_font}
+                    color={"white"}
+                    width="48%"
+                    text="Edit"
+                    bdcolor="transparent"
+                    fontSizeRatio={0.043}
+                    mt={screenHeight * 0.017}
+                    mb={
+                      isKeyboardActive
+                        ? screenHeight * 0.04
+                        : screenHeight * 0.03
+                    }
+                    radius={10}
+                    disabled={formSubmitted}
+                    onPress={handleSubmit}
+                  />
+                </View>
               </ScrollView>
             </View>
           )}
         </Formik>
       </View>
+
+      {deleteModal.open && (
+        <SyncModal
+          label={"Are you sure you want to delete this record?"}
+          onYes={handleDelete}
+          OnNo={() =>
+            setDeleteModal((prevState) => ({ ...prevState, open: false }))
+          }
+        />
+      )}
 
       {/* loader */}
       {loading && (

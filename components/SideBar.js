@@ -152,9 +152,18 @@ export const SideBar = ({ setsideBarScroll, setIsSidebarOpen }) => {
               }}
             >
               <SideNav name={"Sync Data"} destination="Sync" />
+
               {isAccessable("Register") && (
                 <SideNav
                   name={"Pending Farms"}
+                  destination="PendingFarmScreen"
+                  isActive={isAccessable("Register")}
+                />
+              )}
+              {isAccessable("Register") && (
+                <SideNav
+                  name={"Pending Trees"}
+                  destination="PendingTreesScreen"
                   isActive={isAccessable("Register")}
                 />
               )}
@@ -167,7 +176,14 @@ export const SideBar = ({ setsideBarScroll, setIsSidebarOpen }) => {
               )}
               {isAccessable("Register") && (
                 <SideNav
-                  name={"Deleted Farmers"}
+                  name={"Updated Farmers"}
+                  destination="PendingFarmerUpdatesScreen"
+                  isActive={isAccessable("Register")}
+                />
+              )}
+              {isAccessable("Register") && (
+                <SideNav
+                  name={"Removed Farmers"}
                   destination="FarmerDeletedScreen"
                   isActive={isAccessable("Register")}
                 />
@@ -215,7 +231,7 @@ export const SideBar = ({ setsideBarScroll, setIsSidebarOpen }) => {
               )}
 
               <SideNav name={"History"} destination="HistoryScreen" />
-              <SideNav name={"Change Settings"} />
+              <SideNav name={"Change Language"} />
 
               <SideNav name={"Log out"} isLogOut={true} destination={"Login"} />
             </View>

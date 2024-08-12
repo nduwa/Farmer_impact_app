@@ -9,6 +9,7 @@ const FarmerAssignCard = ({
   setChecked,
   filterFn,
   groupData,
+  use = "groupAssign",
   pending = null,
 }) => {
   const screenHeight = Dimensions.get("window").height;
@@ -73,7 +74,9 @@ const FarmerAssignCard = ({
               color: colors.primary,
             }}
           >
-            Pending move to group {pending}
+            {use === "farmerDelete" && "Pending removal"}
+            {use === "farmerUpdate" && "Pending update"}
+            {use === "groupAssign" && `Pending move to group ${pending}`}
           </Text>
         )}
       </View>

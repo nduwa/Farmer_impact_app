@@ -255,7 +255,6 @@ export const FarmerEditScreen = ({ route }) => {
         if (result.success) {
           displayToast("Farmer deleted");
           setCurrentJob("Farmer deleted");
-          navigation.navigate();
         } else {
           displayToast("Deletion failed");
         }
@@ -351,6 +350,7 @@ export const FarmerEditScreen = ({ route }) => {
             tableName: "rtc_groups",
             stationId,
             setData: setGroups,
+            queryArg: `SELECT * FROM rtc_groups WHERE _kf_Station='${stationId}' AND active = "1"`,
           });
         }
       };

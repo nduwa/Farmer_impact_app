@@ -28,6 +28,7 @@ export const ChooseFarmerScreen = ({ route }) => {
   const [activeGroup, setActiveGroup] = useState([]);
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [searchResults, setSearchResults] = useState([]);
+  const [pendingFarmerUpdates, setPendingFarmerUpdates] = useState([]);
 
   const navigation = useNavigation();
 
@@ -56,6 +57,14 @@ export const ChooseFarmerScreen = ({ route }) => {
   };
   const handleBackButton = () => {
     navigation.navigate("FarmerUpdateHome", { data: null });
+  };
+
+  const checkPending = (farmerid) => {
+    if (pendingFarmerUpdates.length == 0) return null;
+
+    for (const farmer of pendingFarmerUpdates) {
+      if (farmer.farmer_ID === farmerid) return true;
+    }
   };
 
   useEffect(() => {
@@ -101,10 +110,20 @@ export const ChooseFarmerScreen = ({ route }) => {
             tableName: "rtc_groups",
             stationId,
             setData: setGroups,
+            queryArg: `SELECT * FROM rtc_groups WHERE _kf_Station='${stationId}' AND active = "1"`,
           });
         }
       };
 
+      const fetchPendings = async () => {
+        retrieveDBdata({
+          tableName: "tmp_farmer_updates",
+          setData: setPendingFarmerUpdates,
+          queryArg: "SELECT * FROM tmp_farmer_updates WHERE uploaded = 0",
+        });
+      };
+
+      fetchPendings();
       fetchData();
 
       return () => {
@@ -307,6 +326,7 @@ export const ChooseFarmerScreen = ({ route }) => {
                 <FarmerUpdateCard
                   data={{ ...item, ...{ farmerGroupID: activeGroup.ID_GROUP } }}
                   destination={data}
+                  pending={checkPending(item.farmerid)}
                 />
               )}
               keyExtractor={(item, index) => index}

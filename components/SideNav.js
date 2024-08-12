@@ -8,7 +8,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Entypo } from "@expo/vector-icons";
-import Octicons from '@expo/vector-icons/Octicons';
+import Octicons from "@expo/vector-icons/Octicons";
 import { colors } from "../data/colors";
 import { useNavigation } from "@react-navigation/native";
 import { useDispatch } from "react-redux";
@@ -105,6 +105,13 @@ export const SideNav = ({
           color={isActive ? colors.secondary : colors.black_a}
         />
       )}
+      {name === "Pending Trees" && (
+        <FontAwesome5
+          name="seedling"
+          size={24}
+          color={isActive ? colors.secondary : colors.black_a}
+        />
+      )}
       {name === "Pending Farms" && (
         <Feather
           name="map"
@@ -119,7 +126,14 @@ export const SideNav = ({
           color={isActive ? colors.secondary : colors.black_a}
         />
       )}
-      {name === "Deleted Farmers" && (
+      {name === "Updated Farmers" && (
+        <MaterialIcons
+          name="edit-note"
+          size={24}
+          color={isActive ? colors.secondary : colors.black_a}
+        />
+      )}
+      {name === "Removed Farmers" && (
         <MaterialCommunityIcons
           name="delete-forever-outline"
           size={24}
@@ -175,9 +189,9 @@ export const SideNav = ({
           color={isActive ? colors.secondary : colors.black_a}
         />
       )}
-      {name === "Change Settings" && (
-        <Feather
-          name="settings"
+      {name === "Change Language" && (
+        <Ionicons
+          name="language-sharp"
           size={24}
           color={isActive ? colors.secondary : colors.black_a}
         />

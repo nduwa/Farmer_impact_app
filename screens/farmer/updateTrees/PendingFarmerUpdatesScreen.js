@@ -19,20 +19,20 @@ import LottieView from "lottie-react-native";
 import { SyncModal } from "../../../components/SyncModal";
 import { FarmerDeletedCard } from "../../../components/FarmerDeletedCard";
 import { updateDBdata } from "../../../helpers/updateDBdata";
-import {
-  deletionAction,
-  farmerDeletion,
-} from "../../../redux/farmer/DeletionSlice";
 import { deleteDBdataAsync } from "../../../helpers/deleteDBdataAsync";
+import {
+  farmerUpdate,
+  farmerUpdateAction,
+} from "../../../redux/farmer/FarmerUpdateSlice";
 
-export const PendingDeletionScreen = () => {
+export const PendingFarmerUpdatesScreen = () => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
-  const deletionState = useSelector((state) => state.deletion);
+  const farmerUpdateState = useSelector((state) => state.update);
   const navigation = useNavigation();
   const dispatch = useDispatch();
 
-  const [deletions, setDeletions] = useState([]);
+  const [farmerUpdates, setFarmerUpdates] = useState([]);
   const [Submitted, setSubmitted] = useState(false);
   const [restoreModal, setRestoreModal] = useState({ open: false, id: null });
   const [currentJob, setCurrentJob] = useState();
@@ -42,7 +42,7 @@ export const PendingDeletionScreen = () => {
 
   const handleUpload = () => {
     setLoading(true);
-    dispatch(farmerDeletion(deletions));
+    dispatch(farmerUpdate(farmerUpdates));
     setSubmitModal(false);
   };
 
@@ -88,11 +88,11 @@ export const PendingDeletionScreen = () => {
   useEffect(() => {
     if (currentJob === "Farmer restored") {
       displayToast("Farmers restored");
-      const newDeletions = deletions.filter(
+      const newFarmerUpdates = farmerUpdates.filter(
         (item) => item.id !== restoreModal.id
       );
 
-      setDeletions(newDeletions);
+      setFarmerUpdates(newFarmerUpdates);
       setCurrentJob("");
     } else if (currentJob === "Changes uploaded") {
       displayToast("Changes uploaded");
@@ -101,11 +101,11 @@ export const PendingDeletionScreen = () => {
   }, [currentJob]);
 
   useEffect(() => {
-    if (deletionState.serverResponded) {
+    if (farmerUpdateState.serverResponded) {
       setSubmitted(true);
 
-      if (deletionState.response.status === "success") {
-        let { processedData } = deletionState.response;
+      if (farmerUpdateState.response.status === "success") {
+        let { processedData } = farmerUpdateState.response;
         let query = "";
         let strIDs = "";
         let i = 0;
@@ -131,19 +131,18 @@ export const PendingDeletionScreen = () => {
         });
       }
     }
-  }, [deletionState.serverResponded]);
+  }, [farmerUpdateState.serverResponded]);
 
   useEffect(() => {
-    if (deletionState.error) {
+    if (farmerUpdateState.error) {
       setLoading(false);
       displayToast("Error: Updates not submitted");
-      dispatch(deletionAction.resetDeletionState());
+      dispatch(farmerUpdateAction.resetUpdateState());
     }
-  }, [deletionState.error]);
-
+  }, [farmerUpdateState.error]);
   useEffect(() => {
     setLoading(false);
-  }, [deletions]);
+  }, [farmerUpdates]);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -154,19 +153,18 @@ export const PendingDeletionScreen = () => {
           setLoading(true);
           retrieveDBdata({
             tableName: "tmp_farmer_updates",
-            setData: setDeletions,
-            queryArg: `SELECT * FROM tmp_farmer_updates WHERE uploaded = 0 AND status = 'delete'`,
+            setData: setFarmerUpdates,
+            queryArg: `SELECT * FROM tmp_farmer_updates WHERE uploaded = 0 AND status = 'update'`,
           });
         }
       };
 
       fetchData();
       return () => {
-        setDeletions([]);
+        setFarmerUpdates([]);
         setSubmitted(false);
         setLoading(false);
-        setLoading(false);
-        dispatch(deletionAction.resetDeletionState());
+        dispatch(farmerUpdateAction.resetUpdateState());
       };
     }, [])
   );
@@ -209,34 +207,35 @@ export const PendingDeletionScreen = () => {
             fontSize: 19,
           }}
         >
-          Farmers to be deleted
+          Farmers to be updated
         </Text>
         <View
           style={{ width: screenWidth * 0.07, backgroundColor: "transparent" }}
         />
       </View>
-      {deletions.length > 0 && (
+      {farmerUpdates.length > 0 && (
         <FlatList
           contentContainerStyle={{ padding: 12, gap: 9 }}
-          data={deletions}
+          data={farmerUpdates}
           initialNumToRender={10}
           renderItem={({ item }) => (
             <FarmerDeletedCard
               data={item}
               deleteDate={formatDate(item.created_at)}
               restoreFn={setRestoreModal}
-              active={!deletionState.loading && !Submitted}
+              active={!farmerUpdateState.loading && !Submitted}
+              use="update"
             />
           )}
           keyExtractor={(item) => item.id}
         />
       )}
 
-      {deletions.length > 0 && (
+      {farmerUpdates.length > 0 && (
         <InspectionHoverSubmitBtn
           topRatio={0.9}
           handlePress={() => setSubmitModal(true)}
-          active={!deletionState.loading && !Submitted}
+          active={!farmerUpdateState.loading && !Submitted}
         />
       )}
 
