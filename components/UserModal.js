@@ -4,10 +4,12 @@ import { colors } from "../data/colors";
 import CustomButton from "./CustomButton";
 import { AntDesign } from "@expo/vector-icons";
 import { MaterialIcons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 
 export const UserModal = ({ data, CloseFn, AccessCtrlFn }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
+  const { t } = useTranslation();
 
   const handleClose = () => {
     CloseFn(false);
@@ -67,7 +69,7 @@ export const UserModal = ({ data, CloseFn, AccessCtrlFn }) => {
               fontWeight: "600",
             }}
           >
-            Current Session
+            {t("homepage.session.title")}
           </Text>
           <View
             style={{
@@ -85,7 +87,7 @@ export const UserModal = ({ data, CloseFn, AccessCtrlFn }) => {
               marginVertical: screenHeight * 0.006,
             }}
           >
-            {`USER / ${data.names.toUpperCase()}`}
+            {`${t("homepage.session.user")} / ${data.names.toUpperCase()}`}
           </Text>
           <View
             style={{
@@ -103,7 +105,7 @@ export const UserModal = ({ data, CloseFn, AccessCtrlFn }) => {
               marginVertical: screenHeight * 0.006,
             }}
           >
-            {`ROLE / ${data.role.toUpperCase()}`}
+            {`${t("homepage.session.role")} / ${data.role.toUpperCase()}`}
           </Text>
           {data.station && (
             <>
@@ -123,7 +125,9 @@ export const UserModal = ({ data, CloseFn, AccessCtrlFn }) => {
                   marginVertical: screenHeight * 0.006,
                 }}
               >
-                {`STATION / ${data?.station?.name.toUpperCase()}`}
+                {`${t(
+                  "homepage.session.station"
+                )} / ${data?.station?.name.toUpperCase()}`}
               </Text>
             </>
           )}
@@ -153,8 +157,7 @@ export const UserModal = ({ data, CloseFn, AccessCtrlFn }) => {
                 color: colors.black_letter,
               }}
             >
-              In case your permissions have been updated, use the button below
-              to refresh the app for the new changes.
+              {t("homepage.session.warning1")}
             </Text>
           </View>
           <Text
@@ -165,7 +168,7 @@ export const UserModal = ({ data, CloseFn, AccessCtrlFn }) => {
               fontSize: screenWidth * 0.029,
             }}
           >
-            This action requires internet connectivity.
+            {t("homepage.session.warning2")}
           </Text>
           <View
             style={{
@@ -178,8 +181,8 @@ export const UserModal = ({ data, CloseFn, AccessCtrlFn }) => {
             <CustomButton
               bg={colors.blue_font}
               color={"white"}
-              width="90%"
-              text="Refresh Access Control"
+              width="95%"
+              text={t("homepage.session.button")}
               bdcolor="transparent"
               mt={8}
               mb={8}

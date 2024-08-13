@@ -9,7 +9,93 @@
     "toast_error": "Something went wrong",
     "name_placeholder": "e.g jdoe"
   },
+  "homepage": {
+    "greeting": "Hello, {{name}}",
+    "farmer": "Farmer",
+    "inspection": "Inspecion",
+    "training": "Training",
+    "buy_coffee": "Buy Coffee",
+    "finance": "CWS Finance",
+    "audit": "Wet Mill Audit",
+    "session": {
+      "title": "Current Session",
+      "user": "USER",
+      "role": "ROLE",
+      "station": "STATION",
+      "warning1": "In case your permissions have been updated, use the button below to refresh the app for the new changes.",
+      "warning2": "This action requires internet connectivity",
+      "button": "Refresh Access Control"
+    },
+    "farmer_modal": {
+      "title": "Farmer Management",
+      "register": "Register",
+      "groups": "Groups",
+      "update": "Update Farmer",
+      "remove": "Remove Farmers",
+      "report": "Weekly Reports"
+    }
+  },
+  "new_farmer": {
+    "title": "New Farmer",
+    "title_household": "Household Information",
+    "title_farmer": "Farmer Information",
+    "button": "Register",
+    "educational_level": {
+      "none": "No formal education",
+      "some_primary": "Some primary",
+      "complete_primary": "Complete primary",
+      "some_secondary": "Some secondary",
+      "complete_secondary": "Complete secondary",
+      "some_techi_uni": "Some technical school or university",
+      "complete_techi_uni": "Complete technical school or university"
+    },
+    "reading_skills": {
+      "none": "Ntazi gusoma",
+      "with_assistance": "Ashobora gusoma abifashijwemo",
+      "without_assistance": "Ashobora gusoma ntabufasha"
+    },
+    "math_skills": {
+      "none": "No math skills",
+      "with_assistance": "Can do basic math with assistance from others",
+      "without_assistance": "Can do basic math without assistance ffrom others"
+    },
+    "marital_status": {
+      "single": "Single",
+      "married": "Married",
+      "widowed": "Widowed",
+      "divorced": "Divorced"
+    },
+    "errors": {
+      "validation_error": "Validation error",
+      "prod_tree_error": "Production trees can't be more than total trees",
+      "invalid_input_error": "Invalid input in {{name}}, check the inputs highlighted in red"
+    },
+    "inputs": {
+      "group": "Group name",
+      "cell": "Cell",
+      "village": "Village",
+      "coffee_plots": "Total plots of land with coffee",
+      "prd_tree": "Productive Trees",
+      "tot_tree": "Total Trees",
+      "name": "Farmer Name",
+      "phone": "Phone number",
+      "gender": {
+        "label": "Gender",
+        "male": "Male",
+        "female": "Female"
+      },
+      "birth": "Year of Birth",
+      "national_id": "National ID",
+      "marital": "Marital Status",
+      "math": "Basic Math Skills",
+      "reading": "Reading Skills",
+      "educational": "Educational Level"
+    }
+  },
   "settings": {
-    "title": "Change Language"
+    "title": "Change Language",
+    "english": "English",
+    "french": "French",
+    "kinyarwanda": "Kinyarwanda"
   }
 }

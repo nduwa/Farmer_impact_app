@@ -31,12 +31,14 @@ import { UserModal } from "../components/UserModal";
 import { FarmerMgtModal } from "../components/FarmerMgtModal";
 import { AccessControlModal } from "../components/AccessControlModal";
 import { retrieveDBdataAsync } from "../helpers/retrieveDBdataAsync";
+import { useTranslation } from "react-i18next";
 
 export const HomeScreen = ({ route }) => {
   const userState = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const navigation = useNavigation();
-  
+  const { t } = useTranslation();
+
   const [today, setToday] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [stationDetails, setStationDetails] = useState({
@@ -327,7 +329,7 @@ export const HomeScreen = ({ route }) => {
                 color: colors.secondary_variant,
               }}
             >
-              Hello {displayName}
+              {t("homepage.greeting", { name: displayName })}
             </Text>
             <Text style={{ fontSize: screenWidth * 0.037 }}>{today}</Text>
           </View>
@@ -401,28 +403,31 @@ export const HomeScreen = ({ route }) => {
           }}
         >
           <OpCard
-            name={"Farmer"}
+            name={t("homepage.farmer")}
             action={setIsFarmerModalOpen}
             active={isAccessable("Register")}
           />
           <OpCard
-            name={"Inspection"}
+            name={t("homepage.inspection")}
             destination={"chooseInspection"}
             active={isAccessable("Inspection")}
           />
           <OpCard
-            name={"Training"}
+            name={t("homepage.training")}
             destination="TrainingCourses"
             active={isAccessable("Training")}
           />
           <OpCard
-            name={"Buy Coffee"}
+            name={t("homepage.buy_coffee")}
             action={setIsBuyCoffeeModalOpen}
             active={isAccessable("Buy coffee")}
           />
-          <OpCard name={"CWS Finance"} active={isAccessable("Finance")} />
           <OpCard
-            name={"Wet Mill Audit"}
+            name={t("homepage.finance")}
+            active={isAccessable("Finance")}
+          />
+          <OpCard
+            name={t("homepage.audit")}
             active={isAccessable("Wet mill audit")}
           />
         </View>

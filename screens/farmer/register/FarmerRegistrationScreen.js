@@ -28,11 +28,13 @@ import { newFarmerSchema } from "../../../validation/newFarmerSchema";
 import { useSelector } from "react-redux";
 import LottieView from "lottie-react-native";
 import { getCurrentDate } from "../../../helpers/getCurrentDate";
+import { useTranslation } from "react-i18next";
 
 export const FarmerRegistrationScreen = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const userData = useSelector((state) => state.user.userData);
+  const { t } = useTranslation();
 
   const [currentStationID, setCurrentStationID] = useState();
   const [supplierID, setSupplierID] = useState();
@@ -77,38 +79,62 @@ export const FarmerRegistrationScreen = ({ route }) => {
   const [loading, setLoading] = useState(false);
 
   const farmerMarital = [
-    { id: 1, name: "Single", value: "S" },
-    { id: 2, name: "Married", value: "M" },
-    { id: 3, name: "Widowed", value: "W" },
-    { id: 4, name: "Divorced", value: "D" },
+    { id: 1, name: t("new_farmer.marital_status.single"), value: "S" },
+    { id: 2, name: t("new_farmer.marital_status.married"), value: "M" },
+    { id: 3, name: t("new_farmer.marital_status.widowed"), value: "W" },
+    { id: 4, name: t("new_farmer.marital_status.divorced"), value: "D" },
   ];
 
   const farmerReading = [
-    { id: 1, name: "Cannot Read", value: "A" },
-    { id: 2, name: "Can read with some assistance", value: "B" },
-    { id: 3, name: "Can read without some assistance from others", value: "C" },
+    { id: 1, name: t("new_farmer.reading_skills.none"), value: "A" },
+    { id: 2, name: t("new_farmer.reading_skills.with_assistance"), value: "B" },
+    {
+      id: 3,
+      name: t("new_farmer.reading_skills.without_assistance"),
+      value: "C",
+    },
   ];
 
   const farmerEducation = [
-    { id: 1, name: "No formal education", value: "A" },
-    { id: 2, name: "Some primary", value: "B" },
-    { id: 3, name: "Complete primary", value: "C" },
-    { id: 4, name: "Some secondary", value: "D" },
-    { id: 5, name: "Complete secondary", value: "E" },
-    { id: 6, name: "Some technical school or university", value: "F" },
-    { id: 7, name: "Complete technical school or university", value: "G" },
+    { id: 1, name: t("new_farmer.educational_level.none"), value: "A" },
+    { id: 2, name: t("new_farmer.educational_level.some_primary"), value: "B" },
+    {
+      id: 3,
+      name: t("new_farmer.educational_level.complete_primary"),
+      value: "C",
+    },
+    {
+      id: 4,
+      name: t("new_farmer.educational_level.some_secondary"),
+      value: "D",
+    },
+    {
+      id: 5,
+      name: t("new_farmer.educational_level.complete_secondary"),
+      value: "E",
+    },
+    {
+      id: 6,
+      name: t("new_farmer.educational_level.some_techi_uni"),
+      value: "F",
+    },
+    {
+      id: 7,
+      name: t("new_farmer.educational_level.complete_techi_uni"),
+      value: "G",
+    },
   ];
 
   const farmerMath = [
-    { id: 1, name: "No math skills", value: "A" },
+    { id: 1, name: t("new_farmer.math_skills.none"), value: "A" },
     {
       id: 2,
-      name: "Can do basic math with assistance from others",
+      name: t("new_farmer.math_skills.with_assistance"),
       value: "B",
     },
     {
       id: 3,
-      name: "Can do basic math without assistance from others",
+      name: t("new_farmer.math_skills.without_assistance"),
       value: "C",
     },
   ];
@@ -224,14 +250,15 @@ export const FarmerRegistrationScreen = ({ route }) => {
     let tmp = input.split("_");
     output = tmp.join(" ");
 
-    if (input === "Year_Birth") output = "Birth year";
-    if (input === "Area_Small") output = "Cell";
-    if (input === "Area_Smallest") output = "Village";
-    if (input === "National_ID_t") output = "National ID";
-    if (input === "Trees_Producing") output = "Production Trees";
-    if (input === "Trees") output = "Total Trees";
+    if (input === "Math_Skills") output = t("new_farmer.inputs.math");
+    if (input === "Year_Birth") output = t("new_farmer.inputs.birth");
+    if (input === "Area_Small") output = t("new_farmer.inputs.cell");
+    if (input === "Area_Smallest") output = t("new_farmer.inputs.village");
+    if (input === "National_ID_t") output = t("new_farmer.inputs.national_id");
+    if (input === "Trees_Producing") output = t("new_farmer.inputs.prd_tree");
+    if (input === "Trees") output = t("new_farmer.inputs.tot_tree");
     if (input === "number_of_plots_with_coffee")
-      output = "Total plots of land with coffee";
+      output = t("new_farmer.inputs.plots");
 
     return output;
   };
@@ -241,9 +268,9 @@ export const FarmerRegistrationScreen = ({ route }) => {
       setLoading(false);
       setValidationError({
         type: "emptyOrInvalidData",
-        message: `Invalid input in ${getInputLabel(
-          Object.keys(errors)[0]
-        )}, check the inputs highlighted in red`,
+        message: t("new_farmer.errors.invalid_input_error", {
+          name: getInputLabel(Object.keys(errors)[0]),
+        }),
         inputBox: null,
       });
     }
@@ -402,7 +429,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
           data={cellList}
           setModalOpen={setCellsModalOpen}
           heightRatio={isKeyboardActive ? 0.5 : 0.8}
-          title={"Cells"}
+          title={t("new_farmer.inputs.cell")}
         />
       )}
 
@@ -412,7 +439,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
           data={villageList}
           setModalOpen={setvillagesModalOpen}
           heightRatio={isKeyboardActive ? 0.5 : 0.8}
-          title={"Villages"}
+          title={t("new_farmer.inputs.village")}
         />
       )}
 
@@ -422,7 +449,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
           data={farmerMarital}
           setModalOpen={setMaritalModalOpen}
           heightRatio={isKeyboardActive ? 0.5 : 0.8}
-          title={"Marital Status"}
+          title={t("new_farmer.inputs.marital")}
         />
       )}
 
@@ -432,7 +459,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
           data={farmerMath}
           setModalOpen={setMathModalOpen}
           heightRatio={isKeyboardActive ? 0.5 : 0.8}
-          title={"Basic Math Skills"}
+          title={t("new_farmer.inputs.math")}
         />
       )}
 
@@ -442,7 +469,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
           data={farmerReading}
           setModalOpen={setReadingModalOpen}
           heightRatio={isKeyboardActive ? 0.5 : 0.8}
-          title={"Reading Skills"}
+          title={t("new_farmer.inputs.reading")}
         />
       )}
 
@@ -485,7 +512,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
             fontSize: 19,
           }}
         >
-          New Farmer
+          {t("new_farmer.title")}
         </Text>
         <View
           style={{ width: screenWidth * 0.07, backgroundColor: "transparent" }}
@@ -566,14 +593,14 @@ export const FarmerRegistrationScreen = ({ route }) => {
                       marginLeft: screenWidth * 0.02,
                     }}
                   >
-                    Household information
+                    {t("new_farmer.title_household")}
                   </Text>
                   <View>
                     <BuyCoffeeInput
                       values={values}
                       handleChange={handleChange("groupName")}
                       handleBlur={handleBlur("groupName")}
-                      label={"Choose group name"}
+                      label={t("new_farmer.inputs.group")}
                       value={
                         activeGroup?.Name?.length > 0
                           ? activeGroup?.Name
@@ -607,7 +634,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
                       values={values}
                       handleChange={handleChange("cell")}
                       handleBlur={handleBlur("cell")}
-                      label={"Cell"}
+                      label={t("new_farmer.inputs.cell")}
                       value={cellChoice?.name}
                       active={false}
                       error={errors.cell}
@@ -662,7 +689,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
                       values={values}
                       handleChange={handleChange("village")}
                       handleBlur={handleBlur("village")}
-                      label={"Village"}
+                      label={t("new_farmer.inputs.village")}
                       value={villageChoice?.name}
                       active={false}
                       error={errors.village}
@@ -714,7 +741,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
                     values={values}
                     handleChange={handleChange("totalPlots")}
                     handleBlur={handleBlur("totalPlots")}
-                    label={"Total plots of land with coffee"}
+                    label={t("new_farmer.inputs.coffee_plots")}
                     value={values.totalPlots}
                     active={true}
                     error={errors.number_of_plots}
@@ -723,7 +750,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
                     values={values}
                     handleChange={handleChange("prodTrees")}
                     handleBlur={handleBlur("prodTrees")}
-                    label={"Productive Trees"}
+                    label={t("new_farmer.inputs.prd_tree")}
                     value={values.prodTrees}
                     active={true}
                     error={errors.Trees_Producing}
@@ -732,7 +759,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
                     values={values}
                     handleChange={handleChange("totTrees")}
                     handleBlur={handleBlur("totTrees")}
-                    label={"Total Trees"}
+                    label={t("new_farmer.inputs.tot_tree")}
                     value={values.totTrees}
                     active={true}
                     error={errors.Trees}
@@ -759,14 +786,14 @@ export const FarmerRegistrationScreen = ({ route }) => {
                       marginLeft: screenWidth * 0.02,
                     }}
                   >
-                    Farmer information
+                    {t("new_farmer.title_farmer")}
                   </Text>
 
                   <BuyCoffeeInput
                     values={values}
                     handleChange={handleChange("farmerName")}
                     handleBlur={handleBlur("farmerName")}
-                    label={"Farmer Name"}
+                    label={t("new_farmer.inputs.name")}
                     value={values.farmerName}
                     error={errors.Name}
                   />
@@ -774,7 +801,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
                     values={values}
                     handleChange={handleChange("phoneNumber")}
                     handleBlur={handleBlur("phoneNumber")}
-                    label={"Phone number"}
+                    label={t("new_farmer.inputs.phone")}
                     value={values.phoneNumber}
                     error={errors.phone}
                   />
@@ -792,7 +819,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
                         marginLeft: screenWidth * 0.02,
                       }}
                     >
-                      Gender
+                      {t("new_farmer.inputs.gender.label")}
                     </Text>
 
                     <RadioButtonGroup
@@ -816,7 +843,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
                               color: colors.black,
                             }}
                           >
-                            Male
+                            {t("new_farmer.inputs.gender.male")}
                           </Text>
                         }
                       />
@@ -831,7 +858,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
                               color: colors.black,
                             }}
                           >
-                            Female
+                            {t("new_farmer.inputs.gender.female")}
                           </Text>
                         }
                       />
@@ -842,7 +869,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
                     values={values}
                     handleChange={handleChange("birthYear")}
                     handleBlur={handleBlur("birthYear")}
-                    label={"Year of Birth"}
+                    label={t("new_farmer.inputs.birth")}
                     value={values.birthYear}
                     error={errors.Year_Birth}
                   />
@@ -850,7 +877,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
                     values={values}
                     handleChange={handleChange("nationalID")}
                     handleBlur={handleBlur("nationalID")}
-                    label={"National ID"}
+                    label={t("new_farmer.inputs.national_id")}
                     value={values.nationalID}
                     error={errors.National_ID}
                   />
@@ -860,7 +887,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
                       values={values}
                       handleChange={handleChange("maritalStatus")}
                       handleBlur={handleBlur("maritalStatus")}
-                      label={"Marital Status"}
+                      label={t("new_farmer.inputs.marital")}
                       value={maritalChoice?.name || values.maritalStatus}
                       error={errors.Marital_Status}
                       active={false}
@@ -911,7 +938,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
                       values={values}
                       handleChange={handleChange("basicMathSkills")}
                       handleBlur={handleBlur("basicMathSkills")}
-                      label={"Basic Math Skills"}
+                      label={t("new_farmer.inputs.math")}
                       value={mathChoice?.name || values.basicMathSkills}
                       error={errors.Math_Skills}
                       active={false}
@@ -962,7 +989,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
                       values={values}
                       handleChange={handleChange("readingSkills")}
                       handleBlur={handleBlur("readingSkills")}
-                      label={"Reading Skills"}
+                      label={t("new_farmer.inputs.reading")}
                       value={readingChoice?.name || values.readingSkills}
                       error={errors.Skills}
                       active={false}
@@ -1013,7 +1040,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
                       values={values}
                       handleChange={handleChange("educationalLevel")}
                       handleBlur={handleBlur("educationalLevel")}
-                      label={"Educational Level"}
+                      label={t("new_farmer.inputs.educational")}
                       value={educationChoice?.name || values.educationalLevel}
                       error={errors.education_level}
                       active={false}
@@ -1083,7 +1110,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
                         marginLeft: screenWidth * 0.02,
                       }}
                     >
-                      Validation Error
+                      {t("new_farmer.errors.validation_error")}
                     </Text>
                     <Text
                       style={{
@@ -1102,7 +1129,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
                   bg={colors.secondary}
                   color={"white"}
                   width="95%"
-                  text="Register"
+                  text={t("new_farmer.button")}
                   bdcolor="transparent"
                   mt={screenHeight * 0.017}
                   mb={

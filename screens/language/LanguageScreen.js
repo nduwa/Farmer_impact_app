@@ -93,7 +93,7 @@ export const LanguageScreen = () => {
       >
         <SimpleIconButton
           selected={currentLanguage === "en"}
-          label={"English"}
+          label={t("settings.english")}
           width="100%"
           color={colors.blue_font}
           labelColor="white"
@@ -102,7 +102,7 @@ export const LanguageScreen = () => {
         />
         <SimpleIconButton
           selected={currentLanguage === "kiny"}
-          label={"Kinyarwanda"}
+          label={t("settings.kinyarwanda")}
           width="100%"
           color={colors.blue_font}
           labelColor="white"
@@ -111,7 +111,7 @@ export const LanguageScreen = () => {
         />
         <SimpleIconButton
           selected={currentLanguage === "fr"}
-          label={"French"}
+          label={t("settings.french")}
           width="100%"
           color={colors.blue_font}
           labelColor="white"

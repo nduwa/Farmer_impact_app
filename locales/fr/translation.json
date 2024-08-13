@@ -1,15 +1,76 @@
 {
   "login": {
-    "title": "Log-In",
-    "username": "User name",
-    "password": "Password",
-    "button": "Login",
-    "name_error": "Invalid username",
-    "pwd_error": "Invalid password",
-    "toast_error": "Something went wrong",
+    "title": "Se Connecter",
+    "username": "Nom d’utilisateur",
+    "password": "Mot de passe",
+    "button": "Connectez-vous",
+    "name_error": "Nom d’utilisateur non valide",
+    "pwd_error": "Mot de passe non valide",
+    "toast_error": "Quelque chose s’est mal passé",
     "name_placeholder": "e.g jdoe"
   },
+  "homepage": {
+    "greeting": "Salut, {{name}}",
+    "farmer": "Cultivateur",
+    "inspection": "Inspection",
+    "training": "Formation",
+    "buy_coffee": "Acheter du café",
+    "finance": "Financement CWS",
+    "audit": "Audit de moulin humide",
+    "session": {
+      "title": "Session en cours",
+      "user": "UTILISATEUR",
+      "role": "RÔLE",
+      "station": "STATION",
+      "warning1": "Si vos autorisations ont été mises à jour, utilisez le bouton ci-dessous pour actualiser l’application pour les nouvelles modifications.",
+      "warning2": "Cette action nécessite une connectivité Internet",
+      "button": "Actualiser le contrôle d’accès"
+    },
+    "farmer_modal": {
+      "title": "Gestion des agriculteurs",
+      "register": "Registre",
+      "groups": "Groupe",
+      "update": "Modifier agriculteur",
+      "remove": "Supprimer l’agriculteur",
+      "report": "Rapport Hebdomadaire"
+    }
+  },
+  "new_farmer": {
+    "title": "Nouvel agriculteur",
+    "title_household": "Informations domestiques",
+    "title_farmer": "Information agricole",
+    "button": "Registre",
+    "errors": {
+      "validation_error": "Erreur de validation",
+      "prod_tree_error": "Les arbres de production ne peuvent pas dépasser le nombre total d'arbres",
+      "invalid_input_error": "Entrée invalide dans {{name}}, vérifiez les entrées surlignées en rouge"
+    },
+    "inputs": {
+      "group": "Nom du groupe",
+      "cell": "Cellule",
+      "village": "Village",
+      "coffee_plots": "Total de parcelles de terre avec du café",
+      "prd_tree": "Arbres productifs",
+      "tot_tree": "Arbres au total",
+      "name": "Nom de l’agriculteur",
+      "phone": "Numéro de téléphone",
+      "gender": {
+        "label": "Sexe",
+        "male": "Mâle",
+        "female": "Femelle"
+      },
+      "birth": "Année de naissance",
+      "national_id": "Carte d’identité nationale",
+      "marital": "état civil",
+      "math": "Compétences en mathématiques",
+      "reading": "Compétences en lecture",
+      "educational": "Niveau d'éducation"
+    }
+  },
   "settings": {
-    "title": "Changer la languee"
+    "title": "Changer la languee",
+    "english": "Anglais",
+    "french": "Français",
+    "kinyarwanda": "Kinyarwanda"
   }
 }
