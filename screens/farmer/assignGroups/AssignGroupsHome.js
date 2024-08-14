@@ -10,11 +10,13 @@ import { colors } from "../../../data/colors";
 import { StatusBar } from "expo-status-bar";
 import { AntDesign } from "@expo/vector-icons";
 import { GroupMgtHomeItem } from "../../../components/GroupMgtHomeItem";
+import { useTranslation } from "react-i18next";
 
 export const AssignGroupsHome = () => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const navigation = useNavigation();
+  const { t } = useTranslation();
 
   const handleBackButton = () => {
     navigation.navigate("Homepage", { data: null });
@@ -58,7 +60,7 @@ export const AssignGroupsHome = () => {
             fontSize: 19,
           }}
         >
-          Groups management
+          {t("groups.title")}
         </Text>
         <View
           style={{ width: screenWidth * 0.07, backgroundColor: "transparent" }}
@@ -77,11 +79,11 @@ export const AssignGroupsHome = () => {
             }}
           >
             <GroupMgtHomeItem
-              label={"Activate/De-activate Groups"}
+              label={t("groups.activate_deactivate")}
               destination={"ActiveGroupsScreen"}
             />
             <GroupMgtHomeItem
-              label={"Assign Farmers to Groups"}
+              label={t("groups.assign_farmers")}
               destination={"FarmerAssignGroupScreen"}
             />
           </View>

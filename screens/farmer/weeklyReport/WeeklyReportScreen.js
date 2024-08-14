@@ -21,11 +21,13 @@ import { getCurrentDate } from "../../../helpers/getCurrentDate";
 import { dataTodb } from "../../../helpers/dataTodb";
 import LottieView from "lottie-react-native";
 import { useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
 
 export const WeeklyReportScreen = () => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const userData = useSelector((state) => state.user.userData);
+  const { t } = useTranslation();
 
   const [currentStationID, setCurrentStationID] = useState();
   const [supplierID, setSupplierID] = useState();
@@ -117,14 +119,19 @@ export const WeeklyReportScreen = () => {
     let tmp = input.split("_");
     output = tmp.join(" ");
 
-    if (input === "trained_number") output = "Number Trained";
-    if (input === "men_attended") output = "Men Attended";
-    if (input === "women_attended") output = "Women Attended";
+    if (input === "trained_number")
+      output = t("weekly_report.inputs.number_trained");
+    if (input === "men_attended")
+      output = t("weekly_report.inputs.men_attended");
+    if (input === "women_attended")
+      output = t("weekly_report.inputs.women_attended");
     if (input === "planned_groups")
-      output = "Groups planned to train next week";
-    if (input === "farm_inspected") output = "Number of farms inspected";
-    if (input === "planned_inspected") output = "Farms planned to be inspected";
-    if (input === "comments") output = "Other activities and comments";
+      output = t("weekly_report.inputs.groups_planned");
+    if (input === "farm_inspected")
+      output = t("weekly_report.inputs.farms_inspected");
+    if (input === "planned_inspected")
+      output = t("weekly_report.inputs.farms_planned");
+    if (input === "comments") output = t("weekly_report.inputs.comments");
 
     return output;
   };
@@ -134,9 +141,9 @@ export const WeeklyReportScreen = () => {
       setLoading(false);
       setValidationError({
         type: "emptyOrInvalidData",
-        message: `Invalid input in '${getInputLabel(
-          Object.keys(errors)[0]
-        )}', check the inputs highlighted in red`,
+        message: t("weekly_report.errors.invalid_input_error", {
+          name: getInputLabel(Object.keys(errors)[0]),
+        }),
         inputBox: null,
       });
     }
@@ -144,7 +151,7 @@ export const WeeklyReportScreen = () => {
 
   useEffect(() => {
     if (currentJob === "Report saved") {
-      displayToast("Report saved, pending upload");
+      displayToast(t("weekly_report.toast.saved_registration_pending"));
       setLoading(false);
       setFormSubmitted(true);
     }
@@ -232,7 +239,7 @@ export const WeeklyReportScreen = () => {
             fontSize: 19,
           }}
         >
-          Field Weekly Report
+          {t("weekly_report.title")}
         </Text>
         <View
           style={{ width: screenWidth * 0.07, backgroundColor: "transparent" }}
@@ -298,13 +305,13 @@ export const WeeklyReportScreen = () => {
                       marginLeft: screenWidth * 0.02,
                     }}
                   >
-                    Fill the form accordingly
+                    {t("weekly_report.form_title")}
                   </Text>
                   <BuyCoffeeInput
                     values={values}
                     handleChange={handleChange("nmbrTrained")}
                     handleBlur={handleBlur("nmbrTrained")}
-                    label={"Number Trained"}
+                    label={t("weekly_report.inputs.number_trained")}
                     value={values.nmbrTrained}
                     active={true}
                     error={errors.trained_number}
@@ -314,7 +321,7 @@ export const WeeklyReportScreen = () => {
                     values={values}
                     handleChange={handleChange("attendedM")}
                     handleBlur={handleBlur("attendedM")}
-                    label={"Men Attended"}
+                    label={t("weekly_report.inputs.men_attended")}
                     value={values.attendedM}
                     error={errors.men_attended}
                   />
@@ -323,7 +330,7 @@ export const WeeklyReportScreen = () => {
                     values={values}
                     handleChange={handleChange("attendedF")}
                     handleBlur={handleBlur("attendedF")}
-                    label={"Women Attended"}
+                    label={t("weekly_report.inputs.women_attended")}
                     value={values.attendedF}
                     error={errors.women_attended}
                   />
@@ -332,7 +339,7 @@ export const WeeklyReportScreen = () => {
                     values={values}
                     handleChange={handleChange("groupsToTrainNextWeek")}
                     handleBlur={handleBlur("groupsToTrainNextWeek")}
-                    label={"Groups planned to train next week"}
+                    label={t("weekly_report.inputs.groups_planned")}
                     value={values.groupsToTrainNextWeek}
                     error={errors.planned_groups}
                   />
@@ -341,7 +348,7 @@ export const WeeklyReportScreen = () => {
                     values={values}
                     handleChange={handleChange("nmbrFarmsInspected")}
                     handleBlur={handleBlur("nmbrFarmsInspected")}
-                    label={"Number of farms inspected"}
+                    label={t("weekly_report.inputs.farms_inspected")}
                     value={values.nmbrFarmsInspected}
                     error={errors.farm_inspected}
                   />
@@ -350,7 +357,7 @@ export const WeeklyReportScreen = () => {
                     values={values}
                     handleChange={handleChange("farmsToInspect")}
                     handleBlur={handleBlur("farmsToInspect")}
-                    label={"Farms planned to be inspected"}
+                    label={t("weekly_report.inputs.farms_planned")}
                     value={values.farmsToInspect}
                     error={errors.planned_inspected}
                   />
@@ -359,7 +366,7 @@ export const WeeklyReportScreen = () => {
                     values={values}
                     handleChange={handleChange("otherActivities")}
                     handleBlur={handleBlur("otherActivities")}
-                    label={"Other activities and comment"}
+                    label={t("weekly_report.inputs.comments")}
                     value={values.otherActivities}
                     multiline={true}
                     error={errors.comments}
@@ -389,7 +396,7 @@ export const WeeklyReportScreen = () => {
                         marginLeft: screenWidth * 0.02,
                       }}
                     >
-                      Validation Error
+                      {t("weekly_report.errors.validation_error")}
                     </Text>
                     <Text
                       style={{
@@ -408,7 +415,7 @@ export const WeeklyReportScreen = () => {
                   bg={colors.secondary}
                   color={"white"}
                   width="95%"
-                  text="Submit"
+                  text={t("weekly_report.button")}
                   bdcolor="transparent"
                   mt={screenHeight * 0.017}
                   mb={

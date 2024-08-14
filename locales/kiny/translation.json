@@ -39,6 +39,9 @@
     "title_household": "Amakuru y'urugo",
     "title_farmer": "Amakuru y'umuhinzi",
     "button": "Kwandikisha",
+    "toast": {
+      "saved_registration_pending": "Byakozwe"
+    },
     "educational_level": {
       "none": "Ntabwo Yize",
       "some_primary": "Yizeho Abanza",
@@ -47,6 +50,11 @@
       "complete_secondary": "Yarangije Ayisumbuye",
       "some_techi_uni": "Yizeho Imyuga cg Kaminuza",
       "complete_techi_uni": "Yarangije Imyuga cg Kaminuza"
+    },
+    "reading_skills": {
+      "none": "Ntazi gusoma",
+      "with_assistance": "Ashobora gusoma abifashijwemo",
+      "without_assistance": "Ashobora gusoma ntabufasha"
     },
     "math_skills": {
       "none": "Nta bumenyi bw’ imibare",
@@ -84,6 +92,38 @@
       "math": "Ubumenyi bw'imibare",
       "reading": "Ubumenyi bwo gusoma",
       "educational": "Urwego rw'amashuri"
+    }
+  },
+  "groups": {
+    "title": "Amatsinda",
+    "activate_deactivate": "Kugenzura matsinda",
+    "assign_farmers": "Gushyira abahinzi mu matsinda"
+  },
+  "update_farmer": {
+    "title": "Genzura umuhinzi",
+    "farmer_trees": "Ibiti by'umuhinzi",
+    "farmer_details": "Imyirondoro y'umuhinzi",
+    "farm_details": "Ibiranga umurima"
+  },
+  "weekly_report": {
+    "title": "Raporo ngarukacyumweru",
+    "form_title": "Uzuza uko bigenwe",
+    "button": "kwemeza",
+    "toast": {
+      "saved_registration_pending": "Byakozwe"
+    },
+    "errors": {
+      "validation_error": "Habayeho kwibeshya",
+      "invalid_input_error": "Kosora '{{name}}', reba ahandi hose hari ibara ry'umutuku"
+    },
+    "inputs": {
+      "number_trained": "Umubare w'abahuguwe",
+      "men_attended": "Umubare w'abagabo bitabiriye",
+      "women_attended": "Umubare w'abagore bitabiriye",
+      "groups_planned": "Amatsinda azahugurwa icyumweru gitaha",
+      "farms_inspected": "Imirima yagenzuwe",
+      "farms_planned": "Imirima yateganyijwe kugenzura",
+      "comments": "Ibindi bikorwa cyangwa ibitekerezo"
     }
   },
   "settings": {

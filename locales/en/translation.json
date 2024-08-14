@@ -40,6 +40,9 @@
     "title_household": "Household Information",
     "title_farmer": "Farmer Information",
     "button": "Register",
+    "toast": {
+      "saved_registration_pending": "Farmer pending registration"
+    },
     "educational_level": {
       "none": "No formal education",
       "some_primary": "Some primary",
@@ -50,14 +53,14 @@
       "complete_techi_uni": "Complete technical school or university"
     },
     "reading_skills": {
-      "none": "Ntazi gusoma",
-      "with_assistance": "Ashobora gusoma abifashijwemo",
-      "without_assistance": "Ashobora gusoma ntabufasha"
+      "none": "Cannot read",
+      "with_assistance": "Can read with some assistance",
+      "without_assistance": "Can read without assistance"
     },
     "math_skills": {
       "none": "No math skills",
       "with_assistance": "Can do basic math with assistance from others",
-      "without_assistance": "Can do basic math without assistance ffrom others"
+      "without_assistance": "Can do basic math without assistance from others"
     },
     "marital_status": {
       "single": "Single",
@@ -90,6 +93,38 @@
       "math": "Basic Math Skills",
       "reading": "Reading Skills",
       "educational": "Educational Level"
+    }
+  },
+  "groups": {
+    "title": "Group management",
+    "activate_deactivate": "Activate/Deactivate groups",
+    "assign_farmers": "Assign Farmers to Groups"
+  },
+  "update_farmer": {
+    "title": "Update Farmer",
+    "farmer_trees": "Farmer Trees",
+    "farmer_details": "Farmer Details",
+    "farm_details": "Farm Details"
+  },
+  "weekly_report": {
+    "title": "Field Weekly Report",
+    "form_title": "Fill the form accordingly",
+    "button": "Submit",
+    "toast": {
+      "saved_registration_pending": "Report saved, pending upload"
+    },
+    "errors": {
+      "validation_error": "Validation error",
+      "invalid_input_error": "Invalid input in {{name}}, check the inputs highlighted in red"
+    },
+    "inputs": {
+      "number_trained": "Number Trained",
+      "men_attended": "Men Attended",
+      "women_attended": "Women Attended",
+      "groups_planned": "Groups planned to train next week",
+      "farms_inspected": "Number of farms inspected",
+      "farms_planned": "Farms planned to be inspected",
+      "comments": "Other activities and comment"
     }
   },
   "settings": {

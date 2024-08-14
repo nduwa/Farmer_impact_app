@@ -161,7 +161,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
       if (productionTress > totalTrees) {
         setValidationError({
           type: "invalidTrees",
-          message: "Production trees can't be more than total trees",
+          message: t("new_farmer.errors.prod_tree_error"),
           inputBox: null,
         });
         return false;
@@ -278,7 +278,7 @@ export const FarmerRegistrationScreen = ({ route }) => {
 
   useEffect(() => {
     if (currentJob === "Farmer information saved") {
-      displayToast("Farmer pending registration");
+      displayToast(t("new_farmer.toast.saved_registration_pending"));
       setLoading(false);
       setFormSubmitted(true);
     }
