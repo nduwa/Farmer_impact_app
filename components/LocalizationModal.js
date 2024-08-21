@@ -45,7 +45,7 @@ export const LocalizationModal = ({ setModalOpen, data, setChoice, title }) => {
         justifyContent: "center",
         alignItems: "center",
         backgroundColor: colors.black_a,
-        zIndex: 10,
+        zIndex: 11,
         pointerEvents: fetching ? "none" : "auto",
       }}
     >

@@ -50,6 +50,9 @@ import { PendingFarmerUpdatesScreen } from "./screens/farmer/updateTrees/Pending
 import { I18nextProvider } from "react-i18next";
 import i18n from "./i18n";
 import { LanguageScreen } from "./screens/language/LanguageScreen";
+import { WetmillHomeScreen } from "./screens/wetmill/WetmillHomeScreen";
+import { ChooseStationScreen } from "./screens/wetmill/ChooseStationScreen";
+import { AuditScreen } from "./screens/wetmill/AuditScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -77,7 +80,6 @@ export default function App() {
               options={{ unmountOnBlur: true }}
               component={SyncScreen}
             />
-
             {/* coffee purchase */}
             <Stack.Screen
               name="Registered_ATP_Farmer"
@@ -109,7 +111,6 @@ export default function App() {
               options={{ unmountOnBlur: true }}
               component={EditTransactionScreen}
             />
-
             {/* inspection */}
             <Stack.Screen
               name="chooseInspection"
@@ -136,7 +137,6 @@ export default function App() {
               options={{ unmountOnBlur: true }}
               component={InspectionsScreen}
             />
-
             {/* history */}
             <Stack.Screen
               name="HistoryScreen"
@@ -148,7 +148,6 @@ export default function App() {
               options={{ unmountOnBlur: true }}
               component={HistoryDetails}
             />
-
             {/* training */}
             <Stack.Screen
               name="TrainingCourses"
@@ -165,7 +164,6 @@ export default function App() {
               options={{ unmountOnBlur: true }}
               component={TrainingScreen}
             />
-
             {/* farmer management */}
             <Stack.Screen
               name="FarmerRegistration"
@@ -222,7 +220,6 @@ export default function App() {
               options={{ unmountOnBlur: true }}
               component={PendingFarmerUpdatesScreen}
             />
-
             <Stack.Screen
               name="WeeklyReportScreen"
               options={{ unmountOnBlur: true }}
@@ -238,7 +235,6 @@ export default function App() {
               options={{ unmountOnBlur: true }}
               component={EditReportScreen}
             />
-
             <Stack.Screen
               name="UpdateTreesScreen"
               options={{ unmountOnBlur: true }}
@@ -254,7 +250,6 @@ export default function App() {
               options={{ unmountOnBlur: true }}
               component={EditTreesScreen}
             />
-
             {/* assign groups */}
             <Stack.Screen
               name="AssignGroupsHome"
@@ -301,11 +296,25 @@ export default function App() {
               options={{ unmountOnBlur: true }}
               component={AssignedFarmerDetailsScreen}
             />
-
             <Stack.Screen
               name="LanguageScreen"
               options={{ unmountOnBlur: true }}
               component={LanguageScreen}
+            />
+            <Stack.Screen
+              name="WetmillHomeScreen"
+              options={{ unmountOnBlur: true }}
+              component={WetmillHomeScreen}
+            />
+            <Stack.Screen
+              name="ChooseStationScreen"
+              options={{ unmountOnBlur: true }}
+              component={ChooseStationScreen}
+            />
+            <Stack.Screen
+              name="AuditScreen"
+              options={{ unmountOnBlur: true }}
+              component={AuditScreen}
             />
           </Stack.Navigator>
         </NavigationContainer>
