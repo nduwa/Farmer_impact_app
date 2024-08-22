@@ -1,29 +1,64 @@
 import { Dimensions, Keyboard, ScrollView, Text, View } from "react-native";
 import { colors } from "../../../data/colors";
 import { BuyCoffeeInput } from "../../../components/BuyCoffeeInput";
-import { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Formik } from "formik";
+import Feather from "@expo/vector-icons/Feather";
+import { staffSchema } from "../../../validation/wetmillAuditSchema";
+import SimpleIconButton from "../../../components/SimpleIconButton";
+import { useFocusEffect } from "@react-navigation/native";
 
-export const StaffAudit = ({ stationName }) => {
+export const StaffAudit = ({ setNextModal, totalParchment, setAudit }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
+  const formRef = useRef(null);
 
-  const [moneyPerKg, setMoneyPerKg] = useState(0);
-  const [moneyPerFuel, setMoneyPerFuel] = useState(0);
-  const [moneyPerExpenses, setMoneyPerExpenses] = useState(0);
-  const [formSubmitted, setFormSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
   const [errors, setErrors] = useState({}); // validation errors
-  const [discrepancy, setDiscrepancy] = useState({
-    percentage: 0,
-    kgs: 0,
-  });
+
   const [validationError, setValidationError] = useState({
     message: null,
     type: null,
     inputBox: null,
   });
+
+  const validateForm = (data, schema) => {
+    const { error } = schema.validate(data, { abortEarly: false });
+    if (!error) {
+      setErrors({});
+      setValidationError({
+        type: null,
+        message: null,
+        inputBox: null,
+      });
+
+      return true;
+    }
+
+    const newErrors = {};
+    error.details.forEach((detail) => {
+      newErrors[detail.path[0]] = detail.message;
+    });
+
+    setErrors(newErrors);
+    return false;
+  };
+
+  const submitForm = (values) => {
+    try {
+      let staffObj = {
+        ...values,
+      };
+
+      if (!validateForm(staffObj, staffSchema)) return;
+
+      setAudit((prevState) => ({ ...prevState, ...staffObj }));
+      setNextModal(true);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
@@ -45,6 +80,23 @@ export const StaffAudit = ({ stationName }) => {
       keyboardDidHideListener.remove();
     };
   }, [isKeyboardActive]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      return () => {
+        if (formRef.current) {
+          formRef.current.setValues({
+            std_salary_expense: "0",
+            std_other_expense: "0",
+            std_fuel_expense: "0",
+            salary_cost_kg: "0",
+            fuel_cost_kg: "0",
+            other_cost_kg: "0",
+          });
+        }
+      };
+    }, [])
+  );
 
   return (
     <View
@@ -76,14 +128,17 @@ export const StaffAudit = ({ stationName }) => {
       />
       <Formik
         initialValues={{
-          GLC654: "",
-          GLC655: "",
-          GLC656: "",
-          GLC657: "",
-          GLC658: "",
-          GLC659: "",
+          std_salary_expense: "0",
+          std_other_expense: "0",
+          std_fuel_expense: "0",
+          salary_cost_kg: "0",
+          fuel_cost_kg: "0",
+          other_cost_kg: "0",
         }}
-        onSubmit={async (values) => {}}
+        innerRef={formRef}
+        onSubmit={async (values) => {
+          submitForm(values);
+        }}
       >
         {({
           handleChange,
@@ -122,12 +177,18 @@ export const StaffAudit = ({ stationName }) => {
               >
                 <BuyCoffeeInput
                   values={values}
-                  handleChange={handleChange("GLC654")}
-                  handleBlur={handleBlur("GLC654")}
+                  handleChange={(text) => {
+                    handleChange("std_salary_expense")(text);
+
+                    let cost = parseFloat(text) / parseFloat(totalParchment);
+
+                    setFieldValue("salary_cost_kg", cost.toFixed(2));
+                  }}
+                  handleBlur={handleBlur("std_salary_expense")}
                   label={"How much money has paid for salaries season to date?"}
-                  value={values.GLC654}
+                  value={values.std_salary_expense}
                   active={true}
-                  error={errors.GLC654 === "GLC654"}
+                  error={errors.std_salary_expense === "std_salary_expense"}
                 />
                 <View
                   style={{
@@ -145,8 +206,8 @@ export const StaffAudit = ({ stationName }) => {
                     marginLeft: screenWidth * 0.02,
                   }}
                 >
-                  The station is averaging {moneyPerKg} RWF per kilogram of
-                  parchment for salary expenses this season.
+                  The station is averaging {values.salary_cost_kg || 0} RWF per
+                  kilogram of parchment for salary expenses this season.
                 </Text>
                 <View
                   style={{
@@ -158,12 +219,18 @@ export const StaffAudit = ({ stationName }) => {
                 />
                 <BuyCoffeeInput
                   values={values}
-                  handleChange={handleChange("GLC656")}
-                  handleBlur={handleBlur("GLC656")}
+                  handleChange={(text) => {
+                    handleChange("std_fuel_expense")(text);
+
+                    let cost = parseFloat(text) / parseFloat(totalParchment);
+
+                    setFieldValue("fuel_cost_kg", cost.toFixed(2));
+                  }}
+                  handleBlur={handleBlur("std_fuel_expense")}
                   label={"How much money has paid for fuel season to date?"}
-                  value={values.GLC656}
+                  value={values.std_fuel_expense}
                   active={true}
-                  error={errors.GLC656 === "GLC656"}
+                  error={errors.std_fuel_expense === "std_fuel_expense"}
                 />
 
                 <View
@@ -182,8 +249,8 @@ export const StaffAudit = ({ stationName }) => {
                     marginLeft: screenWidth * 0.02,
                   }}
                 >
-                  The station averaging {moneyPerFuel} RWF per kilogram of
-                  parchment for fuel expenses this season.
+                  The station averaging {values.fuel_cost_kg || 0} RWF per
+                  kilogram of parchment for fuel expenses this season.
                 </Text>
                 <View
                   style={{
@@ -195,14 +262,20 @@ export const StaffAudit = ({ stationName }) => {
                 />
                 <BuyCoffeeInput
                   values={values}
-                  handleChange={handleChange("GLC656")}
-                  handleBlur={handleBlur("GLC656")}
+                  handleChange={(text) => {
+                    handleChange("std_other_expense")(text);
+
+                    let cost = parseFloat(text) / parseFloat(totalParchment);
+
+                    setFieldValue("other_cost_kg", cost.toFixed(2));
+                  }}
+                  handleBlur={handleBlur("std_other_expense")}
                   label={
                     "How much money has paid for all other expenses season to date?"
                   }
-                  value={values.GLC656}
+                  value={values.std_other_expense}
                   active={true}
-                  error={errors.GLC656 === "GLC656"}
+                  error={errors.std_other_expense === "std_other_expense"}
                 />
                 <View
                   style={{
@@ -220,9 +293,19 @@ export const StaffAudit = ({ stationName }) => {
                     marginLeft: screenWidth * 0.02,
                   }}
                 >
-                  The station is averaging {moneyPerExpenses} RWF per kilogram
-                  of parchment for all other expenses this season
+                  The station is averaging {values.other_cost_kg || 0} RWF per
+                  kilogram of parchment for all other expenses this season
                 </Text>
+
+                <SimpleIconButton
+                  label={"Save"}
+                  width="100%"
+                  color={colors.secondary}
+                  labelColor="white"
+                  active={true}
+                  handlePress={handleSubmit}
+                  icon={<Feather name="save" size={24} color="white" />}
+                />
               </View>
 
               {/* validation error */}

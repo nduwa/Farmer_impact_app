@@ -1,22 +1,34 @@
-import { Dimensions, Keyboard, ScrollView, Text, View } from "react-native";
+import {
+  Dimensions,
+  Keyboard,
+  Platform,
+  ScrollView,
+  Text,
+  ToastAndroid,
+  View,
+} from "react-native";
 import { colors } from "../../../data/colors";
 import Entypo from "@expo/vector-icons/Entypo";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { BuyCoffeeInput } from "../../../components/BuyCoffeeInput";
-import { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Formik } from "formik";
-import RadioButtonGroup, { RadioButtonItem } from "expo-radio-button";
+import Feather from "@expo/vector-icons/Feather";
 import SimpleIconButton from "../../../components/SimpleIconButton";
+import * as FileSystem from "expo-file-system";
+import * as ImagePicker from "expo-image-picker";
+import { congestionSchema } from "../../../validation/wetmillAuditSchema";
+import { useFocusEffect } from "@react-navigation/native";
 
-export const CongestionAudit = ({ stationName }) => {
+export const CongestionAudit = ({ stationName, setNextModal, setAudit }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
+  const formRef = useRef(null);
 
-  const [discrepancy, setDiscrepancy] = useState({
-    percentage: 0,
-    kgs: 0,
+  const [selectedImage, setSelectedImage] = useState({
+    smell_photo: null,
+    appearance_photo: null,
   });
-  const [choice, setChoice] = useState(false);
-  const [formSubmitted, setFormSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
   const [errors, setErrors] = useState({}); // validation errors
@@ -25,6 +37,135 @@ export const CongestionAudit = ({ stationName }) => {
     type: null,
     inputBox: null,
   });
+
+  const androidVersion =
+    Platform.OS === "android" ? Platform.Version : "Not Android";
+
+  const openCamera = async (use = "") => {
+    if (Platform.OS !== "web") {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== "granted") {
+        alert("Sorry, we need camera permissions to make this work!");
+        return;
+      }
+    }
+
+    let result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true, // If you want to enable image editing
+      aspect: [1, 1.414],
+      quality: 1, // Image quality (0 to 1)
+    });
+
+    if (!result.canceled) {
+      saveImage(result.assets[0].uri, use);
+    }
+  };
+
+  const saveImage = async (uri, use = "") => {
+    try {
+      const fileExt = await getFileExtension(uri);
+      const fileName = generateFileName();
+      const fileNameFull = `${fileName}.${fileExt}`; // You can customize the file name and extension here
+      const directory = FileSystem.documentDirectory;
+      const fileUri = `${directory}${fileNameFull}`;
+
+      await FileSystem.moveAsync({
+        from: uri,
+        to: fileUri,
+      });
+
+      // Image saved successfully
+      if (use === "smell") {
+        setSelectedImage((prevState) => ({
+          ...prevState,
+          smell_photo: fileUri,
+        }));
+      } else if (use === "appearance") {
+        setSelectedImage((prevState) => ({
+          ...prevState,
+          appearance_photo: fileUri,
+        }));
+      }
+
+      displayToast("Image saved");
+      console.log("Image saved to:", fileUri);
+
+      // Now you can use fileUri to submit to your backend or do anything else with it
+    } catch (error) {
+      displayToast("Error: Image not uploaded");
+      console.error("Error saving image:", error);
+    }
+  };
+
+  const pickImage = async (use = "") => {
+    // No permissions request is necessary for launching the image library
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: false,
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      saveImage(result.assets[0].uri, use);
+    }
+  };
+
+  const getFileExtension = async (uri) => {
+    const fileInfo = await FileSystem.getInfoAsync(uri);
+    const uriParts = fileInfo.uri.split(".");
+    return uriParts[uriParts.length - 1];
+  };
+
+  const generateFileName = () => {
+    const timestamp = Math.floor(Date.now() / 1000);
+    return `wetmillaudit-${timestamp}`;
+  };
+
+  const displayToast = (msg) => {
+    ToastAndroid.show(msg, ToastAndroid.SHORT);
+  };
+
+  const validateForm = (data, schema) => {
+    const { error } = schema.validate(data, { abortEarly: false });
+    if (!error) {
+      setErrors({});
+      setValidationError({
+        type: null,
+        message: null,
+        inputBox: null,
+      });
+
+      return true;
+    }
+
+    const newErrors = {};
+    error.details.forEach((detail) => {
+      newErrors[detail.path[0]] = detail.message;
+    });
+    console.log(newErrors);
+    setErrors(newErrors);
+    return false;
+  };
+
+  const submitForm = (values) => {
+    try {
+      let congestionObj = {
+        ...values,
+        ...{
+          color_smell_tanks_photo: selectedImage.smell_photo,
+          parchment_appearance_photo: selectedImage.appearance_photo,
+        },
+      };
+
+      if (!validateForm(congestionObj, congestionSchema)) return;
+
+      setAudit((prevState) => ({ ...prevState, ...congestionObj }));
+      setNextModal(true);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
@@ -46,6 +187,23 @@ export const CongestionAudit = ({ stationName }) => {
       keyboardDidHideListener.remove();
     };
   }, [isKeyboardActive]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      return () => {
+        if (formRef.current) {
+          formRef.current.setValues({
+            color_smell_tanks: "",
+            parchment_appearance: "",
+          });
+          setSelectedImage({
+            smell_photo: null,
+            appearance_photo: null,
+          });
+        }
+      };
+    }, [])
+  );
 
   return (
     <View
@@ -77,10 +235,13 @@ export const CongestionAudit = ({ stationName }) => {
       />
       <Formik
         initialValues={{
-          GLC668: "",
-          GLC669: "",
+          color_smell_tanks: "",
+          parchment_appearance: "",
         }}
-        onSubmit={async (values) => {}}
+        innerRef={formRef}
+        onSubmit={async (values) => {
+          submitForm(values);
+        }}
       >
         {({
           handleChange,
@@ -119,33 +280,133 @@ export const CongestionAudit = ({ stationName }) => {
               >
                 <BuyCoffeeInput
                   values={values}
-                  handleChange={handleChange("GLC668")}
-                  handleBlur={handleBlur("GLC668")}
+                  handleChange={handleChange("color_smell_tanks")}
+                  handleBlur={handleBlur("color_smell_tanks")}
                   label={
                     "How would you describe the color and smell of the coffee in the tanks?"
                   }
-                  value={values.GLC668}
+                  value={values.color_smell_tanks}
                   active={true}
-                  error={errors.GLC668 === "GLC668"}
+                  error={errors.color_smell_tanks === "color_smell_tanks"}
                 />
-
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    width: "100%",
+                  }}
+                >
+                  <SimpleIconButton
+                    label={"Take picture"}
+                    width="60%"
+                    color={colors.blue_font}
+                    labelColor="white"
+                    active={true}
+                    mv={screenHeight * 0.01}
+                    handlePress={() => openCamera("smell")}
+                    icon={<Entypo name="camera" size={24} color="white" />}
+                  />
+                  <SimpleIconButton
+                    label={"Gallery"}
+                    width="38%"
+                    color={colors.black}
+                    labelColor="white"
+                    active={true}
+                    mv={screenHeight * 0.01}
+                    handlePress={() => pickImage("smell")}
+                    icon={
+                      <MaterialIcons
+                        name="photo-library"
+                        size={24}
+                        color="white"
+                      />
+                    }
+                  />
+                </View>
                 <BuyCoffeeInput
                   values={values}
-                  handleChange={handleChange("GLC669")}
-                  handleBlur={handleBlur("GLC669")}
+                  handleChange={handleChange("parchment_appearance")}
+                  handleBlur={handleBlur("parchment_appearance")}
                   label={"What is the general appearance of the parchment?"}
-                  value={values.GLC669}
+                  value={values.parchment_appearance}
                   active={true}
-                  error={errors.GLC669 === "GLC669"}
+                  error={errors.parchment_appearance === "parchment_appearance"}
                 />
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    width: "100%",
+                  }}
+                >
+                  <SimpleIconButton
+                    label={"Take picture"}
+                    width="60%"
+                    color={colors.blue_font}
+                    labelColor="white"
+                    active={true}
+                    mv={screenHeight * 0.01}
+                    handlePress={() => openCamera("appearance")}
+                    icon={<Entypo name="camera" size={24} color="white" />}
+                  />
+                  <SimpleIconButton
+                    label={"Gallery"}
+                    width="38%"
+                    color={colors.black}
+                    labelColor="white"
+                    active={true}
+                    mv={screenHeight * 0.01}
+                    handlePress={() => pickImage("appearance")}
+                    icon={
+                      <MaterialIcons
+                        name="photo-library"
+                        size={24}
+                        color="white"
+                      />
+                    }
+                  />
+                </View>
+
+                {androidVersion < 34 ? (
+                  <>
+                    <View
+                      style={{
+                        width: screenWidth * 0.3,
+                        height: screenHeight * 0.002,
+                        backgroundColor: colors.secondary,
+                      }}
+                    />
+                    <View>
+                      <Text
+                        style={{
+                          textAlign: "center",
+                          color: colors.black_letter,
+                        }}
+                      >
+                        Taking photo might not work on this device due to the
+                        platform version, it is recommended to choose the image
+                        from the gallery.
+                      </Text>
+                    </View>
+                  </>
+                ) : (
+                  <View
+                    style={{
+                      height: screenHeight * 0.01,
+                    }}
+                  />
+                )}
+
                 <SimpleIconButton
-                  label={"Take picture"}
+                  label={"Save"}
                   width="100%"
-                  color={colors.blue_font}
+                  color={colors.secondary}
                   labelColor="white"
                   active={true}
-                  mv={screenHeight * 0.01}
-                  icon={<Entypo name="camera" size={24} color="white" />}
+                  handlePress={handleSubmit}
+                  icon={<Feather name="save" size={24} color="white" />}
                 />
               </View>
 

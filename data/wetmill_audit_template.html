@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no"
+    />
+    <title>Wet Mill Audit</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        line-height: 1.6;
+        color: #333;
+      }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+      h1 {
+        text-align: center;
+        color: #864100;
+        margin-bottom: 40px;
+      }
+      .section {
+        margin-bottom: 40px;
+      }
+      .section-title {
+        font-size: 20px;
+        color: #864100;
+        border-bottom: 2px solid #864100;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+      }
+      .section-content {
+        font-size: 16px;
+        color: #555;
+        margin-bottom: 20px;
+      }
+      .question {
+        font-weight: bold;
+        margin-bottom: 10px;
+      }
+      .answer {
+        margin-bottom: 20px;
+        padding-left: 20px;
+      }
+      .header {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        width: 100%;
+        margin-bottom: 50px;
+      }
+
+      .details {
+        display: flex;
+        flex-direction: column;
+      }
+      .details label {
+        font-size: 15px;
+        font-weight: 600;
+      }
+      .logo {
+        height: 120px;
+        width: 120px;
+      }
+      .row {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        width: 50%;
+        border: none;
+        border-bottom: solid 1px #6c4b02;
+      }
+      .row .attr {
+        font-weight: 400;
+      }
+      .row .val {
+        font-weight: 500;
+        color: black !important;
+      }
+      .highlight {
+        font-weight: 700 !important;
+        color: #6c4b02;
+      }
+      .wide {
+        width: 70% !important;
+      }
+      .img-op {
+        max-height: 250px;
+        border: solid transparent;
+        border-radius: 20px;
+      }
+      .four-pictures {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        column-gap: 8px;
+        row-gap: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <img
+          src="https://rwandatc.com/images/RTC%20Logo1.png"
+          alt="logo"
+          class="logo"
+        />
+        <div class="details">
+          <label>Rwanda Trading Company</label>
+          <label>Kigali, Masoro, PEZ Phase I</label>
+          <label>Wet Mill Audit Report</label>
+          <label>12/03/2020</label>
+        </div>
+      </div>
+      <h1>REPORT - MUHURA - 12/03/2020</h1>
+
+      <!-- Section 1 -->
+      <div class="section">
+        <div class="section-title">INVENTORY MANAGEMENT</div>
+        <div class="section-content">
+          <div class="row">
+            <label class="attr">Cheeries reported</label>
+            <label class="val">416785 kgs</label>
+          </div>
+          <div class="row">
+            <label class="attr">Cheeries in books</label>
+            <label class="val">416785 kgs</label>
+          </div>
+          <div class="row">
+            <label class="attr highlight">Discrepancy</label>
+            <label class="val highlight">0 kgs(0%)</label>
+          </div>
+        </div>
+
+        <div class="section-content">
+          <div class="row">
+            <label class="attr">Parchment in theory</label>
+            <label class="val">78629 kgs</label>
+          </div>
+          <div class="row">
+            <label class="attr">Parchment delivered to Kigali</label>
+            <label class="val">0 kgs</label>
+          </div>
+          <div class="row">
+            <label class="attr">Parchment in storehouse</label>
+            <label class="val">12800 kgs</label>
+          </div>
+          <div class="row">
+            <label class="attr">Parchment in tanks</label>
+            <label class="val">4930 kgs</label>
+          </div>
+          <div class="row">
+            <label class="attr">Parchment on tables</label>
+            <label class="val">60700 kgs</label>
+          </div>
+          <div class="row">
+            <label class="attr highlight">Discrepancy</label>
+            <label class="val highlight">199 kgs(0.25%)</label>
+          </div>
+        </div>
+
+        <div class="section-content">
+          <div class="row">
+            <label class="attr">Volumetric Participant</label>
+            <label class="val">Yes</label>
+          </div>
+          <div class="row">
+            <label class="attr">Buckets in theory</label>
+            <label class="val">11883</label>
+          </div>
+          <div class="row">
+            <label class="attr">Actual buckets</label>
+            <label class="val">0</label>
+          </div>
+          <div class="row">
+            <label class="attr highlight">Discrepancy</label>
+            <label class="val highlight">11883(100%)</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2 -->
+      <div class="section">
+        <div class="section-title">MONEY MANAGEMENT</div>
+        <div class="section-content">
+          <div class="row">
+            <label class="attr">STD Price</label>
+            <label class="val">200 RWF</label>
+          </div>
+          <div class="row">
+            <label class="attr">STD total paid</label>
+            <label class="val">83,347,000 RWF</label>
+          </div>
+          <div class="row">
+            <label class="attr">Expected STD cherries</label>
+            <label class="val">416,735 kgs</label>
+          </div>
+          <div class="row">
+            <label class="attr highlight">Discrepancy</label>
+            <label class="val highlight">199(0.25%)</label>
+          </div>
+        </div>
+
+        <div class="section-content">
+          <div class="row">
+            <label class="attr">STD salary expense</label>
+            <label class="val">0 RWF</label>
+          </div>
+          <div class="row">
+            <label class="attr">STD fuel expense</label>
+            <label class="val">1,712,200 RWF</label>
+          </div>
+          <div class="row">
+            <label class="attr">STD other expense</label>
+            <label class="val">842,050 RWF</label>
+          </div>
+        </div>
+        <div class="section-content">
+          <div class="row wide">
+            <label class="attr">Manpower count today</label>
+            <label class="val">24</label>
+            <label class="attr">Parch / Person / Day</label>
+            <label class="val">105.68 kgs</label>
+          </div>
+          <div class="row wide">
+            <label class="attr">Handsorter count today</label>
+            <label class="val">85</label>
+            <label class="attr">Parch / Person / Day</label>
+            <label class="val">29.84 kgs</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Repeat for Sections 3, 4, and 5 -->
+      <div class="section">
+        <div class="section-title">STATE OF OPERATIONS</div>
+        <div class="section-content">
+          <div class="question">Leftover beans in machine?</div>
+          <div class="answer">> Yes</div>
+          <div class="answer">
+            > found them pulping cherries purchased yesterday
+          </div>
+          <img
+            src="https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png"
+            alt=""
+            class="img-op"
+          />
+        </div>
+        <div class="section-content">
+          <div class="question">Quality of Water</div>
+          <div class="answer">> Acceptable</div>
+          <div class="answer">> Its fairy clean</div>
+          <img
+            src="https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png"
+            alt=""
+            class="img-op"
+          />
+        </div>
+        <div class="section-content">
+          <div class="question">Water Sufficient?</div>
+          <div class="answer">> Yes</div>
+          <div class="answer">> They have water</div>
+          <img
+            src="https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png"
+            alt=""
+            class="img-op"
+          />
+        </div>
+        <div class="section-content">
+          <div class="question">Color / Smell Coffee in Tanks</div>
+          <div class="answer">> Acceptable</div>
+          <div class="answer">> Its good though,they have alot in tanks</div>
+          <img
+            src="https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png"
+            alt=""
+            class="img-op"
+          />
+        </div>
+        <div class="section-content">
+          <div class="question">Parchment Appearance</div>
+          <div class="answer">> White</div>
+          <div class="answer">> White</div>
+          <img
+            src="https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png"
+            alt=""
+            class="img-op"
+          />
+        </div>
+        <div class="section-content">
+          <div class="question">Drying Congestion</div>
+          <div class="answer">> Congested</div>
+          <div class="answer">
+            > Theres too much coffee on tables,advised to reduce it
+          </div>
+          <img
+            src="https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png"
+            alt=""
+            class="img-op"
+          />
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">ON-SITE IMAGES</div>
+        <div class="section-content">
+          <div class="four-pictures">
+            <img
+              src="https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png"
+              alt=""
+              class="img-op"
+            /><img
+              src="https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png"
+              alt=""
+              class="img-op"
+            /><img
+              src="https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png"
+              alt=""
+              class="img-op"
+            /><img
+              src="https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png"
+              alt=""
+              class="img-op"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">APPROVAL DECISION</div>
+        <div class="section-content">
+          <div class="answer">> Approved</div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

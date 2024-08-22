@@ -1,35 +1,43 @@
 import {
   Dimensions,
   Keyboard,
+  Platform,
   ScrollView,
   Text,
+  ToastAndroid,
   TouchableOpacity,
   View,
 } from "react-native";
 import { colors } from "../../../data/colors";
 import Entypo from "@expo/vector-icons/Entypo";
 import { BuyCoffeeInput } from "../../../components/BuyCoffeeInput";
-import { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Formik } from "formik";
 import { FontAwesome6 } from "@expo/vector-icons";
 import { MaterialIcons } from "@expo/vector-icons";
 import SimpleIconButton from "../../../components/SimpleIconButton";
-import { LocalizationModal } from "../../../components/LocalizationModal";
+import Feather from "@expo/vector-icons/Feather";
+import { conclusionSchema } from "../../../validation/wetmillAuditSchema";
+import * as FileSystem from "expo-file-system";
+import * as ImagePicker from "expo-image-picker";
+import { useFocusEffect } from "@react-navigation/native";
 
 export const ConclusionAudit = ({
   stationName,
+  setNextModal,
   setChoice,
   choice,
   setModalOpen,
+  setAudit,
 }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
+  const formRef = useRef(null);
 
-  const [discrepancy, setDiscrepancy] = useState({
-    percentage: 0,
-    kgs: 0,
+  const [selectedImage, setSelectedImage] = useState({
+    drying_congestion_photo1: null,
+    drying_congestion_photo2: null,
   });
-  const [formSubmitted, setFormSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
   const [errors, setErrors] = useState({}); // validation errors
@@ -38,6 +46,136 @@ export const ConclusionAudit = ({
     type: null,
     inputBox: null,
   });
+
+  const androidVersion =
+    Platform.OS === "android" ? Platform.Version : "Not Android";
+
+  const openCamera = async (use = "") => {
+    if (Platform.OS !== "web") {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== "granted") {
+        alert("Sorry, we need camera permissions to make this work!");
+        return;
+      }
+    }
+
+    let result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true, // If you want to enable image editing
+      aspect: [1, 1.414],
+      quality: 1, // Image quality (0 to 1)
+    });
+
+    if (!result.canceled) {
+      saveImage(result.assets[0].uri, use);
+    }
+  };
+
+  const saveImage = async (uri, use = "") => {
+    try {
+      const fileExt = await getFileExtension(uri);
+      const fileName = generateFileName();
+      const fileNameFull = `${fileName}.${fileExt}`; // You can customize the file name and extension here
+      const directory = FileSystem.documentDirectory;
+      const fileUri = `${directory}${fileNameFull}`;
+
+      await FileSystem.moveAsync({
+        from: uri,
+        to: fileUri,
+      });
+
+      // Image saved successfully
+      if (use === "1") {
+        setSelectedImage((prevState) => ({
+          ...prevState,
+          drying_congestion_photo1: fileUri,
+        }));
+      } else if (use === "2") {
+        setSelectedImage((prevState) => ({
+          ...prevState,
+          drying_congestion_photo2: fileUri,
+        }));
+      }
+
+      displayToast("Image saved");
+      console.log("Image saved to:", fileUri);
+
+      // Now you can use fileUri to submit to your backend or do anything else with it
+    } catch (error) {
+      displayToast("Error: Image not uploaded");
+      console.error("Error saving image:", error);
+    }
+  };
+
+  const pickImage = async (use = "") => {
+    // No permissions request is necessary for launching the image library
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: false,
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      saveImage(result.assets[0].uri, use);
+    }
+  };
+
+  const getFileExtension = async (uri) => {
+    const fileInfo = await FileSystem.getInfoAsync(uri);
+    const uriParts = fileInfo.uri.split(".");
+    return uriParts[uriParts.length - 1];
+  };
+
+  const generateFileName = () => {
+    const timestamp = Math.floor(Date.now() / 1000);
+    return `wetmillaudit-${timestamp}`;
+  };
+
+  const displayToast = (msg) => {
+    ToastAndroid.show(msg, ToastAndroid.SHORT);
+  };
+
+  const validateForm = (data, schema) => {
+    const { error } = schema.validate(data, { abortEarly: false });
+    if (!error) {
+      setErrors({});
+      setValidationError({
+        type: null,
+        message: null,
+        inputBox: null,
+      });
+
+      return true;
+    }
+
+    const newErrors = {};
+    error.details.forEach((detail) => {
+      newErrors[detail.path[0]] = detail.message;
+    });
+
+    setErrors(newErrors);
+    return false;
+  };
+
+  const submitForm = (values) => {
+    try {
+      let conclObj = {
+        ...values,
+        ...{
+          drying_congestion: choice.name,
+          drying_congestion_photo1: selectedImage.drying_congestion_photo1,
+          drying_congestion_photo2: selectedImage.drying_congestion_photo2,
+        },
+      };
+
+      if (!validateForm(conclObj, conclusionSchema)) return;
+
+      setAudit((prevState) => ({ ...prevState, ...conclObj }));
+      setNextModal(true);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
@@ -59,6 +197,25 @@ export const ConclusionAudit = ({
       keyboardDidHideListener.remove();
     };
   }, [isKeyboardActive]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      return () => {
+        if (formRef.current) {
+          formRef.current.setValues({
+            drying_congestion: "",
+            drying_congestion_comment: "",
+            drying_congestion_comment2: "",
+          });
+          setChoice(null);
+          setSelectedImage({
+            drying_congestion_photo1: null,
+            drying_congestion_photo2: null,
+          });
+        }
+      };
+    }, [])
+  );
 
   return (
     <View
@@ -90,12 +247,14 @@ export const ConclusionAudit = ({
       />
       <Formik
         initialValues={{
-          GLC670: "",
-          GLC671: "",
-          GLC672: "",
-          comment: "",
+          drying_congestion: "",
+          drying_congestion_comment: "",
+          drying_congestion_comment2: "",
         }}
-        onSubmit={async (values) => {}}
+        innerRef={formRef}
+        onSubmit={async (values) => {
+          submitForm(values);
+        }}
       >
         {({
           handleChange,
@@ -127,11 +286,11 @@ export const ConclusionAudit = ({
               <View>
                 <BuyCoffeeInput
                   values={values}
-                  handleChange={handleChange("GLC670")}
-                  handleBlur={handleBlur("GLC670")}
+                  handleChange={handleChange("drying_congestion")}
+                  handleBlur={handleBlur("drying_congestion")}
                   label={"How much congestion is on the drying tables?"}
                   value={choice?.name}
-                  error={errors.GLC670}
+                  error={errors.drying_congestion}
                   active={false}
                 />
                 <TouchableOpacity
@@ -154,7 +313,7 @@ export const ConclusionAudit = ({
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => {
-                    setFieldValue("GLC670", "");
+                    setFieldValue("drying_congestion", "");
                     setChoice(null);
                   }}
                   style={{
@@ -176,12 +335,15 @@ export const ConclusionAudit = ({
               </View>
               <BuyCoffeeInput
                 values={values}
-                handleChange={handleChange("comment")}
-                handleBlur={handleBlur("comment")}
+                handleChange={handleChange("drying_congestion_comment")}
+                handleBlur={handleBlur("drying_congestion_comment")}
                 label={"Comments"}
                 value={values.GLC668}
                 active={true}
-                error={errors.comment === "comment"}
+                error={
+                  errors.drying_congestion_comment ===
+                  "drying_congestion_comment"
+                }
               />
               <Text
                 style={{
@@ -191,33 +353,128 @@ export const ConclusionAudit = ({
               >
                 Please take a good photo, which shows strengths.
               </Text>
-              <SimpleIconButton
-                label={"Take picture"}
-                width="100%"
-                color={colors.blue_font}
-                labelColor="white"
-                active={true}
-                mv={screenHeight * 0.01}
-                icon={<Entypo name="camera" size={24} color="white" />}
-              />
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  width: "100%",
+                }}
+              >
+                <SimpleIconButton
+                  label={"Take picture"}
+                  width="60%"
+                  color={colors.blue_font}
+                  labelColor="white"
+                  active={true}
+                  mv={screenHeight * 0.01}
+                  handlePress={() => openCamera("1")}
+                  icon={<Entypo name="camera" size={24} color="white" />}
+                />
+                <SimpleIconButton
+                  label={"Gallery"}
+                  width="38%"
+                  color={colors.black}
+                  labelColor="white"
+                  active={true}
+                  mv={screenHeight * 0.01}
+                  handlePress={() => pickImage("1")}
+                  icon={
+                    <MaterialIcons
+                      name="photo-library"
+                      size={24}
+                      color="white"
+                    />
+                  }
+                />
+              </View>
 
               <BuyCoffeeInput
                 values={values}
-                handleChange={handleChange("GLC671")}
-                handleBlur={handleBlur("GLC671")}
+                handleChange={handleChange("drying_congestion_comment2")}
+                handleBlur={handleBlur("drying_congestion_comment2")}
                 label={"Do you have any other notes?"}
-                value={values.GLC668}
+                value={values.drying_congestion_comment2}
                 active={true}
-                error={errors.GLC671 === "GLC671"}
+                error={
+                  errors.drying_congestion_comment2 ===
+                  "drying_congestion_comment2"
+                }
               />
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  width: "100%",
+                }}
+              >
+                <SimpleIconButton
+                  label={"Take picture"}
+                  width="60%"
+                  color={colors.blue_font}
+                  labelColor="white"
+                  active={true}
+                  mv={screenHeight * 0.01}
+                  handlePress={() => openCamera("2")}
+                  icon={<Entypo name="camera" size={24} color="white" />}
+                />
+                <SimpleIconButton
+                  label={"Gallery"}
+                  width="38%"
+                  color={colors.black}
+                  labelColor="white"
+                  active={true}
+                  mv={screenHeight * 0.01}
+                  handlePress={() => pickImage("2")}
+                  icon={
+                    <MaterialIcons
+                      name="photo-library"
+                      size={24}
+                      color="white"
+                    />
+                  }
+                />
+              </View>
+
+              {androidVersion < 34 ? (
+                <>
+                  <View
+                    style={{
+                      width: screenWidth * 0.3,
+                      height: screenHeight * 0.002,
+                      backgroundColor: colors.secondary,
+                    }}
+                  />
+                  <View>
+                    <Text
+                      style={{
+                        textAlign: "center",
+                        color: colors.black_letter,
+                      }}
+                    >
+                      Taking photo might not work on this device due to the
+                      platform version, it is recommended to choose the image
+                      from the gallery.
+                    </Text>
+                  </View>
+                </>
+              ) : (
+                <View
+                  style={{
+                    height: screenHeight * 0.01,
+                  }}
+                />
+              )}
+
               <SimpleIconButton
-                label={"Take picture"}
+                label={"Save"}
                 width="100%"
-                color={colors.blue_font}
+                color={colors.secondary}
                 labelColor="white"
                 active={true}
-                mv={screenHeight * 0.01}
-                icon={<Entypo name="camera" size={24} color="white" />}
+                handlePress={handleSubmit}
+                icon={<Feather name="save" size={24} color="white" />}
               />
             </View>
 

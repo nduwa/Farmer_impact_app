@@ -1,22 +1,29 @@
 import { Dimensions, Keyboard, ScrollView, Text, View } from "react-native";
 import { colors } from "../../../data/colors";
-import CustomButton from "../../../components/CustomButton";
+import Feather from "@expo/vector-icons/Feather";
 import { BuyCoffeeInput } from "../../../components/BuyCoffeeInput";
-import { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Formik } from "formik";
 import RadioButtonGroup, { RadioButtonItem } from "expo-radio-button";
+import SimpleIconButton from "../../../components/SimpleIconButton";
+import { useFocusEffect } from "@react-navigation/native";
+import { pricingSchema } from "../../../validation/wetmillAuditSchema";
 
-export const PricingAudit = ({ stationName }) => {
+export const PricingAudit = ({
+  stationName,
+  setNextModal,
+  bucketsYield,
+  setAudit,
+}) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
+  const formRef = useRef(null);
 
   const [choice, setChoice] = useState(false);
   const [discrepancy, setDiscrepancy] = useState({
     percentage: 0,
-    kgs: 0,
+    buckets: 0,
   });
-  const [buckets, setBuckets] = useState(0);
-  const [formSubmitted, setFormSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
   const [errors, setErrors] = useState({}); // validation errors
@@ -25,6 +32,50 @@ export const PricingAudit = ({ stationName }) => {
     type: null,
     inputBox: null,
   });
+
+  const validateForm = (data, schema) => {
+    const { error } = schema.validate(data, { abortEarly: false });
+    if (!error) {
+      setErrors({});
+      setValidationError({
+        type: null,
+        message: null,
+        inputBox: null,
+      });
+
+      return true;
+    }
+
+    const newErrors = {};
+    error.details.forEach((detail) => {
+      newErrors[detail.path[0]] = detail.message;
+    });
+
+    console.log(newErrors);
+    setErrors(newErrors);
+    return false;
+  };
+
+  const submitForm = (values) => {
+    try {
+      let bucketsObj = {
+        ...values,
+        ...{
+          discrepancy_perc_pricing: String(discrepancy.percentage),
+          discrepancy_buckets_pricing: String(discrepancy.buckets),
+          buckets_theory: String(bucketsYield),
+          vol_participant: choice ? "yes" : "no",
+        },
+      };
+
+      if (!validateForm(bucketsObj, pricingSchema)) return;
+
+      setAudit((prevState) => ({ ...prevState, ...bucketsObj }));
+      setNextModal(true);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
@@ -46,6 +97,20 @@ export const PricingAudit = ({ stationName }) => {
       keyboardDidHideListener.remove();
     };
   }, [isKeyboardActive]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      return () => {
+        if (formRef.current) {
+          formRef.current.setValues({
+            buckets_actual: "0",
+            discrepancy_reason_pricing: "",
+          });
+          setDiscrepancy({ percentage: 0, buckets: 0 });
+        }
+      };
+    }, [])
+  );
 
   return (
     <View
@@ -77,12 +142,14 @@ export const PricingAudit = ({ stationName }) => {
       />
       <Formik
         initialValues={{
-          GLC647: choice,
-          GLC648: "",
-          GLC649: "",
-          comment: "",
+          vol_participant: choice,
+          buckets_actual: "0",
+          discrepancy_reason_pricing: "",
         }}
-        onSubmit={async (values) => {}}
+        innerRef={formRef}
+        onSubmit={async (values) => {
+          submitForm(values);
+        }}
       >
         {({
           handleChange,
@@ -177,52 +244,81 @@ export const PricingAudit = ({ stationName }) => {
                     />
                   </RadioButtonGroup>
                 </View>
-                <BuyCoffeeInput
-                  values={values}
-                  handleChange={handleChange("GLC648")}
-                  handleBlur={handleBlur("GLC648")}
-                  label={
-                    "How many total buckets of parchment have been counted for season to date?"
-                  }
-                  value={values.GLC648}
+                {choice && (
+                  <>
+                    <BuyCoffeeInput
+                      values={values}
+                      keyboardType={"numeric"}
+                      handleChange={(text) => {
+                        handleChange("buckets_actual")(text);
+
+                        let diff =
+                          parseFloat(bucketsYield.toFixed(2)) -
+                          parseFloat(text);
+                        let perc = (diff / parseFloat(bucketsYield)) * 100;
+                        setDiscrepancy({
+                          percentage: isNaN(perc) ? 0 : perc.toFixed(2),
+                          buckets: isNaN(diff) ? 0 : diff.toFixed(2),
+                        });
+                      }}
+                      handleBlur={handleBlur("buckets_actual")}
+                      label={
+                        "How many total buckets of parchment have been counted for season to date?"
+                      }
+                      value={values.buckets_actual}
+                      active={true}
+                      error={errors.buckets_actual === "buckets_actual"}
+                    />
+                    <View
+                      style={{
+                        width: "100%",
+                        height: 1,
+                        backgroundColor: colors.secondary_variant,
+                        marginVertical: screenHeight * 0.01,
+                      }}
+                    />
+                    <Text
+                      style={{
+                        fontWeight: "500",
+                        fontSize: screenWidth * 0.04,
+                        color: colors.black,
+                        marginLeft: screenWidth * 0.02,
+                      }}
+                    >
+                      {stationName} Has a volumetric discrepancy of{" "}
+                      {discrepancy.percentage}% ({discrepancy.buckets} buckets)
+                    </Text>
+                    <View
+                      style={{
+                        width: "100%",
+                        height: 1,
+                        backgroundColor: colors.secondary_variant,
+                        marginVertical: screenHeight * 0.01,
+                      }}
+                    />
+                    <BuyCoffeeInput
+                      values={values}
+                      handleChange={handleChange("discrepancy_reason_pricing")}
+                      handleBlur={handleBlur("discrepancy_reason_pricing")}
+                      label={"Why is there any discrepancy"}
+                      value={values.discrepancy_reason_pricing}
+                      active={true}
+                      error={
+                        errors.discrepancy_reason_pricing ===
+                        "discrepancy_reason_pricing"
+                      }
+                    />
+                  </>
+                )}
+
+                <SimpleIconButton
+                  label={"Save"}
+                  width="100%"
+                  color={colors.secondary}
+                  labelColor="white"
                   active={true}
-                  error={errors.GLC648 === "GLC648"}
-                />
-                <View
-                  style={{
-                    width: "100%",
-                    height: 1,
-                    backgroundColor: colors.secondary_variant,
-                    marginVertical: screenHeight * 0.01,
-                  }}
-                />
-                <Text
-                  style={{
-                    fontWeight: "500",
-                    fontSize: screenWidth * 0.04,
-                    color: colors.black,
-                    marginLeft: screenWidth * 0.02,
-                  }}
-                >
-                  {stationName} Has a volumetric discrepancy of{" "}
-                  {discrepancy.percentage}% ({buckets} buckets)
-                </Text>
-                <View
-                  style={{
-                    width: "100%",
-                    height: 1,
-                    backgroundColor: colors.secondary_variant,
-                    marginVertical: screenHeight * 0.01,
-                  }}
-                />
-                <BuyCoffeeInput
-                  values={values}
-                  handleChange={handleChange("comment")}
-                  handleBlur={handleBlur("comment")}
-                  label={"Why is there any discrepancy"}
-                  value={values.comment}
-                  active={true}
-                  error={errors.comment === "comment"}
+                  handlePress={handleSubmit}
+                  icon={<Feather name="save" size={24} color="white" />}
                 />
               </View>
 

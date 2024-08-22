@@ -45,7 +45,6 @@ export const TrainingScreen = () => {
   });
 
   const [attendanceSubmitted, setAttendanceSubmitted] = useState(false);
-  const [attendanceDeleted, setAttendanceDeleted] = useState(false);
 
   const [submitting, setSubmitting] = useState(false);
 

@@ -1,21 +1,22 @@
 import { Dimensions, Keyboard, ScrollView, Text, View } from "react-native";
 import { colors } from "../../../data/colors";
-import CustomButton from "../../../components/CustomButton";
+import Feather from "@expo/vector-icons/Feather";
 import { BuyCoffeeInput } from "../../../components/BuyCoffeeInput";
-import { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Formik } from "formik";
+import SimpleIconButton from "../../../components/SimpleIconButton";
+import { useFocusEffect } from "@react-navigation/native";
+import { leftBeansSchema } from "../../../validation/wetmillAuditSchema";
 
-export const LeftBeansAudit = ({ stationName }) => {
+export const LeftBeansAudit = ({
+  setNextModal,
+  parchDayEstimate,
+  setAudit,
+}) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
+  const formRef = useRef(null);
 
-  const [discrepancy, setDiscrepancy] = useState({
-    percentage: 0,
-    kgs: 0,
-  });
-
-  const [kgPerDay, setKgPerDay] = useState({ manPower: 0, handSorter: 0 });
-  const [formSubmitted, setFormSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
   const [errors, setErrors] = useState({}); // validation errors
@@ -24,6 +25,44 @@ export const LeftBeansAudit = ({ stationName }) => {
     type: null,
     inputBox: null,
   });
+
+  const validateForm = (data, schema) => {
+    const { error } = schema.validate(data, { abortEarly: false });
+    if (!error) {
+      setErrors({});
+      setValidationError({
+        type: null,
+        message: null,
+        inputBox: null,
+      });
+
+      return true;
+    }
+
+    const newErrors = {};
+    error.details.forEach((detail) => {
+      newErrors[detail.path[0]] = detail.message;
+    });
+
+    console.log(newErrors);
+    setErrors(newErrors);
+    return false;
+  };
+
+  const submitForm = (values) => {
+    try {
+      let leftbeansObj = {
+        ...values,
+      };
+
+      if (!validateForm(leftbeansObj, leftBeansSchema)) return;
+
+      setAudit((prevState) => ({ ...prevState, ...leftbeansObj }));
+      setNextModal(true);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
@@ -45,6 +84,21 @@ export const LeftBeansAudit = ({ stationName }) => {
       keyboardDidHideListener.remove();
     };
   }, [isKeyboardActive]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      return () => {
+        if (formRef.current) {
+          formRef.current.setValues({
+            manpower_count: "0",
+            handsorter_count: "0",
+            parch_person_day_manpower: "0",
+            parch_person_day_handsorter: "0",
+          });
+        }
+      };
+    }, [])
+  );
 
   return (
     <View
@@ -76,10 +130,15 @@ export const LeftBeansAudit = ({ stationName }) => {
       />
       <Formik
         initialValues={{
-          GLC660: "",
-          GLC662: "",
+          manpower_count: "0",
+          handsorter_count: "0",
+          parch_person_day_manpower: "0",
+          parch_person_day_handsorter: "0",
         }}
-        onSubmit={async (values) => {}}
+        innerRef={formRef}
+        onSubmit={async (values) => {
+          submitForm(values);
+        }}
       >
         {({
           handleChange,
@@ -118,14 +177,24 @@ export const LeftBeansAudit = ({ stationName }) => {
               >
                 <BuyCoffeeInput
                   values={values}
-                  handleChange={handleChange("GLC660")}
-                  handleBlur={handleBlur("GLC660")}
+                  handleChange={(text) => {
+                    handleChange("manpower_count")(text);
+
+                    let parch_person =
+                      parseFloat(parchDayEstimate) / parseFloat(text);
+
+                    setFieldValue(
+                      "parch_person_day_manpower",
+                      parch_person.toFixed(2)
+                    );
+                  }}
+                  handleBlur={handleBlur("manpower_count")}
                   label={
                     "How many people are working as manpower at the station today?"
                   }
-                  value={values.GLC660}
+                  value={values.manpower_count}
                   active={true}
-                  error={errors.GLC660 === "GLC660"}
+                  error={errors.manpower_count === "manpower_count"}
                 />
                 <View
                   style={{
@@ -144,8 +213,8 @@ export const LeftBeansAudit = ({ stationName }) => {
                   }}
                 >
                   At this rate, each person under manpower is averaging{" "}
-                  {kgPerDay.manPower}
-                  Kilograms of parchment per day
+                  {values.parch_person_day_manpower || 0} kilograms of parchment
+                  per day
                 </Text>
                 <View
                   style={{
@@ -157,14 +226,24 @@ export const LeftBeansAudit = ({ stationName }) => {
                 />
                 <BuyCoffeeInput
                   values={values}
-                  handleChange={handleChange("GLC662")}
-                  handleBlur={handleBlur("GLC662")}
+                  handleChange={(text) => {
+                    handleChange("handsorter_count")(text);
+
+                    let parch_person =
+                      parseFloat(parchDayEstimate) / parseFloat(text);
+
+                    setFieldValue(
+                      "parch_person_day_handsorter",
+                      parch_person.toFixed(2)
+                    );
+                  }}
+                  handleBlur={handleBlur("handsorter_count")}
                   label={
                     "How many handsorters are working at the station today?"
                   }
-                  value={values.GLC662}
+                  value={values.handsorter_count}
                   active={true}
-                  error={errors.GLC662 === "GLC662"}
+                  error={errors.handsorter_count === "handsorter_count"}
                 />
                 <View
                   style={{
@@ -180,11 +259,22 @@ export const LeftBeansAudit = ({ stationName }) => {
                     fontSize: screenWidth * 0.04,
                     color: colors.black,
                     marginLeft: screenWidth * 0.02,
+                    marginBottom: screenHeight * 0.02,
                   }}
                 >
                   At this rate, each handsorter is averaging{" "}
-                  {kgPerDay.handSorter} Kilograms of parchment per day
+                  {values.parch_person_day_handsorter} Kilograms of parchment per
+                  day
                 </Text>
+                <SimpleIconButton
+                  label={"Save"}
+                  width="100%"
+                  color={colors.secondary}
+                  labelColor="white"
+                  active={true}
+                  handlePress={handleSubmit}
+                  icon={<Feather name="save" size={24} color="white" />}
+                />
               </View>
 
               {/* validation error */}

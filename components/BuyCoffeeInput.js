@@ -11,6 +11,7 @@ export const BuyCoffeeInput = ({
   active = true,
   multiline = false,
   radius = 10,
+  keyboardType = null,
 }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
@@ -39,6 +40,7 @@ export const BuyCoffeeInput = ({
         value={value}
         editable={active}
         multiline={multiline}
+        keyboardType={keyboardType || "default"}
         style={{
           borderColor: error ? "red" : colors.bg_variant_font,
           backgroundColor: active ? colors.white_variant : colors.white_a,

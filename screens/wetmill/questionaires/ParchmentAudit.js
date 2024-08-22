@@ -1,23 +1,29 @@
 import { Dimensions, Keyboard, ScrollView, Text, View } from "react-native";
 import { colors } from "../../../data/colors";
-import CustomButton from "../../../components/CustomButton";
+import Feather from "@expo/vector-icons/Feather";
 import { BuyCoffeeInput } from "../../../components/BuyCoffeeInput";
-import { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Formik } from "formik";
+import SimpleIconButton from "../../../components/SimpleIconButton";
+import { useFocusEffect } from "@react-navigation/native";
+import { parchSchema } from "../../../validation/wetmillAuditSchema";
 
 export const ParchmentAudit = ({
   stationName,
+  setNextModal,
   parchmentYield = 0,
   cherriesReported = 0,
+  setAudit,
 }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
+  const formRef = useRef(null);
 
   const [discrepancy, setDiscrepancy] = useState({
     percentage: 0,
     kgs: 0,
   });
-  const [formSubmitted, setFormSubmitted] = useState(false);
+  const [parchTotal, setParchTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
   const [errors, setErrors] = useState({}); // validation errors
@@ -26,6 +32,48 @@ export const ParchmentAudit = ({
     type: null,
     inputBox: null,
   });
+
+  const validateForm = (data, schema) => {
+    const { error } = schema.validate(data, { abortEarly: false });
+    if (!error) {
+      setErrors({});
+      setValidationError({
+        type: null,
+        message: null,
+        inputBox: null,
+      });
+
+      return true;
+    }
+
+    const newErrors = {};
+    error.details.forEach((detail) => {
+      newErrors[detail.path[0]] = detail.message;
+    });
+
+    setErrors(newErrors);
+    return false;
+  };
+
+  const submitForm = (values) => {
+    try {
+      let parchObj = {
+        ...values,
+        ...{
+          discrepancy_perc_parch: String(discrepancy.percentage),
+          discrepancy_kgs_parch: String(discrepancy.kgs),
+          parch_total: String(parchTotal),
+        },
+      };
+
+      if (!validateForm(parchObj, parchSchema)) return;
+
+      setAudit((prevState) => ({ ...prevState, ...parchObj }));
+      setNextModal(true);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
@@ -48,6 +96,23 @@ export const ParchmentAudit = ({
     };
   }, [isKeyboardActive]);
 
+  useFocusEffect(
+    React.useCallback(() => {
+      return () => {
+        if (formRef.current) {
+          formRef.current.setValues({
+            parch_delivered: "0",
+            parch_tables: "0",
+            parch_tanks: "0",
+            parch_storehouse: "0",
+            discrepancy_reason_parch: "",
+          });
+          setDiscrepancy({ percentage: 0, kgs: 0 });
+          setParchTotal(0);
+        }
+      };
+    }, [])
+  );
   return (
     <View
       style={{
@@ -78,15 +143,16 @@ export const ParchmentAudit = ({
       />
       <Formik
         initialValues={{
-          GLC640: "",
-          GLC641: "",
-          GLC642: "",
-          GLC643: "",
-          GLC644: "",
-          GLC645: "",
-          GLC646: "",
+          parch_delivered: "0",
+          parch_tables: "0",
+          parch_tanks: "0",
+          parch_storehouse: "0",
+          discrepancy_reason_parch: "",
         }}
-        onSubmit={async (values) => {}}
+        innerRef={formRef}
+        onSubmit={async (values) => {
+          submitForm(values);
+        }}
       >
         {({
           handleChange,
@@ -123,54 +189,162 @@ export const ParchmentAudit = ({
                   gap: screenHeight * 0.01,
                 }}
               >
-                <BuyCoffeeInput
-                  values={values}
-                  handleChange={handleChange("GLC640")}
-                  handleBlur={handleBlur("GLC640")}
-                  label={`Based on a cherry / parchment ratio of 5.3 and reported cherries of ${cherriesReported}, the expected parchment yield is ${parchmentYield} kilograms (season to date)`}
-                  value={values.GLC640}
-                  active={true}
-                  error={errors.GLC640 === "GLC640"}
+                <Text
+                  style={{
+                    fontWeight: "500",
+                    fontSize: screenWidth * 0.04,
+                    color: colors.black,
+                    marginLeft: screenWidth * 0.02,
+                  }}
+                >
+                  Based on a cherry / parchment ratio of 5.3 and reported
+                  cherries of {cherriesReported} kilograms, the expected
+                  parchment yield is {parchmentYield.toFixed(2)} kilograms
+                  (season to date)
+                </Text>
+                <View
+                  style={{
+                    width: "100%",
+                    height: 1,
+                    backgroundColor: colors.secondary_variant,
+                    marginVertical: screenHeight * 0.01,
+                  }}
                 />
                 <BuyCoffeeInput
                   values={values}
-                  handleChange={handleChange("GLC641")}
-                  handleBlur={handleBlur("GLC641")}
-                  label={`Of the ${parchmentYield} kilograms of expected parchment, how much has been delivered to Kigali?`}
-                  value={values.GLC641}
+                  keyboardType={"numeric"}
+                  handleChange={(text) => {
+                    handleChange("parch_delivered")(text);
+
+                    let current_total =
+                      parseFloat(values.parch_storehouse) +
+                      parseFloat(values.parch_tables) +
+                      parseFloat(values.parch_tanks) +
+                      parseFloat(text);
+
+                    setParchTotal(current_total);
+
+                    let diff =
+                      parseFloat(parchmentYield.toFixed(2)) -
+                      parseFloat(current_total);
+                    let perc = (diff / parseFloat(parchmentYield)) * 100;
+                    setDiscrepancy({
+                      percentage: isNaN(perc) ? 0 : perc.toFixed(2),
+                      kgs: isNaN(diff) ? 0 : diff.toFixed(2),
+                    });
+                  }}
+                  handleBlur={handleBlur("parch_delivered")}
+                  label={`Of the ${parchmentYield.toFixed(
+                    2
+                  )} kilograms of expected parchment, how much has been delivered to Kigali?`}
+                  value={values.parch_delivered}
                   active={true}
-                  error={errors.GLC641 === "GLC641"}
+                  error={errors.parch_delivered === "parch_delivered"}
                 />
                 <BuyCoffeeInput
                   values={values}
-                  handleChange={handleChange("GLC642")}
-                  handleBlur={handleBlur("GLC642")}
-                  label={`Of the ${parchmentYield} kilograms of expected parchment, how much is currently on the tables?`}
-                  value={values.GLC642}
+                  keyboardType={"numeric"}
+                  handleChange={(text) => {
+                    handleChange("parch_tables")(text);
+
+                    let current_total =
+                      parseFloat(values.parch_storehouse) +
+                      parseFloat(text) +
+                      parseFloat(values.parch_tanks) +
+                      parseFloat(values.parch_delivered);
+
+                    setParchTotal(current_total);
+
+                    let diff =
+                      parseFloat(parchmentYield.toFixed(2)) -
+                      parseFloat(current_total);
+                    let perc = (diff / parseFloat(parchmentYield)) * 100;
+                    setDiscrepancy({
+                      percentage: isNaN(perc) ? 0 : perc.toFixed(2),
+                      kgs: isNaN(diff) ? 0 : diff.toFixed(2),
+                    });
+                  }}
+                  handleBlur={handleBlur("parch_tables")}
+                  label={`Of the ${parchmentYield.toFixed(
+                    2
+                  )} kilograms of expected parchment, how much is currently on the tables?`}
+                  value={values.parch_tables}
                   active={true}
-                  error={errors.GLC642 === "GLC642"}
+                  error={errors.parch_tables === "parch_tables"}
                 />
                 <BuyCoffeeInput
                   values={values}
-                  handleChange={handleChange("GLC643")}
-                  handleBlur={handleBlur("GLC643")}
-                  label={`Of the ${parchmentYield} kilograms of expected parchment, how much is currently in the tanks?`}
-                  value={values.GLC643}
+                  keyboardType={"numeric"}
+                  handleChange={(text) => {
+                    handleChange("parch_tanks")(text);
+
+                    let current_total =
+                      parseFloat(values.parch_storehouse) +
+                      parseFloat(values.parch_tables) +
+                      parseFloat(text) +
+                      parseFloat(values.parch_delivered);
+
+                    setParchTotal(current_total);
+
+                    let diff =
+                      parseFloat(parchmentYield.toFixed(2)) -
+                      parseFloat(current_total);
+                    let perc = (diff / parseFloat(parchmentYield)) * 100;
+                    setDiscrepancy({
+                      percentage: isNaN(perc) ? 0 : perc.toFixed(2),
+                      kgs: isNaN(diff) ? 0 : diff.toFixed(2),
+                    });
+                  }}
+                  handleBlur={handleBlur("parch_tanks")}
+                  label={`Of the ${parchmentYield.toFixed(
+                    2
+                  )} kilograms of expected parchment, how much is currently in the tanks?`}
+                  value={values.parch_tanks}
                   active={true}
-                  error={errors.GLC643 === "GLC643"}
+                  error={errors.parch_tanks === "parch_tanks"}
                 />
                 <BuyCoffeeInput
                   values={values}
-                  handleChange={handleChange("GLC644")}
-                  handleBlur={handleBlur("GLC644")}
-                  label={`Of the ${parchmentYield} kilograms of expected parchment, how much is currently in the storehouse?`}
-                  value={values.GLC644}
+                  keyboardType={"numeric"}
+                  handleChange={(text) => {
+                    handleChange("parch_storehouse")(text);
+
+                    let current_total =
+                      parseFloat(text) +
+                      parseFloat(values.parch_tables) +
+                      parseFloat(values.parch_tanks) +
+                      parseFloat(values.parch_delivered);
+
+                    setParchTotal(current_total);
+
+                    let diff =
+                      parseFloat(parchmentYield.toFixed(2)) -
+                      parseFloat(current_total);
+                    let perc = (diff / parseFloat(parchmentYield)) * 100;
+                    setDiscrepancy({
+                      percentage: isNaN(perc) ? 0 : perc.toFixed(2),
+                      kgs: isNaN(diff) ? 0 : diff.toFixed(2),
+                    });
+                  }}
+                  handleBlur={handleBlur("parch_storehouse")}
+                  label={`Of the ${parchmentYield.toFixed(
+                    2
+                  )} kilograms of expected parchment, how much is currently in the storehouse?`}
+                  value={values.parch_storehouse}
                   active={true}
-                  error={errors.GLC644 === "GLC644"}
+                  error={errors.parch_storehouse === "parch_storehouse"}
+                />
+                <View
+                  style={{
+                    width: "100%",
+                    height: 1,
+                    backgroundColor: colors.secondary_variant,
+                    marginVertical: screenHeight * 0.01,
+                  }}
                 />
                 <Text
                   style={{
-                    fontWeight: "400",
+                    fontWeight: "500",
                     fontSize: screenWidth * 0.04,
                     color: colors.black,
                     marginLeft: screenWidth * 0.02,
@@ -179,14 +353,35 @@ export const ParchmentAudit = ({
                   The station has a parchment discrepancy of{" "}
                   {discrepancy.percentage}% ({discrepancy.kgs} kilograms).
                 </Text>
+                <View
+                  style={{
+                    width: "100%",
+                    height: 1,
+                    backgroundColor: colors.secondary_variant,
+                    marginVertical: screenHeight * 0.01,
+                  }}
+                />
                 <BuyCoffeeInput
                   values={values}
-                  handleChange={handleChange("GLC646")}
-                  handleBlur={handleBlur("GLC646")}
+                  keyboardType={"numeric"}
+                  handleChange={handleChange("discrepancy_reason_parch")}
+                  handleBlur={handleBlur("discrepancy_reason_parch")}
                   label={"Why is there any discrepancy"}
-                  value={values.GLC646}
+                  value={values.discrepancy_reason_parch}
                   active={true}
-                  error={errors.GLC646 === "GLC646"}
+                  error={
+                    errors.discrepancy_reason_parch ===
+                    "discrepancy_reason_parch"
+                  }
+                />
+                <SimpleIconButton
+                  label={"Save"}
+                  width="100%"
+                  color={colors.secondary}
+                  labelColor="white"
+                  active={true}
+                  handlePress={handleSubmit}
+                  icon={<Feather name="save" size={24} color="white" />}
                 />
               </View>
 

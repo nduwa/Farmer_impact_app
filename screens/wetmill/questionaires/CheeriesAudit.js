@@ -1,19 +1,27 @@
 import { Dimensions, Keyboard, ScrollView, Text, View } from "react-native";
 import { colors } from "../../../data/colors";
-import CustomButton from "../../../components/CustomButton";
+import Feather from "@expo/vector-icons/Feather";
 import { BuyCoffeeInput } from "../../../components/BuyCoffeeInput";
-import { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Formik } from "formik";
+import SimpleIconButton from "../../../components/SimpleIconButton";
+import { cherriesSchema } from "../../../validation/wetmillAuditSchema";
+import { useFocusEffect } from "@react-navigation/native";
 
-export const CheeriesAudit = ({ stationName }) => {
+export const CheeriesAudit = ({
+  stationName,
+  setNextModal,
+  setAudit,
+  cherriesSMS,
+}) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
+  const formRef = useRef(null);
 
   const [discrepancy, setDiscrepancy] = useState({
     percentage: 0,
     kgs: 0,
   });
-  const [formSubmitted, setFormSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
   const [errors, setErrors] = useState({}); // validation errors
@@ -22,6 +30,48 @@ export const CheeriesAudit = ({ stationName }) => {
     type: null,
     inputBox: null,
   });
+
+  const validateForm = (data, schema) => {
+    const { error } = schema.validate(data, { abortEarly: false });
+    if (!error) {
+      setErrors({});
+      setValidationError({
+        type: null,
+        message: null,
+        inputBox: null,
+      });
+
+      return true;
+    }
+
+    const newErrors = {};
+    error.details.forEach((detail) => {
+      newErrors[detail.path[0]] = detail.message;
+    });
+
+    setErrors(newErrors);
+    return false;
+  };
+
+  const submitForm = (values) => {
+    try {
+      let cherriesObj = {
+        ...values,
+        ...{
+          discrepancy_perc_cherries: String(discrepancy.percentage),
+          discrepancy_kgs_cherries: String(discrepancy.kgs),
+          cherries_sms: String(cherriesSMS),
+        },
+      };
+
+      if (!validateForm(cherriesObj, cherriesSchema)) return;
+
+      setAudit((prevState) => ({ ...prevState, ...cherriesObj }));
+      setNextModal(true);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
@@ -44,6 +94,18 @@ export const CheeriesAudit = ({ stationName }) => {
     };
   }, [isKeyboardActive]);
 
+  useFocusEffect(
+    React.useCallback(() => {
+      return () => {
+        if (formRef.current) {
+          formRef.current.setValues({
+            cherries_books: "0",
+            cherries_sms: cherriesSMS,
+          });
+        }
+      };
+    }, [])
+  );
   return (
     <View
       style={{
@@ -74,11 +136,14 @@ export const CheeriesAudit = ({ stationName }) => {
       />
       <Formik
         initialValues={{
-          GLC637: "",
-          GLC638: "",
-          GLC639: "",
+          cherries_sms: String(cherriesSMS),
+          cherries_books: "0",
+          discrepancy_reason_cherries: "",
         }}
-        onSubmit={async (values) => {}}
+        innerRef={formRef}
+        onSubmit={async (values) => {
+          submitForm(values);
+        }}
       >
         {({
           handleChange,
@@ -117,25 +182,36 @@ export const CheeriesAudit = ({ stationName }) => {
               >
                 <BuyCoffeeInput
                   values={values}
-                  handleChange={handleChange("GLC637")}
-                  handleBlur={handleBlur("GLC637")}
+                  handleChange={handleChange("cherries_sms")}
+                  handleBlur={handleBlur("cherries_sms")}
+                  keyboardType={"numeric"}
                   label={
                     "Kilograms of cherries reported to FileMaker season-to-date"
                   }
-                  value={values.GLC637}
+                  value={values.cherries_sms}
                   active={true}
-                  error={errors.GLC637 === "GLC637"}
+                  error={errors.cherries_sms === "cherries_sms"}
                 />
                 <BuyCoffeeInput
                   values={values}
-                  handleChange={handleChange("GLC638")}
-                  handleBlur={handleBlur("GLC638")}
+                  keyboardType={"numeric"}
+                  handleChange={(text) => {
+                    handleChange("cherries_books")(text);
+
+                    let diff = parseFloat(cherriesSMS) - parseFloat(text);
+                    let perc = (diff / cherriesSMS) * 100;
+                    setDiscrepancy({
+                      percentage: isNaN(perc) ? 0 : perc.toFixed(2),
+                      kgs: isNaN(diff) ? 0 : diff,
+                    });
+                  }}
+                  handleBlur={handleBlur("cherries_books")}
                   label={
                     "How many total kilograms of cherries has the station reported in their books season to date?"
                   }
-                  value={values.GLC638}
+                  value={values.cherries_books}
                   active={true}
-                  error={errors.GLC638 === "GLC638"}
+                  error={errors.cherries_books === "cherries_books"}
                 />
                 <View
                   style={{
@@ -166,12 +242,25 @@ export const CheeriesAudit = ({ stationName }) => {
                 />
                 <BuyCoffeeInput
                   values={values}
-                  handleChange={handleChange("GLC639")}
-                  handleBlur={handleBlur("GLC639")}
+                  handleChange={handleChange("discrepancy_reason_cherries")}
+                  handleBlur={handleBlur("discrepancy_reason_cherries")}
                   label={"Why is there any discrepancy"}
-                  value={values.GLC639}
+                  value={values.discrepancy_reason_cherries}
                   active={true}
-                  error={errors.GLC639 === "GLC639"}
+                  error={
+                    errors.discrepancy_reason_cherries ===
+                    "discrepancy_reason_cherries"
+                  }
+                />
+
+                <SimpleIconButton
+                  label={"Save"}
+                  width="100%"
+                  color={colors.secondary}
+                  labelColor="white"
+                  active={true}
+                  handlePress={handleSubmit}
+                  icon={<Feather name="save" size={24} color="white" />}
                 />
               </View>
 

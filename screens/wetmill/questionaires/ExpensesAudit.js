@@ -1,22 +1,28 @@
 import { Dimensions, Keyboard, ScrollView, Text, View } from "react-native";
 import { colors } from "../../../data/colors";
 import { BuyCoffeeInput } from "../../../components/BuyCoffeeInput";
-import { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Formik } from "formik";
+import Feather from "@expo/vector-icons/Feather";
+import SimpleIconButton from "../../../components/SimpleIconButton";
+import { useFocusEffect } from "@react-navigation/native";
+import { expenseSchema } from "../../../validation/wetmillAuditSchema";
 
-export const ExpensesAudit = ({ stationName }) => {
+export const ExpensesAudit = ({
+  stationName,
+  setNextModal,
+  cherriesPurchased,
+  setAudit,
+}) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
+  const formRef = useRef(null);
 
-  const [pricePerKg, setPricePerKg] = useState(0);
-  const [moneyPaid, setMoneyPaid] = useState(0);
   const [cherriesKgs, setCherriesKgs] = useState(0);
-  const [cherriesPurchased, setCherriesPurchased] = useState(0);
   const [discrepancy, setDiscrepancy] = useState({
     percentage: 0,
     kgs: 0,
   });
-  const [formSubmitted, setFormSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
   const [errors, setErrors] = useState({}); // validation errors
@@ -25,6 +31,49 @@ export const ExpensesAudit = ({ stationName }) => {
     type: null,
     inputBox: null,
   });
+
+  const validateForm = (data, schema) => {
+    const { error } = schema.validate(data, { abortEarly: false });
+    if (!error) {
+      setErrors({});
+      setValidationError({
+        type: null,
+        message: null,
+        inputBox: null,
+      });
+
+      return true;
+    }
+
+    const newErrors = {};
+    error.details.forEach((detail) => {
+      newErrors[detail.path[0]] = detail.message;
+    });
+
+    console.log(newErrors);
+    setErrors(newErrors);
+    return false;
+  };
+
+  const submitForm = (values) => {
+    try {
+      let expObj = {
+        ...values,
+        ...{
+          discrepancy_perc_expenses: String(discrepancy.percentage),
+          discrepancy_kgs_expenses: String(discrepancy.kgs),
+          expected_std_cherries: String(cherriesKgs),
+        },
+      };
+
+      if (!validateForm(expObj, expenseSchema)) return;
+
+      setAudit((prevState) => ({ ...prevState, ...expObj }));
+      setNextModal(true);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
@@ -46,6 +95,20 @@ export const ExpensesAudit = ({ stationName }) => {
       keyboardDidHideListener.remove();
     };
   }, [isKeyboardActive]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      return () => {
+        if (formRef.current) {
+          formRef.current.setValues({
+            std_price: "0",
+            std_total_paid: "0",
+          });
+          setDiscrepancy({ percentage: 0, kgs: 0 });
+        }
+      };
+    }, [])
+  );
 
   return (
     <View
@@ -77,11 +140,13 @@ export const ExpensesAudit = ({ stationName }) => {
       />
       <Formik
         initialValues={{
-          GLC650: "",
-          GLC651: "",
-          GLC652: "",
+          std_price: "0",
+          std_total_paid: "0",
         }}
-        onSubmit={async (values) => {}}
+        innerRef={formRef}
+        onSubmit={async (values) => {
+          submitForm(values);
+        }}
       >
         {({
           handleChange,
@@ -120,25 +185,57 @@ export const ExpensesAudit = ({ stationName }) => {
               >
                 <BuyCoffeeInput
                   values={values}
-                  handleChange={handleChange("GLC650")}
-                  handleBlur={handleBlur("GLC650")}
+                  handleChange={(text) => {
+                    handleChange("std_price")(text);
+
+                    let cherriesWeight =
+                      parseFloat(values.std_total_paid) / parseFloat(text);
+
+                    setCherriesKgs(cherriesWeight.toFixed(2));
+
+                    let diff =
+                      parseFloat(cherriesPurchased.toFixed(2)) -
+                      parseFloat(cherriesWeight.toFixed(2));
+                    let perc = (diff / parseFloat(cherriesPurchased)) * 100;
+                    setDiscrepancy({
+                      percentage: isNaN(perc) ? 0 : perc.toFixed(2),
+                      kgs: isNaN(diff) ? 0 : diff.toFixed(2),
+                    });
+                  }}
+                  handleBlur={handleBlur("std_price")}
                   label={
                     "Average price per kilogram approved by RTC this season"
                   }
-                  value={values.GLC650}
+                  value={values.std_price}
                   active={true}
-                  error={errors.GLC650 === "GLC650"}
+                  error={errors.std_price === "std_price"}
                 />
                 <BuyCoffeeInput
                   values={values}
-                  handleChange={handleChange("GLC651")}
-                  handleBlur={handleBlur("GLC651")}
+                  handleChange={(text) => {
+                    handleChange("std_total_paid")(text);
+
+                    let cherriesWeight =
+                      parseFloat(text) / parseFloat(values.std_price);
+
+                    setCherriesKgs(cherriesWeight.toFixed(2));
+
+                    let diff =
+                      parseFloat(cherriesPurchased.toFixed(2)) -
+                      parseFloat(cherriesWeight.toFixed(2));
+                    let perc = (diff / parseFloat(cherriesPurchased)) * 100;
+                    setDiscrepancy({
+                      percentage: isNaN(perc) ? 0 : perc.toFixed(2),
+                      kgs: isNaN(diff) ? 0 : diff.toFixed(2),
+                    });
+                  }}
+                  handleBlur={handleBlur("std_total_paid")}
                   label={
                     "According to their books, what is the total amount of money that has paid for cherries this season?"
                   }
-                  value={values.GLC651}
+                  value={values.std_total_paid}
                   active={true}
-                  error={errors.GLC651 === "GLC651"}
+                  error={errors.std_total_paid === "std_total_paid"}
                 />
                 <View
                   style={{
@@ -156,12 +253,23 @@ export const ExpensesAudit = ({ stationName }) => {
                     marginLeft: screenWidth * 0.02,
                   }}
                 >
-                  Based on the total money paid of {moneyPaid} RWF divided by
-                  the average price per kg of {pricePerKg} RWF, we would expect
-                  {cherriesKgs} kgs of cherries. The station has reported cherry
-                  purchases of {cherriesPurchased} kgs, which results in a
-                  discrepancy of {discrepancy.percentage}.
+                  Based on the total money paid of {values.std_total_paid || 0}{" "}
+                  RWF divided by the average price per kg of{" "}
+                  {values.std_price || 0} RWF, we would expect{" "}
+                  {isNaN(cherriesKgs) ? 0 : cherriesKgs} kilograms of cherries.
+                  The station has reported cherry purchases of{" "}
+                  {cherriesPurchased || 0} kilograms, which results in a
+                  discrepancy of {discrepancy.percentage || 0}%.
                 </Text>
+                <SimpleIconButton
+                  label={"Save"}
+                  width="100%"
+                  color={colors.secondary}
+                  labelColor="white"
+                  active={true}
+                  handlePress={handleSubmit}
+                  icon={<Feather name="save" size={24} color="white" />}
+                />
               </View>
 
               {/* validation error */}
