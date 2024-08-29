@@ -53,6 +53,7 @@ import { LanguageScreen } from "./screens/language/LanguageScreen";
 import { WetmillHomeScreen } from "./screens/wetmill/WetmillHomeScreen";
 import { ChooseStationScreen } from "./screens/wetmill/ChooseStationScreen";
 import { AuditScreen } from "./screens/wetmill/AuditScreen";
+import FileManager from "./screens/wetmill/FileManager";
 
 const Stack = createNativeStackNavigator();
 
@@ -315,6 +316,11 @@ export default function App() {
               name="AuditScreen"
               options={{ unmountOnBlur: true }}
               component={AuditScreen}
+            />
+            <Stack.Screen
+              name="Filemanager"
+              options={{ unmountOnBlur: true }}
+              component={FileManager}
             />
           </Stack.Navigator>
         </NavigationContainer>

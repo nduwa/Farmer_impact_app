@@ -11,7 +11,7 @@ import { expenseSchema } from "../../../validation/wetmillAuditSchema";
 export const ExpensesAudit = ({
   stationName,
   setNextModal,
-  cherriesPurchased,
+  cherriesPurchased=0,
   setAudit,
 }) => {
   const screenHeight = Dimensions.get("window").height;
@@ -194,7 +194,7 @@ export const ExpensesAudit = ({
                     setCherriesKgs(cherriesWeight.toFixed(2));
 
                     let diff =
-                      parseFloat(cherriesPurchased.toFixed(2)) -
+                      parseFloat(cherriesPurchased) -
                       parseFloat(cherriesWeight.toFixed(2));
                     let perc = (diff / parseFloat(cherriesPurchased)) * 100;
                     setDiscrepancy({
@@ -221,7 +221,7 @@ export const ExpensesAudit = ({
                     setCherriesKgs(cherriesWeight.toFixed(2));
 
                     let diff =
-                      parseFloat(cherriesPurchased.toFixed(2)) -
+                      parseFloat(cherriesPurchased) -
                       parseFloat(cherriesWeight.toFixed(2));
                     let perc = (diff / parseFloat(cherriesPurchased)) * 100;
                     setDiscrepancy({

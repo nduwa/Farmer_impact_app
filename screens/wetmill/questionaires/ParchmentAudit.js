@@ -63,6 +63,7 @@ export const ParchmentAudit = ({
           discrepancy_perc_parch: String(discrepancy.percentage),
           discrepancy_kgs_parch: String(discrepancy.kgs),
           parch_total: String(parchTotal),
+          parch_theory: String(parchmentYield),
         },
       };
 

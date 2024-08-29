@@ -27,6 +27,10 @@ import { CongestionAudit } from "./questionaires/CongestionAudit";
 import { TakePictures } from "./questionaires/TakePictures";
 import { SyncModal } from "../../components/SyncModal";
 import { Approval } from "./questionaires/Aprroval";
+import {
+  prepareReportFile,
+  uritoBase64,
+} from "../../helpers/prepareWetmillReport";
 
 export const AuditScreen = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
@@ -34,15 +38,16 @@ export const AuditScreen = ({ route }) => {
   const navigation = useNavigation();
   const { data } = route.params;
 
-  const [activeAudit, setActiveAudit] = useState(11);
+  const [activeAudit, setActiveAudit] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
   const [choice, setChoice] = useState(false);
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
   const [nextModal, setNextModal] = useState(false);
   const [finishModal, setFinishModal] = useState(false);
   const [auditData, setAuditData] = useState({});
+  const [fileSaved, setFileSaved] = useState(false);
 
-  const [reportedCherries, setReportedCherries] = useState(1800);
+  const [reportedCherries, setReportedCherries] = useState(416735);
   const [parchYield, setParchYield] = useState(0);
   const [bucketsYield, setBucketsYield] = useState(0);
   const [parchDayEstimate, setParchDayEstimate] = useState(0);
@@ -53,14 +58,23 @@ export const AuditScreen = ({ route }) => {
     navigation.navigate("WetmillHomeScreen", { data: null });
   };
 
+  const getDate = () => {
+    const today = new Date();
+    const day = String(today.getDate()).padStart(2, "0");
+    const month = String(today.getMonth() + 1).padStart(2, "0"); // January is 0!
+    const year = today.getFullYear();
+
+    return `${day}/${month}/${year}`;
+  };
+
   const handleSave = () => {
     setNextModal(false);
     setActiveAudit(activeAudit < 11 ? activeAudit + 1 : 11);
   };
 
-  const handleFinish = () => {
+  const handleFinish = async () => {
     setFinishModal(false);
-    console.log("file creation goes here");
+    await prepareReportFile(auditData, data?.Name, getDate(), setFileSaved);
   };
 
   const handlePrev = () => {
@@ -68,8 +82,10 @@ export const AuditScreen = ({ route }) => {
   };
 
   useEffect(() => {
-    console.log(auditData);
-  }, [auditData]);
+    if (fileSaved) {
+      navigation.navigate("Filemanager");
+    }
+  }, [fileSaved]);
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
@@ -95,7 +111,7 @@ export const AuditScreen = ({ route }) => {
   useEffect(() => {
     let parch_yield = reportedCherries / process.env.CHERRY_PARCHMENT_RATIO;
     setParchYield(parseFloat(parch_yield));
-    setBucketsYield(378);
+    setBucketsYield(11883);
     setParchDayEstimate(2536);
   }, []);
   return (
