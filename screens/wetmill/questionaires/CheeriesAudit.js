@@ -76,6 +76,29 @@ export const CheeriesAudit = ({
     }
   };
 
+  const getInputLabel = (input) => {
+    let output = "";
+    let tmp = input.split("_");
+    output = tmp.join(" ");
+
+    if (input === "cheeries_books") output = "Cherries reported in books";
+    if (input === "discrepancy_reason_cherries") output = "Discrepancy reason";
+
+    return output;
+  };
+
+  useEffect(() => {
+    if (Object.keys(errors).length > 0) {
+      setValidationError({
+        type: "emptyOrInvalidData",
+        message: `Invalid input at '${getInputLabel(
+          Object.keys(errors)[0]
+        )}', also check for any other highlighted input box`,
+        inputBox: null,
+      });
+    }
+  }, [errors]);
+
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
       "keyboardDidShow",
@@ -100,6 +123,11 @@ export const CheeriesAudit = ({
   useFocusEffect(
     React.useCallback(() => {
       return () => {
+        setDiscrepancy({
+          percentage: responses.discrepancy_perc_cherries || 0,
+          kgs: responses.discrepancy_kgs_cherries || 0,
+        });
+
         if (formRef.current) {
           formRef.current.setValues({
             cherries_books: responses.cherries_books || "0",
@@ -197,8 +225,8 @@ export const CheeriesAudit = ({
                   label={
                     "Kilograms of cherries reported to FileMaker season-to-date"
                   }
-                  value={values.cherries_sms}
-                  active={true}
+                  value={parseFloat(values.cherries_sms).toLocaleString()}
+                  active={false}
                   error={errors.cherries_sms === "cherries_sms"}
                 />
                 <BuyCoffeeInput
@@ -207,7 +235,7 @@ export const CheeriesAudit = ({
                   handleChange={(text) => {
                     handleChange("cherries_books")(text);
 
-                    let diff = parseFloat(cherriesSMS) - parseFloat(text);
+                    let diff = parseFloat(cherriesSMS) - parseFloat(text) || 0;
                     let perc = (diff / cherriesSMS) * 100;
                     setDiscrepancy({
                       percentage: isNaN(perc) ? 0 : perc.toFixed(2),
@@ -218,9 +246,9 @@ export const CheeriesAudit = ({
                   label={
                     "How many total kilograms of cherries has the station reported in their books season to date?"
                   }
-                  value={values.cherries_books}
+                  value={responses.cherries_books || values.cherries_books}
                   active={true}
-                  error={errors.cherries_books === "cherries_books"}
+                  error={errors.cherries_books}
                 />
                 <View
                   style={{
@@ -254,13 +282,51 @@ export const CheeriesAudit = ({
                   handleChange={handleChange("discrepancy_reason_cherries")}
                   handleBlur={handleBlur("discrepancy_reason_cherries")}
                   label={"Why is there any discrepancy"}
-                  value={values.discrepancy_reason_cherries}
-                  active={true}
-                  error={
-                    errors.discrepancy_reason_cherries ===
-                    "discrepancy_reason_cherries"
+                  value={
+                    responses.discrepancy_reason_cherries ||
+                    values.discrepancy_reason_cherries
                   }
+                  active={true}
+                  error={errors.discrepancy_reason_cherries}
                 />
+
+                {/* validation error */}
+                {validationError.message && (
+                  <View
+                    style={{
+                      width: "100%",
+                      backgroundColor: colors.white_variant,
+                      elevation: 2,
+                      borderWidth: 0.7,
+                      borderColor: "red",
+                      borderRadius: 15,
+                      paddingHorizontal: screenWidth * 0.02,
+                      paddingVertical: screenHeight * 0.02,
+                      gap: screenHeight * 0.01,
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontWeight: "400",
+                        fontSize: screenWidth * 0.05,
+                        color: colors.secondary,
+                        marginLeft: screenWidth * 0.02,
+                      }}
+                    >
+                      Validation Error
+                    </Text>
+                    <Text
+                      style={{
+                        fontWeight: "400",
+                        fontSize: screenWidth * 0.04,
+                        color: colors.black_letter,
+                        marginLeft: screenWidth * 0.02,
+                      }}
+                    >
+                      {validationError.message}
+                    </Text>
+                  </View>
+                )}
 
                 <SimpleIconButton
                   label={"Save"}
@@ -272,44 +338,6 @@ export const CheeriesAudit = ({
                   icon={<Feather name="save" size={24} color="white" />}
                 />
               </View>
-
-              {/* validation error */}
-              {validationError.message && (
-                <View
-                  style={{
-                    width: "95%",
-                    backgroundColor: colors.white_variant,
-                    elevation: 2,
-                    borderWidth: 0.7,
-                    borderColor: "red",
-                    borderRadius: 15,
-                    paddingHorizontal: screenWidth * 0.04,
-                    paddingVertical: screenHeight * 0.03,
-                    gap: screenHeight * 0.01,
-                  }}
-                >
-                  <Text
-                    style={{
-                      fontWeight: "400",
-                      fontSize: screenWidth * 0.05,
-                      color: colors.secondary,
-                      marginLeft: screenWidth * 0.02,
-                    }}
-                  >
-                    Validation Error
-                  </Text>
-                  <Text
-                    style={{
-                      fontWeight: "400",
-                      fontSize: screenWidth * 0.04,
-                      color: colors.black_letter,
-                      marginLeft: screenWidth * 0.02,
-                    }}
-                  >
-                    {validationError.message}
-                  </Text>
-                </View>
-              )}
             </ScrollView>
           </View>
         )}

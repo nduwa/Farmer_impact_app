@@ -178,6 +178,46 @@ export const AppearanceAudit = ({ responses, setNextModal, setAudit }) => {
     }
   };
 
+  const getInputLabel = (input) => {
+    let output = "";
+
+    if (input === "water_quality_comment")
+      output = "comments on the water quality";
+    if (input === "water_suffient_comment")
+      output = "comments on the water suffiency";
+
+    return output;
+  };
+
+  useEffect(() => {
+    let i = 0;
+    if (Object.keys(errors).length > 0) {
+      if (Object.keys(errors)[i] === "water_quality_photo") {
+        setValidationError({
+          type: "emptyOrInvalidData",
+          message: `No photo provided for water quality`,
+          inputBox: null,
+        });
+        i++;
+      } else if (Object.keys(errors)[i] === "water_suffient_photo") {
+        setValidationError({
+          type: "emptyOrInvalidData",
+          message: `No photo provided for water sufficiency`,
+          inputBox: null,
+        });
+        i++;
+      } else {
+        setValidationError({
+          type: "emptyOrInvalidData",
+          message: `Invalid input at '${getInputLabel(
+            Object.keys(errors)[0]
+          )}', also check for any other highlighted input box`,
+          inputBox: null,
+        });
+      }
+    }
+  }, [errors]);
+
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
       "keyboardDidShow",
@@ -364,9 +404,7 @@ export const AppearanceAudit = ({ responses, setNextModal, setAudit }) => {
                   }
                   active={true}
                   multiline={true}
-                  error={
-                    errors.water_quality_comment === "water_quality_comment"
-                  }
+                  error={errors.water_quality_comment}
                 />
                 <View
                   style={{
@@ -480,9 +518,7 @@ export const AppearanceAudit = ({ responses, setNextModal, setAudit }) => {
                   }
                   active={true}
                   multiline={true}
-                  error={
-                    errors.water_suffient_comment === "water_suffient_comment"
-                  }
+                  error={errors.water_suffient_comment}
                 />
                 <View
                   style={{
@@ -558,6 +594,44 @@ export const AppearanceAudit = ({ responses, setNextModal, setAudit }) => {
                   />
                 )}
 
+                {/* validation error */}
+                {validationError.message && (
+                  <View
+                    style={{
+                      width: "100%",
+                      backgroundColor: colors.white_variant,
+                      elevation: 2,
+                      borderWidth: 0.7,
+                      borderColor: "red",
+                      borderRadius: 15,
+                      paddingHorizontal: screenWidth * 0.02,
+                      paddingVertical: screenHeight * 0.02,
+                      gap: screenHeight * 0.01,
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontWeight: "400",
+                        fontSize: screenWidth * 0.05,
+                        color: colors.secondary,
+                        marginLeft: screenWidth * 0.02,
+                      }}
+                    >
+                      Validation Error
+                    </Text>
+                    <Text
+                      style={{
+                        fontWeight: "400",
+                        fontSize: screenWidth * 0.04,
+                        color: colors.black_letter,
+                        marginLeft: screenWidth * 0.02,
+                      }}
+                    >
+                      {validationError.message}
+                    </Text>
+                  </View>
+                )}
+
                 <SimpleIconButton
                   label={"Save"}
                   width="100%"
@@ -568,44 +642,6 @@ export const AppearanceAudit = ({ responses, setNextModal, setAudit }) => {
                   icon={<Feather name="save" size={24} color="white" />}
                 />
               </View>
-
-              {/* validation error */}
-              {validationError.message && (
-                <View
-                  style={{
-                    width: "95%",
-                    backgroundColor: colors.white_variant,
-                    elevation: 2,
-                    borderWidth: 0.7,
-                    borderColor: "red",
-                    borderRadius: 15,
-                    paddingHorizontal: screenWidth * 0.04,
-                    paddingVertical: screenHeight * 0.03,
-                    gap: screenHeight * 0.01,
-                  }}
-                >
-                  <Text
-                    style={{
-                      fontWeight: "400",
-                      fontSize: screenWidth * 0.05,
-                      color: colors.secondary,
-                      marginLeft: screenWidth * 0.02,
-                    }}
-                  >
-                    Validation Error
-                  </Text>
-                  <Text
-                    style={{
-                      fontWeight: "400",
-                      fontSize: screenWidth * 0.04,
-                      color: colors.black_letter,
-                      marginLeft: screenWidth * 0.02,
-                    }}
-                  >
-                    {validationError.message}
-                  </Text>
-                </View>
-              )}
             </ScrollView>
           </View>
         )}

@@ -26,10 +26,10 @@ export const QualityQuantityAudit = ({ responses, setNextModal, setAudit }) => {
   const screenWidth = Dimensions.get("window").width;
   const formRef = useRef(null);
 
-  const [selectedImage, setSelectedImage] = useState(
+  const [selectedImage, setSelectedImage] = useState(responses.leftover_photo);
+  const [choice, setChoice] = useState(
     responses.leftover_beans === "yes" ? true : false
   );
-  const [choice, setChoice] = useState(false);
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
   const [errors, setErrors] = useState({}); // validation errors
   const [validationError, setValidationError] = useState({
@@ -158,6 +158,39 @@ export const QualityQuantityAudit = ({ responses, setNextModal, setAudit }) => {
     }
   };
 
+  const getInputLabel = (input) => {
+    let output = "";
+    let tmp = input.split("_");
+    output = tmp.join(" ");
+
+    if (input === "cheeries_books") output = "Cherries reported in books";
+    if (input === "discrepancy_reason_cherries") output = "Discrepancy reason";
+
+    return output;
+  };
+
+  useEffect(() => {
+    let i = 0;
+    if (Object.keys(errors).length > 0) {
+      if (Object.keys(errors)[i] === "leftover_photo") {
+        setValidationError({
+          type: "emptyOrInvalidData",
+          message: `No photo provided for Beans left over`,
+          inputBox: null,
+        });
+        i++;
+      } else {
+        setValidationError({
+          type: "emptyOrInvalidData",
+          message: `Invalid input at '${getInputLabel(
+            Object.keys(errors)[0]
+          )}', also check for any other highlighted input box`,
+          inputBox: null,
+        });
+      }
+    }
+  }, [errors]);
+
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
       "keyboardDidShow",
@@ -182,13 +215,11 @@ export const QualityQuantityAudit = ({ responses, setNextModal, setAudit }) => {
   useFocusEffect(
     React.useCallback(() => {
       return () => {
-        setSelectedImage(responses.leftover_photo || null);
+        setSelectedImage(null);
         if (formRef.current) {
           formRef.current.setValues({
             leftover_comment: responses.leftover_comment || "",
           });
-          setChoice(responses.leftover_beans === "yes" ? true : false);
-          setSelectedImage(responses.leftover_photo || null);
         }
       };
     }, [])
@@ -225,7 +256,7 @@ export const QualityQuantityAudit = ({ responses, setNextModal, setAudit }) => {
       <Formik
         initialValues={{
           leftover_beans: choice ? "yes" : "no",
-          leftover_comment: "",
+          leftover_comment: responses.leftover_comment || "",
         }}
         innerRef={formRef}
         onSubmit={async (values) => {
@@ -333,7 +364,7 @@ export const QualityQuantityAudit = ({ responses, setNextModal, setAudit }) => {
                   value={responses.leftover_comment || values.leftover_comment}
                   active={true}
                   multiline={true}
-                  error={errors.leftover_comment === "leftover_comment"}
+                  error={errors.leftover_comment}
                 />
                 <View
                   style={{
@@ -401,6 +432,44 @@ export const QualityQuantityAudit = ({ responses, setNextModal, setAudit }) => {
                   />
                 )}
 
+                {/* validation error */}
+                {validationError.message && (
+                  <View
+                    style={{
+                      width: "100%",
+                      backgroundColor: colors.white_variant,
+                      elevation: 2,
+                      borderWidth: 0.7,
+                      borderColor: "red",
+                      borderRadius: 15,
+                      paddingHorizontal: screenWidth * 0.02,
+                      paddingVertical: screenHeight * 0.02,
+                      gap: screenHeight * 0.01,
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontWeight: "400",
+                        fontSize: screenWidth * 0.05,
+                        color: colors.secondary,
+                        marginLeft: screenWidth * 0.02,
+                      }}
+                    >
+                      Validation Error
+                    </Text>
+                    <Text
+                      style={{
+                        fontWeight: "400",
+                        fontSize: screenWidth * 0.04,
+                        color: colors.black_letter,
+                        marginLeft: screenWidth * 0.02,
+                      }}
+                    >
+                      {validationError.message}
+                    </Text>
+                  </View>
+                )}
+
                 <SimpleIconButton
                   label={"Save"}
                   width="100%"
@@ -411,44 +480,6 @@ export const QualityQuantityAudit = ({ responses, setNextModal, setAudit }) => {
                   icon={<Feather name="save" size={24} color="white" />}
                 />
               </View>
-
-              {/* validation error */}
-              {validationError.message && (
-                <View
-                  style={{
-                    width: "95%",
-                    backgroundColor: colors.white_variant,
-                    elevation: 2,
-                    borderWidth: 0.7,
-                    borderColor: "red",
-                    borderRadius: 15,
-                    paddingHorizontal: screenWidth * 0.04,
-                    paddingVertical: screenHeight * 0.03,
-                    gap: screenHeight * 0.01,
-                  }}
-                >
-                  <Text
-                    style={{
-                      fontWeight: "400",
-                      fontSize: screenWidth * 0.05,
-                      color: colors.secondary,
-                      marginLeft: screenWidth * 0.02,
-                    }}
-                  >
-                    Validation Error
-                  </Text>
-                  <Text
-                    style={{
-                      fontWeight: "400",
-                      fontSize: screenWidth * 0.04,
-                      color: colors.black_letter,
-                      marginLeft: screenWidth * 0.02,
-                    }}
-                  >
-                    {validationError.message}
-                  </Text>
-                </View>
-              )}
             </ScrollView>
           </View>
         )}

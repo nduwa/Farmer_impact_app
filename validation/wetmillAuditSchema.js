@@ -27,7 +27,7 @@ export const pricingSchema = joi.object({
   buckets_theory: joi.string().regex(/^[0-9]*(\.[0-9]+)?$/),
   discrepancy_perc_pricing: joi.string().regex(/^[0-9]*(\.[0-9]+)?$/),
   discrepancy_buckets_pricing: joi.string().regex(/^[0-9]*(\.[0-9]+)?$/),
-  discrepancy_reason_pricing: joi.string().required(),
+  discrepancy_reason_pricing: joi.string().allow(null),
 });
 
 export const expenseSchema = joi.object({

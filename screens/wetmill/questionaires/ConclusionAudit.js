@@ -180,6 +180,45 @@ export const ConclusionAudit = ({
     }
   };
 
+  const getInputLabel = (input) => {
+    let output = "";
+
+    if (input === "drying_congestion_comment")
+      output = "comments on the drying tables congestion";
+    if (input === "drying_congestion_comment2") output = "other notes";
+
+    return output;
+  };
+
+  useEffect(() => {
+    let i = 0;
+    if (Object.keys(errors).length > 0) {
+      if (Object.keys(errors)[i] === "drying_congestion_photo1") {
+        setValidationError({
+          type: "emptyOrInvalidData",
+          message: `Not enough photos provided for drying tables congestion`,
+          inputBox: null,
+        });
+        i++;
+      } else if (Object.keys(errors)[i] === "drying_congestion_photo2") {
+        setValidationError({
+          type: "emptyOrInvalidData",
+          message: `Not enough photos provided for drying tables congestion`,
+          inputBox: null,
+        });
+        i++;
+      } else {
+        setValidationError({
+          type: "emptyOrInvalidData",
+          message: `Invalid input at '${getInputLabel(
+            Object.keys(errors)[0]
+          )}', also check for any other highlighted input box`,
+          inputBox: null,
+        });
+      }
+    }
+  }, [errors]);
+
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
       "keyboardDidShow",
@@ -353,10 +392,7 @@ export const ConclusionAudit = ({
                 label={"Comments"}
                 value={values.drying_congestion_comment}
                 active={true}
-                error={
-                  errors.drying_congestion_comment ===
-                  "drying_congestion_comment"
-                }
+                error={errors.drying_congestion_comment}
               />
               <Text
                 style={{
@@ -417,10 +453,7 @@ export const ConclusionAudit = ({
                 label={"Do you have any other notes?"}
                 value={values.drying_congestion_comment2}
                 active={true}
-                error={
-                  errors.drying_congestion_comment2 ===
-                  "drying_congestion_comment2"
-                }
+                error={errors.drying_congestion_comment2}
               />
               <View
                 style={{
@@ -496,6 +529,44 @@ export const ConclusionAudit = ({
                 />
               )}
 
+              {/* validation error */}
+              {validationError.message && (
+                <View
+                  style={{
+                    width: "100%",
+                    backgroundColor: colors.white_variant,
+                    elevation: 2,
+                    borderWidth: 0.7,
+                    borderColor: "red",
+                    borderRadius: 15,
+                    paddingHorizontal: screenWidth * 0.02,
+                    paddingVertical: screenHeight * 0.02,
+                    gap: screenHeight * 0.01,
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontWeight: "400",
+                      fontSize: screenWidth * 0.05,
+                      color: colors.secondary,
+                      marginLeft: screenWidth * 0.02,
+                    }}
+                  >
+                    Validation Error
+                  </Text>
+                  <Text
+                    style={{
+                      fontWeight: "400",
+                      fontSize: screenWidth * 0.04,
+                      color: colors.black_letter,
+                      marginLeft: screenWidth * 0.02,
+                    }}
+                  >
+                    {validationError.message}
+                  </Text>
+                </View>
+              )}
+
               <SimpleIconButton
                 label={"Save"}
                 width="100%"
@@ -506,44 +577,6 @@ export const ConclusionAudit = ({
                 icon={<Feather name="save" size={24} color="white" />}
               />
             </View>
-
-            {/* validation error */}
-            {validationError.message && (
-              <View
-                style={{
-                  width: "95%",
-                  backgroundColor: colors.white_variant,
-                  elevation: 2,
-                  borderWidth: 0.7,
-                  borderColor: "red",
-                  borderRadius: 15,
-                  paddingHorizontal: screenWidth * 0.04,
-                  paddingVertical: screenHeight * 0.03,
-                  gap: screenHeight * 0.01,
-                }}
-              >
-                <Text
-                  style={{
-                    fontWeight: "400",
-                    fontSize: screenWidth * 0.05,
-                    color: colors.secondary,
-                    marginLeft: screenWidth * 0.02,
-                  }}
-                >
-                  Validation Error
-                </Text>
-                <Text
-                  style={{
-                    fontWeight: "400",
-                    fontSize: screenWidth * 0.04,
-                    color: colors.black_letter,
-                    marginLeft: screenWidth * 0.02,
-                  }}
-                >
-                  {validationError.message}
-                </Text>
-              </View>
-            )}
           </View>
         )}
       </Formik>

@@ -32,6 +32,20 @@ export const ParchmentAudit = ({
     inputBox: null,
   });
 
+  const getInputLabel = (input) => {
+    let output = "";
+    let tmp = input.split("_");
+    output = tmp.join(" ");
+
+    if (input === "parch_delivered") output = "Parchment delivered";
+    if (input === "parch_tables") output = "Parchment on tables";
+    if (input === "parch_tanks") output = "Parchment in tanks";
+    if (input === "parch_storehouse") output = "Parchment in the storehouse";
+    if (input === "discrepancy_reason_parch") output = "discrepancy reason";
+
+    return output;
+  };
+
   const validateForm = (data, schema) => {
     const { error } = schema.validate(data, { abortEarly: false });
     if (!error) {
@@ -76,6 +90,18 @@ export const ParchmentAudit = ({
       console.log(error);
     }
   };
+
+  useEffect(() => {
+    if (Object.keys(errors).length > 0) {
+      setValidationError({
+        type: "emptyOrInvalidData",
+        message: `Invalid input at '${getInputLabel(
+          Object.keys(errors)[0]
+        )}', also check for any other highlighted input box`,
+        inputBox: null,
+      });
+    }
+  }, [errors]);
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
@@ -245,7 +271,7 @@ export const ParchmentAudit = ({
                   ).toLocaleString()} kilograms of expected parchment, how much has been delivered to Kigali?`}
                   value={responses.parch_delivered || values.parch_delivered}
                   active={true}
-                  error={errors.parch_delivered === "parch_delivered"}
+                  error={errors.parch_delivered}
                 />
                 <BuyCoffeeInput
                   values={values}
@@ -276,7 +302,7 @@ export const ParchmentAudit = ({
                   )} kilograms of expected parchment, how much is currently on the tables?`}
                   value={responses.parch_tables || values.parch_tables}
                   active={true}
-                  error={errors.parch_tables === "parch_tables"}
+                  error={errors.parch_tables}
                 />
                 <BuyCoffeeInput
                   values={values}
@@ -307,7 +333,7 @@ export const ParchmentAudit = ({
                   ).toLocaleString()} kilograms of expected parchment, how much is currently in the tanks?`}
                   value={responses.parch_tanks || values.parch_tanks}
                   active={true}
-                  error={errors.parch_tanks === "parch_tanks"}
+                  error={errors.parch_tanks}
                 />
                 <BuyCoffeeInput
                   values={values}
@@ -338,7 +364,7 @@ export const ParchmentAudit = ({
                   ).toLocaleString()} kilograms of expected parchment, how much is currently in the storehouse?`}
                   value={responses.parch_storehouse || values.parch_storehouse}
                   active={true}
-                  error={errors.parch_storehouse === "parch_storehouse"}
+                  error={errors.parch_storehouse}
                 />
                 <View
                   style={{
@@ -376,11 +402,45 @@ export const ParchmentAudit = ({
                   label={"Why is there any discrepancy"}
                   value={values.discrepancy_reason_parch}
                   active={true}
-                  error={
-                    errors.discrepancy_reason_parch ===
-                    "discrepancy_reason_parch"
-                  }
+                  error={errors.discrepancy_reason_parch}
                 />
+                {/* validation error */}
+                {validationError.message && (
+                  <View
+                    style={{
+                      width: "100%",
+                      backgroundColor: colors.white_variant,
+                      elevation: 2,
+                      borderWidth: 0.7,
+                      borderColor: "red",
+                      borderRadius: 15,
+                      paddingHorizontal: screenWidth * 0.02,
+                      paddingVertical: screenHeight * 0.02,
+                      gap: screenHeight * 0.01,
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontWeight: "400",
+                        fontSize: screenWidth * 0.05,
+                        color: colors.secondary,
+                        marginLeft: screenWidth * 0.02,
+                      }}
+                    >
+                      Validation Error
+                    </Text>
+                    <Text
+                      style={{
+                        fontWeight: "400",
+                        fontSize: screenWidth * 0.04,
+                        color: colors.black_letter,
+                        marginLeft: screenWidth * 0.02,
+                      }}
+                    >
+                      {validationError.message}
+                    </Text>
+                  </View>
+                )}
                 <SimpleIconButton
                   label={"Save"}
                   width="100%"
@@ -391,44 +451,6 @@ export const ParchmentAudit = ({
                   icon={<Feather name="save" size={24} color="white" />}
                 />
               </View>
-
-              {/* validation error */}
-              {validationError.message && (
-                <View
-                  style={{
-                    width: "95%",
-                    backgroundColor: colors.white_variant,
-                    elevation: 2,
-                    borderWidth: 0.7,
-                    borderColor: "red",
-                    borderRadius: 15,
-                    paddingHorizontal: screenWidth * 0.04,
-                    paddingVertical: screenHeight * 0.03,
-                    gap: screenHeight * 0.01,
-                  }}
-                >
-                  <Text
-                    style={{
-                      fontWeight: "400",
-                      fontSize: screenWidth * 0.05,
-                      color: colors.secondary,
-                      marginLeft: screenWidth * 0.02,
-                    }}
-                  >
-                    Validation Error
-                  </Text>
-                  <Text
-                    style={{
-                      fontWeight: "400",
-                      fontSize: screenWidth * 0.04,
-                      color: colors.black_letter,
-                      marginLeft: screenWidth * 0.02,
-                    }}
-                  >
-                    {validationError.message}
-                  </Text>
-                </View>
-              )}
             </ScrollView>
           </View>
         )}

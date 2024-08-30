@@ -82,6 +82,29 @@ export const PricingAudit = ({
     }
   };
 
+  const getInputLabel = (input) => {
+    let output = "";
+    let tmp = input.split("_");
+    output = tmp.join(" ");
+
+    if (input === "buckets_actual") output = "Buckets counted season to date";
+    if (input === "discrepancy_reason_pricing") output = "Discrepancy reason";
+
+    return output;
+  };
+
+  useEffect(() => {
+    if (Object.keys(errors).length > 0) {
+      setValidationError({
+        type: "emptyOrInvalidData",
+        message: `Invalid input at '${getInputLabel(
+          Object.keys(errors)[0]
+        )}', also check for any other highlighted input box`,
+        inputBox: null,
+      });
+    }
+  }, [errors]);
+
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
       "keyboardDidShow",
@@ -282,9 +305,9 @@ export const PricingAudit = ({
                       label={
                         "How many total buckets of parchment have been counted for season to date?"
                       }
-                      value={responses.buckets_actual || values.buckets_actual}
+                      value={values.buckets_actual}
                       active={true}
-                      error={errors.buckets_actual === "buckets_actual"}
+                      error={errors.buckets_actual}
                     />
                     <View
                       style={{
@@ -318,16 +341,48 @@ export const PricingAudit = ({
                       handleChange={handleChange("discrepancy_reason_pricing")}
                       handleBlur={handleBlur("discrepancy_reason_pricing")}
                       label={"Why is there any discrepancy"}
-                      value={
-                        responses.discrepancy_reason_pricing ||
-                        values.discrepancy_reason_pricing
-                      }
+                      value={values.discrepancy_reason_pricing}
                       active={true}
-                      error={
-                        errors.discrepancy_reason_pricing ===
-                        "discrepancy_reason_pricing"
-                      }
+                      error={errors.discrepancy_reason_pricing}
                     />
+
+                    {/* validation error */}
+                    {validationError.message && (
+                      <View
+                        style={{
+                          width: "100%",
+                          backgroundColor: colors.white_variant,
+                          elevation: 2,
+                          borderWidth: 0.7,
+                          borderColor: "red",
+                          borderRadius: 15,
+                          paddingHorizontal: screenWidth * 0.02,
+                          paddingVertical: screenHeight * 0.02,
+                          gap: screenHeight * 0.01,
+                        }}
+                      >
+                        <Text
+                          style={{
+                            fontWeight: "400",
+                            fontSize: screenWidth * 0.05,
+                            color: colors.secondary,
+                            marginLeft: screenWidth * 0.02,
+                          }}
+                        >
+                          Validation Error
+                        </Text>
+                        <Text
+                          style={{
+                            fontWeight: "400",
+                            fontSize: screenWidth * 0.04,
+                            color: colors.black_letter,
+                            marginLeft: screenWidth * 0.02,
+                          }}
+                        >
+                          {validationError.message}
+                        </Text>
+                      </View>
+                    )}
                   </>
                 )}
 
@@ -341,44 +396,6 @@ export const PricingAudit = ({
                   icon={<Feather name="save" size={24} color="white" />}
                 />
               </View>
-
-              {/* validation error */}
-              {validationError.message && (
-                <View
-                  style={{
-                    width: "95%",
-                    backgroundColor: colors.white_variant,
-                    elevation: 2,
-                    borderWidth: 0.7,
-                    borderColor: "red",
-                    borderRadius: 15,
-                    paddingHorizontal: screenWidth * 0.04,
-                    paddingVertical: screenHeight * 0.03,
-                    gap: screenHeight * 0.01,
-                  }}
-                >
-                  <Text
-                    style={{
-                      fontWeight: "400",
-                      fontSize: screenWidth * 0.05,
-                      color: colors.secondary,
-                      marginLeft: screenWidth * 0.02,
-                    }}
-                  >
-                    Validation Error
-                  </Text>
-                  <Text
-                    style={{
-                      fontWeight: "400",
-                      fontSize: screenWidth * 0.04,
-                      color: colors.black_letter,
-                      marginLeft: screenWidth * 0.02,
-                    }}
-                  >
-                    {validationError.message}
-                  </Text>
-                </View>
-              )}
             </ScrollView>
           </View>
         )}

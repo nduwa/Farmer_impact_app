@@ -49,7 +49,6 @@ export const ExpensesAudit = ({
       newErrors[detail.path[0]] = detail.message;
     });
 
-    console.log(newErrors);
     setErrors(newErrors);
     return false;
   };
@@ -73,6 +72,34 @@ export const ExpensesAudit = ({
       console.log(error);
     }
   };
+
+  const getInputLabel = (input) => {
+    let output = "";
+
+    if (input === "std_price") output = "Average price";
+    if (input === "std_total_paid") output = "Total amount paid for cherries";
+    if (input === "expected_std_cherries") {
+      setValidationError({
+        type: "logic",
+        message: `Invalid logic, the amount of expected kilograms of cherries is invalid`,
+        inputBox: null,
+      });
+    }
+
+    return output;
+  };
+
+  useEffect(() => {
+    if (Object.keys(errors).length > 0) {
+      setValidationError({
+        type: "emptyOrInvalidData",
+        message: `Invalid input at '${getInputLabel(
+          Object.keys(errors)[0]
+        )}', also check for any other highlighted input box`,
+        inputBox: null,
+      });
+    }
+  }, [errors]);
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
@@ -215,7 +242,7 @@ export const ExpensesAudit = ({
                   }
                   value={values.std_price}
                   active={true}
-                  error={errors.std_price === "std_price"}
+                  error={errors.std_price}
                 />
                 <BuyCoffeeInput
                   values={values}
@@ -223,7 +250,7 @@ export const ExpensesAudit = ({
                     handleChange("std_total_paid")(text);
 
                     let cherriesWeight =
-                      parseFloat(text) / parseFloat(values.std_price);
+                      (parseFloat(text) || 0) / parseFloat(values.std_price);
 
                     setCherriesKgs(cherriesWeight.toFixed(2));
 
@@ -242,7 +269,7 @@ export const ExpensesAudit = ({
                   }
                   value={values.std_total_paid}
                   active={true}
-                  error={errors.std_total_paid === "std_total_paid"}
+                  error={errors.std_total_paid}
                 />
                 <View
                   style={{
@@ -260,10 +287,9 @@ export const ExpensesAudit = ({
                     marginLeft: screenWidth * 0.02,
                   }}
                 >
-                  Based on the total money paid of{" "}
-                  {parseFloat(values.std_total_paid).toLocaleString() || 0} RWF
-                  divided by the average price per kg of {values.std_price || 0}{" "}
-                  RWF, we would expect{" "}
+                  Based on the total money paid of {values.std_total_paid || 0}{" "}
+                  RWF divided by the average price per kg of{" "}
+                  {values.std_price || 0} RWF, we would expect{" "}
                   {isNaN(cherriesKgs)
                     ? 0
                     : parseFloat(cherriesKgs).toLocaleString()}{" "}
@@ -272,6 +298,44 @@ export const ExpensesAudit = ({
                   kilograms, which results in a discrepancy of{" "}
                   {discrepancy.percentage || 0}%.
                 </Text>
+
+                {/* validation error */}
+                {validationError.message && (
+                  <View
+                    style={{
+                      width: "100%",
+                      backgroundColor: colors.white_variant,
+                      elevation: 2,
+                      borderWidth: 0.7,
+                      borderColor: "red",
+                      borderRadius: 15,
+                      paddingHorizontal: screenWidth * 0.02,
+                      paddingVertical: screenHeight * 0.02,
+                      gap: screenHeight * 0.01,
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontWeight: "400",
+                        fontSize: screenWidth * 0.05,
+                        color: colors.secondary,
+                        marginLeft: screenWidth * 0.02,
+                      }}
+                    >
+                      Validation Error
+                    </Text>
+                    <Text
+                      style={{
+                        fontWeight: "400",
+                        fontSize: screenWidth * 0.04,
+                        color: colors.black_letter,
+                        marginLeft: screenWidth * 0.02,
+                      }}
+                    >
+                      {validationError.message}
+                    </Text>
+                  </View>
+                )}
                 <SimpleIconButton
                   label={"Save"}
                   width="100%"
@@ -282,44 +346,6 @@ export const ExpensesAudit = ({
                   icon={<Feather name="save" size={24} color="white" />}
                 />
               </View>
-
-              {/* validation error */}
-              {validationError.message && (
-                <View
-                  style={{
-                    width: "95%",
-                    backgroundColor: colors.white_variant,
-                    elevation: 2,
-                    borderWidth: 0.7,
-                    borderColor: "red",
-                    borderRadius: 15,
-                    paddingHorizontal: screenWidth * 0.04,
-                    paddingVertical: screenHeight * 0.03,
-                    gap: screenHeight * 0.01,
-                  }}
-                >
-                  <Text
-                    style={{
-                      fontWeight: "400",
-                      fontSize: screenWidth * 0.05,
-                      color: colors.secondary,
-                      marginLeft: screenWidth * 0.02,
-                    }}
-                  >
-                    Validation Error
-                  </Text>
-                  <Text
-                    style={{
-                      fontWeight: "400",
-                      fontSize: screenWidth * 0.04,
-                      color: colors.black_letter,
-                      marginLeft: screenWidth * 0.02,
-                    }}
-                  >
-                    {validationError.message}
-                  </Text>
-                </View>
-              )}
             </ScrollView>
           </View>
         )}

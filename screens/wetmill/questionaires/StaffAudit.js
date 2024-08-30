@@ -64,6 +64,28 @@ export const StaffAudit = ({
     }
   };
 
+  const getInputLabel = (input) => {
+    let output = "";
+
+    if (input === "std_salary_expense") output = "Salaries paid";
+    if (input === "std_other_expense") output = "Other expenses";
+    if (input === "std_fuel_expense") output = "Fuel expenses";
+
+    return output;
+  };
+
+  useEffect(() => {
+    if (Object.keys(errors).length > 0) {
+      setValidationError({
+        type: "emptyOrInvalidData",
+        message: `Invalid input at '${getInputLabel(
+          Object.keys(errors)[0]
+        )}', also check for any other highlighted input box`,
+        inputBox: null,
+      });
+    }
+  }, [errors]);
+
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
       "keyboardDidShow",
@@ -193,11 +215,9 @@ export const StaffAudit = ({
                   label={
                     "How much money has been paid for salaries season to date?"
                   }
-                  value={
-                    responses.std_salary_expense || values.std_salary_expense
-                  }
+                  value={values.std_salary_expense}
                   active={true}
-                  error={errors.std_salary_expense === "std_salary_expense"}
+                  error={errors.std_salary_expense}
                 />
                 <View
                   style={{
@@ -216,8 +236,8 @@ export const StaffAudit = ({
                   }}
                 >
                   The station is averaging{" "}
-                  {responses.salary_cost_kg || values.salary_cost_kg} RWF
-                  per kilogram of parchment for salary expenses this season.
+                  {responses.salary_cost_kg || values.salary_cost_kg} RWF per
+                  kilogram of parchment for salary expenses this season.
                 </Text>
                 <View
                   style={{
@@ -241,9 +261,9 @@ export const StaffAudit = ({
                   label={
                     "How much money has been paid for fuel season to date?"
                   }
-                  value={responses.std_fuel_expense || values.std_fuel_expense}
+                  value={values.std_fuel_expense}
                   active={true}
-                  error={errors.std_fuel_expense === "std_fuel_expense"}
+                  error={errors.std_fuel_expense}
                 />
 
                 <View
@@ -288,11 +308,9 @@ export const StaffAudit = ({
                   label={
                     "How much money has been paid for all other expenses season to date?"
                   }
-                  value={
-                    responses.std_other_expense || values.std_other_expense
-                  }
+                  value={values.std_other_expense}
                   active={true}
-                  error={errors.std_other_expense === "std_other_expense"}
+                  error={errors.std_other_expense}
                 />
                 <View
                   style={{
@@ -316,6 +334,44 @@ export const StaffAudit = ({
                   kilogram of parchment for all other expenses this season
                 </Text>
 
+                {/* validation error */}
+                {validationError.message && (
+                  <View
+                    style={{
+                      width: "100%",
+                      backgroundColor: colors.white_variant,
+                      elevation: 2,
+                      borderWidth: 0.7,
+                      borderColor: "red",
+                      borderRadius: 15,
+                      paddingHorizontal: screenWidth * 0.02,
+                      paddingVertical: screenHeight * 0.02,
+                      gap: screenHeight * 0.01,
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontWeight: "400",
+                        fontSize: screenWidth * 0.05,
+                        color: colors.secondary,
+                        marginLeft: screenWidth * 0.02,
+                      }}
+                    >
+                      Validation Error
+                    </Text>
+                    <Text
+                      style={{
+                        fontWeight: "400",
+                        fontSize: screenWidth * 0.04,
+                        color: colors.black_letter,
+                        marginLeft: screenWidth * 0.02,
+                      }}
+                    >
+                      {validationError.message}
+                    </Text>
+                  </View>
+                )}
+
                 <SimpleIconButton
                   label={"Save"}
                   width="100%"
@@ -326,44 +382,6 @@ export const StaffAudit = ({
                   icon={<Feather name="save" size={24} color="white" />}
                 />
               </View>
-
-              {/* validation error */}
-              {validationError.message && (
-                <View
-                  style={{
-                    width: "95%",
-                    backgroundColor: colors.white_variant,
-                    elevation: 2,
-                    borderWidth: 0.7,
-                    borderColor: "red",
-                    borderRadius: 15,
-                    paddingHorizontal: screenWidth * 0.04,
-                    paddingVertical: screenHeight * 0.03,
-                    gap: screenHeight * 0.01,
-                  }}
-                >
-                  <Text
-                    style={{
-                      fontWeight: "400",
-                      fontSize: screenWidth * 0.05,
-                      color: colors.secondary,
-                      marginLeft: screenWidth * 0.02,
-                    }}
-                  >
-                    Validation Error
-                  </Text>
-                  <Text
-                    style={{
-                      fontWeight: "400",
-                      fontSize: screenWidth * 0.04,
-                      color: colors.black_letter,
-                      marginLeft: screenWidth * 0.02,
-                    }}
-                  >
-                    {validationError.message}
-                  </Text>
-                </View>
-              )}
             </ScrollView>
           </View>
         )}

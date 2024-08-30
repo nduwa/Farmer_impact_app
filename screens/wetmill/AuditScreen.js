@@ -38,10 +38,10 @@ export const AuditScreen = ({ route }) => {
   const navigation = useNavigation();
   const { data } = route.params;
 
-  const [activeAudit, setActiveAudit] = useState(0);
+  const [activeAudit, setActiveAudit] = useState(7);
   const [modalOpen, setModalOpen] = useState(false);
   const [choice, setChoice] = useState(false);
-  const [isKeyboardActive, setIsKeyboardActive] = useState(false);
+  const [isKeyboardActive, setIsKeyboardActive] = useState(false); 
   const [nextModal, setNextModal] = useState(false);
   const [finishModal, setFinishModal] = useState(false);
   const [auditData, setAuditData] = useState({});

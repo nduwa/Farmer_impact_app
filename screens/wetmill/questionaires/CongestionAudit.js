@@ -169,6 +169,46 @@ export const CongestionAudit = ({ setNextModal, setAudit, responses }) => {
     }
   };
 
+  const getInputLabel = (input) => {
+    let output = "";
+
+    if (input === "color_smell_tanks")
+      output = "Color and smell of coffee tanks";
+    if (input === "parchment_appearance")
+      output = "General appearance of parchment";
+
+    return output;
+  };
+
+  useEffect(() => {
+    let i = 0;
+    if (Object.keys(errors).length > 0) {
+      if (Object.keys(errors)[i] === "smell_photo") {
+        setValidationError({
+          type: "emptyOrInvalidData",
+          message: `No photo provided for color/smell of the tanks`,
+          inputBox: null,
+        });
+        i++;
+      } else if (Object.keys(errors)[i] === "appearance_photo") {
+        setValidationError({
+          type: "emptyOrInvalidData",
+          message: `No photo provided for parchment appearance`,
+          inputBox: null,
+        });
+        i++;
+      } else {
+        setValidationError({
+          type: "emptyOrInvalidData",
+          message: `Invalid input at '${getInputLabel(
+            Object.keys(errors)[0]
+          )}', also check for any other highlighted input box`,
+          inputBox: null,
+        });
+      }
+    }
+  }, [errors]);
+
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
       "keyboardDidShow",
@@ -292,9 +332,7 @@ export const CongestionAudit = ({ setNextModal, setAudit, responses }) => {
                   label={
                     "How would you describe the color and smell of the coffee in the tanks?"
                   }
-                  value={
-                    responses.color_smell_tanks || values.color_smell_tanks
-                  }
+                  value={values.color_smell_tanks}
                   active={true}
                   error={errors.color_smell_tanks === "color_smell_tanks"}
                 />
@@ -344,10 +382,7 @@ export const CongestionAudit = ({ setNextModal, setAudit, responses }) => {
                   handleChange={handleChange("parchment_appearance")}
                   handleBlur={handleBlur("parchment_appearance")}
                   label={"What is the general appearance of the parchment?"}
-                  value={
-                    responses.parchment_appearance ||
-                    values.parchment_appearance
-                  }
+                  value={values.parchment_appearance}
                   active={true}
                   error={errors.parchment_appearance === "parchment_appearance"}
                 />
@@ -425,6 +460,44 @@ export const CongestionAudit = ({ setNextModal, setAudit, responses }) => {
                   />
                 )}
 
+                {/* validation error */}
+                {validationError.message && (
+                  <View
+                    style={{
+                      width: "100%",
+                      backgroundColor: colors.white_variant,
+                      elevation: 2,
+                      borderWidth: 0.7,
+                      borderColor: "red",
+                      borderRadius: 15,
+                      paddingHorizontal: screenWidth * 0.02,
+                      paddingVertical: screenHeight * 0.02,
+                      gap: screenHeight * 0.01,
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontWeight: "400",
+                        fontSize: screenWidth * 0.05,
+                        color: colors.secondary,
+                        marginLeft: screenWidth * 0.02,
+                      }}
+                    >
+                      Validation Error
+                    </Text>
+                    <Text
+                      style={{
+                        fontWeight: "400",
+                        fontSize: screenWidth * 0.04,
+                        color: colors.black_letter,
+                        marginLeft: screenWidth * 0.02,
+                      }}
+                    >
+                      {validationError.message}
+                    </Text>
+                  </View>
+                )}
+
                 <SimpleIconButton
                   label={"Save"}
                   width="100%"
@@ -435,44 +508,6 @@ export const CongestionAudit = ({ setNextModal, setAudit, responses }) => {
                   icon={<Feather name="save" size={24} color="white" />}
                 />
               </View>
-
-              {/* validation error */}
-              {validationError.message && (
-                <View
-                  style={{
-                    width: "95%",
-                    backgroundColor: colors.white_variant,
-                    elevation: 2,
-                    borderWidth: 0.7,
-                    borderColor: "red",
-                    borderRadius: 15,
-                    paddingHorizontal: screenWidth * 0.04,
-                    paddingVertical: screenHeight * 0.03,
-                    gap: screenHeight * 0.01,
-                  }}
-                >
-                  <Text
-                    style={{
-                      fontWeight: "400",
-                      fontSize: screenWidth * 0.05,
-                      color: colors.secondary,
-                      marginLeft: screenWidth * 0.02,
-                    }}
-                  >
-                    Validation Error
-                  </Text>
-                  <Text
-                    style={{
-                      fontWeight: "400",
-                      fontSize: screenWidth * 0.04,
-                      color: colors.black_letter,
-                      marginLeft: screenWidth * 0.02,
-                    }}
-                  >
-                    {validationError.message}
-                  </Text>
-                </View>
-              )}
             </ScrollView>
           </View>
         )}
