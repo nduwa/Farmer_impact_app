@@ -23,12 +23,12 @@ import * as ImagePicker from "expo-image-picker";
 import { useFocusEffect } from "@react-navigation/native";
 
 export const ConclusionAudit = ({
-  stationName,
   setNextModal,
   setChoice,
   choice,
   setModalOpen,
   setAudit,
+  responses,
 }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
@@ -38,7 +38,6 @@ export const ConclusionAudit = ({
     drying_congestion_photo1: null,
     drying_congestion_photo2: null,
   });
-  const [loading, setLoading] = useState(false);
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
   const [errors, setErrors] = useState({}); // validation errors
   const [validationError, setValidationError] = useState({
@@ -162,9 +161,13 @@ export const ConclusionAudit = ({
       let conclObj = {
         ...values,
         ...{
-          drying_congestion: choice.name,
-          drying_congestion_photo1: selectedImage.drying_congestion_photo1,
-          drying_congestion_photo2: selectedImage.drying_congestion_photo2,
+          drying_congestion: responses.drying_congestion || choice.name,
+          drying_congestion_photo1:
+            responses.drying_congestion_photo1 ||
+            selectedImage.drying_congestion_photo1,
+          drying_congestion_photo2:
+            responses.drying_congestion_photo2 ||
+            selectedImage.drying_congestion_photo2,
         },
       };
 
@@ -200,17 +203,26 @@ export const ConclusionAudit = ({
 
   useFocusEffect(
     React.useCallback(() => {
+      setChoice(responses.drying_congestion || null);
+      setSelectedImage({
+        drying_congestion_photo1: responses.drying_congestion_photo1 || null,
+        drying_congestion_photo2: responses.drying_congestion_photo2 || null,
+      });
       return () => {
         if (formRef.current) {
           formRef.current.setValues({
-            drying_congestion: "",
-            drying_congestion_comment: "",
-            drying_congestion_comment2: "",
+            drying_congestion: responses.drying_congestion || "",
+            drying_congestion_comment:
+              responses.drying_congestion_comment || "",
+            drying_congestion_comment2:
+              responses.drying_congestion_comment2 || "",
           });
-          setChoice(null);
+          setChoice(responses.drying_congestion || null);
           setSelectedImage({
-            drying_congestion_photo1: null,
-            drying_congestion_photo2: null,
+            drying_congestion_photo1:
+              responses.drying_congestion_photo1 || null,
+            drying_congestion_photo2:
+              responses.drying_congestion_photo2 || null,
           });
         }
       };
@@ -247,9 +259,10 @@ export const ConclusionAudit = ({
       />
       <Formik
         initialValues={{
-          drying_congestion: "",
-          drying_congestion_comment: "",
-          drying_congestion_comment2: "",
+          drying_congestion: responses.drying_congestion || "",
+          drying_congestion_comment: responses.drying_congestion_comment || "",
+          drying_congestion_comment2:
+            responses.drying_congestion_comment2 || "",
         }}
         innerRef={formRef}
         onSubmit={async (values) => {
@@ -289,7 +302,7 @@ export const ConclusionAudit = ({
                   handleChange={handleChange("drying_congestion")}
                   handleBlur={handleBlur("drying_congestion")}
                   label={"How much congestion is on the drying tables?"}
-                  value={choice?.name}
+                  value={responses.drying_congestion || choice?.name}
                   error={errors.drying_congestion}
                   active={false}
                 />
@@ -338,7 +351,7 @@ export const ConclusionAudit = ({
                 handleChange={handleChange("drying_congestion_comment")}
                 handleBlur={handleBlur("drying_congestion_comment")}
                 label={"Comments"}
-                value={values.GLC668}
+                value={values.drying_congestion_comment}
                 active={true}
                 error={
                   errors.drying_congestion_comment ===
@@ -364,7 +377,11 @@ export const ConclusionAudit = ({
                 <SimpleIconButton
                   label={"Take picture"}
                   width="60%"
-                  color={colors.blue_font}
+                  color={
+                    selectedImage.drying_congestion_photo1
+                      ? colors.green
+                      : colors.blue_font
+                  }
                   labelColor="white"
                   active={true}
                   mv={screenHeight * 0.01}
@@ -374,7 +391,11 @@ export const ConclusionAudit = ({
                 <SimpleIconButton
                   label={"Gallery"}
                   width="38%"
-                  color={colors.black}
+                  color={
+                    selectedImage.drying_congestion_photo1
+                      ? colors.green
+                      : colors.black
+                  }
                   labelColor="white"
                   active={true}
                   mv={screenHeight * 0.01}
@@ -412,7 +433,11 @@ export const ConclusionAudit = ({
                 <SimpleIconButton
                   label={"Take picture"}
                   width="60%"
-                  color={colors.blue_font}
+                  color={
+                    selectedImage.drying_congestion_photo2
+                      ? colors.green
+                      : colors.blue_font
+                  }
                   labelColor="white"
                   active={true}
                   mv={screenHeight * 0.01}
@@ -422,7 +447,11 @@ export const ConclusionAudit = ({
                 <SimpleIconButton
                   label={"Gallery"}
                   width="38%"
-                  color={colors.black}
+                  color={
+                    selectedImage.drying_congestion_photo2
+                      ? colors.green
+                      : colors.black
+                  }
                   labelColor="white"
                   active={true}
                   mv={screenHeight * 0.01}

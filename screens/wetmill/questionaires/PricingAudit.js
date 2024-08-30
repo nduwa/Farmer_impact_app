@@ -14,17 +14,19 @@ export const PricingAudit = ({
   setNextModal,
   bucketsYield,
   setAudit,
+  responses,
 }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const formRef = useRef(null);
 
-  const [choice, setChoice] = useState(false);
+  const [choice, setChoice] = useState(
+    responses?.vol_participant === "yes" ? true : false
+  );
   const [discrepancy, setDiscrepancy] = useState({
     percentage: 0,
     buckets: 0,
   });
-  const [loading, setLoading] = useState(false);
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
   const [errors, setErrors] = useState({}); // validation errors
   const [validationError, setValidationError] = useState({
@@ -51,7 +53,6 @@ export const PricingAudit = ({
       newErrors[detail.path[0]] = detail.message;
     });
 
-    console.log(newErrors);
     setErrors(newErrors);
     return false;
   };
@@ -61,9 +62,13 @@ export const PricingAudit = ({
       let bucketsObj = {
         ...values,
         ...{
-          discrepancy_perc_pricing: String(discrepancy.percentage),
-          discrepancy_buckets_pricing: String(discrepancy.buckets),
-          buckets_theory: String(bucketsYield),
+          discrepancy_perc_pricing:
+            responses.discrepancy_perc_pricing ||
+            String(discrepancy.percentage),
+          discrepancy_buckets_pricing:
+            responses.discrepancy_buckets_pricing ||
+            String(discrepancy.buckets),
+          buckets_theory: responses.buckets_theory || String(bucketsYield),
           vol_participant: choice ? "yes" : "no",
         },
       };
@@ -101,12 +106,23 @@ export const PricingAudit = ({
   useFocusEffect(
     React.useCallback(() => {
       return () => {
+        setDiscrepancy({
+          percentage: responses.discrepancy_perc_pricing || 0,
+          buckets: responses.discrepancy_buckets_pricing || 0,
+        });
+
+        setChoice(responses?.vol_participant === "yes" ? true : false);
+
         if (formRef.current) {
           formRef.current.setValues({
-            buckets_actual: "0",
-            discrepancy_reason_pricing: "",
+            buckets_actual: responses.buckets_actual || "0",
+            discrepancy_reason_pricing:
+              responses.discrepancy_reason_pricing || "",
           });
-          setDiscrepancy({ percentage: 0, buckets: 0 });
+          setDiscrepancy({
+            percentage: responses.discrepancy_perc_pricing || 0,
+            buckets: responses.discrepancy_buckets_pricing || 0,
+          });
         }
       };
     }, [])
@@ -143,8 +159,9 @@ export const PricingAudit = ({
       <Formik
         initialValues={{
           vol_participant: choice,
-          buckets_actual: "0",
-          discrepancy_reason_pricing: "",
+          buckets_actual: responses.buckets_actual || "0",
+          discrepancy_reason_pricing:
+            responses.discrepancy_reason_pricing || "",
         }}
         innerRef={formRef}
         onSubmit={async (values) => {
@@ -265,7 +282,7 @@ export const PricingAudit = ({
                       label={
                         "How many total buckets of parchment have been counted for season to date?"
                       }
-                      value={values.buckets_actual}
+                      value={responses.buckets_actual || values.buckets_actual}
                       active={true}
                       error={errors.buckets_actual === "buckets_actual"}
                     />
@@ -301,7 +318,10 @@ export const PricingAudit = ({
                       handleChange={handleChange("discrepancy_reason_pricing")}
                       handleBlur={handleBlur("discrepancy_reason_pricing")}
                       label={"Why is there any discrepancy"}
-                      value={values.discrepancy_reason_pricing}
+                      value={
+                        responses.discrepancy_reason_pricing ||
+                        values.discrepancy_reason_pricing
+                      }
                       active={true}
                       error={
                         errors.discrepancy_reason_pricing ===

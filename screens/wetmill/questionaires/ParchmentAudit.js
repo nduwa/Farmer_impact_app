@@ -9,7 +9,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { parchSchema } from "../../../validation/wetmillAuditSchema";
 
 export const ParchmentAudit = ({
-  stationName,
+  responses,
   setNextModal,
   parchmentYield = 0,
   cherriesReported = 0,
@@ -24,7 +24,6 @@ export const ParchmentAudit = ({
     kgs: 0,
   });
   const [parchTotal, setParchTotal] = useState(0);
-  const [loading, setLoading] = useState(false);
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
   const [errors, setErrors] = useState({}); // validation errors
   const [validationError, setValidationError] = useState({
@@ -60,10 +59,12 @@ export const ParchmentAudit = ({
       let parchObj = {
         ...values,
         ...{
-          discrepancy_perc_parch: String(discrepancy.percentage),
-          discrepancy_kgs_parch: String(discrepancy.kgs),
-          parch_total: String(parchTotal),
-          parch_theory: String(parchmentYield),
+          discrepancy_perc_parch:
+            responses.discrepancy_perc_parch || String(discrepancy.percentage),
+          discrepancy_kgs_parch:
+            responses.discrepancy_kgs_parch || String(discrepancy.kgs),
+          parch_total: responses.parch_total || String(parchTotal),
+          parch_theory: responses.parch_theory || String(parchmentYield),
         },
       };
 
@@ -102,14 +103,17 @@ export const ParchmentAudit = ({
       return () => {
         if (formRef.current) {
           formRef.current.setValues({
-            parch_delivered: "0",
-            parch_tables: "0",
-            parch_tanks: "0",
-            parch_storehouse: "0",
-            discrepancy_reason_parch: "",
+            parch_delivered: responses.parch_delivered || "0",
+            parch_tables: responses.parch_tables || "0",
+            parch_tanks: responses.parch_tanks || "0",
+            parch_storehouse: responses.parch_storehouse || "0",
+            discrepancy_reason_parch: responses.discrepancy_reason_parch || "",
           });
-          setDiscrepancy({ percentage: 0, kgs: 0 });
-          setParchTotal(0);
+          setDiscrepancy({
+            percentage: responses.discrepancy_perc_parch || 0,
+            kgs: responses.discrepancy_kgs_parch,
+          });
+          setParchTotal(responses.parch_total || 0);
         }
       };
     }, [])
@@ -144,11 +148,11 @@ export const ParchmentAudit = ({
       />
       <Formik
         initialValues={{
-          parch_delivered: "0",
-          parch_tables: "0",
-          parch_tanks: "0",
-          parch_storehouse: "0",
-          discrepancy_reason_parch: "",
+          parch_delivered: responses.parch_delivered || "0",
+          parch_tables: responses.parch_tables || "0",
+          parch_tanks: responses.parch_tanks || "0",
+          parch_storehouse: responses.parch_storehouse || "0",
+          discrepancy_reason_parch: responses.discrepancy_reason_parch || "",
         }}
         innerRef={formRef}
         onSubmit={async (values) => {
@@ -199,9 +203,10 @@ export const ParchmentAudit = ({
                   }}
                 >
                   Based on a cherry / parchment ratio of 5.3 and reported
-                  cherries of {cherriesReported} kilograms, the expected
-                  parchment yield is {parchmentYield.toFixed(2)} kilograms
-                  (season to date)
+                  cherries of {cherriesReported.toLocaleString()} kilograms, the
+                  expected parchment yield is{" "}
+                  {parseFloat(parchmentYield.toFixed(2)).toLocaleString()}{" "}
+                  kilograms (season to date)
                 </Text>
                 <View
                   style={{
@@ -218,10 +223,10 @@ export const ParchmentAudit = ({
                     handleChange("parch_delivered")(text);
 
                     let current_total =
-                      parseFloat(values.parch_storehouse) +
-                      parseFloat(values.parch_tables) +
-                      parseFloat(values.parch_tanks) +
-                      parseFloat(text);
+                      (parseFloat(values.parch_storehouse) || 0) +
+                      (parseFloat(values.parch_tables) || 0) +
+                      (parseFloat(values.parch_tanks) || 0) +
+                      (parseFloat(text) || 0);
 
                     setParchTotal(current_total);
 
@@ -235,10 +240,10 @@ export const ParchmentAudit = ({
                     });
                   }}
                   handleBlur={handleBlur("parch_delivered")}
-                  label={`Of the ${parchmentYield.toFixed(
-                    2
-                  )} kilograms of expected parchment, how much has been delivered to Kigali?`}
-                  value={values.parch_delivered}
+                  label={`Of the ${parseFloat(
+                    parchmentYield.toFixed(2)
+                  ).toLocaleString()} kilograms of expected parchment, how much has been delivered to Kigali?`}
+                  value={responses.parch_delivered || values.parch_delivered}
                   active={true}
                   error={errors.parch_delivered === "parch_delivered"}
                 />
@@ -249,10 +254,10 @@ export const ParchmentAudit = ({
                     handleChange("parch_tables")(text);
 
                     let current_total =
-                      parseFloat(values.parch_storehouse) +
-                      parseFloat(text) +
-                      parseFloat(values.parch_tanks) +
-                      parseFloat(values.parch_delivered);
+                      (parseFloat(values.parch_storehouse) || 0) +
+                      (parseFloat(text) || 0) +
+                      (parseFloat(values.parch_tanks) || 0) +
+                      (parseFloat(values.parch_delivered) || 0);
 
                     setParchTotal(current_total);
 
@@ -269,7 +274,7 @@ export const ParchmentAudit = ({
                   label={`Of the ${parchmentYield.toFixed(
                     2
                   )} kilograms of expected parchment, how much is currently on the tables?`}
-                  value={values.parch_tables}
+                  value={responses.parch_tables || values.parch_tables}
                   active={true}
                   error={errors.parch_tables === "parch_tables"}
                 />
@@ -280,10 +285,10 @@ export const ParchmentAudit = ({
                     handleChange("parch_tanks")(text);
 
                     let current_total =
-                      parseFloat(values.parch_storehouse) +
-                      parseFloat(values.parch_tables) +
-                      parseFloat(text) +
-                      parseFloat(values.parch_delivered);
+                      (parseFloat(values.parch_storehouse) || 0) +
+                      (parseFloat(values.parch_tables) || 0) +
+                      (parseFloat(text) || 0) +
+                      (parseFloat(values.parch_delivered) || 0);
 
                     setParchTotal(current_total);
 
@@ -297,10 +302,10 @@ export const ParchmentAudit = ({
                     });
                   }}
                   handleBlur={handleBlur("parch_tanks")}
-                  label={`Of the ${parchmentYield.toFixed(
-                    2
-                  )} kilograms of expected parchment, how much is currently in the tanks?`}
-                  value={values.parch_tanks}
+                  label={`Of the ${parseFloat(
+                    parchmentYield.toFixed(2)
+                  ).toLocaleString()} kilograms of expected parchment, how much is currently in the tanks?`}
+                  value={responses.parch_tanks || values.parch_tanks}
                   active={true}
                   error={errors.parch_tanks === "parch_tanks"}
                 />
@@ -311,10 +316,10 @@ export const ParchmentAudit = ({
                     handleChange("parch_storehouse")(text);
 
                     let current_total =
-                      parseFloat(text) +
-                      parseFloat(values.parch_tables) +
-                      parseFloat(values.parch_tanks) +
-                      parseFloat(values.parch_delivered);
+                      (parseFloat(text) || 0) +
+                      (parseFloat(values.parch_tables) || 0) +
+                      (parseFloat(values.parch_tanks) || 0) +
+                      (parseFloat(values.parch_delivered) || 0);
 
                     setParchTotal(current_total);
 
@@ -328,10 +333,10 @@ export const ParchmentAudit = ({
                     });
                   }}
                   handleBlur={handleBlur("parch_storehouse")}
-                  label={`Of the ${parchmentYield.toFixed(
-                    2
-                  )} kilograms of expected parchment, how much is currently in the storehouse?`}
-                  value={values.parch_storehouse}
+                  label={`Of the ${parseFloat(
+                    parchmentYield.toFixed(2)
+                  ).toLocaleString()} kilograms of expected parchment, how much is currently in the storehouse?`}
+                  value={responses.parch_storehouse || values.parch_storehouse}
                   active={true}
                   error={errors.parch_storehouse === "parch_storehouse"}
                 />
@@ -352,7 +357,8 @@ export const ParchmentAudit = ({
                   }}
                 >
                   The station has a parchment discrepancy of{" "}
-                  {discrepancy.percentage}% ({discrepancy.kgs} kilograms).
+                  {discrepancy.percentage || 0}% ({discrepancy.kgs || 0}{" "}
+                  kilograms).
                 </Text>
                 <View
                   style={{

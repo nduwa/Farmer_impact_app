@@ -12,12 +12,12 @@ export const LeftBeansAudit = ({
   setNextModal,
   parchDayEstimate,
   setAudit,
+  responses,
 }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const formRef = useRef(null);
 
-  const [loading, setLoading] = useState(false);
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
   const [errors, setErrors] = useState({}); // validation errors
   const [validationError, setValidationError] = useState({
@@ -90,10 +90,12 @@ export const LeftBeansAudit = ({
       return () => {
         if (formRef.current) {
           formRef.current.setValues({
-            manpower_count: "0",
-            handsorter_count: "0",
-            parch_person_day_manpower: "0",
-            parch_person_day_handsorter: "0",
+            manpower_count: responses.manpower_count || "0",
+            handsorter_count: responses.handsorter_count || "0",
+            parch_person_day_manpower:
+              responses.parch_person_day_manpower || "0",
+            parch_person_day_handsorter:
+              responses.parch_person_day_handsorter || "0",
           });
         }
       };
@@ -130,10 +132,11 @@ export const LeftBeansAudit = ({
       />
       <Formik
         initialValues={{
-          manpower_count: "0",
-          handsorter_count: "0",
-          parch_person_day_manpower: "0",
-          parch_person_day_handsorter: "0",
+          manpower_count: responses.manpower_count || "0",
+          handsorter_count: responses.handsorter_count || "0",
+          parch_person_day_manpower: responses.parch_person_day_manpower || "0",
+          parch_person_day_handsorter:
+            responses.parch_person_day_handsorter || "0",
         }}
         innerRef={formRef}
         onSubmit={async (values) => {
@@ -181,7 +184,7 @@ export const LeftBeansAudit = ({
                     handleChange("manpower_count")(text);
 
                     let parch_person =
-                      parseFloat(parchDayEstimate) / parseFloat(text);
+                      parseFloat(parchDayEstimate) / (parseFloat(text) || 1);
 
                     setFieldValue(
                       "parch_person_day_manpower",
@@ -192,7 +195,7 @@ export const LeftBeansAudit = ({
                   label={
                     "How many people are working as manpower at the station today?"
                   }
-                  value={values.manpower_count}
+                  value={responses.manpower_count || values.manpower_count}
                   active={true}
                   error={errors.manpower_count === "manpower_count"}
                 />
@@ -213,8 +216,10 @@ export const LeftBeansAudit = ({
                   }}
                 >
                   At this rate, each person under manpower is averaging{" "}
-                  {values.parch_person_day_manpower || 0} kilograms of parchment
-                  per day
+                  {responses.parch_person_day_manpower ||
+                    values.parch_person_day_manpower ||
+                    0}{" "}
+                  kilograms of parchment per day
                 </Text>
                 <View
                   style={{
@@ -230,7 +235,7 @@ export const LeftBeansAudit = ({
                     handleChange("handsorter_count")(text);
 
                     let parch_person =
-                      parseFloat(parchDayEstimate) / parseFloat(text);
+                      parseFloat(parchDayEstimate) / (parseFloat(text) || 1);
 
                     setFieldValue(
                       "parch_person_day_handsorter",
@@ -241,7 +246,7 @@ export const LeftBeansAudit = ({
                   label={
                     "How many handsorters are working at the station today?"
                   }
-                  value={values.handsorter_count}
+                  value={responses.handsorter_count || values.handsorter_count}
                   active={true}
                   error={errors.handsorter_count === "handsorter_count"}
                 />
@@ -263,8 +268,9 @@ export const LeftBeansAudit = ({
                   }}
                 >
                   At this rate, each handsorter is averaging{" "}
-                  {values.parch_person_day_handsorter} Kilograms of parchment per
-                  day
+                  {responses.parch_person_day_handsorter ||
+                    values.parch_person_day_handsorter}{" "}
+                  Kilograms of parchment per day
                 </Text>
                 <SimpleIconButton
                   label={"Save"}

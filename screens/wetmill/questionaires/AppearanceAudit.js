@@ -21,7 +21,7 @@ import * as ImagePicker from "expo-image-picker";
 import { appearanceSchema } from "../../../validation/wetmillAuditSchema";
 import { useFocusEffect } from "@react-navigation/native";
 
-export const AppearanceAudit = ({ stationName, setNextModal, setAudit }) => {
+export const AppearanceAudit = ({ responses, setNextModal, setAudit }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const formRef = useRef(null);
@@ -30,9 +30,12 @@ export const AppearanceAudit = ({ stationName, setNextModal, setAudit }) => {
     water_sufficient_photo: null,
     water_quality_photo: null,
   });
-  const [choiceQuality, setChoiceQuality] = useState(false);
-  const [choiceSuffiency, setChoiceSuffiency] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [choiceQuality, setChoiceQuality] = useState(
+    responses.water_quality === "yes" ? true : false
+  );
+  const [choiceSuffiency, setChoiceSuffiency] = useState(
+    responses.water_suffient === "yes" ? true : false
+  );
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
   const [errors, setErrors] = useState({}); // validation errors
   const [validationError, setValidationError] = useState({
@@ -158,8 +161,11 @@ export const AppearanceAudit = ({ stationName, setNextModal, setAudit }) => {
         ...{
           water_quality: choiceQuality ? "yes" : "no",
           water_suffient: choiceSuffiency ? "yes" : "no",
-          water_quality_photo: selectedImage.water_quality_photo,
-          water_suffient_photo: selectedImage.water_sufficient_photo,
+          water_quality_photo:
+            responses.water_quality_photo || selectedImage.water_quality_photo,
+          water_suffient_photo:
+            responses.water_suffient_photo ||
+            selectedImage.water_sufficient_photo,
         },
       };
 
@@ -195,17 +201,21 @@ export const AppearanceAudit = ({ stationName, setNextModal, setAudit }) => {
 
   useFocusEffect(
     React.useCallback(() => {
+      setSelectedImage({
+        water_quality_photo: responses.water_quality_photo || null,
+        water_sufficient_photo: responses.water_suffient_photo || null,
+      });
       return () => {
         if (formRef.current) {
           formRef.current.setValues({
-            water_quality_comment: "",
-            water_suffient_comment: "",
+            water_quality_comment: responses.water_quality_comment || "",
+            water_suffient_comment: responses.water_suffient_comment || "",
           });
-          setChoiceQuality(false);
-          setChoiceSuffiency(false);
+          setChoiceQuality(responses.water_quality === "yes" ? true : false);
+          setChoiceSuffiency(responses.water_suffient === "yes" ? true : false);
           setSelectedImage({
-            water_quality_photo: null,
-            water_sufficient_photo: null,
+            water_quality_photo: responses.water_quality_photo || null,
+            water_sufficient_photo: responses.water_suffient_photo || null,
           });
         }
       };
@@ -348,7 +358,10 @@ export const AppearanceAudit = ({ stationName, setNextModal, setAudit }) => {
                   handleChange={handleChange("water_quality_comment")}
                   handleBlur={handleBlur("water_quality_comment")}
                   label={"Comments"}
-                  value={values.water_quality_comment}
+                  value={
+                    responses.water_quality_comment ||
+                    values.water_quality_comment
+                  }
                   active={true}
                   multiline={true}
                   error={
@@ -366,7 +379,11 @@ export const AppearanceAudit = ({ stationName, setNextModal, setAudit }) => {
                   <SimpleIconButton
                     label={"Take picture"}
                     width="60%"
-                    color={colors.blue_font}
+                    color={
+                      selectedImage.water_quality_photo
+                        ? colors.green
+                        : colors.blue_font
+                    }
                     labelColor="white"
                     active={true}
                     mv={screenHeight * 0.01}
@@ -376,7 +393,11 @@ export const AppearanceAudit = ({ stationName, setNextModal, setAudit }) => {
                   <SimpleIconButton
                     label={"Gallery"}
                     width="38%"
-                    color={colors.black}
+                    color={
+                      selectedImage.water_quality_photo
+                        ? colors.green
+                        : colors.black
+                    }
                     labelColor="white"
                     active={true}
                     mv={screenHeight * 0.01}
@@ -453,7 +474,10 @@ export const AppearanceAudit = ({ stationName, setNextModal, setAudit }) => {
                   handleChange={handleChange("water_suffient_comment")}
                   handleBlur={handleBlur("water_suffient_comment")}
                   label={"Comments"}
-                  value={values.water_suffient_comment}
+                  value={
+                    responses.water_quality_comment ||
+                    values.water_suffient_comment
+                  }
                   active={true}
                   multiline={true}
                   error={
@@ -471,7 +495,11 @@ export const AppearanceAudit = ({ stationName, setNextModal, setAudit }) => {
                   <SimpleIconButton
                     label={"Take picture"}
                     width="60%"
-                    color={colors.blue_font}
+                    color={
+                      selectedImage.water_sufficient_photo
+                        ? colors.green
+                        : colors.blue_font
+                    }
                     labelColor="white"
                     active={true}
                     mv={screenHeight * 0.01}
@@ -481,7 +509,11 @@ export const AppearanceAudit = ({ stationName, setNextModal, setAudit }) => {
                   <SimpleIconButton
                     label={"Gallery"}
                     width="38%"
-                    color={colors.black}
+                    color={
+                      selectedImage.water_sufficient_photo
+                        ? colors.green
+                        : colors.black
+                    }
                     labelColor="white"
                     active={true}
                     mv={screenHeight * 0.01}

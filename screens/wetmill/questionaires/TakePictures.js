@@ -11,29 +11,21 @@ import {
 } from "react-native";
 import { colors } from "../../../data/colors";
 import Feather from "@expo/vector-icons/Feather";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { MaterialIcons } from "@expo/vector-icons";
 import SimpleIconButton from "../../../components/SimpleIconButton";
 import Entypo from "@expo/vector-icons/Entypo";
 import * as FileSystem from "expo-file-system";
 import * as ImagePicker from "expo-image-picker";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import { useFocusEffect } from "@react-navigation/native";
 
-export const TakePictures = ({ stationName, setNextModal, setAudit }) => {
+export const TakePictures = ({ setNextModal, setAudit, responses }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
 
-  const androidVersion =
-    Platform.OS === "android" ? Platform.Version : "Not Android";
-
   const [images, setImages] = useState([]);
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
-  const [errors, setErrors] = useState({}); // validation errors
-  const [validationError, setValidationError] = useState({
-    message: null,
-    type: null,
-    inputBox: null,
-  });
 
   const openCamera = async () => {
     if (Platform.OS !== "web") {
@@ -140,6 +132,15 @@ export const TakePictures = ({ stationName, setNextModal, setAudit }) => {
       keyboardDidHideListener.remove();
     };
   }, [isKeyboardActive]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      setImages(responses.siteImages || []);
+      return () => {
+        setImages(responses.siteImages || []);
+      };
+    }, [])
+  );
 
   return (
     <View

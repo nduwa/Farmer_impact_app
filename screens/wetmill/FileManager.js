@@ -8,9 +8,9 @@ const FileManager = () => {
 
   useEffect(() => {
     const loadFiles = async () => {
-      console.log(`${FileSystem.documentDirectory}/Download`);
+      console.log(`${FileSystem.documentDirectory}/rtc_app`);
       const filesInDirectory = await FileSystem.readDirectoryAsync(
-        `${FileSystem.documentDirectory}/Download`
+        `${FileSystem.documentDirectory}/rtc_app`
       );
       setFiles(filesInDirectory);
     };
@@ -19,7 +19,7 @@ const FileManager = () => {
   }, []);
 
   const openFile = async (fileName) => {
-    const fileUri = `${FileSystem.documentDirectory}Download/${fileName}`;
+    const fileUri = `${FileSystem.documentDirectory}rtc_app/${fileName}`;
     FileSystem.getContentUriAsync(fileUri).then((cUri) => {
       console.log(cUri);
       IntentLauncher.startActivityAsync("android.intent.action.VIEW", {

@@ -12,6 +12,7 @@ export const CheeriesAudit = ({
   stationName,
   setNextModal,
   setAudit,
+  responses,
   cherriesSMS,
 }) => {
   const screenHeight = Dimensions.get("window").height;
@@ -22,7 +23,6 @@ export const CheeriesAudit = ({
     percentage: 0,
     kgs: 0,
   });
-  const [loading, setLoading] = useState(false);
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
   const [errors, setErrors] = useState({}); // validation errors
   const [validationError, setValidationError] = useState({
@@ -58,9 +58,12 @@ export const CheeriesAudit = ({
       let cherriesObj = {
         ...values,
         ...{
-          discrepancy_perc_cherries: String(discrepancy.percentage),
-          discrepancy_kgs_cherries: String(discrepancy.kgs),
-          cherries_sms: String(cherriesSMS),
+          discrepancy_perc_cherries:
+            responses.discrepancy_perc_cherries ||
+            String(discrepancy.percentage),
+          discrepancy_kgs_cherries:
+            responses.discrepancy_kgs_cherries || String(discrepancy.kgs),
+          cherries_sms: responses.cherries_sms || String(cherriesSMS),
         },
       };
 
@@ -99,8 +102,13 @@ export const CheeriesAudit = ({
       return () => {
         if (formRef.current) {
           formRef.current.setValues({
-            cherries_books: "0",
-            cherries_sms: cherriesSMS,
+            cherries_books: responses.cherries_books || "0",
+            cherries_sms: responses.cherries_sms || cherriesSMS,
+          });
+
+          setDiscrepancy({
+            percentage: responses.discrepancy_perc_cherries || 0,
+            kgs: responses.discrepancy_kgs_cherries || 0,
           });
         }
       };
@@ -136,9 +144,10 @@ export const CheeriesAudit = ({
       />
       <Formik
         initialValues={{
-          cherries_sms: String(cherriesSMS),
-          cherries_books: "0",
-          discrepancy_reason_cherries: "",
+          cherries_sms: responses.cherries_sms || String(cherriesSMS),
+          cherries_books: responses.cherries_books || "0",
+          discrepancy_reason_cherries:
+            responses.discrepancy_reason_cherries || "",
         }}
         innerRef={formRef}
         onSubmit={async (values) => {

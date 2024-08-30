@@ -8,12 +8,16 @@ import { staffSchema } from "../../../validation/wetmillAuditSchema";
 import SimpleIconButton from "../../../components/SimpleIconButton";
 import { useFocusEffect } from "@react-navigation/native";
 
-export const StaffAudit = ({ setNextModal, totalParchment, setAudit }) => {
+export const StaffAudit = ({
+  setNextModal,
+  totalParchment,
+  setAudit,
+  responses,
+}) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const formRef = useRef(null);
 
-  const [loading, setLoading] = useState(false);
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
   const [errors, setErrors] = useState({}); // validation errors
 
@@ -86,12 +90,12 @@ export const StaffAudit = ({ setNextModal, totalParchment, setAudit }) => {
       return () => {
         if (formRef.current) {
           formRef.current.setValues({
-            std_salary_expense: "0",
-            std_other_expense: "0",
-            std_fuel_expense: "0",
-            salary_cost_kg: "0",
-            fuel_cost_kg: "0",
-            other_cost_kg: "0",
+            std_salary_expense: responses.std_salary_expense || "0",
+            std_other_expense: responses.std_other_expense || "0",
+            std_fuel_expense: responses.std_fuel_expense || "0",
+            salary_cost_kg: responses.salary_cost_kg || "0",
+            fuel_cost_kg: responses.fuel_cost_kg || "0",
+            other_cost_kg: responses.other_cost_kg || "0",
           });
         }
       };
@@ -128,12 +132,12 @@ export const StaffAudit = ({ setNextModal, totalParchment, setAudit }) => {
       />
       <Formik
         initialValues={{
-          std_salary_expense: "0",
-          std_other_expense: "0",
-          std_fuel_expense: "0",
-          salary_cost_kg: "0",
-          fuel_cost_kg: "0",
-          other_cost_kg: "0",
+          std_salary_expense: responses.std_salary_expense || "0",
+          std_other_expense: responses.std_other_expense || "0",
+          std_fuel_expense: responses.std_fuel_expense || "0",
+          salary_cost_kg: responses.salary_cost_kg || "0",
+          fuel_cost_kg: responses.fuel_cost_kg || "0",
+          other_cost_kg: responses.other_cost_kg || "0",
         }}
         innerRef={formRef}
         onSubmit={async (values) => {
@@ -180,13 +184,18 @@ export const StaffAudit = ({ setNextModal, totalParchment, setAudit }) => {
                   handleChange={(text) => {
                     handleChange("std_salary_expense")(text);
 
-                    let cost = parseFloat(text) / parseFloat(totalParchment);
+                    let cost =
+                      (parseFloat(text) || 0) / parseFloat(totalParchment);
 
                     setFieldValue("salary_cost_kg", cost.toFixed(2));
                   }}
                   handleBlur={handleBlur("std_salary_expense")}
-                  label={"How much money has paid for salaries season to date?"}
-                  value={values.std_salary_expense}
+                  label={
+                    "How much money has been paid for salaries season to date?"
+                  }
+                  value={
+                    responses.std_salary_expense || values.std_salary_expense
+                  }
                   active={true}
                   error={errors.std_salary_expense === "std_salary_expense"}
                 />
@@ -206,8 +215,9 @@ export const StaffAudit = ({ setNextModal, totalParchment, setAudit }) => {
                     marginLeft: screenWidth * 0.02,
                   }}
                 >
-                  The station is averaging {values.salary_cost_kg || 0} RWF per
-                  kilogram of parchment for salary expenses this season.
+                  The station is averaging{" "}
+                  {responses.salary_cost_kg || values.salary_cost_kg} RWF
+                  per kilogram of parchment for salary expenses this season.
                 </Text>
                 <View
                   style={{
@@ -222,13 +232,16 @@ export const StaffAudit = ({ setNextModal, totalParchment, setAudit }) => {
                   handleChange={(text) => {
                     handleChange("std_fuel_expense")(text);
 
-                    let cost = parseFloat(text) / parseFloat(totalParchment);
+                    let cost =
+                      (parseFloat(text) || 0) / parseFloat(totalParchment);
 
                     setFieldValue("fuel_cost_kg", cost.toFixed(2));
                   }}
                   handleBlur={handleBlur("std_fuel_expense")}
-                  label={"How much money has paid for fuel season to date?"}
-                  value={values.std_fuel_expense}
+                  label={
+                    "How much money has been paid for fuel season to date?"
+                  }
+                  value={responses.std_fuel_expense || values.std_fuel_expense}
                   active={true}
                   error={errors.std_fuel_expense === "std_fuel_expense"}
                 />
@@ -249,7 +262,8 @@ export const StaffAudit = ({ setNextModal, totalParchment, setAudit }) => {
                     marginLeft: screenWidth * 0.02,
                   }}
                 >
-                  The station averaging {values.fuel_cost_kg || 0} RWF per
+                  The station averaging{" "}
+                  {responses.fuel_cost_kg || values.fuel_cost_kg} RWF per
                   kilogram of parchment for fuel expenses this season.
                 </Text>
                 <View
@@ -265,15 +279,18 @@ export const StaffAudit = ({ setNextModal, totalParchment, setAudit }) => {
                   handleChange={(text) => {
                     handleChange("std_other_expense")(text);
 
-                    let cost = parseFloat(text) / parseFloat(totalParchment);
+                    let cost =
+                      (parseFloat(text) || 0) / parseFloat(totalParchment);
 
                     setFieldValue("other_cost_kg", cost.toFixed(2));
                   }}
                   handleBlur={handleBlur("std_other_expense")}
                   label={
-                    "How much money has paid for all other expenses season to date?"
+                    "How much money has been paid for all other expenses season to date?"
                   }
-                  value={values.std_other_expense}
+                  value={
+                    responses.std_other_expense || values.std_other_expense
+                  }
                   active={true}
                   error={errors.std_other_expense === "std_other_expense"}
                 />
@@ -291,9 +308,11 @@ export const StaffAudit = ({ setNextModal, totalParchment, setAudit }) => {
                     fontSize: screenWidth * 0.04,
                     color: colors.black,
                     marginLeft: screenWidth * 0.02,
+                    marginBottom: screenHeight * 0.02,
                   }}
                 >
-                  The station is averaging {values.other_cost_kg || 0} RWF per
+                  The station is averaging{" "}
+                  {responses.other_cost_kg || values.other_cost_kg} RWF per
                   kilogram of parchment for all other expenses this season
                 </Text>
 

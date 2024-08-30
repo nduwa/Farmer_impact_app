@@ -9,12 +9,14 @@ import SimpleIconButton from "../../../components/SimpleIconButton";
 import { approvalSchema } from "../../../validation/wetmillAuditSchema";
 import { useFocusEffect } from "@react-navigation/native";
 
-export const Approval = ({ setNextModal, setAudit }) => {
+export const Approval = ({ setNextModal, setAudit, responses }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const formRef = useRef(null);
 
-  const [choice, setChoice] = useState(false);
+  const [choice, setChoice] = useState(
+    responses.approve === "approve" ? true : false
+  );
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
   const [errors, setErrors] = useState({}); // validation errors
   const [validationError, setValidationError] = useState({
@@ -88,7 +90,7 @@ export const Approval = ({ setNextModal, setAudit }) => {
         if (formRef.current) {
           formRef.current.setValues({
             approve: choice ? "approve" : "not approved",
-            approve_comment: "",
+            approve_comment: responses.approve_comment || "",
           });
           setChoice(false);
         }
@@ -127,7 +129,7 @@ export const Approval = ({ setNextModal, setAudit }) => {
       <Formik
         initialValues={{
           approve: choice ? "approve" : "not approved",
-          approve_comment: "",
+          approve_comment: responses.approve_comment || "",
         }}
         innerRef={formRef}
         onSubmit={async (values) => {
@@ -234,7 +236,7 @@ export const Approval = ({ setNextModal, setAudit }) => {
                   handleChange={handleChange("approve_comment")}
                   handleBlur={handleBlur("approve_comment")}
                   label={"Comments"}
-                  value={values.approve_comment}
+                  value={responses.approve_comment || values.approve_comment}
                   active={true}
                   multiline={true}
                   error={errors.approve_comment === "approve_comment"}

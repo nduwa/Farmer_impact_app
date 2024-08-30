@@ -20,7 +20,7 @@ import * as ImagePicker from "expo-image-picker";
 import { congestionSchema } from "../../../validation/wetmillAuditSchema";
 import { useFocusEffect } from "@react-navigation/native";
 
-export const CongestionAudit = ({ stationName, setNextModal, setAudit }) => {
+export const CongestionAudit = ({ setNextModal, setAudit, responses }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const formRef = useRef(null);
@@ -29,7 +29,6 @@ export const CongestionAudit = ({ stationName, setNextModal, setAudit }) => {
     smell_photo: null,
     appearance_photo: null,
   });
-  const [loading, setLoading] = useState(false);
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
   const [errors, setErrors] = useState({}); // validation errors
   const [validationError, setValidationError] = useState({
@@ -153,8 +152,11 @@ export const CongestionAudit = ({ stationName, setNextModal, setAudit }) => {
       let congestionObj = {
         ...values,
         ...{
-          color_smell_tanks_photo: selectedImage.smell_photo,
-          parchment_appearance_photo: selectedImage.appearance_photo,
+          color_smell_tanks_photo:
+            responses.color_smell_tanks_photo || selectedImage.smell_photo,
+          parchment_appearance_photo:
+            responses.parchment_appearance_photo ||
+            selectedImage.appearance_photo,
         },
       };
 
@@ -190,15 +192,20 @@ export const CongestionAudit = ({ stationName, setNextModal, setAudit }) => {
 
   useFocusEffect(
     React.useCallback(() => {
+      setSelectedImage({
+        smell_photo: responses.color_smell_tanks_photo || null,
+        appearance_photo: responses.parchment_appearance_photo || null,
+      });
+
       return () => {
         if (formRef.current) {
           formRef.current.setValues({
-            color_smell_tanks: "",
-            parchment_appearance: "",
+            color_smell_tanks: responses.color_smell_tanks || "",
+            parchment_appearance: responses.parchment_appearance || "",
           });
           setSelectedImage({
-            smell_photo: null,
-            appearance_photo: null,
+            smell_photo: responses.color_smell_tanks_photo || null,
+            appearance_photo: responses.parchment_appearance_photo || null,
           });
         }
       };
@@ -235,8 +242,8 @@ export const CongestionAudit = ({ stationName, setNextModal, setAudit }) => {
       />
       <Formik
         initialValues={{
-          color_smell_tanks: "",
-          parchment_appearance: "",
+          color_smell_tanks: responses.color_smell_tanks || "",
+          parchment_appearance: responses.parchment_appearance || "",
         }}
         innerRef={formRef}
         onSubmit={async (values) => {
@@ -285,7 +292,9 @@ export const CongestionAudit = ({ stationName, setNextModal, setAudit }) => {
                   label={
                     "How would you describe the color and smell of the coffee in the tanks?"
                   }
-                  value={values.color_smell_tanks}
+                  value={
+                    responses.color_smell_tanks || values.color_smell_tanks
+                  }
                   active={true}
                   error={errors.color_smell_tanks === "color_smell_tanks"}
                 />
@@ -300,7 +309,11 @@ export const CongestionAudit = ({ stationName, setNextModal, setAudit }) => {
                   <SimpleIconButton
                     label={"Take picture"}
                     width="60%"
-                    color={colors.blue_font}
+                    color={
+                      selectedImage.smell_photo
+                        ? colors.green
+                        : colors.blue_font
+                    }
                     labelColor="white"
                     active={true}
                     mv={screenHeight * 0.01}
@@ -310,7 +323,9 @@ export const CongestionAudit = ({ stationName, setNextModal, setAudit }) => {
                   <SimpleIconButton
                     label={"Gallery"}
                     width="38%"
-                    color={colors.black}
+                    color={
+                      selectedImage.smell_photo ? colors.green : colors.black
+                    }
                     labelColor="white"
                     active={true}
                     mv={screenHeight * 0.01}
@@ -329,7 +344,10 @@ export const CongestionAudit = ({ stationName, setNextModal, setAudit }) => {
                   handleChange={handleChange("parchment_appearance")}
                   handleBlur={handleBlur("parchment_appearance")}
                   label={"What is the general appearance of the parchment?"}
-                  value={values.parchment_appearance}
+                  value={
+                    responses.parchment_appearance ||
+                    values.parchment_appearance
+                  }
                   active={true}
                   error={errors.parchment_appearance === "parchment_appearance"}
                 />
@@ -344,7 +362,11 @@ export const CongestionAudit = ({ stationName, setNextModal, setAudit }) => {
                   <SimpleIconButton
                     label={"Take picture"}
                     width="60%"
-                    color={colors.blue_font}
+                    color={
+                      selectedImage.appearance_photo
+                        ? colors.green
+                        : colors.blue_font
+                    }
                     labelColor="white"
                     active={true}
                     mv={screenHeight * 0.01}
@@ -354,7 +376,11 @@ export const CongestionAudit = ({ stationName, setNextModal, setAudit }) => {
                   <SimpleIconButton
                     label={"Gallery"}
                     width="38%"
-                    color={colors.black}
+                    color={
+                      selectedImage.appearance_photo
+                        ? colors.green
+                        : colors.black
+                    }
                     labelColor="white"
                     active={true}
                     mv={screenHeight * 0.01}

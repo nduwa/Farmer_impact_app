@@ -9,9 +9,9 @@ import { useFocusEffect } from "@react-navigation/native";
 import { expenseSchema } from "../../../validation/wetmillAuditSchema";
 
 export const ExpensesAudit = ({
-  stationName,
+  responses,
   setNextModal,
-  cherriesPurchased=0,
+  cherriesPurchased = 0,
   setAudit,
 }) => {
   const screenHeight = Dimensions.get("window").height;
@@ -23,7 +23,6 @@ export const ExpensesAudit = ({
     percentage: 0,
     kgs: 0,
   });
-  const [loading, setLoading] = useState(false);
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
   const [errors, setErrors] = useState({}); // validation errors
   const [validationError, setValidationError] = useState({
@@ -98,13 +97,20 @@ export const ExpensesAudit = ({
 
   useFocusEffect(
     React.useCallback(() => {
+      setDiscrepancy({
+        percentage: responses.discrepancy_perc_expenses || 0,
+        kgs: responses.discrepancy_kgs_expenses || 0,
+      });
       return () => {
         if (formRef.current) {
           formRef.current.setValues({
-            std_price: "0",
-            std_total_paid: "0",
+            std_price: responses.std_price || "0",
+            std_total_paid: responses.std_total_paid || "0",
           });
-          setDiscrepancy({ percentage: 0, kgs: 0 });
+          setDiscrepancy({
+            percentage: responses.discrepancy_perc_expenses || 0,
+            kgs: responses.discrepancy_kgs_expenses || 0,
+          });
         }
       };
     }, [])
@@ -140,8 +146,8 @@ export const ExpensesAudit = ({
       />
       <Formik
         initialValues={{
-          std_price: "0",
-          std_total_paid: "0",
+          std_price: responses.std_price || "0",
+          std_total_paid: responses.std_total_paid || "0",
         }}
         innerRef={formRef}
         onSubmit={async (values) => {
@@ -189,7 +195,8 @@ export const ExpensesAudit = ({
                     handleChange("std_price")(text);
 
                     let cherriesWeight =
-                      parseFloat(values.std_total_paid) / parseFloat(text);
+                      parseFloat(values.std_total_paid) /
+                      (parseFloat(text) || 1);
 
                     setCherriesKgs(cherriesWeight.toFixed(2));
 
@@ -253,13 +260,17 @@ export const ExpensesAudit = ({
                     marginLeft: screenWidth * 0.02,
                   }}
                 >
-                  Based on the total money paid of {values.std_total_paid || 0}{" "}
-                  RWF divided by the average price per kg of{" "}
-                  {values.std_price || 0} RWF, we would expect{" "}
-                  {isNaN(cherriesKgs) ? 0 : cherriesKgs} kilograms of cherries.
-                  The station has reported cherry purchases of{" "}
-                  {cherriesPurchased || 0} kilograms, which results in a
-                  discrepancy of {discrepancy.percentage || 0}%.
+                  Based on the total money paid of{" "}
+                  {parseFloat(values.std_total_paid).toLocaleString() || 0} RWF
+                  divided by the average price per kg of {values.std_price || 0}{" "}
+                  RWF, we would expect{" "}
+                  {isNaN(cherriesKgs)
+                    ? 0
+                    : parseFloat(cherriesKgs).toLocaleString()}{" "}
+                  kilograms of cherries. The station has reported cherry
+                  purchases of {cherriesPurchased.toLocaleString() || 0}{" "}
+                  kilograms, which results in a discrepancy of{" "}
+                  {discrepancy.percentage || 0}%.
                 </Text>
                 <SimpleIconButton
                   label={"Save"}

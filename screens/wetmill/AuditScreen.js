@@ -173,7 +173,9 @@ export const AuditScreen = ({ route }) => {
           flex: 1,
         }}
       >
-        <ScrollView>
+        <ScrollView
+          contentContainerStyle={{ paddingBottom: screenHeight * 0.04 }}
+        >
           <View
             style={{
               padding: screenWidth * 0.02,
@@ -195,6 +197,7 @@ export const AuditScreen = ({ route }) => {
                 setNextModal={setNextModal}
                 setAudit={setAuditData}
                 cherriesSMS={reportedCherries}
+                responses={auditData}
               />
             )}
             {activeAudit == 1 && (
@@ -204,6 +207,7 @@ export const AuditScreen = ({ route }) => {
                 cherriesReported={reportedCherries}
                 parchmentYield={parchYield}
                 setAudit={setAuditData}
+                responses={auditData}
               />
             )}
             {activeAudit == 2 && (
@@ -212,14 +216,16 @@ export const AuditScreen = ({ route }) => {
                 setNextModal={setNextModal}
                 bucketsYield={bucketsYield}
                 setAudit={setAuditData}
+                responses={auditData}
               />
             )}
             {activeAudit == 3 && (
               <ExpensesAudit
                 stationName={data?.Name}
                 setNextModal={setNextModal}
-                cherriesPurchased={auditData?.cherries_books || 13000}
+                cherriesPurchased={auditData?.cherries_books || 416785}
                 setAudit={setAuditData}
+                responses={auditData}
               />
             )}
             {activeAudit == 4 && (
@@ -228,6 +234,7 @@ export const AuditScreen = ({ route }) => {
                 setNextModal={setNextModal}
                 totalParchment={auditData?.parch_total || 78430}
                 setAudit={setAuditData}
+                responses={auditData}
               />
             )}
             {activeAudit == 5 && (
@@ -236,6 +243,7 @@ export const AuditScreen = ({ route }) => {
                 setNextModal={setNextModal}
                 setAudit={setAuditData}
                 parchDayEstimate={parchDayEstimate}
+                responses={auditData}
               />
             )}
             {activeAudit == 6 && (
@@ -243,6 +251,7 @@ export const AuditScreen = ({ route }) => {
                 stationName={data?.Name}
                 setNextModal={setNextModal}
                 setAudit={setAuditData}
+                responses={auditData}
               />
             )}
             {activeAudit == 7 && (
@@ -250,6 +259,7 @@ export const AuditScreen = ({ route }) => {
                 stationName={data?.Name}
                 setAudit={setAuditData}
                 setNextModal={setNextModal}
+                responses={auditData}
               />
             )}
             {activeAudit == 8 && (
@@ -257,6 +267,7 @@ export const AuditScreen = ({ route }) => {
                 stationName={data?.Name}
                 setAudit={setAuditData}
                 setNextModal={setNextModal}
+                responses={auditData}
               />
             )}
             {activeAudit == 9 && (
@@ -267,16 +278,22 @@ export const AuditScreen = ({ route }) => {
                 stationName={data?.Name}
                 setAudit={setAuditData}
                 setNextModal={setNextModal}
+                responses={auditData}
               />
             )}
             {activeAudit == 10 && (
               <TakePictures
                 setAudit={setAuditData}
                 setNextModal={setNextModal}
+                responses={auditData}
               />
             )}
             {activeAudit == 11 && (
-              <Approval setAudit={setAuditData} setNextModal={setFinishModal} />
+              <Approval
+                setAudit={setAuditData}
+                setNextModal={setFinishModal}
+                responses={auditData}
+              />
             )}
           </View>
         </ScrollView>

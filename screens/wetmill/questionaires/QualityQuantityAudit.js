@@ -21,18 +21,15 @@ import * as ImagePicker from "expo-image-picker";
 import { QalQatSchema } from "../../../validation/wetmillAuditSchema";
 import { useFocusEffect } from "@react-navigation/native";
 
-export const QualityQuantityAudit = ({
-  stationName,
-  setNextModal,
-  setAudit,
-}) => {
+export const QualityQuantityAudit = ({ responses, setNextModal, setAudit }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const formRef = useRef(null);
 
-  const [selectedImage, setSelectedImage] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(
+    responses.leftover_beans === "yes" ? true : false
+  );
   const [choice, setChoice] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
   const [errors, setErrors] = useState({}); // validation errors
   const [validationError, setValidationError] = useState({
@@ -148,7 +145,7 @@ export const QualityQuantityAudit = ({
         ...values,
         ...{
           leftover_beans: choice ? "yes" : "no",
-          leftover_photo: selectedImage,
+          leftover_photo: responses.leftover_photo || selectedImage,
         },
       };
 
@@ -185,12 +182,13 @@ export const QualityQuantityAudit = ({
   useFocusEffect(
     React.useCallback(() => {
       return () => {
+        setSelectedImage(responses.leftover_photo || null);
         if (formRef.current) {
           formRef.current.setValues({
-            leftover_comment: "",
+            leftover_comment: responses.leftover_comment || "",
           });
-          setChoice(false);
-          setSelectedImage(null);
+          setChoice(responses.leftover_beans === "yes" ? true : false);
+          setSelectedImage(responses.leftover_photo || null);
         }
       };
     }, [])
@@ -332,7 +330,7 @@ export const QualityQuantityAudit = ({
                   handleChange={handleChange("leftover_comment")}
                   handleBlur={handleBlur("leftover_comment")}
                   label={"Describe what is left"}
-                  value={values.leftover_comment}
+                  value={responses.leftover_comment || values.leftover_comment}
                   active={true}
                   multiline={true}
                   error={errors.leftover_comment === "leftover_comment"}
@@ -348,7 +346,7 @@ export const QualityQuantityAudit = ({
                   <SimpleIconButton
                     label={"Take picture"}
                     width="60%"
-                    color={colors.blue_font}
+                    color={selectedImage ? colors.green : colors.blue_font}
                     labelColor="white"
                     active={true}
                     mv={screenHeight * 0.01}
@@ -358,7 +356,7 @@ export const QualityQuantityAudit = ({
                   <SimpleIconButton
                     label={"Gallery"}
                     width="38%"
-                    color={colors.black}
+                    color={selectedImage ? colors.green : colors.black}
                     labelColor="white"
                     active={true}
                     mv={screenHeight * 0.01}
