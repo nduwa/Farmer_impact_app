@@ -137,7 +137,7 @@ const generateBulkValueString = (
   } else if (tableName === "inspectionResponses") {
     let bulkValues = "";
     for (let i = 0; i < data.length; i++) {
-      bulkValues += `('${data[i].created_at}','${extraVal}','${data[i].inspection_answer_id}','${data[i].deleted}','${data[i].__kp_InspectionLog}')`;
+      bulkValues += `('${data[i].created_at}','${extraVal}','${data[i].inspection_answer_id}',${data[i].answer_explanaition},'${data[i].deleted}','${data[i].__kp_InspectionLog}')`;
       if (i < data.length - 1) bulkValues += ",";
     }
 

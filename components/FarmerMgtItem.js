@@ -13,6 +13,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import { AntDesign } from "@expo/vector-icons";
 import { colors } from "../data/colors";
+import { useTranslation } from "react-i18next";
 
 export const FarmerMgtItem = ({
   destination,
@@ -23,6 +24,7 @@ export const FarmerMgtItem = ({
   const navigation = useNavigation();
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
+  const { t } = useTranslation();
 
   const handleNavigation = () => {
     setIsFarmerModalOpen(false);
@@ -55,22 +57,24 @@ export const FarmerMgtItem = ({
       }}
       onPress={handleNavigation}
     >
-      {label === "Register" && <Feather name="save" size={24} color="black" />}
+      {label === t("homepage.farmer_modal.register") && (
+        <Feather name="save" size={24} color="black" />
+      )}
 
-      {label === "Remove Farmers" && (
+      {label === t("homepage.farmer_modal.remove") && (
         <MaterialCommunityIcons
           name="delete-forever-outline"
           size={24}
           color="black"
         />
       )}
-      {label === "Groups" && (
+      {label === t("homepage.farmer_modal.groups") && (
         <FontAwesome6 name="people-group" size={18} color="black" />
       )}
-      {label === "Update Farmer" && (
+      {label === t("homepage.farmer_modal.update") && (
         <FontAwesome5 name="user-edit" size={20} color="black" />
       )}
-      {label === "Weekly Reports" && (
+      {label === t("homepage.farmer_modal.report") && (
         <AntDesign name="barchart" size={24} color="black" />
       )}
 

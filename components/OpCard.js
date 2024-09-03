@@ -13,16 +13,19 @@ import {
 } from "react-native";
 import { colors } from "../data/colors";
 import { useNavigation } from "@react-navigation/native";
+import { useTranslation } from "react-i18next";
 
 export const OpCard = ({ name, action, destination = null, active = true }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const navigation = useNavigation();
+  const { t } = useTranslation();
 
   const [factor, setFactor] = useState(1);
 
   const handlePress = () => {
-    if (name == "Buy Coffee" || name == "Farmer") action(true);
+    if (name == t("homepage.buy_coffee") || name == t("homepage.farmer"))
+      action(true);
     if (destination) navigation.navigate(destination, { data: null });
   };
 
@@ -72,35 +75,28 @@ export const OpCard = ({ name, action, destination = null, active = true }) => {
           gap: screenWidth * 0.02,
         }}
       >
-        {name === "Farmer" && (
+        {name === t("homepage.farmer") && (
           <FontAwesome6
             name="people-group"
             size={screenWidth * 0.09}
             color="black"
           />
         )}
-        {name === "Inspection" && (
+        {name === t("homepage.inspection") && (
           <MaterialCommunityIcons
             name="notebook-check-outline"
             size={screenWidth * 0.09}
             color="black"
           />
         )}
-        {name === "Update Farmer" && (
-          <FontAwesome6
-            name="user-pen"
-            size={screenWidth * 0.08}
-            color="black"
-          />
-        )}
-        {name === "Training" && (
+        {name === t("homepage.training") && (
           <FontAwesome5
             name="chalkboard-teacher"
             size={screenWidth * 0.08}
             color="black"
           />
         )}
-        {name === "Buy Coffee" && (
+        {name === t("homepage.buy_coffee") && (
           <Foundation
             name="burst-sale"
             size={screenWidth * 0.1}
@@ -108,14 +104,14 @@ export const OpCard = ({ name, action, destination = null, active = true }) => {
           />
         )}
 
-        {name === "CWS Finance" && (
+        {name === t("homepage.finance") && (
           <FontAwesome6
             name="sack-dollar"
             size={screenWidth * 0.09}
             color="black"
           />
         )}
-        {name === "Wet Mill Audit" && (
+        {name === t("homepage.audit") && (
           <MaterialCommunityIcons
             name="archive-search-outline"
             size={screenWidth * 0.09}
@@ -125,7 +121,8 @@ export const OpCard = ({ name, action, destination = null, active = true }) => {
         <Text
           style={{
             fontWeight: "500",
-            fontSize: screenWidth * 0.041,
+            fontSize:
+              name?.length > 15 ? screenWidth * 0.038 : screenWidth * 0.041,
             textAlign: "center",
           }}
         >

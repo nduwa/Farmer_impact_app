@@ -1,0 +1,136 @@
+{
+  "login": {
+    "title": "Se Connecter",
+    "username": "Nom d’utilisateur",
+    "password": "Mot de passe",
+    "button": "Connectez-vous",
+    "name_error": "Nom d’utilisateur non valide",
+    "pwd_error": "Mot de passe non valide",
+    "toast_error": "Quelque chose s’est mal passé",
+    "name_placeholder": "e.g jdoe"
+  },
+  "homepage": {
+    "greeting": "Salut, {{name}}",
+    "farmer": "Cultivateur",
+    "inspection": "Inspection",
+    "training": "Formation",
+    "buy_coffee": "Acheter du café",
+    "finance": "Financement CWS",
+    "audit": "Audit de moulin humide",
+    "session": {
+      "title": "Session en cours",
+      "user": "UTILISATEUR",
+      "role": "RÔLE",
+      "station": "STATION",
+      "warning1": "Si vos autorisations ont été mises à jour, utilisez le bouton ci-dessous pour actualiser l’application pour les nouvelles modifications.",
+      "warning2": "Cette action nécessite une connectivité Internet",
+      "button": "Actualiser le contrôle d’accès"
+    },
+    "farmer_modal": {
+      "title": "Gestion des agriculteurs",
+      "register": "Registre",
+      "groups": "Groupe",
+      "update": "Modifier agriculteur",
+      "remove": "Supprimer l’agriculteur",
+      "report": "Rapport Hebdomadaire"
+    }
+  },
+  "new_farmer": {
+    "title": "Nouvel agriculteur",
+    "title_household": "Informations domestiques",
+    "title_farmer": "Information agricole",
+    "button": "Registre",
+    "toast": {
+      "saved_registration_pending": "Agriculteur en attente d'enregistrement"
+    },
+    "educational_level": {
+      "none": "Pas d'éducation formelle",
+      "some_primary": "Quelques écoles primaires",
+      "complete_primary": "Compléter l'école primaire",
+      "some_secondary": "quelques écoles secondaires",
+      "complete_secondary": "Compléter l'école secondaires",
+      "some_techi_uni": "École technique ou université",
+      "complete_techi_uni": "Terminer une école technique ou une université"
+    },
+    "reading_skills": {
+      "none": "Ne peut pas lire",
+      "with_assistance": "Peut lire avec un peu d'aide",
+      "without_assistance": "Peut lire sans aide"
+    },
+    "math_skills": {
+      "none": "Pas de compétences mathématiques",
+      "with_assistance": "Peut faire des calculs de base avec l'aide d'autres personnes",
+      "without_assistance": "Peut faire des calculs de base sans l'aide d'autrui"
+    },
+    "marital_status": {
+      "single": "Célibataire",
+      "married": "Mariés",
+      "widowed": "Veuve",
+      "divorced": "Divorcé"
+    },
+    "errors": {
+      "validation_error": "Erreur de validation",
+      "prod_tree_error": "Les arbres de production ne peuvent pas dépasser le nombre total d'arbres",
+      "invalid_input_error": "Entrée invalide dans {{name}}, vérifiez les entrées surlignées en rouge"
+    },
+    "inputs": {
+      "group": "Nom du groupe",
+      "cell": "Cellule",
+      "village": "Village",
+      "coffee_plots": "Total de parcelles de terre avec du café",
+      "prd_tree": "Arbres productifs",
+      "tot_tree": "Arbres au total",
+      "name": "Nom de l’agriculteur",
+      "phone": "Numéro de téléphone",
+      "gender": {
+        "label": "Sexe",
+        "male": "Mâle",
+        "female": "Femelle"
+      },
+      "birth": "Année de naissance",
+      "national_id": "Carte d’identité nationale",
+      "marital": "état civil",
+      "math": "Compétences en mathématiques",
+      "reading": "Compétences en lecture",
+      "educational": "Niveau d'éducation"
+    }
+  },
+  "groups": {
+    "title": "Gestion du groupe",
+    "activate_deactivate": "Activer/désactiver des groupes",
+    "assign_farmers": "Affecter des agriculteurs à des groupes"
+  },
+  "update_farmer": {
+    "title": "Modifier l'agriculteur",
+    "farmer_trees": "Arbres de l'agriculteur",
+    "farmer_details": "Détails de l'agriculteur",
+    "farm_details": "Détails de la ferme"
+  },
+  "weekly_report": {
+    "title": "Rapport hebdomadaire",
+    "form_title": "Remplir le formulaire",
+    "button": "Soumettre",
+    "toast": {
+      "saved_registration_pending": "Rapport sauvegardé, en attente de téléchargement"
+    },
+    "errors": {
+      "validation_error": "Erreur de validation",
+      "invalid_input_error": "Entrée invalide dans '{{name}}', vérifiez les entrées surlignées en rouge"
+    },
+    "inputs": {
+      "number_trained": "Nombre formé",
+      "men_attended": "Hommes présents",
+      "women_attended": "Femmes présentes",
+      "groups_planned": "Groupes prévus pour s'entraîner la semaine prochaine",
+      "farms_inspected": "Nombre de fermes inspectées",
+      "farms_planned": "Fermes agricoles à inspecter",
+      "comments": "Autres activités et commentaires"
+    }
+  },
+  "settings": {
+    "title": "Changer la languee",
+    "english": "Anglais",
+    "french": "Français",
+    "kinyarwanda": "Kinyarwanda"
+  }
+}

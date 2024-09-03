@@ -1,0 +1,135 @@
+{
+  "login": {
+    "title": "Kwinjira",
+    "username": "Izina",
+    "password": "Ijambo banga",
+    "button": "injira",
+    "name_error": "Shyiramo izina 'username'",
+    "pwd_error": "Shyiramo ijambo banga 'password'",
+    "toast_error": "Ntago byakozwe",
+    "name_placeholder": "urugero: pndayizeye"
+  },
+  "homepage": {
+    "greeting": "Muraho, {{name}}",
+    "farmer": "Umuhinzi",
+    "inspection": "Ubugenzuzi",
+    "training": "Amahugurwa",
+    "buy_coffee": "Kugura Kawa",
+    "finance": "Umutungo",
+    "session": {
+      "title": "Aka kanya",
+      "user": "UMUKOZI",
+      "role": "INSHINGANO",
+      "station": "URUGANDA",
+      "warning1": "Niba wahawe impushya zindi, kanda aho munsi hafite ibara ry'ubururu",
+      "warning2": "Iki gikorwa gisaba murandasi",
+      "button": "Shakisha impushya"
+    },
+    "farmer_modal": {
+      "title": "Umuhinzi",
+      "register": "Kwandikisha",
+      "groups": "Amatsinda",
+      "update": "Hindura imyirondoro",
+      "remove": "Gusiba umuhinzi",
+      "report": "Raporo"
+    }
+  },
+  "new_farmer": {
+    "title": "Umuhinzi mushya",
+    "title_household": "Amakuru y'urugo",
+    "title_farmer": "Amakuru y'umuhinzi",
+    "button": "Kwandikisha",
+    "toast": {
+      "saved_registration_pending": "Byakozwe"
+    },
+    "educational_level": {
+      "none": "Ntabwo Yize",
+      "some_primary": "Yizeho Abanza",
+      "complete_primary": "Yarangije Abanza",
+      "some_secondary": "Yizeho Ayisumbuye",
+      "complete_secondary": "Yarangije Ayisumbuye",
+      "some_techi_uni": "Yizeho Imyuga cg Kaminuza",
+      "complete_techi_uni": "Yarangije Imyuga cg Kaminuza"
+    },
+    "reading_skills": {
+      "none": "Ntazi gusoma",
+      "with_assistance": "Ashobora gusoma abifashijwemo",
+      "without_assistance": "Ashobora gusoma ntabufasha"
+    },
+    "math_skills": {
+      "none": "Nta bumenyi bw’ imibare",
+      "with_assistance": "Ashobora gukora imibare abifashijwemo",
+      "without_assistance": "Ashobora kwikorera Imibare ntabufasha"
+    },
+    "marital_status": {
+      "single": "Ingaragu",
+      "married": "Arubatse",
+      "widowed": "Yarapfakaye",
+      "divorced": "Afite gatanya"
+    },
+    "errors": {
+      "validation_error": "Habayeho kwibeshya",
+      "prod_tree_error": "Umubare w'ibiti by'umusaruro uraruta umubare w'ibiti",
+      "invalid_input_error": "Kosora '{{name}}', reba ahandi hose hari ibara ry'umutuku"
+    },
+    "inputs": {
+      "group": "Izina ry'itsinda",
+      "cell": "Akagali",
+      "village": "Umudugudu",
+      "coffee_plots": "Imirima ya kawa",
+      "prd_tree": "Ibiti bitanga umusaruro",
+      "tot_tree": "Umubare w'ibiti byose",
+      "name": "Amazina y'umuhinzi",
+      "phone": "Nimero ya terefone",
+      "gender": {
+        "label": "Igitsina",
+        "male": "Gabo",
+        "female": "Gore"
+      },
+      "birth": "Umwaka w'amavuko",
+      "national_id": "Nimero y'indangamuntu",
+      "marital": "Marital Status",
+      "math": "Ubumenyi bw'imibare",
+      "reading": "Ubumenyi bwo gusoma",
+      "educational": "Urwego rw'amashuri"
+    }
+  },
+  "groups": {
+    "title": "Amatsinda",
+    "activate_deactivate": "Kugenzura matsinda",
+    "assign_farmers": "Gushyira abahinzi mu matsinda"
+  },
+  "update_farmer": {
+    "title": "Genzura umuhinzi",
+    "farmer_trees": "Ibiti by'umuhinzi",
+    "farmer_details": "Imyirondoro y'umuhinzi",
+    "farm_details": "Ibiranga umurima"
+  },
+  "weekly_report": {
+    "title": "Raporo ngarukacyumweru",
+    "form_title": "Uzuza uko bigenwe",
+    "button": "kwemeza",
+    "toast": {
+      "saved_registration_pending": "Byakozwe"
+    },
+    "errors": {
+      "validation_error": "Habayeho kwibeshya",
+      "invalid_input_error": "Kosora '{{name}}', reba ahandi hose hari ibara ry'umutuku"
+    },
+    "inputs": {
+      "number_trained": "Umubare w'abahuguwe",
+      "men_attended": "Umubare w'abagabo bitabiriye",
+      "women_attended": "Umubare w'abagore bitabiriye",
+      "groups_planned": "Amatsinda azahugurwa icyumweru gitaha",
+      "farms_inspected": "Imirima yagenzuwe",
+      "farms_planned": "Imirima yateganyijwe kugenzura",
+      "comments": "Ibindi bikorwa cyangwa ibitekerezo"
+    }
+  },
+  "settings": {
+    "title": "Hindura ururimi",
+    "english": "Icyongereza",
+    "french": "Igifaransa",
+    "kinyarwanda": "Ikinyarwanda"
+  }
+}

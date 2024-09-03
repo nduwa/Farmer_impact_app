@@ -11,10 +11,12 @@ import { colors } from "../data/colors";
 import { globalStyles } from "../data/globalStyles";
 import { FarmerMgtItem } from "./FarmerMgtItem";
 import { useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
 
 export const FarmerMgtModal = ({ setIsFarmerModalOpen }) => {
   const [initClose, setInitClose] = useState(false);
   const userState = useSelector((state) => state.user);
+  const { t } = useTranslation();
 
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
@@ -86,7 +88,7 @@ export const FarmerMgtModal = ({ setIsFarmerModalOpen }) => {
                 color: colors.secondary,
               }}
             >
-              Farmer Management
+              {t("homepage.farmer_modal.title")}
             </Text>
           </View>
 
@@ -94,31 +96,30 @@ export const FarmerMgtModal = ({ setIsFarmerModalOpen }) => {
             <FarmerMgtItem
               setIsFarmerModalOpen={setIsFarmerModalOpen}
               destination={"FarmerRegistration"}
-              label={"Register"}
+              label={t("homepage.farmer_modal.register")}
               isActive={isAccessable("Register")}
             />
             <FarmerMgtItem
               setIsFarmerModalOpen={setIsFarmerModalOpen}
               destination={"AssignGroupsHome"}
-              label={"Groups"}
+              label={t("homepage.farmer_modal.groups")}
               isActive={isAccessable("Register")}
             />
             <FarmerMgtItem
               setIsFarmerModalOpen={setIsFarmerModalOpen}
               destination={"FarmerUpdateHome"}
-              label={"Update Farmer"}
-              isActive={true}
+              label={t("homepage.farmer_modal.update")}
             />
             <FarmerMgtItem
               setIsFarmerModalOpen={setIsFarmerModalOpen}
               destination={"SelectFarmerDeleteScreen"}
-              label={"Remove Farmers"}
+              label={t("homepage.farmer_modal.remove")}
               isActive={isAccessable("Update Farmers")}
             />
             <FarmerMgtItem
               setIsFarmerModalOpen={setIsFarmerModalOpen}
               destination={"WeeklyReportScreen"}
-              label={"Weekly Reports"}
+              label={t("homepage.farmer_modal.report")}
               isActive={isAccessable("Training")}
             />
           </View>

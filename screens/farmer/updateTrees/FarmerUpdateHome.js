@@ -10,11 +10,13 @@ import { colors } from "../../../data/colors";
 import { StatusBar } from "expo-status-bar";
 import { AntDesign } from "@expo/vector-icons";
 import { UpdateFarmerItem } from "../../../components/UpdateFarmerItem";
+import { useTranslation } from "react-i18next";
 
 export const FarmerUpdateHome = () => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const navigation = useNavigation();
+  const { t } = useTranslation();
 
   const handleBackButton = () => {
     navigation.navigate("Homepage", { data: null });
@@ -58,7 +60,7 @@ export const FarmerUpdateHome = () => {
             fontSize: 19,
           }}
         >
-          Update Farmer
+          {t("update_farmer.title")}
         </Text>
         <View
           style={{ width: screenWidth * 0.07, backgroundColor: "transparent" }}
@@ -77,15 +79,15 @@ export const FarmerUpdateHome = () => {
             }}
           >
             <UpdateFarmerItem
-              label={"Farmer Trees"}
+              label={t("update_farmer.farmer_trees")}
               destination={"UpdateTreesScreen"}
             />
             <UpdateFarmerItem
-              label={"Farmer Details"}
+              label={t("update_farmer.farmer_details")}
               destination={"FarmerUpdateScreen"}
             />
             <UpdateFarmerItem
-              label={"Farm Details"}
+              label={t("update_farmer.farm_details")}
               destination={"FarmUpdateScreen"}
             />
           </View>

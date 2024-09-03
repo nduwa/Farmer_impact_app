@@ -1,6 +1,6 @@
 import RadioButtonGroup, { RadioButtonItem } from "expo-radio-button";
 import React, { memo, useEffect, useState } from "react";
-import { Dimensions, FlatList, Text, View } from "react-native";
+import { Dimensions, FlatList, Text, TextInput, View } from "react-native";
 import { colors } from "../data/colors";
 import { useFocusEffect } from "@react-navigation/native";
 
@@ -11,15 +11,21 @@ const InspectionQuestion = ({ data, question, setQnAnswer, currentAnswer }) => {
   const [answer, setAnswer] = useState("");
   const [choices, setChoices] = useState([]);
   const [selectedAnswer, setSelectedAnswer] = useState("");
+  const [explaination, setExplaination] = useState("");
 
   const removeDuplicates = (items) => {
     return [...new Set(items)];
   };
 
-  const handleAnswer = (value) => {
-    setAnswer(value);
+  const handleAnswer = ({ ans, expl = null }) => {
+    setAnswer(ans);
 
-    setQnAnswer({ id: question.id, answer: value });
+    setQnAnswer({ id: question.id, answer: ans, explaination: expl || "" });
+  };
+
+  const getLabel = (id) => {
+    let foundlabel = choices.find((item) => item.id == id);
+    return foundlabel?.label;
   };
 
   useEffect(() => {
@@ -89,7 +95,7 @@ const InspectionQuestion = ({ data, question, setQnAnswer, currentAnswer }) => {
           <RadioButtonGroup
             containerStyle={{ marginBottom: 10, gap: 7 }}
             selected={selectedAnswer}
-            onSelected={(value) => handleAnswer(value)}
+            onSelected={(value) => handleAnswer({ ans: value })}
             radioBackground={colors.secondary}
           >
             {choices.map((item) => (
@@ -111,6 +117,49 @@ const InspectionQuestion = ({ data, question, setQnAnswer, currentAnswer }) => {
               />
             ))}
           </RadioButtonGroup>
+        )}
+        {(getLabel(answer) === "Ntibitunganye" ||
+          getLabel(answer) === "Non Compliance") && (
+          <>
+            <View
+              style={{
+                width: "100%",
+                height: 1,
+                backgroundColor: colors.secondary_variant,
+              }}
+            />
+            <View
+              style={{
+                justifyContent: "center",
+                gap: screenHeight * 0.01,
+                marginVertical: screenHeight * 0.02,
+                paddingHorizontal: screenHeight * 0.005,
+              }}
+            >
+              <Text style={{ fontSize: screenWidth * 0.04, fontWeight: "500" }}>
+                When can the compliance be met?
+              </Text>
+              <TextInput
+                multiline={true}
+                value={explaination}
+                onChangeText={(value) => {
+                  setExplaination(value);
+                  handleAnswer({ ans: answer, expl: value });
+                }}
+                style={{
+                  borderColor: colors.bg_variant_font,
+                  backgroundColor: colors.white_variant,
+                  borderWidth: 0.3,
+                  borderRadius: 10,
+                  padding: 7,
+                  fontWeight: "500",
+                  fontSize: screenWidth * 0.04,
+                  color: colors.blue_font,
+                  textAlign: "left",
+                }}
+              />
+            </View>
+          </>
         )}
       </View>
     </View>

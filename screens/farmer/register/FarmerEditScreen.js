@@ -369,6 +369,9 @@ export const FarmerEditScreen = ({ route }) => {
             for (const cell of allCells) {
               if (cell.parent_id === sector.id) {
                 stationCells.push(cell);
+                if (cell.name === data.farmerData.cell) {
+                  setCellChoice(cell);
+                }
               }
             }
           }

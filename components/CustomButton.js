@@ -31,7 +31,7 @@ export default function CustomButton({
     <TouchableOpacity
       disabled={disabled}
       style={{
-        backgroundColor: disabled ? colors.white_a : bg,
+        backgroundColor: bg,
         justifyContent: "center",
         alignItems: "center",
         paddingVertical: screenWidth * paddingRatio + adjustVal,
@@ -41,6 +41,7 @@ export default function CustomButton({
         marginTop: mt,
         marginBottom: mb,
         width: width,
+        opacity: disabled ? 0.4 : 1,
       }}
       onPress={onPress}
     >

@@ -38,14 +38,8 @@ export const TrainingScreen = () => {
   const [currentJob, setCurrentJob] = useState(null);
   const [language, setLanguage] = useState("eng");
   const [deleteModal, setDeleteModal] = useState({ open: false, id: null });
-  const [trainingModal, setTrainingModal] = useState({
-    open: false,
-    id: null,
-    data: null,
-  });
-
+  
   const [attendanceSubmitted, setAttendanceSubmitted] = useState(false);
-  const [attendanceDeleted, setAttendanceDeleted] = useState(false);
 
   const [submitting, setSubmitting] = useState(false);
 
