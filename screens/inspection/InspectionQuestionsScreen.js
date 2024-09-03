@@ -20,12 +20,15 @@ import { dataTodb } from "../../helpers/dataTodb";
 import { useDispatch, useSelector } from "react-redux";
 import LottieView from "lottie-react-native";
 import { getCurrentDate } from "../../helpers/getCurrentDate";
+import { useTranslation } from "react-i18next";
 
 export const InspectionQuestionsScreen = ({ route }) => {
   const screenWidth = Dimensions.get("window").width;
   const screenHeight = Dimensions.get("window").height;
   const navigation = useNavigation();
   const flatListRef = useRef(null);
+  const { t, i18n } = useTranslation();
+  const currentLanguage = i18n.language;
 
   const userData = useSelector((state) => state.user);
 
@@ -39,7 +42,6 @@ export const InspectionQuestionsScreen = ({ route }) => {
   });
   const [answers, setAnswers] = useState([]);
   const [questions, setQuestions] = useState([]);
-  const [language, setLanguage] = useState("kiny");
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [qnStart, setQnStart] = useState(0);
@@ -123,8 +125,6 @@ export const InspectionQuestionsScreen = ({ route }) => {
       setInsertId: setInsertedInspection,
       extraVal: kfHousehold,
     });
-
-    // setInsertedInspection(970);
   };
   const handlePress = () => {
     if (currentPage >= totalPages) {
@@ -172,8 +172,31 @@ export const InspectionQuestionsScreen = ({ route }) => {
     if (pages > 0) displayToast(`Page ${currentPage} of ${pages} loaded`);
   };
 
+  function findOrCreateOrUpdate(item) {
+    let element = answers.find((ans) => ans.id === item.id);
+    if (!element) {
+      element = {
+        id: item.id,
+        answer: item.answer,
+        explaination: item?.explaination,
+      };
+
+      setAnswers([...answers, element]);
+    } else {
+      let allCurrentAnswers = answers;
+      for (let ans of allCurrentAnswers) {
+        if (ans.id === item.id) {
+          ans.answer = item.answer;
+          ans.explaination = item?.explaination || "";
+        }
+      }
+
+      setAnswers(allCurrentAnswers);
+    }
+  }
+
   const handleAnswer = (newAnswer) => {
-    setAnswers([...answers, newAnswer]);
+    findOrCreateOrUpdate(newAnswer);
   };
 
   const fetchAnswer = (qnId) => {
@@ -198,6 +221,7 @@ export const InspectionQuestionsScreen = ({ route }) => {
         let response = {
           rtc_inspection_id: inspId,
           inspection_answer_id: answer.answer,
+          answer_explanaition: answer.explaination,
           deleted: 0,
           __kp_InspectionLog: "",
           created_at: getCurrentDate(),
@@ -352,7 +376,8 @@ export const InspectionQuestionsScreen = ({ route }) => {
             backgroundColor: colors.white,
             padding: screenHeight * 0.02,
             borderRadius: screenHeight * 0.01,
-            elevation: 3,
+            elevation: 4,
+            zIndex: 11,
           }}
         >
           <Text style={{ fontSize: screenHeight * 0.02, fontWeight: "700" }}>
@@ -400,7 +425,7 @@ export const InspectionQuestionsScreen = ({ route }) => {
                     type: data.inspectionType,
                     question: item,
                     index: qnStart + index,
-                    language,
+                    language: currentLanguage,
                   }}
                   currentAnswer={fetchAnswer(item.id)}
                   question={item}

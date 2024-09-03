@@ -369,6 +369,7 @@ export const WeeklyReportScreen = () => {
                     label={t("weekly_report.inputs.comments")}
                     value={values.otherActivities}
                     multiline={true}
+                    font_sm={0.04}
                     error={errors.comments}
                   />
                 </View>

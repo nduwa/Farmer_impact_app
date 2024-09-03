@@ -24,6 +24,7 @@ import {
 } from "../../redux/inspection/inspectionSlice";
 import { updateDBdata } from "../../helpers/updateDBdata";
 import { getCurrentDate } from "../../helpers/getCurrentDate";
+import LottieView from "lottie-react-native";
 
 export const InspectionsScreen = () => {
   const screenHeight = Dimensions.get("window").height;
@@ -41,6 +42,7 @@ export const InspectionsScreen = () => {
     data: null,
   });
   const [currentJob, setCurrentJob] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [inspectionDeleted, setInspectionDeleted] = useState(false);
 
   const handleBackButton = () => {
@@ -124,6 +126,7 @@ export const InspectionsScreen = () => {
     setInspectionModal((prevState) => ({ ...prevState, open: false }));
 
     setInspections(filtered);
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -146,6 +149,7 @@ export const InspectionsScreen = () => {
 
   useEffect(() => {
     if (inspectionState.error) {
+      setLoading(false);
       const inspectionError = inspectionState.error;
 
       if (inspectionError?.code === "ERR_BAD_RESPONSE") {
@@ -183,6 +187,7 @@ export const InspectionsScreen = () => {
 
   useEffect(() => {
     if (responses.length > 0) {
+      setLoading(true);
       dispatch(
         inspectionSubmission({
           inspection: inspectionModal.data,
@@ -192,9 +197,14 @@ export const InspectionsScreen = () => {
     }
   }, [responses.length]);
 
+  useEffect(() => {
+    setLoading(false);
+  }, [inspections.length]);
+
   useFocusEffect(
     React.useCallback(() => {
       const fetchData = async () => {
+        setLoading(true);
         retrieveDBdata({
           tableName: "rtc_inspections",
           setData: setInspections,
@@ -293,7 +303,7 @@ export const InspectionsScreen = () => {
       )}
 
       {/* inspection modal */}
-      {inspectionModal.open && (
+      {!inspectionModal.open && (
         <InspectionModal
           data={{
             inspection_id: inspectionModal.id,
@@ -309,6 +319,42 @@ export const InspectionsScreen = () => {
             setInspectionModal((prevState) => ({ ...prevState, open: false }))
           }
         />
+      )}
+
+      {loading && (
+        <View
+          style={{
+            position: "absolute",
+            marginTop: screenHeight * 0.195,
+            width: "100%",
+            backgroundColor: "transparent",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 11,
+          }}
+        >
+          <View
+            style={{
+              width: "auto",
+              backgroundColor: "white",
+              borderRadius: screenHeight * 0.5,
+              elevation: 4,
+            }}
+          >
+            <LottieView
+              style={{
+                height: screenHeight * 0.05,
+                width: screenHeight * 0.05,
+                alignSelf: "center",
+              }}
+              source={require("../../assets/lottie/spinner.json")}
+              autoPlay
+              speed={1}
+              loop={true}
+              resizeMode="cover"
+            />
+          </View>
+        </View>
       )}
     </View>
   );

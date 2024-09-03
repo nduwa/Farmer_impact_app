@@ -15,7 +15,6 @@ export const LocalizationModal = ({ setModalOpen, data, setChoice, title }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
 
-  const [selectedItemID, setSelectedItemID] = useState(null);
   const [fetching, setFetching] = useState(false);
 
   const handleItemSelection = (id) => {

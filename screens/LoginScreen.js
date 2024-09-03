@@ -246,12 +246,23 @@ export const LoginScreen = ({ navigation }) => {
           console.warn(e);
         } finally {
           prepareTables();
+
+          //create active column in groups table
           addColumnIfNotExists({
             tableName: "rtc_groups",
             columnName: "active",
             columnType: "integer",
             defaultValue: "0",
           });
+
+          //create explanaition column in inspection responses table
+          addColumnIfNotExists({
+            tableName: "inspection_responses",
+            columnName: "answer_explanaition",
+            columnType: "text",
+            defaultValue: "",
+          });
+          
           await SplashScreen.hideAsync();
         }
       };

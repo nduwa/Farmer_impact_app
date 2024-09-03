@@ -12,6 +12,8 @@ export const BuyCoffeeInput = ({
   multiline = false,
   radius = 10,
   keyboardType = null,
+  font_sm = 0.03,
+  font_lg = 0.05,
 }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
@@ -49,7 +51,7 @@ export const BuyCoffeeInput = ({
           padding: 7,
           fontWeight: "500",
           fontSize:
-            value?.length > 30 ? screenWidth * 0.03 : screenWidth * 0.05,
+            value?.length > 30 ? screenWidth * font_sm : screenWidth * font_lg,
           color: colors.blue_font,
           textAlign: "left",
         }}

@@ -134,7 +134,7 @@ const FarmerInspectionCard = ({ data, setModal }) => {
           fontSizeRatio={0.04}
           radius={7}
           paddingRatio={0.014}
-          disabled={false}
+          disabled={true}
           onPress={handleChildrenUpdate}
         />
         <CustomButton
