@@ -8,7 +8,7 @@ export const sync = createAsyncThunk("data/sync", async (data) => {
     let id = null;
 
     if (tableName === "stations") {
-      id = await SecureStore.getItemAsync("rtc-user-id");
+      id = data.specialId || (await SecureStore.getItemAsync("rtc-user-id"));
     } else if (
       tableName === "groups" ||
       tableName === "farmers" ||

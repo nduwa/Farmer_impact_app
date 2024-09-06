@@ -3,13 +3,17 @@ import { Dimensions, Text, TouchableOpacity } from "react-native";
 import { colors } from "../data/colors";
 import { AntDesign } from "@expo/vector-icons";
 
-export const WetmillItem = ({ label, type }) => {
+export const WetmillItem = ({ label, actionFn = null, destination = null }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const navigation = useNavigation();
 
   const handlePress = () => {
-    navigation.replace("ChooseStationScreen", { data: type });
+    if (actionFn) {
+      actionFn(true);
+    } else if (destination) {
+      navigation.replace(destination);
+    }
   };
 
   return (

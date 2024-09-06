@@ -179,7 +179,9 @@ export const HomeScreen = ({ route }) => {
         stationData.location = await SecureStore.getItemAsync(
           "rtc-station-location"
         );
+
         stationData.name = await SecureStore.getItemAsync("rtc-station-name");
+
         stationData.id =
           userState.userData.staff._kf_Station ||
           (await SecureStore.getItemAsync("rtc-station-id"));
@@ -402,34 +404,55 @@ export const HomeScreen = ({ route }) => {
             padding: screenWidth * 0.05,
           }}
         >
+          {!isAccessable("census survey") && (
+            <OpCard
+              name={t("homepage.farmer")}
+              action={setIsFarmerModalOpen}
+              active={isAccessable("Register")}
+            />
+          )}
+          {!isAccessable("census survey") && (
+            <OpCard
+              name={t("homepage.inspection")}
+              destination={"chooseInspection"}
+              active={isAccessable("Inspection")}
+            />
+          )}
+
+          {!isAccessable("census survey") && (
+            <OpCard
+              name={t("homepage.training")}
+              destination="TrainingCourses"
+              active={isAccessable("Training")}
+            />
+          )}
+
+          {!isAccessable("census survey") && (
+            <OpCard
+              name={t("homepage.buy_coffee")}
+              action={setIsBuyCoffeeModalOpen}
+              active={isAccessable("Buy coffee")}
+            />
+          )}
+          {!isAccessable("census survey") && (
+            <OpCard
+              name={t("homepage.finance")}
+              active={isAccessable("Finance")}
+            />
+          )}
+
+          {!isAccessable("census survey") && (
+            <OpCard
+              name={t("homepage.audit")}
+              active={isAccessable("wet mill audit")}
+              destination={"WetmillHomeScreen"}
+            />
+          )}
+
           <OpCard
-            name={t("homepage.farmer")}
-            action={setIsFarmerModalOpen}
-            active={isAccessable("Register")}
-          />
-          <OpCard
-            name={t("homepage.inspection")}
-            destination={"chooseInspection"}
-            active={isAccessable("Inspection")}
-          />
-          <OpCard
-            name={t("homepage.training")}
-            destination="TrainingCourses"
-            active={isAccessable("Training")}
-          />
-          <OpCard
-            name={t("homepage.buy_coffee")}
-            action={setIsBuyCoffeeModalOpen}
-            active={isAccessable("Buy coffee")}
-          />
-          <OpCard
-            name={t("homepage.finance")}
-            active={isAccessable("Finance")}
-          />
-          <OpCard
-            name={t("homepage.audit")}
-            active={true}
-            destination={"WetmillHomeScreen"}
+            name={"Census Survey"}
+            active={isAccessable("census survey")}
+            destination={"ChooseSurveyFarmerScreen"}
           />
         </View>
       </View>
