@@ -1,6 +1,4 @@
-import { StatusBar } from "expo-status-bar";
-import React, { useEffect, useState } from "react";
-import * as SecureStore from "expo-secure-store";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import {
   Dimensions,
   Keyboard,
@@ -10,40 +8,72 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { colors } from "../../data/colors";
+import * as SecureStore from "expo-secure-store";
+import { StatusBar } from "expo-status-bar";
 import { AntDesign } from "@expo/vector-icons";
-import { Formik } from "formik";
-import { BuyCoffeeInput } from "../../components/BuyCoffeeInput";
-import { useFocusEffect, useNavigation } from "@react-navigation/native";
-import CustomButton from "../../components/CustomButton";
-import { FarmerTressSchema } from "../../validation/FarmerTreesSchema";
-import { getCurrentDate } from "../../helpers/getCurrentDate";
-import { dataTodb } from "../../helpers/dataTodb";
-import { useSelector } from "react-redux";
+import Foundation from "@expo/vector-icons/Foundation";
+import { colors } from "../../data/colors";
+import SimpleIconButton from "../../components/SimpleIconButton";
+import React, { useEffect, useState } from "react";
+import { LocalizationModal } from "../../components/LocalizationModal";
+import { SyncModal } from "../../components/SyncModal";
+import { FarmerDetails } from "./questionaires/FarmerDetails";
+import { FarmDetails } from "./questionaires/FarmDetails";
+import { getCurrentLocation } from "../../helpers/getCurrentLocation";
 import LottieView from "lottie-react-native";
+import { HouseholdDetails } from "./questionaires/HouseholdDetails";
+import { TreeDetailsA } from "./questionaires/TreeDetailsA";
+import { TreeDetailsB } from "./questionaires/TreeDetailsB";
+import { DiseasesAndPests } from "./questionaires/DiseasesAndPests";
+import { ObservationCourses } from "./questionaires/ObservationCourses";
+import { ObservationDiseases } from "./questionaires/ObservationDiseases";
 
 export const CensusSurveyScreen = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
+  const navigation = useNavigation();
   const { data } = route.params;
-  const userData = useSelector((state) => state.user.userData);
 
-  const [currentStationID, setCurrentStationID] = useState();
-  const [supplierID, setSupplierID] = useState();
-  const [CWname, setCWName] = useState();
-  const [errors, setErrors] = useState({}); // validation errors
-
+  const [activeQuestionaire, setActiveQuestionaire] = useState(7);
+  const [pestsModalOpen, setPestsModalOpen] = useState(false);
+  const [pestChoices, setPestChoices] = useState([]);
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
-  const [currentJob, setCurrentJob] = useState(null);
-  const [validationError, setValidationError] = useState({
-    message: null,
-    type: null,
-    inputBox: null,
-  });
-  const [formSubmitted, setFormSubmitted] = useState(false);
+  const [nextModal, setNextModal] = useState(false);
+  const [finishModal, setFinishModal] = useState(false);
+  const [surveyData, setSurveyData] = useState({});
+
+  const [stationName, setStationName] = useState();
+  const [location, setLocation] = useState(null);
+  const [locationModal, setLocationModal] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const navigation = useNavigation();
+  const pestsList = [
+    { id: 1, name: "Leaf rust" },
+    { id: 2, name: "Coffee berry borer" },
+    { id: 3, name: "Coffee berry disease" },
+    { id: 4, name: "White Stem borer" },
+    { id: 5, name: "Scares and mealy bugs" },
+    { id: 6, name: "Antestia" },
+    { id: 7, name: "Leaf miner" },
+  ];
+
+  const handlePestRemoval = (id) => {
+    let addedPests = pestChoices;
+
+    let filtered = addedPests.filter((item) => item.id !== id);
+
+    setPestChoices(filtered);
+  };
+
+  const handlePestChoice = (choice) => {
+    if (pestChoices.length > 3) return;
+
+    let foundItem = pestChoices.find((item) => item.id === choice.id);
+
+    if (foundItem) return;
+
+    setPestChoices((prevState) => [...prevState, choice]);
+  };
 
   const handleBackButton = () => {
     navigation.navigate("ChooseSurveyFarmerScreen", { data: null });
@@ -53,109 +83,39 @@ export const CensusSurveyScreen = ({ route }) => {
     ToastAndroid.show(msg, ToastAndroid.SHORT);
   };
 
-  const submitTreesDetails = (formData) => {
-    try {
-      let nameFull = userData.user.Name_Full;
-      let userkf = userData.user.__kp_User;
-      let staffKf = userData.staff.__kp_Staff;
-
-      let submitData = {
-        _kf_Staff: staffKf,
-        _kf_User: userkf,
-        Group_ID: formData.groupID,
-        farmer_ID: formData.farmerID,
-        farmer_name: formData.farmerName,
-        national_ID: formData.nationalID,
-        full_name: nameFull,
-        created_at: getCurrentDate(),
-        received_seedling: formData.nmbrReceivedSeedlings,
-        survived_seedling: formData.nmbrSurvivedSeedlings,
-        planted_year: formData.yearPlantedReceivedSeedlings,
-        old_trees: formData.nmbrOldTrees,
-        old_trees_planted_year: formData.yearPlantedOldTrees,
-        coffee_plot: formData.nmbrCoffeeFarms,
-        nitrogen: formData.totalNitrogenFixingShadeTrees,
-        natural_shade: formData.totalNaturalShadeTrees,
-        shade_trees: formData.totalNbrShadeTrees,
-      };
-
-      if (!validateInputs(submitData, FarmerTressSchema)) return;
-
-      let kfsupplier = supplierID;
-      let kfstation = currentStationID;
-      let stationName = CWname;
-
-      dataTodb({
-        tableName: "householdTrees",
-        syncData: [submitData],
-        setCurrentJob,
-        extraValArr: [kfstation, kfsupplier, stationName],
-      });
-    } catch (error) {
-      console.log(error);
-    }
+  const handleSave = () => {
+    setNextModal(false);
+    setActiveQuestionaire(
+      activeQuestionaire < 11 ? activeQuestionaire + 1 : 11
+    );
   };
 
-  const validateInputs = (data, schema) => {
-    const { error } = schema.validate(data, { abortEarly: false });
-    if (!error) {
-      setErrors({});
-      setValidationError({
-        type: null,
-        message: null,
-        inputBox: null,
+  const handleFinish = async () => {
+    setFinishModal(false);
+  };
+
+  const handlePrev = () => {
+    setActiveQuestionaire(activeQuestionaire > 0 ? activeQuestionaire - 1 : 0);
+  };
+
+  const handleLocation = async () => {
+    setLocationModal(false);
+    setLoading(true);
+
+    let loc = await getCurrentLocation();
+    if (loc) {
+      setLocation({
+        latitude: loc.coords.latitude,
+        longitude: loc.coords.longitude,
       });
 
-      return true;
-    }
-
-    const newErrors = {};
-    error.details.forEach((detail) => {
-      newErrors[detail.path[0]] = detail.message;
-    });
-    setErrors(newErrors);
-    return false;
-  };
-
-  const getInputLabel = (input) => {
-    let output = "";
-    let tmp = input.split("_");
-    output = tmp.join(" ");
-
-    if (input === "received_seedling") output = "received seedlings";
-    if (input === "survived_seedling") output = "Survived seedlings";
-    if (input === "planted_year")
-      output = "Year planted of the received seedlings";
-    if (input === "old_trees") output = "Old trees";
-    if (input === "old_trees_planted_year") output = "Year of the old trees";
-    if (input === "coffee_plot") output = "Number of coffee plots";
-    if (input === "nitrogen") output = "Total of nitrogen  fixing shade trees";
-    if (input === "natural_shade") output = "Total of natural shade";
-    if (input === "shade_trees") output = "Total number of shade trees";
-
-    return output;
-  };
-
-  useEffect(() => {
-    if (Object.keys(errors).length > 0) {
+      displayToast("Coordinates have been set");
       setLoading(false);
-      setValidationError({
-        type: "emptyOrInvalidData",
-        message: `Invalid input in '${getInputLabel(
-          Object.keys(errors)[0]
-        )}', check the inputs highlighted in red`,
-        inputBox: null,
-      });
-    }
-  }, [errors]);
-
-  useEffect(() => {
-    if (currentJob === "tree details saved") {
-      displayToast("Tree Details saved, pending upload");
+    } else {
+      displayToast("Could not get coordinates");
       setLoading(false);
-      setFormSubmitted(true);
     }
-  }, [currentJob]);
+  };
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
@@ -180,23 +140,8 @@ export const CensusSurveyScreen = ({ route }) => {
 
   useFocusEffect(
     React.useCallback(() => {
-      const fetchData = async () => {
-        const stationId = await SecureStore.getItemAsync("rtc-station-id");
-        const supplierID = await SecureStore.getItemAsync("rtc-supplier-id");
-        const stationName = await SecureStore.getItemAsync("rtc-station-name");
-
-        if (stationId) {
-          setCurrentStationID(stationId);
-          setSupplierID(supplierID);
-          setCWName(stationName);
-        }
-      };
-
-      fetchData();
       return () => {
-        setLoading(false);
-        setFormSubmitted(false);
-        setErrors({});
+        setSurveyData({});
       };
     }, [])
   );
@@ -205,11 +150,29 @@ export const CensusSurveyScreen = ({ route }) => {
     <View
       style={{
         flex: 1,
+        backgroundColor: colors.bg_variant,
         maxWidth: screenWidth,
       }}
     >
       <StatusBar style="dark" />
 
+      {pestsModalOpen && (
+        <LocalizationModal
+          setChoice={handlePestChoice}
+          data={pestsList}
+          setModalOpen={setPestsModalOpen}
+          heightRatio={isKeyboardActive ? 0.5 : 0.8}
+          title={"Diseases/Pests"}
+        />
+      )}
+
+      {locationModal && (
+        <SyncModal
+          label={"Do you want to capture this farm's coordinates?"}
+          onYes={handleLocation}
+          OnNo={() => setLocationModal(false)}
+        />
+      )}
       <View
         style={{
           flexDirection: "row",
@@ -220,6 +183,7 @@ export const CensusSurveyScreen = ({ route }) => {
           paddingTop: screenHeight * 0.042,
           padding: 10,
           elevation: 5,
+          zIndex: 10,
         }}
       >
         <TouchableOpacity
@@ -239,254 +203,123 @@ export const CensusSurveyScreen = ({ route }) => {
             fontSize: 19,
           }}
         >
-          Census Survey
+          {`${stationName || "Station"} | Census Survey`}
         </Text>
         <View
           style={{ width: screenWidth * 0.07, backgroundColor: "transparent" }}
         />
       </View>
-      <View style={{ backgroundColor: colors.bg_variant }}>
-        <Formik
-          initialValues={{
-            farmerID: data.farmerData.farmerid,
-            farmerName: data.farmerData.Name,
-            nationalID: data.farmerData.National_ID_t,
-            groupID: data.farmerData.farmerGroupID,
-            nmbrReceivedSeedlings: "0",
-            nmbrSurvivedSeedlings: "0",
-            yearPlantedReceivedSeedlings: "",
-            nmbrOldTrees: "0",
-            yearPlantedOldTrees: "",
-            nmbrCoffeeFarms: "0",
-            totalNitrogenFixingShadeTrees: "0",
-            totalNaturalShadeTrees: "0",
-            totalNbrShadeTrees: "0",
-          }}
-          onSubmit={async (values) => {
-            submitTreesDetails(values);
-          }}
+      <View
+        style={{
+          flex: 1,
+        }}
+      >
+        <ScrollView
+          contentContainerStyle={{ paddingBottom: screenHeight * 0.04 }}
         >
-          {({
-            handleChange,
-            setFieldValue,
-            handleBlur,
-            handleSubmit,
-            values,
-          }) => (
-            <View
-              style={{
-                gap: 18,
-              }}
-            >
-              <ScrollView
-                showsVerticalScrollIndicator={false}
-                style={{
-                  height: "94%",
-                }}
-                contentContainerStyle={{
-                  flexDirection: "column",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  gap: screenHeight * 0.01,
-                  paddingVertical: screenHeight * 0.005,
-                }}
-              >
-                <View
-                  style={{
-                    width: "95%",
-                    backgroundColor: colors.white,
-                    elevation: 2,
-                    borderRadius: 15,
-                    marginTop: screenHeight * 0.025,
-                    paddingHorizontal: screenWidth * 0.04,
-                    paddingVertical: screenHeight * 0.03,
-                    gap: screenHeight * 0.01,
-                  }}
-                >
-                  <Text
-                    style={{
-                      fontWeight: "400",
-                      fontSize: screenWidth * 0.05,
-                      color: colors.secondary,
-                      marginLeft: screenWidth * 0.02,
-                    }}
-                  >
-                    Fill the form accordingly
-                  </Text>
-                  <BuyCoffeeInput
-                    values={values}
-                    handleChange={handleChange("farmerID")}
-                    handleBlur={handleBlur("farmerID")}
-                    label={"Farmer ID"}
-                    value={values.farmerID}
-                    active={false}
-                    error={errors.farmer_ID === "farmer_ID"}
-                  />
-                  <BuyCoffeeInput
-                    values={values}
-                    handleChange={handleChange("farmerName")}
-                    handleBlur={handleBlur("farmerName")}
-                    label={"Farmer name"}
-                    value={values.farmerName}
-                    active={false}
-                    error={errors.farmer_name}
-                  />
-                  <BuyCoffeeInput
-                    values={values}
-                    handleChange={handleChange("nationalID")}
-                    handleBlur={handleBlur("nationalID")}
-                    label={"National ID"}
-                    value={values.nationalID}
-                    active={false}
-                    error={errors.national_ID}
-                  />
-                  <BuyCoffeeInput
-                    values={values}
-                    handleChange={handleChange("groupID")}
-                    handleBlur={handleBlur("groupID")}
-                    label={"Group ID"}
-                    value={values.groupID}
-                    active={false}
-                    error={errors.Group_ID}
-                  />
-                  <BuyCoffeeInput
-                    values={values}
-                    handleChange={handleChange("nmbrReceivedSeedlings")}
-                    handleBlur={handleBlur("nmbrReceivedSeedlings")}
-                    label={"Number of received seedlings"}
-                    value={values.nmbrReceivedSeedlings}
-                    error={errors.received_seedling}
-                  />
-
-                  <BuyCoffeeInput
-                    values={values}
-                    handleChange={handleChange("nmbrSurvivedSeedlings")}
-                    handleBlur={handleBlur("nmbrSurvivedSeedlings")}
-                    label={"Number of survived seedlings"}
-                    value={values.nmbrSurvivedSeedlings}
-                    error={errors.survived_seedling}
-                  />
-
-                  <BuyCoffeeInput
-                    values={values}
-                    handleChange={handleChange("yearPlantedReceivedSeedlings")}
-                    handleBlur={handleBlur("yearPlantedReceivedSeedlings")}
-                    label={"Year planted of the received seedlings"}
-                    value={values.yearPlantedReceivedSeedlings}
-                    error={errors.planted_year}
-                  />
-
-                  <BuyCoffeeInput
-                    values={values}
-                    handleChange={handleChange("nmbrOldTrees")}
-                    handleBlur={handleBlur("nmbrOldTrees")}
-                    label={"Number of old trees"}
-                    value={values.nmbrOldTrees}
-                    error={errors.old_trees}
-                  />
-                  <BuyCoffeeInput
-                    values={values}
-                    handleChange={handleChange("yearPlantedOldTrees")}
-                    handleBlur={handleBlur("yearPlantedOldTrees")}
-                    label={"Year of planted for the old trees"}
-                    value={values.yearPlantedOldTrees}
-                    error={errors.old_trees_planted_year}
-                  />
-
-                  <BuyCoffeeInput
-                    values={values}
-                    handleChange={handleChange("nmbrCoffeeFarms")}
-                    handleBlur={handleBlur("nmbrCoffeeFarms")}
-                    label={"Number of coffee plots/Farms in general"}
-                    value={values.nmbrCoffeeFarms}
-                    error={errors.coffee_plot}
-                  />
-
-                  <BuyCoffeeInput
-                    values={values}
-                    handleChange={handleChange("totalNitrogenFixingShadeTrees")}
-                    handleBlur={handleBlur("totalNitrogenFixingShadeTrees")}
-                    label={"Total of nitrogen fixing shade trees"}
-                    value={values.totalNitrogenFixingShadeTrees}
-                    error={errors.nitrogen}
-                  />
-
-                  <BuyCoffeeInput
-                    values={values}
-                    handleChange={handleChange("totalNaturalShadeTrees")}
-                    handleBlur={handleBlur("totalNaturalShadeTrees")}
-                    label={"Total of natural shade trees"}
-                    value={values.totalNaturalShadeTrees}
-                    error={errors.natural_shade}
-                  />
-
-                  <BuyCoffeeInput
-                    values={values}
-                    handleChange={handleChange("totalNbrShadeTrees")}
-                    handleBlur={handleBlur("totalNbrShadeTrees")}
-                    label={"Total number of shade trees"}
-                    value={values.totalNbrShadeTrees}
-                    error={errors.shade_trees}
-                  />
-                </View>
-
-                {/* validation error */}
-                {validationError.message && (
-                  <View
-                    style={{
-                      width: "95%",
-                      backgroundColor: colors.white_variant,
-                      elevation: 2,
-                      borderWidth: 0.7,
-                      borderColor: "red",
-                      borderRadius: 15,
-                      paddingHorizontal: screenWidth * 0.04,
-                      paddingVertical: screenHeight * 0.03,
-                      gap: screenHeight * 0.01,
-                    }}
-                  >
-                    <Text
-                      style={{
-                        fontWeight: "400",
-                        fontSize: screenWidth * 0.05,
-                        color: colors.secondary,
-                        marginLeft: screenWidth * 0.02,
-                      }}
-                    >
-                      Validation Error
-                    </Text>
-                    <Text
-                      style={{
-                        fontWeight: "400",
-                        fontSize: screenWidth * 0.04,
-                        color: colors.black_letter,
-                        marginLeft: screenWidth * 0.02,
-                      }}
-                    >
-                      {validationError.message}
-                    </Text>
-                  </View>
-                )}
-
-                <CustomButton
-                  bg={colors.secondary}
-                  color={"white"}
-                  width="95%"
-                  text="Submit"
-                  bdcolor="transparent"
-                  mt={screenHeight * 0.017}
-                  mb={
-                    isKeyboardActive ? screenHeight * 0.04 : screenHeight * 0.03
-                  }
-                  radius={10}
-                  disabled={formSubmitted}
-                  onPress={handleSubmit}
-                />
-              </ScrollView>
-            </View>
-          )}
-        </Formik>
+          <View
+            style={{
+              padding: screenWidth * 0.02,
+              gap: screenHeight * 0.014,
+            }}
+          >
+            <SimpleIconButton
+              label={"Previous section"}
+              width="100%"
+              color={colors.blue_font}
+              labelColor="white"
+              handlePress={handlePrev}
+              active={activeQuestionaire > 0}
+              icon={<Foundation name="previous" size={24} color="white" />}
+            />
+            {activeQuestionaire == 0 && (
+              <FarmerDetails
+                setNextModal={setNextModal}
+                setSurvey={setSurveyData}
+                responses={surveyData}
+                farmerData={data?.farmerData}
+              />
+            )}
+            {activeQuestionaire == 1 && (
+              <FarmDetails
+                setNextModal={setNextModal}
+                setSurvey={setSurveyData}
+                responses={surveyData}
+                setLocationModal={setLocationModal}
+                location={location}
+              />
+            )}
+            {activeQuestionaire == 2 && (
+              <HouseholdDetails
+                setNextModal={setNextModal}
+                setSurvey={setSurveyData}
+                responses={surveyData}
+                farmerData={data?.farmerData}
+              />
+            )}
+            {activeQuestionaire == 3 && (
+              <TreeDetailsA
+                setNextModal={setNextModal}
+                setSurvey={setSurveyData}
+                responses={surveyData}
+                farmerData={data?.farmerData}
+              />
+            )}
+            {activeQuestionaire == 4 && (
+              <TreeDetailsB
+                setNextModal={setNextModal}
+                setSurvey={setSurveyData}
+                responses={surveyData}
+                farmerData={data?.farmerData}
+              />
+            )}
+            {activeQuestionaire == 5 && (
+              <DiseasesAndPests
+                setNextModal={setNextModal}
+                setSurvey={setSurveyData}
+                setPestsModal={setPestsModalOpen}
+                removePestFn={handlePestRemoval}
+                responses={surveyData}
+                farmerData={data?.farmerData}
+                pestsAdded={pestChoices}
+              />
+            )}
+            {activeQuestionaire == 6 && (
+              <ObservationCourses
+                setNextModal={setNextModal}
+                setSurvey={setSurveyData}
+                responses={surveyData}
+                farmerData={data?.farmerData}
+              />
+            )}
+            {activeQuestionaire == 7 && (
+              <ObservationDiseases
+                setNextModal={setNextModal}
+                setSurvey={setSurveyData}
+                responses={surveyData}
+                farmerData={data?.farmerData}
+              />
+            )}
+          </View>
+        </ScrollView>
       </View>
+      {nextModal && (
+        <SyncModal
+          label={"Do you confirm the provided information?"}
+          onYes={handleSave}
+          OnNo={() => setNextModal(false)}
+        />
+      )}
+
+      {finishModal && (
+        <SyncModal
+          label={
+            "You are about to close this audit, Do you confirm the provided information?"
+          }
+          onYes={handleFinish}
+          OnNo={() => setFinishModal(false)}
+        />
+      )}
 
       {/* loader */}
       {loading && (

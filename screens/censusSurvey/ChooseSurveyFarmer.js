@@ -29,6 +29,7 @@ export const ChooseSurveyFarmerScreen = ({ route }) => {
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [searchResults, setSearchResults] = useState([]);
   const [pendingFarmerUpdates, setPendingFarmerUpdates] = useState([]);
+  const [stationName, setStationName] = useState();
 
   const navigation = useNavigation();
 
@@ -102,6 +103,7 @@ export const ChooseSurveyFarmerScreen = ({ route }) => {
     React.useCallback(() => {
       const fetchData = async () => {
         const stationId = await SecureStore.getItemAsync("rtc-station-id");
+        const station_name = await SecureStore.getItemAsync("rtc-station-name");
 
         if (stationId) {
           retrieveDBdata({
@@ -110,6 +112,8 @@ export const ChooseSurveyFarmerScreen = ({ route }) => {
             setData: setGroups,
             queryArg: `SELECT * FROM rtc_groups WHERE _kf_Station='${stationId}' AND active = "1"`,
           });
+
+          setStationName(station_name);
         }
       };
 
@@ -323,7 +327,10 @@ export const ChooseSurveyFarmerScreen = ({ route }) => {
               data={displayData}
               renderItem={({ item }) => (
                 <FarmerUpdateCard
-                  data={{ ...item, ...{ farmerGroupID: activeGroup.ID_GROUP } }}
+                  data={{
+                    ...item,
+                    ...{ farmerGroupID: activeGroup.ID_GROUP, stationName },
+                  }}
                   destination={"CensusSurveyScreen"}
                   pending={checkPending(item.farmerid)}
                 />
