@@ -3,7 +3,8 @@ import { colors } from "../data/colors";
 import { Dimensions, Text, View } from "react-native";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import TinyIconButton from "./TinyIconButton";
-import { useState } from "react";
+import React, { useState } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 
 export const RadioInput = ({
   options = [],
@@ -12,6 +13,7 @@ export const RadioInput = ({
   id,
   setRemoval = null,
   removable = false,
+  selectedAnswer = null,
 }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
@@ -27,15 +29,26 @@ export const RadioInput = ({
 
     setChoice({
       id: answerObj.id,
-      answer: getLabel(answerObj.answer),
+      answer: getLabelorId({ id: answerObj.answer, answer: null }),
       label,
     });
   };
 
-  const getLabel = (id) => {
-    let foundlabel = options.find((item) => item.id == id);
-    return foundlabel?.label;
+  const getLabelorId = ({ id = null, answer = null }) => {
+    if (id) {
+      let foundlabel = options.find((item) => item.id == id);
+      return foundlabel?.label;
+    } else if (answer) {
+      let foundid = options.find((item) => item.label === answer);
+      return foundid?.id;
+    }
   };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      setAnswer(getLabelorId({ answer: selectedAnswer }));
+    }, [])
+  );
 
   return (
     <View

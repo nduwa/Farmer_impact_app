@@ -8,6 +8,7 @@ import { Formik } from "formik";
 import SimpleIconButton from "../../../components/SimpleIconButton";
 import { useFocusEffect } from "@react-navigation/native";
 import RadioButtonGroup, { RadioButtonItem } from "expo-radio-button";
+import { FarmerDetailsSchema } from "../../../validation/CensusSurveySchema";
 
 export const FarmerDetails = ({
   setNextModal,
@@ -45,7 +46,6 @@ export const FarmerDetails = ({
     error.details.forEach((detail) => {
       newErrors[detail.path[0]] = detail.message;
     });
-
     setErrors(newErrors);
     return false;
   };
@@ -54,9 +54,10 @@ export const FarmerDetails = ({
     try {
       let farmerObj = {
         ...values,
+        ...{ gender },
       };
 
-      //   if (!validateForm(farmerObj, cherriesSchema)) return;
+      if (!validateForm(farmerObj, FarmerDetailsSchema)) return;
 
       setSurvey((prevState) => ({ ...prevState, ...farmerObj }));
       setNextModal(true);
@@ -69,9 +70,6 @@ export const FarmerDetails = ({
     let output = "";
     let tmp = input.split("_");
     output = tmp.join(" ");
-
-    if (input === "cheeries_books") output = "Cherries reported in books";
-    if (input === "discrepancy_reason_cherries") output = "Discrepancy reason";
 
     return output;
   };
@@ -114,13 +112,13 @@ export const FarmerDetails = ({
       return () => {
         if (formRef.current) {
           formRef.current.setValues({
-            stationName: farmerData.stationName,
-            farmerName: responses.Name || farmerData.Name || "",
-            farmerID: responses.farmerid || farmerData.farmerid || "",
-            nationalID: responses.National_ID_t || farmerData.National_ID_t,
-            dob: String(farmerData.Year_Birth || ""),
+            station_name: farmerData.stationName,
+            farmer_name: responses.Name || farmerData.Name || "",
+            farmer_id: responses.farmerid || farmerData.farmerid || "",
+            national_id: responses.national_id || farmerData.National_ID_t,
+            year_of_birth: String(farmerData.Year_Birth || ""),
             gender,
-            phone: responses.Phone || farmerData.Phone || "",
+            phone: responses.phone || farmerData.Phone || "",
           });
         }
       };
@@ -157,13 +155,13 @@ export const FarmerDetails = ({
       />
       <Formik
         initialValues={{
-          stationName: farmerData.stationName,
-          farmerName: responses.Name || farmerData.Name || "",
-          farmerID: responses.farmerid || farmerData.farmerid || "",
-          nationalID: responses.National_ID_t || farmerData.National_ID_t,
-          dob: String(farmerData.Year_Birth || ""),
+          station_name: farmerData.stationName,
+          farmer_name: responses.farmer_name || farmerData.Name || "",
+          farmer_id: responses.farmerid || farmerData.farmerid || "",
+          national_id: responses.national_id || farmerData.National_ID_t,
+          year_of_birth: String(farmerData.Year_Birth || ""),
           gender,
-          phone: responses.Phone || farmerData.Phone || "",
+          phone: responses.phone || farmerData.Phone || "",
         }}
         innerRef={formRef}
         onSubmit={async (values) => {
@@ -207,48 +205,48 @@ export const FarmerDetails = ({
               >
                 <BuyCoffeeInput
                   values={values}
-                  handleChange={handleChange("stationName")}
-                  handleBlur={handleBlur("stationName")}
+                  handleChange={handleChange("station_name")}
+                  handleBlur={handleBlur("station_name")}
                   label={"Station name"}
-                  value={values.stationName}
+                  value={values.station_name}
                   active={false}
-                  error={errors.stationName === "stationName"}
+                  error={errors.station_name === "station_name"}
                 />
                 <BuyCoffeeInput
                   values={values}
-                  handleChange={handleChange("farmerName")}
-                  handleBlur={handleBlur("farmerName")}
+                  handleChange={handleChange("farmer_name")}
+                  handleBlur={handleBlur("farmer_name")}
                   label={"Farmer name"}
-                  active={false}
-                  value={values.farmerName}
-                  error={errors.farmerName === "farmerName"}
+                  active={true}
+                  value={values.farmer_name}
+                  error={errors.farmer_name === "farmer_name"}
                 />
                 <BuyCoffeeInput
                   values={values}
-                  handleChange={handleChange("farmerID")}
-                  handleBlur={handleBlur("farmerID")}
+                  handleChange={handleChange("farmer_id")}
+                  handleBlur={handleBlur("farmer_id")}
                   label={"Farmer ID"}
-                  value={values.farmerID}
+                  value={values.farmer_id}
                   active={false}
-                  error={errors.farmerID === "farmerID"}
+                  error={errors.farmer_id === "farmer_id"}
                 />
                 <BuyCoffeeInput
                   values={values}
-                  handleChange={handleChange("nationalID")}
-                  handleBlur={handleBlur("nationalID")}
+                  handleChange={handleChange("national_id")}
+                  handleBlur={handleBlur("national_id")}
                   label={"National ID"}
-                  active={false}
-                  value={values.nationalID}
-                  error={errors.nationalID === "nationalID"}
+                  active={true}
+                  value={values.national_id}
+                  error={errors.national_id === "national_id"}
                 />
                 <BuyCoffeeInput
                   values={values}
-                  handleChange={handleChange("dob")}
-                  handleBlur={handleBlur("dob")}
+                  handleChange={handleChange("year_of_birth")}
+                  handleBlur={handleBlur("year_of_birth")}
                   label={"Year of birth"}
-                  value={values.dob}
-                  active={false}
-                  error={errors.dob === "dob"}
+                  value={values.year_of_birth}
+                  active={true}
+                  error={errors.year_of_birth === "year_of_birth"}
                 />
                 <View
                   style={{
@@ -273,7 +271,7 @@ export const FarmerDetails = ({
                       gap: 5,
                     }}
                     selected={gender}
-                    onSelected={(value) => setGender(gender)}
+                    onSelected={(value) => setGender(value)}
                     radioBackground={colors.secondary}
                   >
                     <RadioButtonItem

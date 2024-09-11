@@ -8,6 +8,7 @@ import { Formik } from "formik";
 import SimpleIconButton from "../../../components/SimpleIconButton";
 import { useFocusEffect } from "@react-navigation/native";
 import RadioButtonGroup, { RadioButtonItem } from "expo-radio-button";
+import { HouseholdDetailsSchema } from "../../../validation/CensusSurveySchema";
 
 export const HouseholdDetails = ({
   setNextModal,
@@ -52,13 +53,13 @@ export const HouseholdDetails = ({
 
   const submitForm = (values) => {
     try {
-      let farmerObj = {
+      let householdObj = {
         ...values,
       };
 
-      //   if (!validateForm(farmerObj, cherriesSchema)) return;
+      if (!validateForm(householdObj, HouseholdDetailsSchema)) return;
 
-      setSurvey((prevState) => ({ ...prevState, ...farmerObj }));
+      setSurvey((prevState) => ({ ...prevState, ...householdObj }));
       setNextModal(true);
     } catch (error) {
       console.log(error);
@@ -114,9 +115,9 @@ export const HouseholdDetails = ({
       return () => {
         if (formRef.current) {
           formRef.current.setValues({
-            _2to20yrs: responses._2to20yrs || "",
-            _20to30yrs: responses._20to30yrs || "",
-            incomeSourceMain: responses.incomeSourceMain || "",
+            _1_to_20_yrs: responses._1_to_20_yrs || "",
+            _20_to_30_yrs: responses._20_to_30_yrs || "",
+            income_source_main: responses.incomeSourceMain || "",
           });
         }
       };
@@ -153,9 +154,9 @@ export const HouseholdDetails = ({
       />
       <Formik
         initialValues={{
-          _2to20yrs: responses._2to20yrs || "",
-          _20to30yrs: responses._20to30yrs || "",
-          incomeSourceMain: responses.incomeSourceMain || "",
+          _1_to_20_yrs: responses._1_to_20_yrs || "",
+          _20_to_30_yrs: responses._20_to_30_yrs || "",
+          income_source_main: responses.income_source_main || "",
         }}
         innerRef={formRef}
         onSubmit={async (values) => {
@@ -217,30 +218,31 @@ export const HouseholdDetails = ({
                 />
                 <BuyCoffeeInput
                   values={values}
-                  handleChange={handleChange("_2to20yrs")}
-                  handleBlur={handleBlur("_2to20yrs")}
+                  handleChange={handleChange("_1_to_20_yrs")}
+                  handleBlur={handleBlur("_1_to_20_yrs")}
                   label={"From 1-20 years"}
-                  value={values._2to20yrs}
-                  active={false}
-                  error={errors._2to20yrs === "_2to20yrs"}
+                  value={values._1_to_20_yrs}
+                  active={true}
+                  error={errors._1_to_20_yrs}
                 />
                 <BuyCoffeeInput
                   values={values}
-                  handleChange={handleChange("_20to30yrs")}
-                  handleBlur={handleBlur("_20to30yrs")}
+                  handleChange={handleChange("_20_to_30_yrs")}
+                  handleBlur={handleBlur("_20_to_30_yrs")}
                   label={"From 20-30 years"}
-                  active={false}
-                  value={values._20to30yrs}
-                  error={errors._20to30yrs === "_20to30yrs"}
+                  active={true}
+                  value={values._20_to_30_yrs}
+                  error={errors._20_to_30_yrs}
                 />
                 <BuyCoffeeInput
                   values={values}
-                  handleChange={handleChange("incomeSourceMain")}
-                  handleBlur={handleBlur("incomeSourceMain")}
+                  handleChange={handleChange("income_source_main")}
+                  handleBlur={handleBlur("income_source_main")}
                   label={"Main source of income(coffee or other)"}
-                  value={values.incomeSourceMain}
-                  active={false}
-                  error={errors.incomeSourceMain === "incomeSourceMain"}
+                  value={values.income_source_main}
+                  active={true}
+                  multiline={true}
+                  error={errors.income_source_main}
                 />
                 <View
                   style={{

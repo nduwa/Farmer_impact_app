@@ -1,4 +1,3 @@
-import * as SecureStore from "expo-secure-store";
 import { Dimensions, Keyboard, ScrollView, Text, View } from "react-native";
 import { colors } from "../../../data/colors";
 import Feather from "@expo/vector-icons/Feather";
@@ -21,14 +20,8 @@ export const DiseasesAndPests = ({
   const screenWidth = Dimensions.get("window").width;
   const formRef = useRef(null);
 
-  const [answers, setAnswers] = useState([]);
+  const [answers, setAnswers] = useState(responses.pests_and_diseases || []);
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
-  const [errors, setErrors] = useState({}); // validation errors
-  const [validationError, setValidationError] = useState({
-    message: null,
-    type: null,
-    inputBox: null,
-  });
 
   const answerOps = [
     { id: 1, label: "More than half of the farm" },
@@ -37,6 +30,16 @@ export const DiseasesAndPests = ({
     { id: 4, label: "Only a few trees" },
     { id: 5, label: "N/A" },
   ];
+
+  const getPrevChoice = (id) => {
+    if (!responses.pests_and_diseases) return null;
+    const prevChoices = responses.pests_and_diseases;
+    for (const ans of prevChoices) {
+      if (ans.id === id) {
+        return ans.answer;
+      }
+    }
+  };
 
   const handleNewInput = () => {
     setPestsModal(true);
@@ -68,35 +71,11 @@ export const DiseasesAndPests = ({
     setAnswers(filteredAnswers);
   };
 
-  const validateForm = (data, schema) => {
-    const { error } = schema.validate(data, { abortEarly: false });
-    if (!error) {
-      setErrors({});
-      setValidationError({
-        type: null,
-        message: null,
-        inputBox: null,
-      });
-
-      return true;
-    }
-
-    const newErrors = {};
-    error.details.forEach((detail) => {
-      newErrors[detail.path[0]] = detail.message;
-    });
-
-    setErrors(newErrors);
-    return false;
-  };
-
   const submitForm = (values) => {
     try {
       let pestsObj = {
         pests_and_diseases: answers,
       };
-
-      //   if (!validateForm(pestsObj, cherriesSchema)) return;
 
       setSurvey((prevState) => ({ ...prevState, ...pestsObj }));
       setNextModal(true);
@@ -104,29 +83,6 @@ export const DiseasesAndPests = ({
       console.log(error);
     }
   };
-
-  const getInputLabel = (input) => {
-    let output = "";
-    let tmp = input.split("_");
-    output = tmp.join(" ");
-
-    if (input === "cheeries_books") output = "Cherries reported in books";
-    if (input === "discrepancy_reason_cherries") output = "Discrepancy reason";
-
-    return output;
-  };
-
-  useEffect(() => {
-    if (Object.keys(errors).length > 0) {
-      setValidationError({
-        type: "emptyOrInvalidData",
-        message: `Invalid input at '${getInputLabel(
-          Object.keys(errors)[0]
-        )}', also check for any other highlighted input box`,
-        inputBox: null,
-      });
-    }
-  }, [errors]);
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
@@ -154,11 +110,7 @@ export const DiseasesAndPests = ({
       return () => {
         if (formRef.current) {
           formRef.current.setValues({
-            seedlings_2021: responses.seedlings_2021 || "0",
-            seedlings_2022: responses.seedlings_2022 || "0",
-            seedlings_2023: responses.seedlings_2023 || "0",
-            rejuvenated_2023: responses.rejuvenated_2023 || "0",
-            rejuvenated_2024: responses.rejuvenated_2023 || "0",
+            pests_and_diseases: "",
           });
         }
       };
@@ -259,7 +211,7 @@ export const DiseasesAndPests = ({
 
                 {pestsAdded.length > 0 ? (
                   pestsAdded.map((item) => (
-                    <>
+                    <View key={item.id}>
                       <RadioInput
                         label={item.name}
                         id={item.id}
@@ -267,6 +219,7 @@ export const DiseasesAndPests = ({
                         options={answerOps}
                         setRemoval={handleRemoval}
                         removable={true}
+                        selectedAnswer={getPrevChoice(item.id)}
                       />
                       <View
                         style={{
@@ -276,7 +229,7 @@ export const DiseasesAndPests = ({
                           marginVertical: screenHeight * 0.01,
                         }}
                       />
-                    </>
+                    </View>
                   ))
                 ) : (
                   <View
@@ -328,43 +281,6 @@ export const DiseasesAndPests = ({
                     marginVertical: screenHeight * 0.01,
                   }}
                 />
-                {/* validation error */}
-                {validationError.message && (
-                  <View
-                    style={{
-                      width: "100%",
-                      backgroundColor: colors.white_variant,
-                      elevation: 2,
-                      borderWidth: 0.7,
-                      borderColor: "red",
-                      borderRadius: 15,
-                      paddingHorizontal: screenWidth * 0.02,
-                      paddingVertical: screenHeight * 0.02,
-                      gap: screenHeight * 0.01,
-                    }}
-                  >
-                    <Text
-                      style={{
-                        fontWeight: "400",
-                        fontSize: screenWidth * 0.05,
-                        color: colors.secondary,
-                        marginLeft: screenWidth * 0.02,
-                      }}
-                    >
-                      Validation Error
-                    </Text>
-                    <Text
-                      style={{
-                        fontWeight: "400",
-                        fontSize: screenWidth * 0.04,
-                        color: colors.black_letter,
-                        marginLeft: screenWidth * 0.02,
-                      }}
-                    >
-                      {validationError.message}
-                    </Text>
-                  </View>
-                )}
 
                 <SimpleIconButton
                   label={"Save"}

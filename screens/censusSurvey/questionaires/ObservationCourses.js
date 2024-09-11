@@ -1,27 +1,21 @@
-import * as SecureStore from "expo-secure-store";
 import { Dimensions, Keyboard, ScrollView, Text, View } from "react-native";
 import { colors } from "../../../data/colors";
 import Feather from "@expo/vector-icons/Feather";
-import { BuyCoffeeInput } from "../../../components/BuyCoffeeInput";
 import React, { useEffect, useRef, useState } from "react";
 import { Formik } from "formik";
 import SimpleIconButton from "../../../components/SimpleIconButton";
 import { useFocusEffect } from "@react-navigation/native";
 import { RadioInput } from "../../../components/RadioInput";
 
-export const ObservationCourses = ({
-  setNextModal,
-  setSurvey,
-  responses,
-  farmerData,
-}) => {
+export const ObservationCourses = ({ setNextModal, setSurvey, responses }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const formRef = useRef(null);
 
-  const [answers, setAnswers] = useState([]);
+  const [answers, setAnswers] = useState(
+    responses.observation_on_courses || []
+  );
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
-  const [errors, setErrors] = useState({}); // validation errors
   const [validationError, setValidationError] = useState({
     message: null,
     type: null,
@@ -53,65 +47,38 @@ export const ObservationCourses = ({
     setAnswers(allAnswers);
   };
 
-  const validateForm = (data, schema) => {
-    const { error } = schema.validate(data, { abortEarly: false });
-    if (!error) {
-      setErrors({});
-      setValidationError({
-        type: null,
-        message: null,
-        inputBox: null,
-      });
-
-      return true;
-    }
-
-    const newErrors = {};
-    error.details.forEach((detail) => {
-      newErrors[detail.path[0]] = detail.message;
-    });
-
-    setErrors(newErrors);
-    return false;
-  };
-
   const submitForm = (values) => {
     try {
-      let farmerObj = {
-        ...values,
+      let observObj = {
+        observation_on_courses: answers,
       };
 
-      //   if (!validateForm(farmerObj, cherriesSchema)) return;
+      if (answers.length < 9) {
+        setValidationError({
+          type: "emptyOrInvalidData",
+          message: `Some information is missing, please fill in all required information`,
+          inputBox: null,
+        });
 
-      setSurvey((prevState) => ({ ...prevState, ...farmerObj }));
+        return;
+      }
+
+      setSurvey((prevState) => ({ ...prevState, ...observObj }));
       setNextModal(true);
     } catch (error) {
       console.log(error);
     }
   };
 
-  const getInputLabel = (input) => {
-    let output = "";
-    let tmp = input.split("_");
-    output = tmp.join(" ");
-
-    if (input === "cheeries_books") output = "Cherries reported in books";
-    if (input === "discrepancy_reason_cherries") output = "Discrepancy reason";
-
-    return output;
-  };
-
-  useEffect(() => {
-    if (Object.keys(errors).length > 0) {
-      setValidationError({
-        type: "emptyOrInvalidData",
-        message: `Invalid input at '${getInputLabel(
-          Object.keys(errors)[0]
-        )}', also check for any other highlighted input box`,
-        inputBox: null,
-      });
+  const getPrevChoice = (id) => {
+    if (!responses.observation_on_courses) return null;
+    const prevChoices = responses.observation_on_courses;
+    for (const ans of prevChoices) {
+      if (ans.id === id) {
+        return ans.answer;
+      }
     }
-  }, [errors]);
+  };
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
@@ -139,11 +106,7 @@ export const ObservationCourses = ({
       return () => {
         if (formRef.current) {
           formRef.current.setValues({
-            seedlings_2021: responses.seedlings_2021 || "0",
-            seedlings_2022: responses.seedlings_2022 || "0",
-            seedlings_2023: responses.seedlings_2023 || "0",
-            rejuvenated_2023: responses.rejuvenated_2023 || "0",
-            rejuvenated_2024: responses.rejuvenated_2023 || "0",
+            observations: "",
           });
         }
       };
@@ -180,15 +143,11 @@ export const ObservationCourses = ({
       />
       <Formik
         initialValues={{
-          seedlings_2021: responses.seedlings_2021 || "0",
-          seedlings_2022: responses.seedlings_2022 || "0",
-          seedlings_2023: responses.seedlings_2023 || "0",
-          rejuvenated_2023: responses.rejuvenated_2023 || "0",
-          rejuvenated_2024: responses.rejuvenated_2023 || "0",
+          observations: "",
         }}
         innerRef={formRef}
         onSubmit={async (values) => {
-          submitForm(values);
+          submitForm();
         }}
       >
         {({
@@ -250,6 +209,7 @@ export const ObservationCourses = ({
                   id={1}
                   setChoice={handleAnswer}
                   options={answerOps}
+                  selectedAnswer={getPrevChoice(1)}
                 />
 
                 <View
@@ -265,6 +225,7 @@ export const ObservationCourses = ({
                   id={2}
                   setChoice={handleAnswer}
                   options={answerOps}
+                  selectedAnswer={getPrevChoice(2)}
                 />
                 <View
                   style={{
@@ -279,6 +240,7 @@ export const ObservationCourses = ({
                   id={3}
                   setChoice={handleAnswer}
                   options={answerOps}
+                  selectedAnswer={getPrevChoice(3)}
                 />
                 <View
                   style={{
@@ -293,6 +255,7 @@ export const ObservationCourses = ({
                   id={4}
                   setChoice={handleAnswer}
                   options={answerOps}
+                  selectedAnswer={getPrevChoice(4)}
                 />
                 <View
                   style={{
@@ -307,6 +270,7 @@ export const ObservationCourses = ({
                   id={5}
                   setChoice={handleAnswer}
                   options={answerOps}
+                  selectedAnswer={getPrevChoice(5)}
                 />
                 <View
                   style={{
@@ -321,6 +285,7 @@ export const ObservationCourses = ({
                   id={6}
                   setChoice={handleAnswer}
                   options={answerOps}
+                  selectedAnswer={getPrevChoice(6)}
                 />
                 <View
                   style={{
@@ -335,6 +300,7 @@ export const ObservationCourses = ({
                   id={7}
                   setChoice={handleAnswer}
                   options={answerOps}
+                  selectedAnswer={getPrevChoice(7)}
                 />
                 <View
                   style={{
@@ -349,6 +315,7 @@ export const ObservationCourses = ({
                   id={8}
                   setChoice={handleAnswer}
                   options={answerOps}
+                  selectedAnswer={getPrevChoice(8)}
                 />
                 <View
                   style={{
@@ -363,6 +330,7 @@ export const ObservationCourses = ({
                   id={9}
                   setChoice={handleAnswer}
                   options={answerOps}
+                  selectedAnswer={getPrevChoice(9)}
                 />
                 <View
                   style={{

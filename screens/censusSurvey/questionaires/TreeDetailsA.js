@@ -7,6 +7,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Formik } from "formik";
 import SimpleIconButton from "../../../components/SimpleIconButton";
 import { useFocusEffect } from "@react-navigation/native";
+import { TreeDetailsASchema } from "../../../validation/CensusSurveySchema";
 
 export const TreeDetailsA = ({
   setNextModal,
@@ -50,13 +51,13 @@ export const TreeDetailsA = ({
 
   const submitForm = (values) => {
     try {
-      let farmerObj = {
+      let treeDetailsObj = {
         ...values,
       };
 
-      //   if (!validateForm(farmerObj, cherriesSchema)) return;
+      if (!validateForm(treeDetailsObj, TreeDetailsASchema)) return;
 
-      setSurvey((prevState) => ({ ...prevState, ...farmerObj }));
+      setSurvey((prevState) => ({ ...prevState, ...treeDetailsObj }));
       setNextModal(true);
     } catch (error) {
       console.log(error);
@@ -225,7 +226,7 @@ export const TreeDetailsA = ({
                   keyboardType={"numeric"}
                   value={values.seedlings_2021}
                   active={true}
-                  error={errors.seedlings_2021 === "seedlings_2021"}
+                  error={errors.seedlings_2021}
                 />
                 <BuyCoffeeInput
                   values={values}
@@ -235,7 +236,7 @@ export const TreeDetailsA = ({
                   keyboardType={"numeric"}
                   active={true}
                   value={values.seedlings_2022}
-                  error={errors.seedlings_2022 === "seedlings_2022"}
+                  error={errors.seedlings_2022}
                 />
                 <BuyCoffeeInput
                   values={values}
@@ -245,7 +246,7 @@ export const TreeDetailsA = ({
                   keyboardType={"numeric"}
                   value={values.seedlings_2023}
                   active={true}
-                  error={errors.seedlings_2023 === "seedlings_2023"}
+                  error={errors.seedlings_2023}
                 />
                 <View
                   style={{
@@ -281,7 +282,7 @@ export const TreeDetailsA = ({
                   keyboardType={"numeric"}
                   value={values.rejuvenated_2023}
                   active={true}
-                  error={errors.rejuvenated_2023 === "rejuvenated_2023"}
+                  error={errors.rejuvenated_2023}
                 />
                 <BuyCoffeeInput
                   values={values}
@@ -291,7 +292,7 @@ export const TreeDetailsA = ({
                   keyboardType={"numeric"}
                   value={values.rejuvenated_2024}
                   active={true}
-                  error={errors.rejuvenated_2024 === "rejuvenated_2024"}
+                  error={errors.rejuvenated_2024}
                 />
 
                 <View

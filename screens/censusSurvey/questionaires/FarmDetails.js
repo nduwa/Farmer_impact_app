@@ -16,6 +16,7 @@ import SimpleIconButton from "../../../components/SimpleIconButton";
 import { useFocusEffect } from "@react-navigation/native";
 import { FontAwesome6 } from "@expo/vector-icons";
 import { MaterialIcons } from "@expo/vector-icons";
+import { FarmDetailsSchema } from "../../../validation/CensusSurveySchema";
 
 export const FarmDetails = ({
   setNextModal,
@@ -62,11 +63,17 @@ export const FarmDetails = ({
     try {
       let farmObj = {
         ...values,
+        ...{
+          latitude: location.latitude,
+          longitude: location.longitude,
+        },
       };
 
-      //   if (!validateForm(farmObj, cherriesSchema)) return;
+      const { farmLocation, ...rest } = farmObj;
 
-      setSurvey((prevState) => ({ ...prevState, ...farmObj }));
+      if (!validateForm(rest, FarmDetailsSchema)) return;
+
+      setSurvey((prevState) => ({ ...prevState, ...rest }));
       setNextModal(true);
     } catch (error) {
       console.log(error);
@@ -122,7 +129,7 @@ export const FarmDetails = ({
             farmLocation: responses.latitude
               ? `${responses.latitude}, ${responses.longitude}`
               : "",
-            coffeeTrees: responses.coffeeTrees || "",
+            coffee_trees: responses.coffee_trees || "",
           });
         }
       };
@@ -162,7 +169,7 @@ export const FarmDetails = ({
           farmLocation: responses.latitude
             ? `${responses.latitude}, ${responses.longitude}`
             : "",
-          coffeeTrees: responses.coffeeTrees || "",
+          coffee_trees: responses.coffee_trees || "",
         }}
         innerRef={formRef}
         onSubmit={async (values) => {
@@ -262,11 +269,11 @@ export const FarmDetails = ({
                 </View>
                 <BuyCoffeeInput
                   values={values}
-                  handleChange={handleChange("coffeeTrees")}
-                  handleBlur={handleBlur("coffeeTrees")}
+                  handleChange={handleChange("coffee_trees")}
+                  handleBlur={handleBlur("coffee_trees")}
                   label={"Total Number of coffee trees"}
-                  value={values.coffeeTrees}
-                  error={errors.coffeeTrees === "coffeeTrees"}
+                  value={values.coffee_trees}
+                  error={errors.coffee_trees}
                 />
                 <View
                   style={{

@@ -7,6 +7,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Formik } from "formik";
 import SimpleIconButton from "../../../components/SimpleIconButton";
 import { useFocusEffect } from "@react-navigation/native";
+import { TreeDetailsBSchema } from "../../../validation/CensusSurveySchema";
 
 export const TreeDetailsB = ({ setNextModal, setSurvey, responses }) => {
   const screenHeight = Dimensions.get("window").height;
@@ -45,13 +46,13 @@ export const TreeDetailsB = ({ setNextModal, setSurvey, responses }) => {
 
   const submitForm = (values) => {
     try {
-      let farmerObj = {
+      let TreeDetailsObj = {
         ...values,
       };
 
-      //   if (!validateForm(farmerObj, cherriesSchema)) return;
+      if (!validateForm(TreeDetailsObj, TreeDetailsBSchema)) return;
 
-      setSurvey((prevState) => ({ ...prevState, ...farmerObj }));
+      setSurvey((prevState) => ({ ...prevState, ...TreeDetailsObj }));
       setNextModal(true);
     } catch (error) {
       console.log(error);
@@ -109,9 +110,9 @@ export const TreeDetailsB = ({ setNextModal, setSurvey, responses }) => {
           formRef.current.setValues({
             trees_less_than_10: responses.trees_less_than_10 || "0",
             trees_10_20: responses.trees_10_20 || "0",
-            other_crops_in_farm: responses.other_crops_in_farm || "0",
+            other_crops_in_farm: responses.other_crops_in_farm || "",
             other_crops_in_coffee_farm:
-              responses.other_crops_in_coffee_farm || "0",
+              responses.other_crops_in_coffee_farm || "",
             shade_trees: responses.shade_trees || "0",
             natural_shade_trees: responses.natural_shade_trees || "0",
             nitrogen_fixing_shade_trees:
@@ -158,9 +159,9 @@ export const TreeDetailsB = ({ setNextModal, setSurvey, responses }) => {
         initialValues={{
           trees_less_than_10: responses.trees_less_than_10 || "0",
           trees_10_20: responses.trees_10_20 || "0",
-          other_crops_in_farm: responses.other_crops_in_farm || "0",
+          other_crops_in_farm: responses.other_crops_in_farm || "",
           other_crops_in_coffee_farm:
-            responses.other_crops_in_coffee_farm || "0",
+            responses.other_crops_in_coffee_farm || "",
           shade_trees: responses.shade_trees || "0",
           natural_shade_trees: responses.natural_shade_trees || "0",
           nitrogen_fixing_shade_trees:
@@ -236,7 +237,7 @@ export const TreeDetailsB = ({ setNextModal, setSurvey, responses }) => {
                   keyboardType={"numeric"}
                   value={values.trees_less_than_10}
                   active={true}
-                  error={errors.trees_less_than_10 === "trees_less_than_10"}
+                  error={errors.trees_less_than_10}
                 />
                 <BuyCoffeeInput
                   values={values}
@@ -246,7 +247,7 @@ export const TreeDetailsB = ({ setNextModal, setSurvey, responses }) => {
                   keyboardType={"numeric"}
                   active={true}
                   value={values.trees_10_20}
-                  error={errors.trees_10_20 === "trees_10_20"}
+                  error={errors.trees_10_20}
                 />
                 <BuyCoffeeInput
                   values={values}
@@ -256,7 +257,7 @@ export const TreeDetailsB = ({ setNextModal, setSurvey, responses }) => {
                   keyboardType={"numeric"}
                   value={values.trees_20_more}
                   active={true}
-                  error={errors.trees_20_more === "trees_20_more"}
+                  error={errors.trees_20_more}
                 />
 
                 <View
@@ -276,7 +277,7 @@ export const TreeDetailsB = ({ setNextModal, setSurvey, responses }) => {
                   keyboardType={"numeric"}
                   value={values.coffee_farms}
                   active={true}
-                  error={errors.coffee_farms === "coffee_farms"}
+                  error={errors.coffee_farms}
                 />
                 <BuyCoffeeInput
                   values={values}
@@ -286,7 +287,7 @@ export const TreeDetailsB = ({ setNextModal, setSurvey, responses }) => {
                   keyboardType={"numeric"}
                   value={values.prod_est_2023}
                   active={true}
-                  error={errors.prod_est_2023 === "prod_est_2023"}
+                  error={errors.prod_est_2023}
                 />
                 <BuyCoffeeInput
                   values={values}
@@ -296,7 +297,7 @@ export const TreeDetailsB = ({ setNextModal, setSurvey, responses }) => {
                   keyboardType={"numeric"}
                   value={values.prod_est_2024}
                   active={true}
-                  error={errors.prod_est_2024 === "prod_est_2024"}
+                  error={errors.prod_est_2024}
                 />
 
                 <View
@@ -315,10 +316,7 @@ export const TreeDetailsB = ({ setNextModal, setSurvey, responses }) => {
                   keyboardType={"numeric"}
                   value={values.nitrogen_fixing_shade_trees}
                   active={true}
-                  error={
-                    errors.nitrogen_fixing_shade_trees ===
-                    "nitrogen_fixing_shade_trees"
-                  }
+                  error={errors.nitrogen_fixing_shade_trees}
                 />
                 <BuyCoffeeInput
                   values={values}
@@ -328,7 +326,7 @@ export const TreeDetailsB = ({ setNextModal, setSurvey, responses }) => {
                   keyboardType={"numeric"}
                   value={values.natural_shade_trees}
                   active={true}
-                  error={errors.natural_shade_trees === "natural_shade_trees"}
+                  error={errors.natural_shade_trees}
                 />
                 <BuyCoffeeInput
                   values={values}
@@ -338,7 +336,7 @@ export const TreeDetailsB = ({ setNextModal, setSurvey, responses }) => {
                   keyboardType={"numeric"}
                   value={values.shade_trees}
                   active={true}
-                  error={errors.shade_trees === "shade_trees"}
+                  error={errors.shade_trees}
                 />
                 <View
                   style={{
@@ -356,10 +354,7 @@ export const TreeDetailsB = ({ setNextModal, setSurvey, responses }) => {
                   keyboardType={"numeric"}
                   value={values.other_crops_in_coffee_farm}
                   active={true}
-                  error={
-                    errors.other_crops_in_coffee_farm ===
-                    "other_crops_in_coffee_farm"
-                  }
+                  error={errors.other_crops_in_coffee_farm}
                 />
                 <BuyCoffeeInput
                   values={values}
@@ -369,7 +364,7 @@ export const TreeDetailsB = ({ setNextModal, setSurvey, responses }) => {
                   keyboardType={"numeric"}
                   value={values.other_crops_in_farm}
                   active={true}
-                  error={errors.other_crops_in_farm === "other_crops_in_farm"}
+                  error={errors.other_crops_in_farm}
                 />
                 <View
                   style={{

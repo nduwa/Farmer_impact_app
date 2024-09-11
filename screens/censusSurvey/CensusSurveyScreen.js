@@ -8,7 +8,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import * as SecureStore from "expo-secure-store";
 import { StatusBar } from "expo-status-bar";
 import { AntDesign } from "@expo/vector-icons";
 import Foundation from "@expo/vector-icons/Foundation";
@@ -34,7 +33,7 @@ export const CensusSurveyScreen = ({ route }) => {
   const navigation = useNavigation();
   const { data } = route.params;
 
-  const [activeQuestionaire, setActiveQuestionaire] = useState(7);
+  const [activeQuestionaire, setActiveQuestionaire] = useState(0);
   const [pestsModalOpen, setPestsModalOpen] = useState(false);
   const [pestChoices, setPestChoices] = useState([]);
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
@@ -42,7 +41,7 @@ export const CensusSurveyScreen = ({ route }) => {
   const [finishModal, setFinishModal] = useState(false);
   const [surveyData, setSurveyData] = useState({});
 
-  const [stationName, setStationName] = useState();
+  const [stationName, setStationName] = useState(data?.farmerData.stationName);
   const [location, setLocation] = useState(null);
   const [locationModal, setLocationModal] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -85,9 +84,7 @@ export const CensusSurveyScreen = ({ route }) => {
 
   const handleSave = () => {
     setNextModal(false);
-    setActiveQuestionaire(
-      activeQuestionaire < 11 ? activeQuestionaire + 1 : 11
-    );
+    setActiveQuestionaire(activeQuestionaire < 7 ? activeQuestionaire + 1 : 7);
   };
 
   const handleFinish = async () => {
@@ -116,6 +113,10 @@ export const CensusSurveyScreen = ({ route }) => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    console.log(surveyData);
+  }, [surveyData]);
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
@@ -314,7 +315,7 @@ export const CensusSurveyScreen = ({ route }) => {
       {finishModal && (
         <SyncModal
           label={
-            "You are about to close this audit, Do you confirm the provided information?"
+            "You are about to close this survey session, Do you confirm the provided information?"
           }
           onYes={handleFinish}
           OnNo={() => setFinishModal(false)}
