@@ -113,8 +113,9 @@ export const FarmerDetails = ({
         if (formRef.current) {
           formRef.current.setValues({
             station_name: farmerData.stationName,
-            farmer_name: responses.Name || farmerData.Name || "",
+            farmer_name: responses.farmer_name || farmerData.Name || "",
             farmer_id: responses.farmerid || farmerData.farmerid || "",
+            group_id: responses.group_id || farmerData.groupid || "",
             national_id: responses.national_id || farmerData.National_ID_t,
             year_of_birth: String(farmerData.Year_Birth || ""),
             gender,
@@ -157,7 +158,8 @@ export const FarmerDetails = ({
         initialValues={{
           station_name: farmerData.stationName,
           farmer_name: responses.farmer_name || farmerData.Name || "",
-          farmer_id: responses.farmerid || farmerData.farmerid || "",
+          farmer_id: responses.farmer_id || farmerData.farmerid || "",
+          group_id: responses.group_id || farmerData.farmerGroupID || "",
           national_id: responses.national_id || farmerData.National_ID_t,
           year_of_birth: String(farmerData.Year_Birth || ""),
           gender,
@@ -210,7 +212,7 @@ export const FarmerDetails = ({
                   label={"Station name"}
                   value={values.station_name}
                   active={false}
-                  error={errors.station_name === "station_name"}
+                  error={errors.station_name}
                 />
                 <BuyCoffeeInput
                   values={values}
@@ -219,7 +221,7 @@ export const FarmerDetails = ({
                   label={"Farmer name"}
                   active={true}
                   value={values.farmer_name}
-                  error={errors.farmer_name === "farmer_name"}
+                  error={errors.farmer_name}
                 />
                 <BuyCoffeeInput
                   values={values}
@@ -228,7 +230,16 @@ export const FarmerDetails = ({
                   label={"Farmer ID"}
                   value={values.farmer_id}
                   active={false}
-                  error={errors.farmer_id === "farmer_id"}
+                  error={errors.farmer_id}
+                />
+                <BuyCoffeeInput
+                  values={values}
+                  handleChange={handleChange("group_id")}
+                  handleBlur={handleBlur("group_id")}
+                  label={"Group ID"}
+                  active={false}
+                  value={values.group_id}
+                  error={errors.group_id}
                 />
                 <BuyCoffeeInput
                   values={values}
@@ -237,7 +248,7 @@ export const FarmerDetails = ({
                   label={"National ID"}
                   active={true}
                   value={values.national_id}
-                  error={errors.national_id === "national_id"}
+                  error={errors.national_id}
                 />
                 <BuyCoffeeInput
                   values={values}
@@ -246,7 +257,7 @@ export const FarmerDetails = ({
                   label={"Year of birth"}
                   value={values.year_of_birth}
                   active={true}
-                  error={errors.year_of_birth === "year_of_birth"}
+                  error={errors.year_of_birth}
                 />
                 <View
                   style={{
@@ -313,7 +324,7 @@ export const FarmerDetails = ({
                   handleBlur={handleBlur("phone")}
                   label={"Phone number"}
                   value={values.phone}
-                  error={errors.phone === "phone"}
+                  error={errors.phone}
                 />
                 <View
                   style={{

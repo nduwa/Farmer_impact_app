@@ -182,6 +182,13 @@ export const SideNav = ({
           color={isActive ? colors.secondary : colors.black_a}
         />
       )}
+      {name === "Pending surveys" && (
+        <FontAwesome5
+          name="file-upload"
+          size={24}
+          color={isActive ? colors.secondary : colors.black_a}
+        />
+      )}
       {name === "History" && (
         <Entypo
           name="back-in-time"
@@ -199,6 +206,7 @@ export const SideNav = ({
       {name === "Log out" && (
         <FontAwesome5 name="power-off" size={24} color="white" />
       )}
+
       <Text
         style={{
           fontWeight: "600",

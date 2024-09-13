@@ -8,6 +8,7 @@ import { Formik } from "formik";
 import SimpleIconButton from "../../../components/SimpleIconButton";
 import { useFocusEffect } from "@react-navigation/native";
 import { TreeDetailsASchema } from "../../../validation/CensusSurveySchema";
+import { YEAR_1ST, YEAR_2ND, YEAR_3RD, YEAR_4TH } from "@env";
 
 export const TreeDetailsA = ({
   setNextModal,
@@ -108,16 +109,22 @@ export const TreeDetailsA = ({
     };
   }, [isKeyboardActive]);
 
+  /*  year 1st = 2021,
+    year 2nd = 2022,
+    year 3rd = 2023,
+    year 4th = 2024
+*/
+
   useFocusEffect(
     React.useCallback(() => {
       return () => {
         if (formRef.current) {
           formRef.current.setValues({
-            seedlings_2021: responses.seedlings_2021 || "0",
-            seedlings_2022: responses.seedlings_2022 || "0",
-            seedlings_2023: responses.seedlings_2023 || "0",
-            rejuvenated_2023: responses.rejuvenated_2023 || "0",
-            rejuvenated_2024: responses.rejuvenated_2023 || "0",
+            seedlings_year_1st: responses.seedlings_year_1st || "0",
+            seedlings_year_2nd: responses.seedlings_year_2nd || "0",
+            seedlings_year_3rd: responses.seedlings_year_3rd || "0",
+            rejuvenated_year_3rd: responses.rejuvenated_year_3rd || "0",
+            rejuvenated_year_4th: responses.rejuvenated_year_4th || "0",
           });
         }
       };
@@ -154,11 +161,11 @@ export const TreeDetailsA = ({
       />
       <Formik
         initialValues={{
-          seedlings_2021: responses.seedlings_2021 || "0",
-          seedlings_2022: responses.seedlings_2022 || "0",
-          seedlings_2023: responses.seedlings_2023 || "0",
-          rejuvenated_2023: responses.rejuvenated_2023 || "0",
-          rejuvenated_2024: responses.rejuvenated_2023 || "0",
+          seedlings_year_1st: responses.seedlings_year_1st || "0",
+          seedlings_year_2nd: responses.seedlings_year_2nd || "0",
+          seedlings_year_3rd: responses.seedlings_year_3rd || "0",
+          rejuvenated_year_3rd: responses.rejuvenated_year_3rd || "0",
+          rejuvenated_year_4th: responses.rejuvenated_year_3rd || "0",
         }}
         innerRef={formRef}
         onSubmit={async (values) => {
@@ -208,7 +215,7 @@ export const TreeDetailsA = ({
                     marginLeft: screenWidth * 0.02,
                   }}
                 >
-                  Received seedlings(2021-2023)
+                  Received seedlings({YEAR_1ST}-{YEAR_3RD})
                 </Text>
                 <View
                   style={{
@@ -220,33 +227,33 @@ export const TreeDetailsA = ({
                 />
                 <BuyCoffeeInput
                   values={values}
-                  handleChange={handleChange("seedlings_2021")}
-                  handleBlur={handleBlur("seedlings_2021")}
-                  label={"Year 2021"}
+                  handleChange={handleChange("seedlings_year_1st")}
+                  handleBlur={handleBlur("seedlings_year_1st")}
+                  label={`Year ${YEAR_1ST}`}
                   keyboardType={"numeric"}
-                  value={values.seedlings_2021}
+                  value={values.seedlings_year_1st}
                   active={true}
-                  error={errors.seedlings_2021}
+                  error={errors.seedlings_year_1st}
                 />
                 <BuyCoffeeInput
                   values={values}
-                  handleChange={handleChange("seedlings_2022")}
-                  handleBlur={handleBlur("seedlings_2022")}
-                  label={"Year 2022"}
+                  handleChange={handleChange("seedlings_year_2nd")}
+                  handleBlur={handleBlur("seedlings_year_2nd")}
+                  label={`Year ${YEAR_2ND}`}
                   keyboardType={"numeric"}
                   active={true}
-                  value={values.seedlings_2022}
-                  error={errors.seedlings_2022}
+                  value={values.seedlings_year_2nd}
+                  error={errors.seedlings_year_2nd}
                 />
                 <BuyCoffeeInput
                   values={values}
-                  handleChange={handleChange("seedlings_2023")}
-                  handleBlur={handleBlur("seedlings_2023")}
-                  label={"Year 2023"}
+                  handleChange={handleChange("seedlings_year_3rd")}
+                  handleBlur={handleBlur("seedlings_year_3rd")}
+                  label={`Year ${YEAR_3RD}`}
                   keyboardType={"numeric"}
-                  value={values.seedlings_2023}
+                  value={values.seedlings_year_3rd}
                   active={true}
-                  error={errors.seedlings_2023}
+                  error={errors.seedlings_year_3rd}
                 />
                 <View
                   style={{
@@ -264,7 +271,8 @@ export const TreeDetailsA = ({
                     marginLeft: screenWidth * 0.02,
                   }}
                 >
-                  Number of rejuvenated coffee trees, if any (2023-2024)
+                  Number of rejuvenated coffee trees, if any ({YEAR_3RD}-
+                  {YEAR_4TH})
                 </Text>
                 <View
                   style={{
@@ -276,23 +284,23 @@ export const TreeDetailsA = ({
                 />
                 <BuyCoffeeInput
                   values={values}
-                  handleChange={handleChange("rejuvenated_2023")}
-                  handleBlur={handleBlur("rejuvenated_2023")}
-                  label={"Year 2023"}
+                  handleChange={handleChange("rejuvenated_year_3rd")}
+                  handleBlur={handleBlur("rejuvenated_year_3rd")}
+                  label={`Year ${YEAR_3RD}`}
                   keyboardType={"numeric"}
-                  value={values.rejuvenated_2023}
+                  value={values.rejuvenated_year_3rd}
                   active={true}
-                  error={errors.rejuvenated_2023}
+                  error={errors.rejuvenated_year_3rd}
                 />
                 <BuyCoffeeInput
                   values={values}
-                  handleChange={handleChange("rejuvenated_2024")}
-                  handleBlur={handleBlur("rejuvenated_2024")}
-                  label={"Year 2024"}
+                  handleChange={handleChange("rejuvenated_year_4th")}
+                  handleBlur={handleBlur("rejuvenated_year_4th")}
+                  label={`Year ${YEAR_4TH}`}
                   keyboardType={"numeric"}
-                  value={values.rejuvenated_2024}
+                  value={values.rejuvenated_year_4th}
                   active={true}
-                  error={errors.rejuvenated_2024}
+                  error={errors.rejuvenated_year_4th}
                 />
 
                 <View

@@ -8,6 +8,7 @@ import { Formik } from "formik";
 import SimpleIconButton from "../../../components/SimpleIconButton";
 import { useFocusEffect } from "@react-navigation/native";
 import { TreeDetailsBSchema } from "../../../validation/CensusSurveySchema";
+import { YEAR_1ST, YEAR_2ND, YEAR_3RD, YEAR_4TH } from "@env";
 
 export const TreeDetailsB = ({ setNextModal, setSurvey, responses }) => {
   const screenHeight = Dimensions.get("window").height;
@@ -117,8 +118,8 @@ export const TreeDetailsB = ({ setNextModal, setSurvey, responses }) => {
             natural_shade_trees: responses.natural_shade_trees || "0",
             nitrogen_fixing_shade_trees:
               responses.nitrogen_fixing_shade_trees || "0",
-            prod_est_2024: responses.prod_est_2024 || "0",
-            prod_est_2023: responses.prod_est_2023 || "0",
+            prod_est_year_4th: responses.prod_est_year_4th || "0",
+            prod_est_year_3rd: responses.prod_est_year_3rd || "0",
             coffee_farms: responses.coffee_farms || "0",
             trees_20_more: responses.trees_20_more || "0",
           });
@@ -126,6 +127,12 @@ export const TreeDetailsB = ({ setNextModal, setSurvey, responses }) => {
       };
     }, [])
   );
+
+  /*  year 1st = 2021,
+    year 2nd = 2022,
+    year 3rd = 2023,
+    year 4th = 2024
+*/
 
   return (
     <View
@@ -166,8 +173,8 @@ export const TreeDetailsB = ({ setNextModal, setSurvey, responses }) => {
           natural_shade_trees: responses.natural_shade_trees || "0",
           nitrogen_fixing_shade_trees:
             responses.nitrogen_fixing_shade_trees || "0",
-          prod_est_2024: responses.prod_est_2024 || "0",
-          prod_est_2023: responses.prod_est_2023 || "0",
+          prod_est_year_4th: responses.prod_est_year_4th || "0",
+          prod_est_year_3rd: responses.prod_est_year_3rd || "0",
           coffee_farms: responses.coffee_farms || "0",
           trees_20_more: responses.trees_20_more || "0",
         }}
@@ -281,23 +288,23 @@ export const TreeDetailsB = ({ setNextModal, setSurvey, responses }) => {
                 />
                 <BuyCoffeeInput
                   values={values}
-                  handleChange={handleChange("prod_est_2023")}
-                  handleBlur={handleBlur("prod_est_2023")}
-                  label={"Estimated production in 2023 (in Kg)"}
+                  handleChange={handleChange("prod_est_year_3rd")}
+                  handleBlur={handleBlur("prod_est_year_3rd")}
+                  label={`Estimated production in ${YEAR_3RD} (in Kg)`}
                   keyboardType={"numeric"}
-                  value={values.prod_est_2023}
+                  value={values.prod_est_year_3rd}
                   active={true}
-                  error={errors.prod_est_2023}
+                  error={errors.prod_est_year_3rd}
                 />
                 <BuyCoffeeInput
                   values={values}
-                  handleChange={handleChange("prod_est_2024")}
-                  handleBlur={handleBlur("prod_est_2024")}
-                  label={"Estimated production in 2024 (in Kg)"}
+                  handleChange={handleChange("prod_est_year_4th")}
+                  handleBlur={handleBlur("prod_est_year_4th")}
+                  label={`Estimated production in ${YEAR_4TH} (in Kg)`}
                   keyboardType={"numeric"}
-                  value={values.prod_est_2024}
+                  value={values.prod_est_year_4th}
                   active={true}
-                  error={errors.prod_est_2024}
+                  error={errors.prod_est_year_4th}
                 />
 
                 <View

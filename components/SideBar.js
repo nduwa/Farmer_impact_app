@@ -230,6 +230,13 @@ export const SideBar = ({ setsideBarScroll, setIsSidebarOpen }) => {
                 />
               )}
 
+              {isAccessable("census survey") && (
+                <SideNav
+                  name={"Pending surveys"}
+                  destination="PendingSurveyScreen"
+                  isActive={isAccessable("census survey")}
+                />
+              )}
               <SideNav name={"History"} destination="HistoryScreen" />
               <SideNav name={"Change Language"} destination="LanguageScreen" />
 

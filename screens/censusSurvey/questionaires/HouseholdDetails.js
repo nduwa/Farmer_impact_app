@@ -115,8 +115,8 @@ export const HouseholdDetails = ({
       return () => {
         if (formRef.current) {
           formRef.current.setValues({
-            _1_to_20_yrs: responses._1_to_20_yrs || "",
-            _20_to_30_yrs: responses._20_to_30_yrs || "",
+            child_1_to_20_yrs: responses.child_1_to_20_yrs || "",
+            child_20_to_30_yrs: responses.child_20_to_30_yrs || "",
             income_source_main: responses.incomeSourceMain || "",
           });
         }
@@ -154,8 +154,8 @@ export const HouseholdDetails = ({
       />
       <Formik
         initialValues={{
-          _1_to_20_yrs: responses._1_to_20_yrs || "",
-          _20_to_30_yrs: responses._20_to_30_yrs || "",
+          child_1_to_20_yrs: responses.child_1_to_20_yrs || "",
+          child_20_to_30_yrs: responses.child_20_to_30_yrs || "",
           income_source_main: responses.income_source_main || "",
         }}
         innerRef={formRef}
@@ -218,21 +218,21 @@ export const HouseholdDetails = ({
                 />
                 <BuyCoffeeInput
                   values={values}
-                  handleChange={handleChange("_1_to_20_yrs")}
-                  handleBlur={handleBlur("_1_to_20_yrs")}
+                  handleChange={handleChange("child_1_to_20_yrs")}
+                  handleBlur={handleBlur("child_1_to_20_yrs")}
                   label={"From 1-20 years"}
-                  value={values._1_to_20_yrs}
+                  value={values.child_1_to_20_yrs}
                   active={true}
-                  error={errors._1_to_20_yrs}
+                  error={errors.child_1_to_20_yrs}
                 />
                 <BuyCoffeeInput
                   values={values}
-                  handleChange={handleChange("_20_to_30_yrs")}
-                  handleBlur={handleBlur("_20_to_30_yrs")}
+                  handleChange={handleChange("child_20_to_30_yrs")}
+                  handleBlur={handleBlur("child_20_to_30_yrs")}
                   label={"From 20-30 years"}
                   active={true}
-                  value={values._20_to_30_yrs}
-                  error={errors._20_to_30_yrs}
+                  value={values.child_20_to_30_yrs}
+                  error={errors.child_20_to_30_yrs}
                 />
                 <BuyCoffeeInput
                   values={values}

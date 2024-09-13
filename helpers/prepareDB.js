@@ -644,6 +644,132 @@ export const prepareTables = async () => {
       (_, error) =>
         console.error(`Error creating tmp_farmer_updates table:`, error)
     );
+
+    // trees survey
+    tx.executeSql(
+      `CREATE TABLE IF NOT EXISTS rtc_trees_survey (
+        id integer primary key AUTOINCREMENT,
+        created_at datetime NOT NULL,
+        __kp_trees_survey varchar(255) NOT NULL,
+        _kf_User varchar(255) NOT NULL,
+        full_name varchar(222) NOT NULL,
+        _kf_Station varchar(255) NOT NULL,
+        _kf_Supplier varchar(255) NOT NULL,
+        _kf_tree_details int(11) NOT NULL,
+        _kf_pests_diseases varchar(255) NOT NULL,
+        _kf_pests_observation varchar(255) NOT NULL,
+        _kf_courses_observation varchar(255) NOT NULL,
+        station_name varchar(255) NOT NULL,
+        group_id varchar(255) NOT NULL,
+        farmer_id varchar(255) NOT NULL,
+        farmer_name varchar(255) NOT NULL,
+        national_id varchar(255) NOT NULL,
+        phone varchar(255) NOT NULL,
+        year_of_birth varchar(255) NOT NULL,
+        gender varchar(255) NOT NULL,
+        child_1_to_20_yrs varchar(255) NOT NULL,
+        child_20_to_30_yrs varchar(255) NOT NULL,
+        income_source_main varchar(255) NOT NULL,
+        coffee_trees integer NOT NULL,
+        coffee_farms integer NOT NULL,
+        trees_10_20 integer NOT NULL,
+        trees_20_more integer NOT NULL,
+        trees_less_than_10 integer NOT NULL,
+        shade_trees integer NOT NULL,
+        natural_shade_trees integer NOT NULL,
+        nitrogen_fixing_shade_trees integer NOT NULL,
+        other_crops_in_coffee_farm varchar(255) NOT NULL,
+        other_crops_in_farm varchar(255) NOT NULL,
+        latitude double NOT NULL,
+        longitude double NOT NULL,        
+        updated_at datetime NOT NULL,
+        uploaded integer NOT NULL
+      )`,
+      [],
+      () => console.log(`Table rtc_trees_survey created successfully`),
+      (_, error) =>
+        console.error(`Error creating rtc_trees_survey table:`, error)
+    );
+
+    //tree details
+    tx.executeSql(
+      `CREATE TABLE IF NOT EXISTS rtc_tree_details_survey (
+      id integer primary key AUTOINCREMENT,
+      created_at datetime NOT NULL,
+      __kp_tree_details varchar(255) NOT NULL,
+      _kf_trees_survey varchar(255) NOT NULL,
+      est_production_kg integer NOT NULL,
+      est_production_year varchar(45) NOT NULL,
+      received_seedlings integer NOT NULL,
+      received_seedlings_year integer NOT NULL,
+      rejuvenated_seedlings integer NOT NULL,
+      rejuvenated_seedlings_year integer NOT NULL
+    )`,
+      [],
+      () => console.log(`Table rtc_tree_details_survey created successfully`),
+      (_, error) =>
+        console.error(`Error creating rtc_tree_details_survey table:`, error)
+    );
+
+    //pests and diseases
+    tx.executeSql(
+      `CREATE TABLE IF NOT EXISTS rtc_pests_diseases_survey (
+      id integer primary key AUTOINCREMENT,
+      created_at datetime NOT NULL,
+      __kp_pests_diseases varchar(255) NOT NULL,
+      _kf_trees_survey varchar(255) NOT NULL,
+      name varchar(255) NOT NULL,
+      level varchar(45) NOT NULL
+    )`,
+      [],
+      () => console.log(`Table rtc_pests_diseases_survey created successfully`),
+      (_, error) =>
+        console.error(`Error creating rtc_pests_diseases_survey table:`, error)
+    );
+
+    //observation diseases
+    tx.executeSql(
+      `CREATE TABLE IF NOT EXISTS rtc_observation_diseases_survey (
+      id integer primary key AUTOINCREMENT,
+      created_at datetime NOT NULL,
+      __kp_pests_observation varchar(255) NOT NULL,
+      _kf_trees_survey varchar(255) NOT NULL,
+      name varchar(255) NOT NULL,
+      level varchar(45) NOT NULL
+    )`,
+      [],
+      () =>
+        console.log(
+          `Table rtc_observation_diseases_survey created successfully`
+        ),
+      (_, error) =>
+        console.error(
+          `Error creating rtc_observation_diseases_survey table:`,
+          error
+        )
+    );
+
+    //observation courses
+    tx.executeSql(
+      `CREATE TABLE IF NOT EXISTS rtc_observation_courses_survey (
+      id integer primary key AUTOINCREMENT,
+      created_at datetime NOT NULL,
+      __kp_courses_observation varchar(255) NOT NULL,
+      _kf_trees_survey varchar(255) NOT NULL,
+      course_name varchar(255) NOT NULL,
+      rating varchar(45) NOT NULL
+    )`,
+      [],
+      () =>
+        console.log(
+          `Table rtc_observation_courses_survey created successfully`
+        ),
+      (_, error) =>
+        console.error(
+          `Error creating rtc_observation_courses_survey table:`,
+          error
+        )
+    );
   });
 };
 

@@ -11,6 +11,10 @@ export const FarmerDetailsSchema = joi.object({
     .string()
     .regex(/^[a-zA-Z0-9 \s]+$/)
     .required(),
+  group_id: joi
+    .string()
+    .regex(/^[a-zA-Z0-9 \s]+$/)
+    .required(),
   national_id: joi
     .string()
     .regex(/^[0-9\s]+$/)
@@ -35,20 +39,26 @@ export const FarmDetailsSchema = joi.object({
 });
 
 export const HouseholdDetailsSchema = joi.object({
-  _1_to_20_yrs: joi.number().required(),
-  _20_to_30_yrs: joi.number().required(),
+  child_1_to_20_yrs: joi.number().required(),
+  child_20_to_30_yrs: joi.number().required(),
   income_source_main: joi
     .string()
     .regex(/^[a-zA-Z0-9 \s]+$/)
     .required(),
 });
 
+/*  year 1st = 2021,
+    year 2nd = 2022,
+    year 3rd = 2023,
+    year 4th = 2024
+*/
+
 export const TreeDetailsASchema = joi.object({
-  seedlings_2021: joi.number().required(),
-  seedlings_2022: joi.number().required(),
-  seedlings_2023: joi.number().required(),
-  rejuvenated_2023: joi.number().required(),
-  rejuvenated_2024: joi.number().required(),
+  seedlings_year_1st: joi.number().required(),
+  seedlings_year_2nd: joi.number().required(),
+  seedlings_year_3rd: joi.number().required(),
+  rejuvenated_year_3rd: joi.number().required(),
+  rejuvenated_year_4th: joi.number().required(),
 });
 
 export const TreeDetailsBSchema = joi.object({
@@ -59,8 +69,8 @@ export const TreeDetailsBSchema = joi.object({
   shade_trees: joi.number().required(),
   natural_shade_trees: joi.number().required(),
   nitrogen_fixing_shade_trees: joi.number().required(),
-  prod_est_2024: joi.number().required(),
-  prod_est_2023: joi.number().required(),
+  prod_est_year_4th: joi.number().required(),
+  prod_est_year_3rd: joi.number().required(),
   coffee_farms: joi.number().required(),
   trees_20_more: joi.number().required(),
 });
