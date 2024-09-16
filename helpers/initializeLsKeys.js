@@ -35,6 +35,7 @@ export const initializeLsKeys = ({ stationId, setStationDetails }) => {
         ); // village
 
         await SecureStore.setItemAsync("rtc-station-name", data.Name);
+        await SecureStore.setItemAsync("rtc-supplier-id", data._kf_Supplier);
       })
       .catch((error) => {
         console.log("Error setting station ls keys: ", error);

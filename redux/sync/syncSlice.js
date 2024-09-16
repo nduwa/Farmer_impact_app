@@ -43,6 +43,10 @@ export const sync = createAsyncThunk("data/sync", async (data) => {
           "rtc-station-name",
           response.data.data[0].Name
         );
+        await SecureStore.setItemAsync(
+          "rtc-supplier-id",
+          response.data.data[0]._kf_Supplier
+        );
       } else if (tableName === "suppliers") {
         await SecureStore.setItemAsync(
           "rtc-supplier-id",

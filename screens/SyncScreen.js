@@ -125,9 +125,10 @@ export const SyncScreen = ({ navigation, route }) => {
 
     let specialId =
       isAccessable("census survey", userState.accessModules) &&
-      currentTable === "stations"
+      restartTable === "stations"
         ? userState.userData.staff._kf_Station
         : null;
+
     dispatch(
       sync({
         tableName: restartTable,
@@ -159,7 +160,7 @@ export const SyncScreen = ({ navigation, route }) => {
         job.status ||
         job.table === "cells" ||
         job.table === "crops" ||
-        isEligible(job.table)
+        !isEligible(job.table)
       ) {
         continue;
       } else {

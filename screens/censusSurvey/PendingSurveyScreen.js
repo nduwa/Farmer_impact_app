@@ -46,6 +46,7 @@ export const PendingSurveyScreen = () => {
 
   useEffect(() => {
     setLoading(false);
+    console.log(surveys);
   }, [surveys]);
 
   useFocusEffect(

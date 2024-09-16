@@ -1,4 +1,5 @@
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import * as SecureStore from "expo-secure-store";
 import {
   Dimensions,
   Keyboard,
@@ -26,11 +27,13 @@ import { TreeDetailsB } from "./questionaires/TreeDetailsB";
 import { DiseasesAndPests } from "./questionaires/DiseasesAndPests";
 import { ObservationCourses } from "./questionaires/ObservationCourses";
 import { ObservationDiseases } from "./questionaires/ObservationDiseases";
-import { ParallelInsertToDb } from "../../helpers/parallelInsertToDb";
 import generateUUID from "../../helpers/generateUUID";
 import { getCurrentDate } from "../../helpers/getCurrentDate";
 import { useSelector } from "react-redux";
 import { YEAR_1ST, YEAR_2ND, YEAR_3RD, YEAR_4TH } from "@env";
+import { dummySurvey } from "../../data/dummy";
+import { PrepareQueries } from "../../helpers/prepareQueries";
+import ProgressBar from "../../components/ProgressBar";
 
 export const CensusSurveyScreen = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
@@ -39,7 +42,8 @@ export const CensusSurveyScreen = ({ route }) => {
   const userData = useSelector((state) => state.user);
   const { data } = route.params;
 
-  const [activeQuestionaire, setActiveQuestionaire] = useState(0);
+  const [submitting, setSubmitting] = useState(true);
+  const [activeQuestionaire, setActiveQuestionaire] = useState(8);
   const [pestsModalOpen, setPestsModalOpen] = useState(false);
   const [pestChoices, setPestChoices] = useState([]);
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
@@ -48,9 +52,12 @@ export const CensusSurveyScreen = ({ route }) => {
   const [surveyData, setSurveyData] = useState({});
 
   const [stationName, setStationName] = useState(data?.farmerData.stationName);
+  const [supplierId, setSupplierId] = useState(null);
   const [location, setLocation] = useState(null);
   const [locationModal, setLocationModal] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const [SQLqueries, setSQLqueries] = useState([]);
 
   const pestsList = [
     { id: 1, name: "Leaf rust" },
@@ -93,9 +100,9 @@ export const CensusSurveyScreen = ({ route }) => {
     setActiveQuestionaire(activeQuestionaire < 7 ? activeQuestionaire + 1 : 7);
   };
 
-  const handleSurveyToDb = async () => {
-    const currentSurvey = surveyData;
-
+  const handleSurveyToDb = () => {
+    const currentSurvey = dummySurvey;
+    const kfSupplier = supplierId;
     /*  year 1st = 2021,
     year 2nd = 2022,
     year 3rd = 2023,
@@ -133,9 +140,9 @@ export const CensusSurveyScreen = ({ route }) => {
       _kf_courses_observation: ids.__kp_courses_observation,
       created_at: getCurrentDate(),
       _kf_Station: userData.userData.staff._kf_Station,
-      _kf_Supplier: userData.userData.staff._kf_Supplier,
+      _kf_Supplier: kfSupplier,
       full_name: userData.userData.user.Name_Full,
-      _kf_User: userData.userData.user._kf_User,
+      _kf_User: userData.userData.user.__kp_User,
       uploaded: 0,
     };
 
@@ -193,7 +200,7 @@ export const CensusSurveyScreen = ({ route }) => {
       let tmpObj = {
         __kp_pests_diseases: ids.__kp_pests_diseases,
         _kf_trees_survey: ids.__kp_trees_survey,
-        name: record.name,
+        name: record.label,
         level: record.answer,
         created_at: getCurrentDate(),
       };
@@ -207,7 +214,7 @@ export const CensusSurveyScreen = ({ route }) => {
       let tmpObj = {
         __kp_pests_observation: ids.__kp_pests_observation,
         _kf_trees_survey: ids.__kp_trees_survey,
-        name: record.name,
+        name: record.label,
         level: record.answer,
         created_at: getCurrentDate(),
       };
@@ -221,7 +228,7 @@ export const CensusSurveyScreen = ({ route }) => {
       let tmpObj = {
         __kp_courses_observation: ids.__kp_courses_observation,
         _kf_trees_survey: ids.__kp_trees_survey,
-        course_name: record.name,
+        course_name: record.label,
         rating: record.answer,
         created_at: getCurrentDate(),
       };
@@ -252,13 +259,15 @@ export const CensusSurveyScreen = ({ route }) => {
       },
     ];
 
-    await ParallelInsertToDb(tablesDataArray, displayToast);
+    PrepareQueries(tablesDataArray, setSQLqueries);
   };
 
-  const handleFinish = async () => {
+  const handleFinish = () => {
     setFinishModal(false);
+    setActiveQuestionaire(8);
+    setSubmitting(true);
 
-    await handleSurveyToDb();
+    handleSurveyToDb();
   };
 
   const handlePrev = () => {
@@ -285,8 +294,10 @@ export const CensusSurveyScreen = ({ route }) => {
   };
 
   useEffect(() => {
-    console.log(surveyData);
-  }, [surveyData]);
+    if (SQLqueries.length == 5) {
+      console.log("ready");
+    }
+  }, [SQLqueries]);
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
@@ -311,8 +322,17 @@ export const CensusSurveyScreen = ({ route }) => {
 
   useFocusEffect(
     React.useCallback(() => {
+      const initData = async () => {
+        const kfSupplier = await SecureStore.getItemAsync("rtc-supplier-id");
+        if (kfSupplier) {
+          setSupplierId(kfSupplier);
+        }
+      };
+
+      initData();
       return () => {
         setSurveyData({});
+        setSubmitting(true);
       };
     }, [])
   );
@@ -400,7 +420,7 @@ export const CensusSurveyScreen = ({ route }) => {
               color={colors.blue_font}
               labelColor="white"
               handlePress={handlePrev}
-              active={activeQuestionaire > 0}
+              active={activeQuestionaire > 0 && !submitting}
               icon={<Foundation name="previous" size={24} color="white" />}
             />
             {activeQuestionaire == 0 && (
@@ -472,6 +492,18 @@ export const CensusSurveyScreen = ({ route }) => {
               />
             )}
           </View>
+          {submitting && (
+            <View
+              style={{
+                justifyContent: "center",
+                alignItems: "center",
+                width: "100%",
+                padding: screenWidth * 0.02,
+              }}
+            >
+              <ProgressBar progress={0.5} />
+            </View>
+          )}
         </ScrollView>
       </View>
       {nextModal && (

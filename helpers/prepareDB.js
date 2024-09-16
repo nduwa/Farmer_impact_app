@@ -655,7 +655,7 @@ export const prepareTables = async () => {
         full_name varchar(222) NOT NULL,
         _kf_Station varchar(255) NOT NULL,
         _kf_Supplier varchar(255) NOT NULL,
-        _kf_tree_details int(11) NOT NULL,
+        _kf_tree_details varchar(255) NOT NULL,
         _kf_pests_diseases varchar(255) NOT NULL,
         _kf_pests_observation varchar(255) NOT NULL,
         _kf_courses_observation varchar(255) NOT NULL,
