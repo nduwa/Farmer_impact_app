@@ -32,8 +32,8 @@ import { getCurrentDate } from "../../helpers/getCurrentDate";
 import { useSelector } from "react-redux";
 import { YEAR_1ST, YEAR_2ND, YEAR_3RD, YEAR_4TH } from "@env";
 import { dummySurvey } from "../../data/dummy";
-import { PrepareQueries } from "../../helpers/prepareQueries";
 import ProgressBar from "../../components/ProgressBar";
+import { saveDataToFile } from "../../helpers/saveDataToFile";
 
 export const CensusSurveyScreen = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
@@ -42,8 +42,8 @@ export const CensusSurveyScreen = ({ route }) => {
   const userData = useSelector((state) => state.user);
   const { data } = route.params;
 
-  const [submitting, setSubmitting] = useState(true);
-  const [activeQuestionaire, setActiveQuestionaire] = useState(8);
+  const [submitting, setSubmitting] = useState(false);
+  const [activeQuestionaire, setActiveQuestionaire] = useState(7);
   const [pestsModalOpen, setPestsModalOpen] = useState(false);
   const [pestChoices, setPestChoices] = useState([]);
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
@@ -56,8 +56,6 @@ export const CensusSurveyScreen = ({ route }) => {
   const [location, setLocation] = useState(null);
   const [locationModal, setLocationModal] = useState(false);
   const [loading, setLoading] = useState(false);
-
-  const [SQLqueries, setSQLqueries] = useState([]);
 
   const pestsList = [
     { id: 1, name: "Leaf rust" },
@@ -236,30 +234,23 @@ export const CensusSurveyScreen = ({ route }) => {
       observationCourses.push(tmpObj);
     }
 
-    const tablesDataArray = [
-      {
-        tableName: "rtc_trees_survey",
-        records: [treeSurveyObj],
-      },
-      {
-        tableName: "rtc_tree_details_survey",
-        records: treeDetails,
-      },
-      {
-        tableName: "rtc_pests_diseases_survey",
-        records: pestsAndDiseases,
-      },
-      {
-        tableName: "rtc_observation_diseases_survey",
-        records: observationPests,
-      },
-      {
-        tableName: "rtc_observation_courses_survey",
-        records: observationCourses,
-      },
-    ];
-
-    PrepareQueries(tablesDataArray, setSQLqueries);
+    saveDataToFile({
+      treeSurveyObj,
+      treeDetails,
+      pestsAndDiseases,
+      observationPests,
+      observationCourses,
+    })
+      .then((result) => {
+        if (result) {
+          displayToast("Survey saved successfully");
+          console.log(`file saved at ${result}`);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        displayToast("Error: data not saved");
+      });
   };
 
   const handleFinish = () => {
@@ -294,12 +285,6 @@ export const CensusSurveyScreen = ({ route }) => {
   };
 
   useEffect(() => {
-    if (SQLqueries.length == 5) {
-      console.log("ready");
-    }
-  }, [SQLqueries]);
-
-  useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
       "keyboardDidShow",
       () => {
@@ -332,7 +317,7 @@ export const CensusSurveyScreen = ({ route }) => {
       initData();
       return () => {
         setSurveyData({});
-        setSubmitting(true);
+        setSubmitting(false);
       };
     }, [])
   );
@@ -492,18 +477,6 @@ export const CensusSurveyScreen = ({ route }) => {
               />
             )}
           </View>
-          {submitting && (
-            <View
-              style={{
-                justifyContent: "center",
-                alignItems: "center",
-                width: "100%",
-                padding: screenWidth * 0.02,
-              }}
-            >
-              <ProgressBar progress={0.5} />
-            </View>
-          )}
         </ScrollView>
       </View>
       {nextModal && (

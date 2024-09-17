@@ -1,6 +1,6 @@
 export const PrepareQueries = (tablesDataArray, setQueryStateFn) => {
   let queries = [];
-  for (const { tableName, records } of tablesDataArray) {
+  for (const { tableName, records, activity } of tablesDataArray) {
     if (records.length === 0) continue;
 
     // Extract columns from the first record
@@ -31,7 +31,7 @@ export const PrepareQueries = (tablesDataArray, setQueryStateFn) => {
 
     let sqlQuery = `INSERT INTO ${tableName} (${columns}) VALUES ${valuesString}`;
 
-    queries.push(sqlQuery);
+    queries.push({ query: sqlQuery, tableName, activity });
   }
 
   setQueryStateFn(queries);
