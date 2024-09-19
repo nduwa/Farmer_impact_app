@@ -14,7 +14,7 @@ import { AntDesign } from "@expo/vector-icons";
 import Foundation from "@expo/vector-icons/Foundation";
 import { colors } from "../../data/colors";
 import SimpleIconButton from "../../components/SimpleIconButton";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { LocalizationModal } from "../../components/LocalizationModal";
 import { SyncModal } from "../../components/SyncModal";
 import { FarmerDetails } from "./questionaires/FarmerDetails";
@@ -34,6 +34,7 @@ import { YEAR_1ST, YEAR_2ND, YEAR_3RD, YEAR_4TH } from "@env";
 import { dummySurvey } from "../../data/dummy";
 import ProgressBar from "../../components/ProgressBar";
 import { saveDataToFile } from "../../helpers/saveDataToFile";
+import { dataTodb } from "../../helpers/dataTodb";
 
 export const CensusSurveyScreen = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
@@ -41,8 +42,8 @@ export const CensusSurveyScreen = ({ route }) => {
   const navigation = useNavigation();
   const userData = useSelector((state) => state.user);
   const { data } = route.params;
+  const scrollListRef = useRef(null);
 
-  const [submitting, setSubmitting] = useState(false);
   const [activeQuestionaire, setActiveQuestionaire] = useState(7);
   const [pestsModalOpen, setPestsModalOpen] = useState(false);
   const [pestChoices, setPestChoices] = useState([]);
@@ -56,6 +57,9 @@ export const CensusSurveyScreen = ({ route }) => {
   const [location, setLocation] = useState(null);
   const [locationModal, setLocationModal] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const [currentJob, setCurrentJob] = useState();
+  const [progress, setProgress] = useState(0);
 
   const pestsList = [
     { id: 1, name: "Leaf rust" },
@@ -240,23 +244,30 @@ export const CensusSurveyScreen = ({ route }) => {
       pestsAndDiseases,
       observationPests,
       observationCourses,
-    })
-      .then((result) => {
-        if (result) {
-          displayToast("Survey saved successfully");
-          console.log(`file saved at ${result}`);
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-        displayToast("Error: data not saved");
-      });
+    }).then((fileuri) => {
+      if (fileuri) {
+        let surveyDetails = {
+          farmer_ID: treeSurveyObj.farmer_id,
+          farmer_name: treeSurveyObj.farmer_name,
+          group_id: treeSurveyObj.group_id,
+          filepath: fileuri,
+          phone: treeSurveyObj.phone,
+          created_at: getCurrentDate(),
+        };
+
+        dataTodb({
+          tableName: "censusSurvey",
+          syncData: [surveyDetails],
+          setCurrentJob,
+        });
+      }
+    });
   };
 
   const handleFinish = () => {
     setFinishModal(false);
     setActiveQuestionaire(8);
-    setSubmitting(true);
+    setLoading(true);
 
     handleSurveyToDb();
   };
@@ -283,6 +294,25 @@ export const CensusSurveyScreen = ({ route }) => {
       setLoading(false);
     }
   };
+
+  const scrollToTop = () => {
+    if (scrollListRef.current) {
+      scrollListRef.current.scrollTo({ y: 0, animated: true });
+    }
+  };
+
+  useEffect(() => {
+    if (currentJob === "survey data saved") {
+      displayToast("Survey saved successfully");
+      setLoading(false);
+    }
+  }, [currentJob]);
+
+  useEffect(() => {
+    let progress = (activeQuestionaire / 7) * 100;
+    setProgress(progress / 100);
+    scrollToTop();
+  }, [activeQuestionaire]);
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
@@ -317,7 +347,7 @@ export const CensusSurveyScreen = ({ route }) => {
       initData();
       return () => {
         setSurveyData({});
-        setSubmitting(false);
+        setLoading(false);
       };
     }, [])
   );
@@ -390,8 +420,21 @@ export const CensusSurveyScreen = ({ route }) => {
           flex: 1,
         }}
       >
+        <View
+          style={{
+            justifyContent: "center",
+            alignItems: "center",
+            width: "100%",
+            paddingHorizontal: screenWidth * 0.02,
+            paddingVertical: screenHeight * 0.015,
+          }}
+        >
+          <ProgressBar progress={progress} />
+        </View>
         <ScrollView
           contentContainerStyle={{ paddingBottom: screenHeight * 0.04 }}
+          ref={scrollListRef}
+          s
         >
           <View
             style={{
@@ -405,7 +448,7 @@ export const CensusSurveyScreen = ({ route }) => {
               color={colors.blue_font}
               labelColor="white"
               handlePress={handlePrev}
-              active={activeQuestionaire > 0 && !submitting}
+              active={activeQuestionaire > 0 && !loading}
               icon={<Foundation name="previous" size={24} color="white" />}
             />
             {activeQuestionaire == 0 && (
@@ -483,7 +526,10 @@ export const CensusSurveyScreen = ({ route }) => {
         <SyncModal
           label={"Do you confirm the provided information?"}
           onYes={handleSave}
-          OnNo={() => setNextModal(false)}
+          OnNo={() => {
+            setNextModal(false);
+            setLoading(false);
+          }}
         />
       )}
 

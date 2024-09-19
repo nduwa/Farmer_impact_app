@@ -262,7 +262,15 @@ export const LoginScreen = ({ navigation }) => {
             columnType: "text",
             defaultValue: "",
           });
-          
+
+          //create explanaition column in inspection responses table
+          addColumnIfNotExists({
+            tableName: "inspection_responses",
+            columnName: "compliance_date",
+            columnType: "datetime",
+            defaultValue: "",
+          });
+
           await SplashScreen.hideAsync();
         }
       };

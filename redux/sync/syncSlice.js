@@ -27,6 +27,7 @@ export const sync = createAsyncThunk("data/sync", async (data) => {
     if (response.status === 200) {
       console.log(`Data received for ${tableName}`);
       if (tableName === "stations") {
+        console.log(response.data);
         await SecureStore.setItemAsync(
           "rtc-station-id",
           response.data.data[0].__kp_Station

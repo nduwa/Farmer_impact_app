@@ -10,12 +10,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { TreeDetailsASchema } from "../../../validation/CensusSurveySchema";
 import { YEAR_1ST, YEAR_2ND, YEAR_3RD, YEAR_4TH } from "@env";
 
-export const TreeDetailsA = ({
-  setNextModal,
-  setSurvey,
-  responses,
-  farmerData,
-}) => {
+export const TreeDetailsA = ({ setNextModal, setSurvey, responses }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const formRef = useRef(null);

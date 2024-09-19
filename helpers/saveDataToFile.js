@@ -12,6 +12,14 @@ export const saveDataToFile = async (data) => {
     const directory = `${FileSystem.documentDirectory}rtc_app/survey/`;
     const fileName = generateFileName();
     // Define the file path
+
+    // Check if the directory exists, if not, create it
+    if (!directory.exists) {
+      await FileSystem.makeDirectoryAsync(directory, {
+        intermediates: true,
+      });
+    }
+
     const fileUri = `${directory}${fileName}.json`;
 
     // Write data to the file

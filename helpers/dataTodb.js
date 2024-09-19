@@ -137,7 +137,7 @@ const generateBulkValueString = (
   } else if (tableName === "inspectionResponses") {
     let bulkValues = "";
     for (let i = 0; i < data.length; i++) {
-      bulkValues += `('${data[i].created_at}','${extraVal}','${data[i].inspection_answer_id}',${data[i].answer_explanaition},'${data[i].deleted}','${data[i].__kp_InspectionLog}')`;
+      bulkValues += `('${data[i].created_at}','${extraVal}','${data[i].inspection_answer_id}','${data[i].answer_explanaition}','${data[i].compliance_date}','${data[i].deleted}','${data[i].__kp_InspectionLog}')`;
       if (i < data.length - 1) bulkValues += ",";
     }
 
@@ -287,6 +287,14 @@ const generateBulkValueString = (
     /* 
       extraValArr[0] -> CW_Name
     */
+
+    return bulkValues;
+  } else if (tableName === "censusSurvey") {
+    let bulkValues = "";
+    for (let i = 0; i < data.length; i++) {
+      bulkValues += `('${data[i].created_at}','${data[i].farmer_ID}','${data[i].farmer_name}','${data[i].phone}','${data[i].group_id}','${data[i].filepath}',0)`;
+      if (i < data.length - 1) bulkValues += ",";
+    }
 
     return bulkValues;
   }
@@ -1335,6 +1343,44 @@ export const dataTodb = ({
             (_, error) => {
               setCurrentJob("Error saving farmer details");
               console.error("Error saving farmer details: ", error);
+              return;
+            }
+          );
+        });
+      }
+    } else if (tableName === "censusSurvey") {
+      for (let i = 0; i < totalPages; i++) {
+        let page = i + 1;
+        let start = (page - 1) * limit; // the starting index
+        let end = start + limit; // the last index
+        let data = syncData.slice(
+          start,
+          end
+        ); /* on the last page when the rows aren't 10, it won't throw array index errors because of how slice() handles last index parameter */
+        let activeRows = data.length;
+
+        let bulkValues = generateBulkValueString(tableName, totalRows, data);
+
+        db.transaction((tx) => {
+          console.log(`${dbQueries.Q_TMP_CENSUS_SURVEY} ${bulkValues}`);
+
+          tx.executeSql(
+            `${dbQueries.Q_TMP_CENSUS_SURVEY} ${bulkValues};`,
+            [],
+            () => {
+              insertedRows += activeRows;
+              const progress = (insertedRows / totalRows) * 100;
+
+              let jobString =
+                progress < 100 ? `Saving survey data...` : "survey data saved";
+
+              if (setCurrentJob) setCurrentJob(jobString);
+
+              console.log("survey saved");
+            },
+            (_, error) => {
+              setCurrentJob("Error saving survey");
+              console.error("Error saving survey: ", error);
               return;
             }
           );

@@ -1,6 +1,9 @@
 import React, { useEffect, useRef } from "react";
-import { View, Animated, StyleSheet } from "react-native";
+import { View, Animated, StyleSheet, Text, Dimensions } from "react-native";
 import { colors } from "../data/colors";
+
+const screenHeight = Dimensions.get("window").height;
+const screenWidth = Dimensions.get("window").width;
 
 const ProgressBar = ({ progress }) => {
   const animation = useRef(new Animated.Value(0)).current;
@@ -32,7 +35,7 @@ const ProgressBar = ({ progress }) => {
 
 const styles = StyleSheet.create({
   progressBarContainer: {
-    height: 10,
+    height: screenWidth * 0.01,
     width: "100%",
     backgroundColor: colors.white_a,
     borderRadius: 10,

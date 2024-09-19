@@ -7,7 +7,6 @@ import React, { useEffect, useRef, useState } from "react";
 import { Formik } from "formik";
 import SimpleIconButton from "../../../components/SimpleIconButton";
 import { useFocusEffect } from "@react-navigation/native";
-import RadioButtonGroup, { RadioButtonItem } from "expo-radio-button";
 import { HouseholdDetailsSchema } from "../../../validation/CensusSurveySchema";
 
 export const HouseholdDetails = ({

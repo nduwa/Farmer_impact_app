@@ -15,6 +15,7 @@ import ReportSlice from "./farmer/ReportSlice";
 import UpdateTreesSlice from "./farmer/UpdateTreesSlice";
 import FarmCoordinateSlice from "./farmer/FarmCoordinateSlice";
 import FarmerUpdateSlice from "./farmer/FarmerUpdateSlice";
+import CensusSurveySlice from "./censusSurvey/CensusSurveySlice";
 
 const store = configureStore({
   reducer: {
@@ -34,6 +35,7 @@ const store = configureStore({
     trees: UpdateTreesSlice.reducer,
     farms: FarmCoordinateSlice.reducer,
     update: FarmerUpdateSlice.reducer,
+    survey: CensusSurveySlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

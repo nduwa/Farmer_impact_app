@@ -13,16 +13,39 @@ import { StatusBar } from "expo-status-bar";
 import { AntDesign } from "@expo/vector-icons";
 import LottieView from "lottie-react-native";
 import { retrieveDBdata } from "../../helpers/retrieveDBdata";
+import { SurveyPendingCard } from "../../components/SurveyPendingCard";
+import { deleteDBdataAsync } from "../../helpers/deleteDBdataAsync";
+import { SyncModal } from "../../components/SyncModal";
+import { deleteFile } from "../../helpers/deleteFile";
+import { useDispatch, useSelector } from "react-redux";
+import { readDataFromFile } from "../../helpers/readDataFromFile";
+import {
+  surveyAction,
+  surveyUpload,
+} from "../../redux/censusSurvey/CensusSurveySlice";
+import { updateDBdata } from "../../helpers/updateDBdata";
 
 export const PendingSurveyScreen = () => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const navigation = useNavigation();
+  const dispatch = useDispatch();
+  const surveyState = useSelector((state) => state.survey);
 
   const [surveys, setSurveys] = useState([]);
 
   const [currentJob, setCurrentJob] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [uploadModal, setUploadModal] = useState({
+    open: false,
+    id: null,
+    uri: null,
+  });
+  const [deleteModal, setDeleteModal] = useState({
+    open: false,
+    id: null,
+    uri: null,
+  });
 
   const handleBackButton = () => {
     navigation.navigate("Homepage", { data: null });
@@ -44,10 +67,102 @@ export const PendingSurveyScreen = () => {
     return theDate.toLocaleDateString("en-US", options);
   }
 
+  const removeSurvey = (id) => {
+    const allSurveys = surveys.filter((item) => item.id !== id);
+
+    setSurveys(allSurveys);
+  };
+
+  const handleUpload = () => {
+    let fileUri = uploadModal.uri;
+    setLoading(true);
+
+    readDataFromFile(fileUri).then((data) => {
+      if (data) {
+        dispatch(surveyUpload(data));
+        console.log("data extracted from the file successfully");
+      }
+    });
+  };
+  const handleDelete = async () => {
+    setDeleteModal((prevState) => ({ ...prevState, open: false }));
+    setLoading(true);
+
+    let id = deleteModal.id;
+    deleteDBdataAsync({
+      tableName: "tmp_census_survey",
+      targetCol: "id",
+      targetId: id,
+    })
+      .then((result) => {
+        if (result.success) {
+          removeSurvey(result.deletedTransaction);
+          setCurrentJob("record deleted");
+        } else {
+          displayToast("Deletion failed");
+        }
+      })
+      .catch((error) => console.log(error));
+  };
+
   useEffect(() => {
     setLoading(false);
-    console.log(surveys);
   }, [surveys]);
+
+  useEffect(() => {
+    if (surveyState.error) {
+      setLoading(false);
+      const surveyError = surveyState.error;
+
+      if (surveyError?.code === "ERR_BAD_RESPONSE") {
+        displayToast("Error: Server error");
+      } else if (surveyError?.code === "ERR_BAD_REQUEST") {
+        displayToast("Error: Incomplete data");
+      } else if (surveyError?.code === "ERR_NETWORK") {
+        displayToast("Error: Network error");
+      } else {
+        displayToast("Something went wrong");
+      }
+
+      setUploadModal((prevState) => ({ ...prevState, open: false }));
+    }
+  }, [surveyState.error]);
+
+  useEffect(() => {
+    if (surveyState.serverResponded) {
+      let surveyId = uploadModal.id;
+
+      if (!surveyId) return;
+
+      console.log(surveyState);
+
+      updateDBdata({
+        msgNo: "Upload failed",
+        msgYes: "Survey uploaded",
+        setCurrentJob,
+        query: `UPDATE tmp_census_survey SET uploaded = 1 WHERE id= ${surveyId}`,
+      });
+    }
+  }, [surveyState.serverResponded]);
+
+  useEffect(() => {
+    if (currentJob === "record deleted") {
+      deleteFile(deleteModal.uri).then(() => {
+        setLoading(false);
+        displayToast("Survey deleted");
+        setCurrentJob();
+      });
+    } else if (currentJob === "Survey uploaded") {
+      removeSurvey(uploadModal.id);
+      deleteFile(uploadModal.uri).then(() => {
+        setLoading(false);
+        displayToast("Survey uploaded");
+        dispatch(surveyAction.resetSurveyState());
+        setUploadModal({ open: false, id: null, uri: null });
+        setCurrentJob();
+      });
+    }
+  }, [currentJob]);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -55,15 +170,17 @@ export const PendingSurveyScreen = () => {
         setLoading(true);
 
         retrieveDBdata({
-          tableName: "rtc_trees_survey",
+          tableName: "tmp_census_survey",
           setData: setSurveys,
-          queryArg: "SELECT * FROM rtc_trees_survey WHERE uploaded=0;",
+          queryArg: "SELECT * FROM tmp_census_survey WHERE uploaded=0;",
         });
       };
 
       fetchData();
       return () => {
-        setCurrentJob(null);
+        setCurrentJob();
+        dispatch(surveyAction.resetSurveyState());
+        setSurveys([]);
       };
     }, [])
   );
@@ -117,11 +234,48 @@ export const PendingSurveyScreen = () => {
           data={surveys}
           initialNumToRender={10}
           renderItem={({ item }) => (
-            <View>
-              <Text>{item.id}</Text>
-            </View>
+            <SurveyPendingCard
+              data={item}
+              surveyDate={formatDate(item.created_at)}
+              uploadFn={() =>
+                setUploadModal({ open: true, id: item.id, uri: item.filepath })
+              }
+              deleteFn={() =>
+                setDeleteModal({ open: true, id: item.id, uri: item.filepath })
+              }
+            />
           )}
           keyExtractor={(item) => item.id}
+        />
+      )}
+
+      {uploadModal.open && (
+        <SyncModal
+          label={"You are about to upload this survey, proceed?"}
+          onYes={handleUpload}
+          OnNo={() => {
+            setUploadModal({
+              open: false,
+              id: null,
+              uri: null,
+            });
+            setLoading(false);
+          }}
+        />
+      )}
+
+      {deleteModal.open && (
+        <SyncModal
+          label={"You are about to delete this survey, are you sure?"}
+          onYes={handleDelete}
+          OnNo={() => {
+            setDeleteModal({
+              open: false,
+              id: null,
+              uri: null,
+            });
+            setLoading(false);
+          }}
         />
       )}
 
@@ -129,7 +283,7 @@ export const PendingSurveyScreen = () => {
         <View
           style={{
             position: "absolute",
-            marginTop: screenHeight * 0.195,
+            marginTop: screenHeight * 0.095,
             width: "100%",
             backgroundColor: "transparent",
             alignItems: "center",
