@@ -100,8 +100,10 @@ export const HomeScreen = ({ route }) => {
     setAccessControlOps({ open: true, granted: false, refreshing: true });
   };
 
-  const isAccessable = (mod) => {
-    return accessableModules?.some((module) => module.module_name === mod);
+  const isAccessable = (mods) => {
+    return mods.some((mod) =>
+      accessableModules?.some((module) => module.module_name === mod)
+    );
   };
 
   useEffect(() => {
@@ -404,56 +406,58 @@ export const HomeScreen = ({ route }) => {
             padding: screenWidth * 0.05,
           }}
         >
-          {!isAccessable("census survey") && (
+          {isAccessable(["Register", "Training", "Update Farmers"]) && (
             <OpCard
               name={t("homepage.farmer")}
               action={setIsFarmerModalOpen}
-              active={isAccessable("Register")}
+              active={isAccessable(["Register", "Training", "Update Farmers"])}
             />
           )}
-          {!isAccessable("census survey") && (
+          {isAccessable(["Inspection"]) && (
             <OpCard
               name={t("homepage.inspection")}
               destination={"chooseInspection"}
-              active={isAccessable("Inspection")}
+              active={isAccessable(["Inspection"])}
             />
           )}
 
-          {!isAccessable("census survey") && (
+          {isAccessable(["Training"]) && (
             <OpCard
               name={t("homepage.training")}
               destination="TrainingCourses"
-              active={isAccessable("Training")}
+              active={isAccessable(["Training"])}
             />
           )}
 
-          {!isAccessable("census survey") && (
+          {isAccessable(["Buy coffee"]) && (
             <OpCard
               name={t("homepage.buy_coffee")}
               action={setIsBuyCoffeeModalOpen}
-              active={isAccessable("Buy coffee")}
+              active={isAccessable(["Buy coffee"])}
             />
           )}
-          {!isAccessable("census survey") && (
+          {isAccessable(["Finance"]) && (
             <OpCard
               name={t("homepage.finance")}
-              active={isAccessable("Finance")}
+              active={isAccessable(["Finance"])}
             />
           )}
 
-          {!isAccessable("census survey") && (
+          {isAccessable(["wet mill audit"]) && (
             <OpCard
               name={t("homepage.audit")}
-              active={isAccessable("wet mill audit")}
+              active={isAccessable(["wet mill audit"])}
               destination={"WetmillHomeScreen"}
             />
           )}
 
-          <OpCard
-            name={"Census Survey"}
-            active={isAccessable("census survey")}
-            destination={"ChooseSurveyFarmerScreen"}
-          />
+          {isAccessable(["census survey"]) && (
+            <OpCard
+              name={"Census Survey"}
+              active={isAccessable(["census survey"])}
+              destination={"ChooseSurveyFarmerScreen"}
+            />
+          )}
         </View>
       </View>
 

@@ -109,6 +109,7 @@ export const FarmerMgtModal = ({ setIsFarmerModalOpen }) => {
               setIsFarmerModalOpen={setIsFarmerModalOpen}
               destination={"FarmerUpdateHome"}
               label={t("homepage.farmer_modal.update")}
+              isActive={isAccessable("Update Farmers")}
             />
             <FarmerMgtItem
               setIsFarmerModalOpen={setIsFarmerModalOpen}
