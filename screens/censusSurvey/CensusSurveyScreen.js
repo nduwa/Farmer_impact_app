@@ -44,7 +44,7 @@ export const CensusSurveyScreen = ({ route }) => {
   const { data } = route.params;
   const scrollListRef = useRef(null);
 
-  const [activeQuestionaire, setActiveQuestionaire] = useState(7);
+  const [activeQuestionaire, setActiveQuestionaire] = useState(0);
   const [pestsModalOpen, setPestsModalOpen] = useState(false);
   const [pestChoices, setPestChoices] = useState([]);
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
@@ -60,6 +60,7 @@ export const CensusSurveyScreen = ({ route }) => {
 
   const [currentJob, setCurrentJob] = useState();
   const [progress, setProgress] = useState(0);
+  const [submitted, setSubmitted] = useState(false);
 
   const pestsList = [
     { id: 1, name: "Leaf rust" },
@@ -103,7 +104,7 @@ export const CensusSurveyScreen = ({ route }) => {
   };
 
   const handleSurveyToDb = () => {
-    const currentSurvey = dummySurvey;
+    const currentSurvey = surveyData;
     const kfSupplier = supplierId;
     /*  year 1st = 2021,
     year 2nd = 2022,
@@ -266,7 +267,6 @@ export const CensusSurveyScreen = ({ route }) => {
 
   const handleFinish = () => {
     setFinishModal(false);
-    setActiveQuestionaire(8);
     setLoading(true);
 
     handleSurveyToDb();
@@ -305,6 +305,8 @@ export const CensusSurveyScreen = ({ route }) => {
     if (currentJob === "survey data saved") {
       displayToast("Survey saved successfully");
       setLoading(false);
+      setSubmitted(true);
+      handleBackButton();
     }
   }, [currentJob]);
 
@@ -348,6 +350,9 @@ export const CensusSurveyScreen = ({ route }) => {
       return () => {
         setSurveyData({});
         setLoading(false);
+        setSubmitted(false);
+        setProgress(0);
+        setCurrentJob();
       };
     }, [])
   );
@@ -448,7 +453,7 @@ export const CensusSurveyScreen = ({ route }) => {
               color={colors.blue_font}
               labelColor="white"
               handlePress={handlePrev}
-              active={activeQuestionaire > 0 && !loading}
+              active={activeQuestionaire > 0 && !submitted && !loading}
               icon={<Foundation name="previous" size={24} color="white" />}
             />
             {activeQuestionaire == 0 && (
@@ -456,7 +461,7 @@ export const CensusSurveyScreen = ({ route }) => {
                 setNextModal={setNextModal}
                 setSurvey={setSurveyData}
                 responses={surveyData}
-                farmerData={data?.farmerData}
+                farmerData={data?.farmerData || null}
               />
             )}
             {activeQuestionaire == 1 && (

@@ -66,14 +66,14 @@ const InspectionQuestion = ({ data, question, setQnAnswer, currentAnswer }) => {
     setAnswer({
       id: question.id,
       answer: ans,
-      complianceDate: compDate || date,
+      complianceDate: compDate,
       explaination: expl || "",
     });
 
     setQnAnswer({
       id: question.id,
       answer: ans,
-      complianceDate: compDate || date,
+      complianceDate: compDate,
       explaination: expl || "",
     });
   };
@@ -91,6 +91,22 @@ const InspectionQuestion = ({ data, question, setQnAnswer, currentAnswer }) => {
     }
 
     return null;
+  };
+
+  const handleAnswerExpl = (value) => {
+    if (
+      getLabel(value) === "Compliance" ||
+      getLabel(value) === "Biratunganye"
+    ) {
+      return "100%";
+    } else if (
+      getLabel(value) === "Not applicable" ||
+      getLabel(value) === "Ntibimureba"
+    ) {
+      return "0%";
+    } else {
+      return answer.explaination;
+    }
   };
 
   useEffect(() => {
@@ -169,10 +185,7 @@ const InspectionQuestion = ({ data, question, setQnAnswer, currentAnswer }) => {
             onSelected={(value) =>
               handleAnswer({
                 ans: value,
-                expl:
-                  getLabel(value) === "Compliance" || "Biratunganye"
-                    ? "100%"
-                    : answer.explaination,
+                expl: handleAnswerExpl(value),
               })
             }
             radioBackground={colors.secondary}

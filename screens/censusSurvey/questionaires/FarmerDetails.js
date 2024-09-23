@@ -20,7 +20,7 @@ export const FarmerDetails = ({
   const screenWidth = Dimensions.get("window").width;
   const formRef = useRef(null);
 
-  const [gender, setGender] = useState(farmerData.Gender || null);
+  const [gender, setGender] = useState(farmerData?.Gender || null);
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
   const [errors, setErrors] = useState({}); // validation errors
   const [validationError, setValidationError] = useState({
@@ -115,7 +115,7 @@ export const FarmerDetails = ({
             station_name: farmerData.stationName,
             farmer_name: responses.farmer_name || farmerData.Name || "",
             farmer_id: responses.farmerid || farmerData.farmerid || "",
-            group_id: responses.group_id || farmerData.groupid || "",
+            group_id: responses.group_id || farmerData.farmerGroupID || "",
             national_id: responses.national_id || farmerData.National_ID_t,
             year_of_birth: String(farmerData.Year_Birth || ""),
             gender,

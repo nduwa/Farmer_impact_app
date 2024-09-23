@@ -8,6 +8,12 @@ export const SurveyPendingCard = ({ data, surveyDate, uploadFn, deleteFn }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
 
+  const handleStr = (str) => {
+    if (str === "not applicable") {
+      return "[UNREGISTERED FARMER]";
+    } else return str;
+  };
+
   return (
     <View
       style={{
@@ -23,7 +29,10 @@ export const SurveyPendingCard = ({ data, surveyDate, uploadFn, deleteFn }) => {
     >
       <View style={{ gap: screenHeight * 0.008 }}>
         <Text style={{ fontSize: screenWidth * 0.05, fontWeight: "600" }}>
-          SURVEY | {data.farmer_ID ? data.farmer_ID : data.farmer_name}
+          SURVEY |{" "}
+          {data.farmer_ID
+            ? handleStr(data.farmer_ID)
+            : handleStr(data.farmer_name)}
         </Text>
         <Text
           style={{ fontSize: screenWidth * 0.035, color: colors.black_letter }}

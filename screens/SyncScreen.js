@@ -77,8 +77,14 @@ export const SyncScreen = ({ navigation, route }) => {
     return found;
   };
 
-  const isAccessable = (mod, allMods) => {
+  const hasAccess = (mod, allMods) => {
     return allMods?.some((module) => module.module_name === mod);
+  };
+
+  const isOnlyAccess = (mod, allMods) => {
+    let foundMod = allMods?.some((module) => module.module_name === mod);
+
+    return foundMod && allMods.length == 1;
   };
 
   const handleExit = () => {
@@ -103,12 +109,15 @@ export const SyncScreen = ({ navigation, route }) => {
     }
 
     let specialId =
-      isAccessable("census survey", userState.accessModules) &&
+      userState.userData.staff.Role === "surveyor" &&
       currentTable === "stations"
         ? userState.userData.staff._kf_Station
         : null;
 
-    dispatch(sync({ tableName: currentTable, specialId }));
+    let queryParam =
+      hasAccess("wet mill audit") && currentTable === "stations" ? "all" : null;
+
+    dispatch(sync({ tableName: currentTable, specialId, queryParam }));
     setSyncStarted(true);
     setIsSyncing(true);
   };
@@ -124,15 +133,19 @@ export const SyncScreen = ({ navigation, route }) => {
     setCurrentTable(restartTable);
 
     let specialId =
-      isAccessable("census survey", userState.accessModules) &&
+      userState.userData.staff.Role === "surveyor" &&
       restartTable === "stations"
         ? userState.userData.staff._kf_Station
         : null;
+
+    let queryParam =
+      hasAccess("wet mill audit") && currentTable === "stations" ? "all" : null;
 
     dispatch(
       sync({
         tableName: restartTable,
         specialId,
+        queryParam,
       })
     );
     setSyncStarted(true);
@@ -250,10 +263,10 @@ export const SyncScreen = ({ navigation, route }) => {
     const listForSync = async () => {
       let allAssignedModules = userState.accessModules;
 
-      if (isAccessable("census survey", allAssignedModules)) {
+      if (userState?.userData?.staff?.Role === "surveyor") {
         let allowedList = ["stations", "groups", "farmers", "households"];
         setListedForSync(allowedList);
-      } else if (isAccessable("wet mill audit", allAssignedModules)) {
+      } else if (isOnlyAccess("wet mill audit", allAssignedModules)) {
         let allowedList = ["stations"];
         setListedForSync(allowedList);
       } else {

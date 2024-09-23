@@ -12,11 +12,13 @@ import * as SecureStore from "expo-secure-store";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
 import { AntDesign } from "@expo/vector-icons";
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { Feather } from "@expo/vector-icons";
 import { Formik } from "formik";
 import { GroupsModal } from "../../components/GroupsModal";
 import { retrieveDBdata } from "../../helpers/retrieveDBdata";
 import { FarmerUpdateCard } from "../../components/FarmerUpdateCard";
+import SimpleIconButton from "../../components/SimpleIconButton";
 
 export const ChooseSurveyFarmerScreen = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
@@ -64,6 +66,18 @@ export const ChooseSurveyFarmerScreen = ({ route }) => {
     for (const farmer of pendingFarmerUpdates) {
       if (farmer.farmer_ID === farmerid) return true;
     }
+  };
+
+  const handleNavigation = (destination) => {
+    navigation.navigate(destination, {
+      data: {
+        farmerData: {
+          stationName,
+          farmerid: "not applicable",
+          farmerGroupID: "not applicable",
+        },
+      },
+    });
   };
 
   useEffect(() => {
@@ -307,6 +321,16 @@ export const ChooseSurveyFarmerScreen = ({ route }) => {
             </Formik>
           </View>
         </View>
+        <SimpleIconButton
+          label={"Farmer not registered?"}
+          width="100%"
+          color={colors.blue_font}
+          labelColor="white"
+          handlePress={() => handleNavigation("CensusSurveyScreen")}
+          icon={
+            <FontAwesome6 name="file-circle-question" size={24} color="white" />
+          }
+        />
         <View
           style={{
             flex: 1,

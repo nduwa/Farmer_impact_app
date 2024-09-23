@@ -207,6 +207,10 @@ export const InspectionQuestionsScreen = ({ route }) => {
   };
 
   useEffect(() => {
+    console.log(answers);
+  }, [answers]);
+
+  useEffect(() => {
     if (currentJob === "Responses saved") {
       displayToast("Responses saved");
       setSubmitted(true);

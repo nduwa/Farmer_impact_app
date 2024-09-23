@@ -6,9 +6,11 @@ export const sync = createAsyncThunk("data/sync", async (data) => {
   try {
     const { tableName } = data;
     let id = null;
+    let queryStr = null;
 
     if (tableName === "stations") {
       id = data.specialId || (await SecureStore.getItemAsync("rtc-user-id"));
+      queryStr = data.queryParam || null;
     } else if (
       tableName === "groups" ||
       tableName === "farmers" ||
@@ -20,14 +22,17 @@ export const sync = createAsyncThunk("data/sync", async (data) => {
 
     if (!tableName) return;
 
-    let routeString = `/sync/${tableName}${id ? "/" + id : ""}`;
+    let routeString = `/sync/${tableName}${id ? "/" + id : ""}${
+      queryStr ? "?" + queryStr + "=1" : ""
+    }`;
+
+    console.log(routeString);
 
     const response = await api.get(routeString);
 
     if (response.status === 200) {
       console.log(`Data received for ${tableName}`);
       if (tableName === "stations") {
-        console.log(response.data);
         await SecureStore.setItemAsync(
           "rtc-station-id",
           response.data.data[0].__kp_Station
