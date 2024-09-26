@@ -16,6 +16,18 @@ export const globalStyles = StyleSheet.create({
     backgroundColor: colors.bg_variant,
     width: sidebarWidth,
   },
+  wetmillModalStyles: {
+    position: "absolute",
+    width: "100%",
+    height: screenHeight * 0.4,
+    padding: 20,
+    gap: 20,
+    backgroundColor: colors.bg_variant,
+    borderTopRightRadius: 50,
+    borderTopLeftRadius: 50,
+    justifyContent: "flex-start",
+    alignItems: "center",
+  },
   buyCoffeeModalStyles: {
     position: "absolute",
     width: "100%",

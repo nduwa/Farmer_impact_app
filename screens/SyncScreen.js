@@ -23,6 +23,10 @@ import LottieView from "lottie-react-native";
 export const SyncScreen = ({ navigation, route }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
+  const userState = useSelector((state) => state.user);
+  let allAssignedModules = userState.accessModules;
+
+  const [listedForSync, setListedForSync] = useState([]);
   const [progress, setProgress] = useState(0);
   const [currentJob, setCurrentJob] = useState(null);
   const [currentTable, setCurrentTable] = useState(null);
@@ -67,6 +71,23 @@ export const SyncScreen = ({ navigation, route }) => {
     }
   };
 
+  const isEligible = (table) => {
+    if (listedForSync.length < 1) return true;
+
+    let found = listedForSync.find((item) => item === table);
+    return found;
+  };
+
+  const hasAccess = (mod, allMods) => {
+    return allMods?.some((module) => module.module_name === mod);
+  };
+
+  const isOnlyAccess = (mod, allMods) => {
+    let foundMod = allMods?.some((module) => module.module_name === mod);
+
+    return foundMod && allMods.length == 1;
+  };
+
   const handleExit = () => {
     setIsSyncing(false);
     setSyncStarted(false);
@@ -87,7 +108,20 @@ export const SyncScreen = ({ navigation, route }) => {
       setLoading(false);
       return;
     }
-    dispatch(sync({ tableName: currentTable }));
+
+    let specialId =
+      userState.userData.staff.Role === "surveyor" &&
+      currentTable === "stations"
+        ? userState.userData.staff._kf_Station
+        : null;
+
+    let queryParam =
+      hasAccess("Wet mill audit", allAssignedModules) &&
+      currentTable === "stations"
+        ? "all"
+        : null;
+
+    dispatch(sync({ tableName: currentTable, specialId, queryParam }));
     setSyncStarted(true);
     setIsSyncing(true);
   };
@@ -101,7 +135,26 @@ export const SyncScreen = ({ navigation, route }) => {
     if (restartSyncModal.table == null) return;
     let restartTable = sycnList[restartSyncModal.table].table;
     setCurrentTable(restartTable);
-    dispatch(sync({ tableName: restartTable }));
+
+    let specialId =
+      userState.userData.staff.Role === "surveyor" &&
+      restartTable === "stations"
+        ? userState.userData.staff._kf_Station
+        : null;
+
+    let queryParam =
+      hasAccess("Wet mill audit", allAssignedModules) &&
+      restartTable === "stations"
+        ? "all"
+        : null;
+
+    dispatch(
+      sync({
+        tableName: restartTable,
+        specialId,
+        queryParam,
+      })
+    );
     setSyncStarted(true);
     setIsSyncing(true);
   };
@@ -123,7 +176,12 @@ export const SyncScreen = ({ navigation, route }) => {
 
   const scheduleNextJob = () => {
     for (const job of sycnList) {
-      if (job.status || job.table === "cells" || job.table === "crops") {
+      if (
+        job.status ||
+        job.table === "cells" ||
+        job.table === "crops" ||
+        !isEligible(job.table)
+      ) {
         continue;
       } else {
         setCurrentTable(null);
@@ -167,15 +225,35 @@ export const SyncScreen = ({ navigation, route }) => {
     }
   }, [syncState.loading, syncState.serverResponded]);
 
-  useEffect(
-    () => async () => {
+  useEffect(() => {
+    const postJob = async () => {
       if (currentJob === "completed") {
         let storageKey = `rtc-sync-${currentTable}`;
         await SecureStore.setItemAsync(storageKey, "1");
       }
-    },
-    [currentJob]
-  );
+    };
+
+    postJob();
+  }, [currentJob]);
+
+  useEffect(() => {
+    let remainingTables = sycnList.filter(
+      (item) =>
+        !item.status &&
+        item.table !== "cells" &&
+        item.table !== "crops" &&
+        isEligible(item.table)
+    );
+
+    if (remainingTables.length == 0 && syncStarted) {
+      console.log("sync done!");
+      dataTodb({
+        tableName: "session",
+        syncData: [{ __kp_user: userState.userData.user.__kp_User, synced: 1 }],
+        setCurrentJob: displayToast,
+      });
+    }
+  }, [sycnList]);
 
   useEffect(() => {
     const refreshSyncList = async () => {
@@ -209,7 +287,21 @@ export const SyncScreen = ({ navigation, route }) => {
       }
     };
 
+    const listForSync = async () => {
+      if (userState?.userData?.staff?.Role === "surveyor") {
+        let allowedList = ["stations", "groups", "farmers", "households"];
+        setListedForSync(allowedList);
+      } else if (isOnlyAccess("Wet mill audit", allAssignedModules)) {
+        let allowedList = ["stations"];
+        setListedForSync(allowedList);
+      } else {
+        let allowedList = [];
+        setListedForSync(allowedList);
+      }
+    };
+
     refreshSyncList();
+    listForSync();
   }, []);
 
   return (
@@ -330,60 +422,82 @@ export const SyncScreen = ({ navigation, route }) => {
               gap: screenHeight * 0.02,
             }}
           >
-            <SyncItem
-              name={"Stations"}
-              setRestartTable={setRestartSyncModal}
-              isDone={sycnList[0].status}
-              tableIndex={0}
-            />
-            <SyncItem
-              name={"Groups"}
-              setRestartTable={setRestartSyncModal}
-              isDone={sycnList[1].status}
-              tableIndex={1}
-            />
-            <SyncItem
-              name={"Farmers"}
-              setRestartTable={setRestartSyncModal}
-              isDone={sycnList[2].status}
-              tableIndex={2}
-            />
-            <SyncItem
-              name={"Households"}
-              setRestartTable={setRestartSyncModal}
-              isDone={sycnList[3].status}
-              tableIndex={3}
-            />
-            <SyncItem
-              name={"Training modules"}
-              setRestartTable={setRestartSyncModal}
-              isDone={sycnList[5].status}
-              tableIndex={5}
-            />
-            <SyncItem
-              name={"Inspection questions"}
-              setRestartTable={setRestartSyncModal}
-              isDone={sycnList[6].status}
-              tableIndex={6}
-            />
-            <SyncItem
-              name={"Inspection answers"}
-              setRestartTable={setRestartSyncModal}
-              isDone={sycnList[7].status}
-              tableIndex={7}
-            />
-            <SyncItem
-              name={"Suppliers"}
-              setRestartTable={setRestartSyncModal}
-              isDone={sycnList[9].status}
-              tableIndex={9}
-            />
-            <SyncItem
-              name={"Seasons"}
-              setRestartTable={setRestartSyncModal}
-              isDone={sycnList[10].status}
-              tableIndex={10}
-            />
+            {isEligible("stations") && (
+              <SyncItem
+                name={"Stations"}
+                setRestartTable={setRestartSyncModal}
+                isDone={sycnList[0].status}
+                tableIndex={0}
+              />
+            )}
+
+            {isEligible("groups") && (
+              <SyncItem
+                name={"Groups"}
+                setRestartTable={setRestartSyncModal}
+                isDone={sycnList[1].status}
+                tableIndex={1}
+              />
+            )}
+
+            {isEligible("farmers") && (
+              <SyncItem
+                name={"Farmers"}
+                setRestartTable={setRestartSyncModal}
+                isDone={sycnList[2].status}
+                tableIndex={2}
+              />
+            )}
+
+            {isEligible("households") && (
+              <SyncItem
+                name={"Households"}
+                setRestartTable={setRestartSyncModal}
+                isDone={sycnList[3].status}
+                tableIndex={3}
+              />
+            )}
+            {isEligible("trainingModules") && (
+              <SyncItem
+                name={"Training modules"}
+                setRestartTable={setRestartSyncModal}
+                isDone={sycnList[5].status}
+                tableIndex={5}
+              />
+            )}
+            {isEligible("inspectionQuestions") && (
+              <SyncItem
+                name={"Inspection questions"}
+                setRestartTable={setRestartSyncModal}
+                isDone={sycnList[6].status}
+                tableIndex={6}
+              />
+            )}
+            {isEligible("inspectionAnswers") && (
+              <SyncItem
+                name={"Inspection answers"}
+                setRestartTable={setRestartSyncModal}
+                isDone={sycnList[7].status}
+                tableIndex={7}
+              />
+            )}
+
+            {isEligible("suppliers") && (
+              <SyncItem
+                name={"Suppliers"}
+                setRestartTable={setRestartSyncModal}
+                isDone={sycnList[9].status}
+                tableIndex={9}
+              />
+            )}
+            {isEligible("seasons") && (
+              <SyncItem
+                name={"Seasons"}
+                setRestartTable={setRestartSyncModal}
+                isDone={sycnList[10].status}
+                tableIndex={10}
+              />
+            )}
           </View>
         </ScrollView>
       </View>

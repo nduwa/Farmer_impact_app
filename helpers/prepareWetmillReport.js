@@ -23,7 +23,7 @@ const saveFile = async (uri) => {
     const fileExt = await getFileExtension(uri);
     const fileName = generateFileName();
     const fileNameFull = `${fileName}.${fileExt}`; // You can customize the file name and extension here
-    const directory = `${FileSystem.documentDirectory}rtc_app/`;
+    const directory = `${FileSystem.documentDirectory}rtc_app/wetmill/`;
 
     // Check if the directory exists, if not, create it
     if (!directory.exists) {
@@ -461,6 +461,7 @@ export const prepareReportFile = async (
 
   printToFile(hmtlString, setCompleted);
 };
+
 export const printToFile = async (html, setCompleted) => {
   const { uri } = await Print.printToFileAsync({ html });
   if (uri) {

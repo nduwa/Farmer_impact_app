@@ -118,11 +118,14 @@ export const OpCard = ({ name, action, destination = null, active = true }) => {
             color="black"
           />
         )}
+        {name === "Census Survey" && (
+          <FontAwesome6 name="file-circle-question" size={24} color="black" />
+        )}
         <Text
           style={{
             fontWeight: "500",
             fontSize:
-              name?.length > 15 ? screenWidth * 0.038 : screenWidth * 0.041,
+              name?.length > 12 ? screenWidth * 0.038 : screenWidth * 0.041,
             textAlign: "center",
           }}
         >

@@ -54,6 +54,9 @@ import { WetmillHomeScreen } from "./screens/wetmill/WetmillHomeScreen";
 import { ChooseStationScreen } from "./screens/wetmill/ChooseStationScreen";
 import { AuditScreen } from "./screens/wetmill/AuditScreen";
 import FileManager from "./screens/wetmill/FileManager";
+import { CensusSurveyScreen } from "./screens/censusSurvey/CensusSurveyScreen";
+import { ChooseSurveyFarmerScreen } from "./screens/censusSurvey/ChooseSurveyFarmer";
+import { PendingSurveyScreen } from "./screens/censusSurvey/PendingSurveyScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -321,6 +324,23 @@ export default function App() {
               name="Filemanager"
               options={{ unmountOnBlur: true }}
               component={FileManager}
+            />
+
+            {/* census */}
+            <Stack.Screen
+              name="ChooseSurveyFarmerScreen"
+              options={{ unmountOnBlur: true }}
+              component={ChooseSurveyFarmerScreen}
+            />
+            <Stack.Screen
+              name="CensusSurveyScreen"
+              options={{ unmountOnBlur: true }}
+              component={CensusSurveyScreen}
+            />
+            <Stack.Screen
+              name="PendingSurveyScreen"
+              options={{ unmountOnBlur: true }}
+              component={PendingSurveyScreen}
             />
           </Stack.Navigator>
         </NavigationContainer>

@@ -199,7 +199,7 @@ export const InspectionsScreen = () => {
 
   useEffect(() => {
     setLoading(false);
-  }, [inspections.length]);
+  }, [inspections]);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -303,7 +303,7 @@ export const InspectionsScreen = () => {
       )}
 
       {/* inspection modal */}
-      {!inspectionModal.open && (
+      {inspectionModal.open && (
         <InspectionModal
           data={{
             inspection_id: inspectionModal.id,

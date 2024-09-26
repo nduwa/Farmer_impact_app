@@ -6,9 +6,11 @@ export const sync = createAsyncThunk("data/sync", async (data) => {
   try {
     const { tableName } = data;
     let id = null;
+    let queryStr = null;
 
     if (tableName === "stations") {
-      id = await SecureStore.getItemAsync("rtc-user-id");
+      id = data.specialId || (await SecureStore.getItemAsync("rtc-user-id"));
+      queryStr = data.queryParam || null;
     } else if (
       tableName === "groups" ||
       tableName === "farmers" ||
@@ -20,7 +22,9 @@ export const sync = createAsyncThunk("data/sync", async (data) => {
 
     if (!tableName) return;
 
-    let routeString = `/sync/${tableName}${id ? "/" + id : ""}`;
+    let routeString = `/sync/${tableName}${id ? "/" + id : ""}${
+      queryStr ? "?" + queryStr + "=1" : ""
+    }`;
 
     const response = await api.get(routeString);
 
@@ -42,6 +46,10 @@ export const sync = createAsyncThunk("data/sync", async (data) => {
         await SecureStore.setItemAsync(
           "rtc-station-name",
           response.data.data[0].Name
+        );
+        await SecureStore.setItemAsync(
+          "rtc-supplier-id",
+          response.data.data[0]._kf_Supplier
         );
       } else if (tableName === "suppliers") {
         await SecureStore.setItemAsync(

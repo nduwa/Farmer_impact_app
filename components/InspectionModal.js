@@ -102,7 +102,7 @@ export const InspectionModal = ({
               marginVertical: screenHeight * 0.006,
             }}
           >
-            {`${data.inspectionData._kf_Household}`}
+            {`${data.inspectionData?._kf_Household}`}
           </Text>
 
           <View

@@ -30,6 +30,10 @@ export const InspectionCoursesScreen = ({ route }) => {
     });
   };
 
+  const handleSync = () => {
+    navigation.navigate("Sync", { data: null });
+  };
+
   const handleCourseLabel = (item) => {
     let str =
       language === "kiny"

@@ -18,4 +18,7 @@ export const colors = {
   green_bg: "rgba(0,150,0,0.7)",
   red: "#c40000",
   red_bg: "rgba(160,0,0,0.7)",
+  gold_bg: "rgba(255,215,0,1)",
+  silver_bg: "rgba(248,248,255,1)",
+  bronze_bg: "rgba(225,169,95,1)",
 };

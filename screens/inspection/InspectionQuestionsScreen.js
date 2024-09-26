@@ -178,7 +178,8 @@ export const InspectionQuestionsScreen = ({ route }) => {
       element = {
         id: item.id,
         answer: item.answer,
-        explaination: item?.explaination,
+        explaination: item?.explaination || null,
+        complianceDate: item?.complianceDate || null,
       };
 
       setAnswers([...answers, element]);
@@ -188,6 +189,7 @@ export const InspectionQuestionsScreen = ({ route }) => {
         if (ans.id === item.id) {
           ans.answer = item.answer;
           ans.explaination = item?.explaination || "";
+          ans.complianceDate = item?.complianceDate || "";
         }
       }
 
@@ -205,11 +207,16 @@ export const InspectionQuestionsScreen = ({ route }) => {
   };
 
   useEffect(() => {
+    console.log(answers);
+  }, [answers]);
+
+  useEffect(() => {
     if (currentJob === "Responses saved") {
       displayToast("Responses saved");
       setSubmitted(true);
     }
   }, [currentJob]);
+
   useEffect(() => {
     if (insertedInspection) {
       displayToast("Inspection saved");
@@ -222,6 +229,7 @@ export const InspectionQuestionsScreen = ({ route }) => {
           rtc_inspection_id: inspId,
           inspection_answer_id: answer.answer,
           answer_explanaition: answer.explaination,
+          compliance_date: answer.complianceDate || "",
           deleted: 0,
           __kp_InspectionLog: "",
           created_at: getCurrentDate(),

@@ -79,34 +79,41 @@ export const UserModal = ({ data, CloseFn, AccessCtrlFn }) => {
             }}
           />
 
-          <Text
-            style={{
-              fontWeight: "500",
-              textAlign: "center",
-              fontSize: screenWidth * 0.04,
-              marginVertical: screenHeight * 0.006,
-            }}
-          >
-            {`${t("homepage.session.user")} / ${data.names.toUpperCase()}`}
-          </Text>
-          <View
-            style={{
-              backgroundColor: colors.secondary_variant,
-              height: screenHeight * 0.001,
-              width: screenWidth * 0.6,
-            }}
-          />
+          {data.names && (
+            <>
+              <Text
+                style={{
+                  fontWeight: "500",
+                  textAlign: "center",
+                  fontSize: screenWidth * 0.04,
+                  marginVertical: screenHeight * 0.006,
+                }}
+              >
+                {`${t("homepage.session.user")} / ${data.names.toUpperCase()}`}
+              </Text>
+              <View
+                style={{
+                  backgroundColor: colors.secondary_variant,
+                  height: screenHeight * 0.001,
+                  width: screenWidth * 0.6,
+                }}
+              />
+            </>
+          )}
 
-          <Text
-            style={{
-              fontWeight: "500",
-              textAlign: "center",
-              fontSize: screenWidth * 0.04,
-              marginVertical: screenHeight * 0.006,
-            }}
-          >
-            {`${t("homepage.session.role")} / ${data.role.toUpperCase()}`}
-          </Text>
+          {data.role && (
+            <Text
+              style={{
+                fontWeight: "500",
+                textAlign: "center",
+                fontSize: screenWidth * 0.04,
+                marginVertical: screenHeight * 0.006,
+              }}
+            >
+              {`${t("homepage.session.role")} / ${data.role.toUpperCase()}`}
+            </Text>
+          )}
+
           {data.station && (
             <>
               <View

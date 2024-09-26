@@ -20,7 +20,7 @@ export const SyncQueries = {
   RTC_INSPECTION_ANS:
     "INSERT OR REPLACE INTO inspection_answers (id,created_at,Eng_answer,Kiny_answer,question_id,priority,status,created_by,score,__kp_Option,_kf_Evaluation) VALUES",
   RTC_INSPECTION_RESP:
-    "INSERT OR REPLACE INTO inspection_responses (created_at, rtc_inspections_id, inspection_answer_id,answer_explanaition, deleted, __kp_InspectionLog) VALUES",
+    "INSERT OR REPLACE INTO inspection_responses (created_at, rtc_inspections_id, inspection_answer_id,answer_explanaition,compliance_date, deleted, __kp_InspectionLog) VALUES",
   RTC_INSPECTIONS:
     "INSERT OR REPLACE INTO rtc_inspections (created_at, Score_n, _kf_Course, _kf_Household, __kp_Inspection, _kf_Station, _kf_Supplier, created_by, inspection_at, uploaded, uploaded_at, longitude, latitude) VALUES",
   RTC_ATTENDANCE_SHEETS:

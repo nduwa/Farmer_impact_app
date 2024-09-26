@@ -100,8 +100,10 @@ export const HomeScreen = ({ route }) => {
     setAccessControlOps({ open: true, granted: false, refreshing: true });
   };
 
-  const isAccessable = (mod) => {
-    return accessableModules?.some((module) => module.module_name === mod);
+  const isAccessable = (mods) => {
+    return mods.some((mod) =>
+      accessableModules?.some((module) => module.module_name === mod)
+    );
   };
 
   useEffect(() => {
@@ -179,7 +181,9 @@ export const HomeScreen = ({ route }) => {
         stationData.location = await SecureStore.getItemAsync(
           "rtc-station-location"
         );
+
         stationData.name = await SecureStore.getItemAsync("rtc-station-name");
+
         stationData.id =
           userState.userData.staff._kf_Station ||
           (await SecureStore.getItemAsync("rtc-station-id"));
@@ -220,7 +224,8 @@ export const HomeScreen = ({ route }) => {
 
       const newUserDetection = async () => {
         let stationId = userState.userData.staff._kf_Station;
-        detectNewUser({ newStationId: data?.stationId || stationId })
+        let userKey = userState.userData.user.__kp_User;
+        detectNewUser({ user_key: data?.userId || userKey })
           .then((isNewUser) => {
             if (isNewUser && !userState.checkedForNewUser) {
               setAccessControlOps({
@@ -402,35 +407,58 @@ export const HomeScreen = ({ route }) => {
             padding: screenWidth * 0.05,
           }}
         >
-          <OpCard
-            name={t("homepage.farmer")}
-            action={setIsFarmerModalOpen}
-            active={isAccessable("Register")}
-          />
-          <OpCard
-            name={t("homepage.inspection")}
-            destination={"chooseInspection"}
-            active={isAccessable("Inspection")}
-          />
-          <OpCard
-            name={t("homepage.training")}
-            destination="TrainingCourses"
-            active={isAccessable("Training")}
-          />
-          <OpCard
-            name={t("homepage.buy_coffee")}
-            action={setIsBuyCoffeeModalOpen}
-            active={isAccessable("Buy coffee")}
-          />
-          <OpCard
-            name={t("homepage.finance")}
-            active={isAccessable("Finance")}
-          />
-          <OpCard
-            name={t("homepage.audit")}
-            active={true}
-            destination={"WetmillHomeScreen"}
-          />
+          {isAccessable(["Register", "Training", "Update Farmers"]) && (
+            <OpCard
+              name={t("homepage.farmer")}
+              action={setIsFarmerModalOpen}
+              active={isAccessable(["Register", "Training", "Update Farmers"])}
+            />
+          )}
+          {isAccessable(["Inspection"]) && (
+            <OpCard
+              name={t("homepage.inspection")}
+              destination={"chooseInspection"}
+              active={isAccessable(["Inspection"])}
+            />
+          )}
+
+          {isAccessable(["Training"]) && (
+            <OpCard
+              name={t("homepage.training")}
+              destination="TrainingCourses"
+              active={isAccessable(["Training"])}
+            />
+          )}
+
+          {isAccessable(["Buy coffee"]) && (
+            <OpCard
+              name={t("homepage.buy_coffee")}
+              action={setIsBuyCoffeeModalOpen}
+              active={isAccessable(["Buy coffee"])}
+            />
+          )}
+          {isAccessable(["Finance"]) && (
+            <OpCard
+              name={t("homepage.finance")}
+              active={isAccessable(["Finance"])}
+            />
+          )}
+
+          {isAccessable(["Wet mill audit"]) && (
+            <OpCard
+              name={t("homepage.audit")}
+              active={false}
+              destination={"WetmillHomeScreen"}
+            />
+          )}
+
+          {isAccessable(["census survey"]) && (
+            <OpCard
+              name={"Census Survey"}
+              active={isAccessable(["census survey"])}
+              destination={"ChooseSurveyFarmerScreen"}
+            />
+          )}
         </View>
       </View>
 

@@ -644,6 +644,49 @@ export const prepareTables = async () => {
       (_, error) =>
         console.error(`Error creating tmp_farmer_updates table:`, error)
     );
+
+    //census survey
+    tx.executeSql(
+      `CREATE TABLE IF NOT EXISTS tmp_census_survey (
+      id integer primary key AUTOINCREMENT,
+      created_at datetime NOT NULL,
+      farmer_ID varchar(255) NOT NULL,
+      farmer_name varchar(255) NOT NULL,
+      phone varchar(255) NOT NULL,
+      group_id varchar(255) NOT NULL,
+      filepath varchar(255) NOT NULL,
+      uploaded integer NOT NULL
+    )`,
+      [],
+      () => console.log(`Table tmp_census_survey created successfully`),
+      (_, error) =>
+        console.error(`Error creating tmp_census_survey table:`, error)
+    );
+
+    //wetmill audit
+    tx.executeSql(
+      `CREATE TABLE IF NOT EXISTS tmp_wetmill_audit (
+      id integer primary key AUTOINCREMENT,
+      created_at datetime NOT NULL,
+      filepath varchar(255) NOT NULL,
+      uploaded integer NOT NULL
+    )`,
+      [],
+      () => console.log(`Table tmp_wetmill_audit created successfully`),
+      (_, error) =>
+        console.error(`Error creating tmp_wetmill_audit table:`, error)
+    );
+
+    //user sessions
+    tx.executeSql(
+      `CREATE TABLE IF NOT EXISTS tmp_sessions (
+      __kp_user varchar(255) UNIQUE primary key,
+      synced integer NOT NULL
+    )`,
+      [],
+      () => console.log(`Table tmp_sessions created successfully`),
+      (_, error) => console.error(`Error creating tmp_sessions table:`, error)
+    );
   });
 };
 

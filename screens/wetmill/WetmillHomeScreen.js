@@ -11,12 +11,15 @@ import { AntDesign } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import { colors } from "../../data/colors";
 import { WetmillItem } from "../../components/WetmillItem";
+import { WetmillAuditModal } from "../../components/WetmillAuditModal";
+import { useState } from "react";
 
 export const WetmillHomeScreen = () => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const navigation = useNavigation();
-  const { t } = useTranslation();
+
+  const [isWetmillModalOpen, setIsWetmillModalOpen] = useState(false);
 
   const handleBackButton = () => {
     navigation.navigate("Homepage", { data: null });
@@ -78,11 +81,18 @@ export const WetmillHomeScreen = () => {
               gap: screenHeight * 0.014,
             }}
           >
-            <WetmillItem label={"Season"} type={"season"} />
-            <WetmillItem label={"Off-season"} destination={"offseason"} />
+            <WetmillItem
+              label={"New Audit Report"}
+              actionFn={setIsWetmillModalOpen}
+            />
+            <WetmillItem label={"Pending Reports"} />
           </View>
         </ScrollView>
       </View>
+
+      {isWetmillModalOpen && (
+        <WetmillAuditModal setIsWetmillModalOpen={setIsWetmillModalOpen} />
+      )}
     </View>
   );
 };
