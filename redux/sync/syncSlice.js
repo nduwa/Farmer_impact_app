@@ -26,8 +26,6 @@ export const sync = createAsyncThunk("data/sync", async (data) => {
       queryStr ? "?" + queryStr + "=1" : ""
     }`;
 
-    console.log(routeString);
-
     const response = await api.get(routeString);
 
     if (response.status === 200) {

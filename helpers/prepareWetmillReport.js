@@ -461,6 +461,7 @@ export const prepareReportFile = async (
 
   printToFile(hmtlString, setCompleted);
 };
+
 export const printToFile = async (html, setCompleted) => {
   const { uri } = await Print.printToFileAsync({ html });
   if (uri) {

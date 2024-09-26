@@ -23,10 +23,8 @@ export const WetmillAuditModal = ({ setIsWetmillModalOpen }) => {
   const handleClick = () => {
     setInitClose(true);
   };
- let arr=[]
-
-arr.filter()
- const translateY = animation.interpolate({
+  
+  const translateY = animation.interpolate({
     inputRange: [0, 1],
     outputRange: [
       initClose ? 0 : animationFactor,

@@ -24,6 +24,7 @@ export const SyncScreen = ({ navigation, route }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const userState = useSelector((state) => state.user);
+  let allAssignedModules = userState.accessModules;
 
   const [listedForSync, setListedForSync] = useState([]);
   const [progress, setProgress] = useState(0);
@@ -115,7 +116,10 @@ export const SyncScreen = ({ navigation, route }) => {
         : null;
 
     let queryParam =
-      hasAccess("wet mill audit") && currentTable === "stations" ? "all" : null;
+      hasAccess("Wet mill audit", allAssignedModules) &&
+      currentTable === "stations"
+        ? "all"
+        : null;
 
     dispatch(sync({ tableName: currentTable, specialId, queryParam }));
     setSyncStarted(true);
@@ -139,7 +143,10 @@ export const SyncScreen = ({ navigation, route }) => {
         : null;
 
     let queryParam =
-      hasAccess("wet mill audit") && currentTable === "stations" ? "all" : null;
+      hasAccess("Wet mill audit", allAssignedModules) &&
+      restartTable === "stations"
+        ? "all"
+        : null;
 
     dispatch(
       sync({
@@ -218,15 +225,35 @@ export const SyncScreen = ({ navigation, route }) => {
     }
   }, [syncState.loading, syncState.serverResponded]);
 
-  useEffect(
-    () => async () => {
+  useEffect(() => {
+    const postJob = async () => {
       if (currentJob === "completed") {
         let storageKey = `rtc-sync-${currentTable}`;
         await SecureStore.setItemAsync(storageKey, "1");
       }
-    },
-    [currentJob]
-  );
+    };
+
+    postJob();
+  }, [currentJob]);
+
+  useEffect(() => {
+    let remainingTables = sycnList.filter(
+      (item) =>
+        !item.status &&
+        item.table !== "cells" &&
+        item.table !== "crops" &&
+        isEligible(item.table)
+    );
+
+    if (remainingTables.length == 0 && syncStarted) {
+      console.log("sync done!");
+      dataTodb({
+        tableName: "session",
+        syncData: [{ __kp_user: userState.userData.user.__kp_User, synced: 1 }],
+        setCurrentJob: displayToast,
+      });
+    }
+  }, [sycnList]);
 
   useEffect(() => {
     const refreshSyncList = async () => {
@@ -261,12 +288,10 @@ export const SyncScreen = ({ navigation, route }) => {
     };
 
     const listForSync = async () => {
-      let allAssignedModules = userState.accessModules;
-
       if (userState?.userData?.staff?.Role === "surveyor") {
         let allowedList = ["stations", "groups", "farmers", "households"];
         setListedForSync(allowedList);
-      } else if (isOnlyAccess("wet mill audit", allAssignedModules)) {
+      } else if (isOnlyAccess("Wet mill audit", allAssignedModules)) {
         let allowedList = ["stations"];
         setListedForSync(allowedList);
       } else {

@@ -224,7 +224,8 @@ export const HomeScreen = ({ route }) => {
 
       const newUserDetection = async () => {
         let stationId = userState.userData.staff._kf_Station;
-        detectNewUser({ newStationId: data?.stationId || stationId })
+        let userKey = userState.userData.user.__kp_User;
+        detectNewUser({ user_key: data?.userId || userKey })
           .then((isNewUser) => {
             if (isNewUser && !userState.checkedForNewUser) {
               setAccessControlOps({
@@ -443,10 +444,10 @@ export const HomeScreen = ({ route }) => {
             />
           )}
 
-          {isAccessable(["wet mill audit"]) && (
+          {isAccessable(["Wet mill audit"]) && (
             <OpCard
               name={t("homepage.audit")}
-              active={isAccessable(["wet mill audit"])}
+              active={false}
               destination={"WetmillHomeScreen"}
             />
           )}

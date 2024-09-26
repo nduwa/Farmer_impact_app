@@ -662,6 +662,31 @@ export const prepareTables = async () => {
       (_, error) =>
         console.error(`Error creating tmp_census_survey table:`, error)
     );
+
+    //wetmill audit
+    tx.executeSql(
+      `CREATE TABLE IF NOT EXISTS tmp_wetmill_audit (
+      id integer primary key AUTOINCREMENT,
+      created_at datetime NOT NULL,
+      filepath varchar(255) NOT NULL,
+      uploaded integer NOT NULL
+    )`,
+      [],
+      () => console.log(`Table tmp_wetmill_audit created successfully`),
+      (_, error) =>
+        console.error(`Error creating tmp_wetmill_audit table:`, error)
+    );
+
+    //user sessions
+    tx.executeSql(
+      `CREATE TABLE IF NOT EXISTS tmp_sessions (
+      __kp_user varchar(255) UNIQUE primary key,
+      synced integer NOT NULL
+    )`,
+      [],
+      () => console.log(`Table tmp_sessions created successfully`),
+      (_, error) => console.error(`Error creating tmp_sessions table:`, error)
+    );
   });
 };
 

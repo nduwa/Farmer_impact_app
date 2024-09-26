@@ -33,6 +33,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { addColumnIfNotExists, prepareTables } from "../helpers/prepareDB";
 import { useTranslation } from "react-i18next";
 import { initLanguage } from "../helpers/initLanguage";
+import { dataTodb } from "../helpers/dataTodb";
 
 // Prevent auto-hiding of the splash screen
 SplashScreen.preventAutoHideAsync();

@@ -17,4 +17,8 @@ export const dbQueries = {
     "INSERT INTO tmp_farmer_updates(__kp_Farmer,_kf_Group,_kf_Staff,user_code,_kf_Station,CW_Name,Year_Birth,Gender,farmer_ID,farmer_name,national_ID,Phone,Position,Marital_Status,Reading_Skills,Math_Skills,education_level,cell,village,Trees,Trees_Producing,number_of_plots_with_coffee,created_at,full_name,status,uploaded) VALUES",
   Q_TMP_CENSUS_SURVEY:
     "INSERT INTO tmp_census_survey(created_at,farmer_ID,farmer_name,phone,group_id,filepath,uploaded) VALUES",
+  Q_TMP_SESSIONS:
+    "INSERT OR REPLACE INTO tmp_sessions(__kp_user,synced) VALUES",
+  Q_TMP_WETMILL:
+    "INSERT OR REPLACE INTO tmp_sessions(created_at,filepath,uploaded) VALUES",
 };

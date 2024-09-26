@@ -50,9 +50,12 @@ const generateBulkValueString = (
 
     for (let i = 0; i < data.length; i++) {
       let name = data[i].Name || "";
+      let math_skills = data[i].Math_Skills || "";
       const sanitizedName = name.replace(/'/g, ""); // names like Jean D'arc will be Jean D arc for sql syntax reasons
+      const sanitizedMathSkillStr = math_skills.replace(/['’]/g, "");
+
       bulkValues += `(
-        ${data[i].id},'${data[i].__kp_Farmer}','${data[i]._kf_Group}','${data[i]._kf_Household}','${data[i]._kf_Location}','${data[i]._kf_Supplier}','${data[i]._kf_Station}','${data[i].Year_Birth}','${data[i].Gender}','${data[i].farmerid}','${sanitizedName}','${data[i].National_ID_t}','${data[i].Phone}','${data[i].Position}','${data[i].CAFE_ID}','${data[i].SAN_ID}','${data[i].UTZ_ID}','${data[i].Marital_Status}','${data[i].Reading_Skills}','${data[i].Math_Skills}','${data[i].created_at}','${data[i].created_by}','${data[i].registered_at}','${data[i].updated_at}','${data[i].type}',${data[i].sync_farmers},${data[i].uploaded},'${data[i].uploaded_at}','${data[i].Area_Small}','${data[i].Area_Smallest}',${data[i].Trees},${data[i].Trees_Producing},${data[i].number_of_plots_with_coffee},'${data[i].STP_Weight}','${data[i].education_level}',${data[i].latitude},${data[i].longitude},'${data[i].householdid}','${data[i].seasonal_goal}',${data[i].recordid},0,"","0000-00-00 00:00:0","1")`;
+        ${data[i].id},'${data[i].__kp_Farmer}','${data[i]._kf_Group}','${data[i]._kf_Household}','${data[i]._kf_Location}','${data[i]._kf_Supplier}','${data[i]._kf_Station}','${data[i].Year_Birth}','${data[i].Gender}','${data[i].farmerid}','${sanitizedName}','${data[i].National_ID_t}','${data[i].Phone}','${data[i].Position}','${data[i].CAFE_ID}','${data[i].SAN_ID}','${data[i].UTZ_ID}','${data[i].Marital_Status}','${data[i].Reading_Skills}','${sanitizedMathSkillStr}','${data[i].created_at}','${data[i].created_by}','${data[i].registered_at}','${data[i].updated_at}','${data[i].type}',${data[i].sync_farmers},${data[i].uploaded},'${data[i].uploaded_at}','${data[i].Area_Small}','${data[i].Area_Smallest}',${data[i].Trees},${data[i].Trees_Producing},${data[i].number_of_plots_with_coffee},'${data[i].STP_Weight}','${data[i].education_level}',${data[i].latitude},${data[i].longitude},'${data[i].householdid}','${data[i].seasonal_goal}',${data[i].recordid},0,"","0000-00-00 00:00:0","1")`;
       if (i < data.length - 1) bulkValues += ",";
     }
 
@@ -297,6 +300,14 @@ const generateBulkValueString = (
     }
 
     return bulkValues;
+  } else if (tableName === "session") {
+    let bulkValues = "";
+    for (let i = 0; i < data.length; i++) {
+      bulkValues += `('${data[i].__kp_user}',${data[i].synced || 0})`;
+      if (i < data.length - 1) bulkValues += ",";
+    }
+
+    return bulkValues;
   }
 };
 
@@ -424,6 +435,7 @@ export const dataTodb = ({
             [],
             () => {
               insertedRows += activeRows;
+
               const progress = (insertedRows / totalRows) * 100;
               let jobString =
                 progress < 100 ? `data batch ${page} completed` : "completed";
@@ -1362,8 +1374,6 @@ export const dataTodb = ({
         let bulkValues = generateBulkValueString(tableName, totalRows, data);
 
         db.transaction((tx) => {
-          console.log(`${dbQueries.Q_TMP_CENSUS_SURVEY} ${bulkValues}`);
-
           tx.executeSql(
             `${dbQueries.Q_TMP_CENSUS_SURVEY} ${bulkValues};`,
             [],
@@ -1381,6 +1391,45 @@ export const dataTodb = ({
             (_, error) => {
               setCurrentJob("Error saving survey");
               console.error("Error saving survey: ", error);
+              return;
+            }
+          );
+        });
+      }
+    } else if (tableName === "session") {
+      for (let i = 0; i < totalPages; i++) {
+        let page = i + 1;
+        let start = (page - 1) * limit; // the starting index
+        let end = start + limit; // the last index
+        let data = syncData.slice(
+          start,
+          end
+        ); /* on the last page when the rows aren't 10, it won't throw array index errors because of how slice() handles last index parameter */
+        let activeRows = data.length;
+
+        let bulkValues = generateBulkValueString(tableName, totalRows, data);
+
+        db.transaction((tx) => {
+          console.log(`${dbQueries.Q_TMP_SESSIONS} ${bulkValues};`);
+          tx.executeSql(
+            `${dbQueries.Q_TMP_SESSIONS} ${bulkValues};`,
+            [],
+            () => {
+              insertedRows += activeRows;
+              const progress = (insertedRows / totalRows) * 100;
+
+              let jobString =
+                progress < 100
+                  ? `Saving session data...`
+                  : "session data saved";
+
+              if (setCurrentJob) setCurrentJob(jobString);
+
+              console.log("session saved");
+            },
+            (_, error) => {
+              setCurrentJob("Error saving session");
+              console.error("Error saving session: ", error);
               return;
             }
           );
