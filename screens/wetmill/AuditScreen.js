@@ -4,6 +4,7 @@ import {
   Keyboard,
   ScrollView,
   Text,
+  ToastAndroid,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -21,31 +22,35 @@ import { LeftBeansAudit } from "./questionaires/LeftBeansAudit";
 import { QualityQuantityAudit } from "./questionaires/QualityQuantityAudit";
 import { AppearanceAudit } from "./questionaires/AppearanceAudit";
 import { ConclusionAudit } from "./questionaires/ConclusionAudit";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { LocalizationModal } from "../../components/LocalizationModal";
 import { CongestionAudit } from "./questionaires/CongestionAudit";
 import { TakePictures } from "./questionaires/TakePictures";
 import { SyncModal } from "../../components/SyncModal";
 import { Approval } from "./questionaires/Aprroval";
-import {
-  prepareReportFile,
-  uritoBase64,
-} from "../../helpers/prepareWetmillReport";
+import { prepareReportFile } from "../../helpers/prepareWetmillReport";
+import { dataTodb } from "../../helpers/dataTodb";
+import { getCurrentDate } from "../../helpers/getCurrentDate";
+import { useSelector } from "react-redux";
+import ProgressBar from "../../components/ProgressBar";
 
 export const AuditScreen = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const navigation = useNavigation();
   const { data } = route.params;
+  const scrollListRef = useRef(null);
 
-  const [activeAudit, setActiveAudit] = useState(7);
+  const [activeAudit, setActiveAudit] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
   const [choice, setChoice] = useState(false);
-  const [isKeyboardActive, setIsKeyboardActive] = useState(false); 
+  const [isKeyboardActive, setIsKeyboardActive] = useState(false);
   const [nextModal, setNextModal] = useState(false);
   const [finishModal, setFinishModal] = useState(false);
   const [auditData, setAuditData] = useState({});
-  const [fileSaved, setFileSaved] = useState(false);
+  const [fileSaved, setFileSaved] = useState({ status: false, uri: null });
+  const [currentJob, setCurrentJob] = useState();
+  const [progress, setProgress] = useState(0);
 
   const [reportedCherries, setReportedCherries] = useState(416735);
   const [parchYield, setParchYield] = useState(0);
@@ -81,11 +86,43 @@ export const AuditScreen = ({ route }) => {
     setActiveAudit(activeAudit > 0 ? activeAudit - 1 : 0);
   };
 
-  useEffect(() => {
-    if (fileSaved) {
-      navigation.navigate("Filemanager");
+  const displayToast = (msg) => {
+    ToastAndroid.show(msg, ToastAndroid.SHORT);
+  };
+
+  const scrollToTop = () => {
+    if (scrollListRef.current) {
+      scrollListRef.current.scrollTo({ y: 0, animated: true });
     }
-  }, [fileSaved]);
+  };
+
+  useEffect(() => {
+    let progress = (activeAudit / 11) * 100;
+    setProgress(progress / 100);
+    scrollToTop();
+  }, [activeAudit]);
+
+  useEffect(() => {
+    if (currentJob === "wetmill audit data saved") {
+      displayToast(currentJob);
+      navigation.navigate("WetmillHomeScreen");
+    }
+  }, [currentJob]);
+
+  useEffect(() => {
+    if (fileSaved.status) {
+      dataTodb({
+        tableName: "wetmillaudit",
+        syncData: [
+          {
+            createdAt: getCurrentDate(),
+            filepath: fileSaved.uri,
+          },
+        ],
+        setCurrentJob,
+      });
+    }
+  }, [fileSaved.status]);
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
@@ -173,8 +210,20 @@ export const AuditScreen = ({ route }) => {
           flex: 1,
         }}
       >
+        <View
+          style={{
+            justifyContent: "center",
+            alignItems: "center",
+            width: "100%",
+            paddingHorizontal: screenWidth * 0.02,
+            paddingVertical: screenHeight * 0.015,
+          }}
+        >
+          <ProgressBar progress={progress} />
+        </View>
         <ScrollView
           contentContainerStyle={{ paddingBottom: screenHeight * 0.04 }}
+          ref={scrollListRef}
         >
           <View
             style={{

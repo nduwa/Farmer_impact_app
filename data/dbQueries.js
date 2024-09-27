@@ -20,5 +20,5 @@ export const dbQueries = {
   Q_TMP_SESSIONS:
     "INSERT OR REPLACE INTO tmp_sessions(__kp_user,synced) VALUES",
   Q_TMP_WETMILL:
-    "INSERT OR REPLACE INTO tmp_sessions(created_at,filepath,uploaded) VALUES",
+    "INSERT OR REPLACE INTO tmp_wetmill_audit(created_at,filepath,uploaded) VALUES",
 };

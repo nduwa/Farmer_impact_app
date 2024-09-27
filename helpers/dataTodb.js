@@ -308,6 +308,16 @@ const generateBulkValueString = (
     }
 
     return bulkValues;
+  } else if (tableName === "wetmillaudit") {
+    let bulkValues = "";
+    for (let i = 0; i < data.length; i++) {
+      bulkValues += `('${data[i].created_at}','${data[i].filepath}',${
+        data[i].uploaded || 0
+      })`;
+      if (i < data.length - 1) bulkValues += ",";
+    }
+
+    return bulkValues;
   }
 };
 
@@ -1410,7 +1420,6 @@ export const dataTodb = ({
         let bulkValues = generateBulkValueString(tableName, totalRows, data);
 
         db.transaction((tx) => {
-          console.log(`${dbQueries.Q_TMP_SESSIONS} ${bulkValues};`);
           tx.executeSql(
             `${dbQueries.Q_TMP_SESSIONS} ${bulkValues};`,
             [],
@@ -1430,6 +1439,44 @@ export const dataTodb = ({
             (_, error) => {
               setCurrentJob("Error saving session");
               console.error("Error saving session: ", error);
+              return;
+            }
+          );
+        });
+      }
+    } else if (tableName === "wetmillaudit") {
+      for (let i = 0; i < totalPages; i++) {
+        let page = i + 1;
+        let start = (page - 1) * limit; // the starting index
+        let end = start + limit; // the last index
+        let data = syncData.slice(
+          start,
+          end
+        ); /* on the last page when the rows aren't 10, it won't throw array index errors because of how slice() handles last index parameter */
+        let activeRows = data.length;
+
+        let bulkValues = generateBulkValueString(tableName, totalRows, data);
+
+        db.transaction((tx) => {
+          tx.executeSql(
+            `${dbQueries.Q_TMP_WETMILL} ${bulkValues};`,
+            [],
+            () => {
+              insertedRows += activeRows;
+              const progress = (insertedRows / totalRows) * 100;
+
+              let jobString =
+                progress < 100
+                  ? `Saving wetmill audit data...`
+                  : "wetmill audit data saved";
+
+              if (setCurrentJob) setCurrentJob(jobString);
+
+              console.log("wetmill audit saved");
+            },
+            (_, error) => {
+              setCurrentJob("Error saving wetmill audit");
+              console.error("Error saving wetmill audit: ", error);
               return;
             }
           );

@@ -669,8 +669,7 @@ export const prepareTables = async () => {
       id integer primary key AUTOINCREMENT,
       created_at datetime NOT NULL,
       filepath varchar(255) NOT NULL,
-      uploaded integer NOT NULL
-    )`,
+      uploaded integer NOT NULL`,
       [],
       () => console.log(`Table tmp_wetmill_audit created successfully`),
       (_, error) =>

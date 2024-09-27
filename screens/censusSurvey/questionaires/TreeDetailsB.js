@@ -358,7 +358,6 @@ export const TreeDetailsB = ({ setNextModal, setSurvey, responses }) => {
                   handleChange={handleChange("other_crops_in_coffee_farm")}
                   handleBlur={handleBlur("other_crops_in_coffee_farm")}
                   label={"Other crops in the coffee farm? (List them)"}
-                  keyboardType={"numeric"}
                   value={values.other_crops_in_coffee_farm}
                   active={true}
                   error={errors.other_crops_in_coffee_farm}
@@ -368,7 +367,6 @@ export const TreeDetailsB = ({ setNextModal, setSurvey, responses }) => {
                   handleChange={handleChange("other_crops_in_farm")}
                   handleBlur={handleBlur("other_crops_in_farm")}
                   label={"Other crops in your farm? (List them)"}
-                  keyboardType={"numeric"}
                   value={values.other_crops_in_farm}
                   active={true}
                   error={errors.other_crops_in_farm}

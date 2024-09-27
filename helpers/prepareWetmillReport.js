@@ -13,7 +13,7 @@ const getFileExtension = async (uri) => {
   return uriParts[uriParts.length - 1];
 };
 
-const generateFileName = () => {
+export const generateFileName = () => {
   const timestamp = Math.floor(Date.now() / 1000);
   return `wetmillaudit-report-${timestamp}`;
 };
@@ -466,6 +466,6 @@ export const printToFile = async (html, setCompleted) => {
   const { uri } = await Print.printToFileAsync({ html });
   if (uri) {
     saveFile(uri);
-    setCompleted(true);
+    setCompleted({ status: true, uri });
   }
 };
