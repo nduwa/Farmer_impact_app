@@ -6,11 +6,18 @@ import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import SimpleIconButton from "./SimpleIconButton";
 import TinyIconButton from "./TinyIconButton";
+import { openFile } from "../screens/wetmill/FileManager";
+import { useNavigation } from "@react-navigation/native";
 
 export const FilePendingItem = ({ data, index, date, uploadFn, deleteFn }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
+  const navigation = useNavigation();
 
+  const readFile = async (uri) => {
+    await openFile({ filepath: uri });
+    // navigation.navigate("Filemanager");
+  };
   return (
     <View
       style={{
@@ -24,7 +31,13 @@ export const FilePendingItem = ({ data, index, date, uploadFn, deleteFn }) => {
         elevation: 3,
       }}
     >
-      <View style={{ flexDirection: "row", gap: screenHeight * 0.02 }}>
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "flex-start",
+          gap: screenHeight * 0.02,
+        }}
+      >
         <View
           style={{
             justifyContent: "center",
@@ -47,38 +60,36 @@ export const FilePendingItem = ({ data, index, date, uploadFn, deleteFn }) => {
               color: colors.black_letter,
             }}
           >
-            Pending since: {date}
+            File type: pdf
           </Text>
-        </View>
-        <TouchableOpacity
-          style={{
-            flexDirection: "row",
-            justifyContent: "center",
-            alignItems: "center",
-            height: screenHeight * 0.04,
-            gap: screenWidth * 0.01,
-            padding: screenWidth * 0.01,
-            borderWidth: screenWidth * 0.003,
-            borderColor: colors.black_a,
-            borderRadius: screenWidth * 0.02,
-            marginLeft: screenWidth * 0.04,
-          }}
-        >
-          <AntDesign
-            name="folderopen"
-            size={screenWidth * 0.04}
-            color={colors.black_letter}
-          />
           <Text
             style={{
-              fontSize: screenWidth * 0.03,
-              fontWeight: "600",
+              fontSize: screenWidth * 0.035,
               color: colors.black_letter,
             }}
           >
-            Open File?
+            Pending since: {date}
           </Text>
-        </TouchableOpacity>
+        </View>
+        <View
+          style={{
+            position: "absolute",
+            width: "100%",
+            left: screenWidth * 0.61,
+          }}
+        >
+          <TinyIconButton
+            label={"Remove?"}
+            width="28%"
+            color={colors.red}
+            labelColor="white"
+            active={true}
+            handlePress={() =>
+              deleteFn({ id: data.id, uri: data.filepath, open: true })
+            }
+            icon={<Ionicons name="trash" size={24} color={"white"} />}
+          />
+        </View>
       </View>
 
       <View
@@ -92,9 +103,10 @@ export const FilePendingItem = ({ data, index, date, uploadFn, deleteFn }) => {
         }}
       >
         <SimpleIconButton
-          handlePress={() => deleteFn(data.id, data.filepath)}
-          label={"Delete"}
-          icon={<Ionicons name="trash" size={24} color="white" />}
+          handlePress={async () => await readFile(data.filepath)}
+          label={"Preview"}
+          icon={<Ionicons name="reader" size={24} color="white" />}
+          color={colors.black}
         />
         <SimpleIconButton
           handlePress={() => uploadFn(data.filepath)}

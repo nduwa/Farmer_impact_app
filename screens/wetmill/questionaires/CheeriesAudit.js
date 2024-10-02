@@ -7,6 +7,7 @@ import { Formik } from "formik";
 import SimpleIconButton from "../../../components/SimpleIconButton";
 import { cherriesSchema } from "../../../validation/wetmillAuditSchema";
 import { useFocusEffect } from "@react-navigation/native";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 export const CheeriesAudit = ({
   stationName,
@@ -14,6 +15,7 @@ export const CheeriesAudit = ({
   setAudit,
   responses,
   cherriesSMS,
+  computeReportedKgs,
 }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
@@ -23,6 +25,7 @@ export const CheeriesAudit = ({
     percentage: 0,
     kgs: 0,
   });
+  const [validState, setValidState] = useState(false);
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
   const [errors, setErrors] = useState({}); // validation errors
   const [validationError, setValidationError] = useState({
@@ -122,6 +125,9 @@ export const CheeriesAudit = ({
 
   useFocusEffect(
     React.useCallback(() => {
+      formRef.current.setFieldValue("cherries_sms", cherriesSMS);
+      console.log(cherriesSMS)
+      if (cherriesSMS > 0) setValidState(true);
       return () => {
         setDiscrepancy({
           percentage: responses.discrepancy_perc_cherries || 0,
@@ -139,8 +145,9 @@ export const CheeriesAudit = ({
             kgs: responses.discrepancy_kgs_cherries || 0,
           });
         }
+        setValidState(false);
       };
-    }, [])
+    }, [cherriesSMS])
   );
   return (
     <View
@@ -172,7 +179,7 @@ export const CheeriesAudit = ({
       />
       <Formik
         initialValues={{
-          cherries_sms: responses.cherries_sms || String(cherriesSMS),
+          cherries_sms: responses.cherries_sms || cherriesSMS,
           cherries_books: responses.cherries_books || "0",
           discrepancy_reason_cherries:
             responses.discrepancy_reason_cherries || "",
@@ -227,6 +234,12 @@ export const CheeriesAudit = ({
                   }
                   value={parseFloat(values.cherries_sms).toLocaleString()}
                   active={false}
+                  weirdMode={!validState}
+                  weirdModeBtnLabel={"Compute kilograms reported"}
+                  weirdModeBtnIcon={
+                    <MaterialIcons name="calculate" size={24} color="white" />
+                  }
+                  weirdModePressFn={() => computeReportedKgs()}
                   error={errors.cherries_sms === "cherries_sms"}
                 />
                 <BuyCoffeeInput
@@ -333,7 +346,7 @@ export const CheeriesAudit = ({
                   width="100%"
                   color={colors.secondary}
                   labelColor="white"
-                  active={true}
+                  active={validState}
                   handlePress={handleSubmit}
                   icon={<Feather name="save" size={24} color="white" />}
                 />

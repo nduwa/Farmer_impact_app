@@ -18,7 +18,7 @@ export const generateFileName = () => {
   return `wetmillaudit-report-${timestamp}`;
 };
 
-const saveFile = async (uri) => {
+const saveFile = async (uri, setCompleted) => {
   try {
     const fileExt = await getFileExtension(uri);
     const fileName = generateFileName();
@@ -41,6 +41,7 @@ const saveFile = async (uri) => {
 
     displayToast("file saved");
     console.log("file saved to:", fileUri);
+    setCompleted({ status: true, uri: fileUri });
   } catch (error) {
     displayToast("Error: file not saved");
     console.error("Error saving file:", error);
@@ -61,7 +62,8 @@ export const prepareReportFile = async (
   auditData,
   stationName,
   date,
-  setCompleted
+  setCompleted,
+  location
 ) => {
   const hmtlString = `
   <html lang="en">
@@ -164,6 +166,21 @@ export const prepareReportFile = async (
         flex-wrap: wrap;
         column-gap: 8px;
         row-gap: 8px;
+      }
+      .location {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        gap: 0.3rem;
+      }
+      .location a {
+        font-size: 0.9rem;
+        text-decoration: none;
+        color: #864100;
+      }
+      .img-icon {
+        height: 20px;
       }
     </style>
   </head>
@@ -454,6 +471,19 @@ export const prepareReportFile = async (
           </div>
         </div>
       </div>
+
+      <div class="location">
+        <img src="${
+          Asset.fromModule(require("../data/images/location.png")).uri
+        }" alt="" class="img-icon" />
+        <a href="http://maps.google.com/maps?z=12&t=m&q=loc:${
+          location?.coords?.latitude
+        }+${location?.coords?.longitude}"
+          >http://maps.google.com/maps?z=12&t=m&q=loc:${location?.coords?.latitude}+${
+    location?.coords?.longitude
+  }</a
+        >
+      </div>
     </div>
   </body>
 </html>
@@ -465,7 +495,6 @@ export const prepareReportFile = async (
 export const printToFile = async (html, setCompleted) => {
   const { uri } = await Print.printToFileAsync({ html });
   if (uri) {
-    saveFile(uri);
-    setCompleted({ status: true, uri });
+    saveFile(uri, setCompleted);
   }
 };

@@ -18,7 +18,6 @@ import {
 } from "../redux/accessControl/accessControlSlice";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { dataTodb } from "../helpers/dataTodb";
-import { updateDBdataAsync } from "../helpers/updateDBdataAsync";
 import { updateDBdata } from "../helpers/updateDBdata";
 import { UserActions } from "../redux/user/UserSlice";
 

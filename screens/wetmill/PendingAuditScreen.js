@@ -49,7 +49,7 @@ export const PendingAuditScreen = () => {
   });
 
   const handleBackButton = () => {
-    navigation.navigate("Homepage", { data: null });
+    navigation.navigate("WetmillHomeScreen", { data: null });
   };
 
   const displayToast = (msg) => {
@@ -96,7 +96,7 @@ export const PendingAuditScreen = () => {
 
     let id = deleteModal.id;
     deleteDBdataAsync({
-      tableName: "tmp_census_survey",
+      tableName: "tmp_wetmill_audit",
       targetCol: "id",
       targetId: id,
     })
@@ -105,6 +105,7 @@ export const PendingAuditScreen = () => {
           removeAudit(result.deletedTransaction);
           setCurrentJob("record deleted");
         } else {
+          console.log(result);
           displayToast("Deletion failed");
         }
       })
@@ -165,6 +166,12 @@ export const PendingAuditScreen = () => {
         setUploadModal({ open: false, id: null, uri: null });
         setCurrentJob();
       });
+    } else if (currentJob === "Deletion failed") {
+      setLoading(false);
+      displayToast("Error: Deleting failed");
+      dispatch(auditActions.resetAuditState());
+      setUploadModal({ open: false, id: null, uri: null });
+      setCurrentJob();
     }
   }, [currentJob]);
 
@@ -232,35 +239,18 @@ export const PendingAuditScreen = () => {
           style={{ width: screenWidth * 0.07, backgroundColor: "transparent" }}
         />
       </View>
-      <View
-        style={{
-          padding: 12,
-          gap: 9,
-        }}
-      >
-        <FilePendingItem
-          data={{ filepath: "ssss", id: 12 }}
-          date={"12/12/12"}
-          index={0}
-          deleteFn={handleDelete}
-          uploadFn={handleUpload}
-        />
-      </View>
       {audits.length > 0 && (
         <FlatList
           contentContainerStyle={{ padding: 12, gap: 9 }}
           data={audits}
           initialNumToRender={10}
-          renderItem={({ item }) => (
-            <SurveyPendingCard
-              data={item}
-              surveyDate={formatDate(item.created_at)}
-              uploadFn={() =>
-                setUploadModal({ open: true, id: item.id, uri: item.filepath })
-              }
-              deleteFn={() =>
-                setDeleteModal({ open: true, id: item.id, uri: item.filepath })
-              }
+          renderItem={({ item, index }) => (
+            <FilePendingItem
+              data={{ filepath: item.filepath, id: item.id }}
+              date={formatDate(item.created_at)}
+              index={index}
+              deleteFn={setDeleteModal}
+              uploadFn={handleUpload}
             />
           )}
           keyExtractor={(item) => item.id}

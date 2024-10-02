@@ -37,6 +37,7 @@ const TinyIconButton = ({
         width,
         elevation: 3,
         opacity: active ? 1 : 0.4,
+        zIndex: 15,
       }}
     >
       {icon && icon}

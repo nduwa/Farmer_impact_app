@@ -11,6 +11,7 @@ const SimpleIconButton = ({
   color = colors.secondary,
   labelColor = "white",
   mv = 0,
+  bdRadiusRatio = 0.045,
   icon = null,
 }) => {
   const screenHeight = Dimensions.get("window").height;
@@ -27,7 +28,7 @@ const SimpleIconButton = ({
         gap: screenWidth * 0.03,
         backgroundColor: color,
         height: screenHeight * 0.045,
-        borderRadius: screenHeight * 0.045,
+        borderRadius: screenHeight * bdRadiusRatio,
         borderLeftWidth: screenWidth * 0.03,
         borderRightWidth: screenWidth * 0.03,
         borderLeftColor: selected ? "white" : "transparent",

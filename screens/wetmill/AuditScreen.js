@@ -1,4 +1,4 @@
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import {
   Dimensions,
   Keyboard,
@@ -22,7 +22,7 @@ import { LeftBeansAudit } from "./questionaires/LeftBeansAudit";
 import { QualityQuantityAudit } from "./questionaires/QualityQuantityAudit";
 import { AppearanceAudit } from "./questionaires/AppearanceAudit";
 import { ConclusionAudit } from "./questionaires/ConclusionAudit";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { LocalizationModal } from "../../components/LocalizationModal";
 import { CongestionAudit } from "./questionaires/CongestionAudit";
 import { TakePictures } from "./questionaires/TakePictures";
@@ -31,13 +31,23 @@ import { Approval } from "./questionaires/Aprroval";
 import { prepareReportFile } from "../../helpers/prepareWetmillReport";
 import { dataTodb } from "../../helpers/dataTodb";
 import { getCurrentDate } from "../../helpers/getCurrentDate";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import ProgressBar from "../../components/ProgressBar";
+import {
+  closedTrActions,
+  getClosedTransactions,
+} from "../../redux/wetmillAudit/ClosedTransactionsSlice";
+import { getCurrentLocation } from "../../helpers/getCurrentLocation";
+import * as SecureStore from "expo-secure-store";
+import LottieView from "lottie-react-native";
 
 export const AuditScreen = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const navigation = useNavigation();
+  const dispatch = useDispatch();
+  const closedTrActionsState = useSelector((state) => state.closedTransaction);
+
   const { data } = route.params;
   const scrollListRef = useRef(null);
 
@@ -51,8 +61,10 @@ export const AuditScreen = ({ route }) => {
   const [fileSaved, setFileSaved] = useState({ status: false, uri: null });
   const [currentJob, setCurrentJob] = useState();
   const [progress, setProgress] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [seasonId, setSeasonId] = useState();
 
-  const [reportedCherries, setReportedCherries] = useState(416735);
+  const [reportedCherries, setReportedCherries] = useState();
   const [parchYield, setParchYield] = useState(0);
   const [bucketsYield, setBucketsYield] = useState(0);
   const [parchDayEstimate, setParchDayEstimate] = useState(0);
@@ -78,8 +90,22 @@ export const AuditScreen = ({ route }) => {
   };
 
   const handleFinish = async () => {
+    setLoading(true);
     setFinishModal(false);
-    await prepareReportFile(auditData, data?.Name, getDate(), setFileSaved);
+
+    let location = await getCurrentLocation();
+    if (location) {
+      await prepareReportFile(
+        auditData,
+        data?.Name,
+        getDate(),
+        setFileSaved,
+        location
+      );
+      console.log(location);
+    } else {
+      displayToast("Could not get coordinates");
+    }
   };
 
   const handlePrev = () => {
@@ -96,6 +122,46 @@ export const AuditScreen = ({ route }) => {
     }
   };
 
+  const computeReportedKgs = () => {
+    setLoading(true);
+    dispatch(getClosedTransactions({ stationId: data.__kp_Station, seasonId }));
+  };
+
+  useEffect(() => {
+    if (closedTrActionsState.serverResponded) {
+      let { total_kilograms, total_bad_kilograms } =
+        closedTrActionsState.response.closedTransactions[0];
+
+      let { total_buckets } = closedTrActionsState.response.buckets[0];
+
+      let totalkgs = total_kilograms + total_bad_kilograms;
+
+      setReportedCherries(parseInt(totalkgs));
+      setBucketsYield(parseInt(total_buckets));
+      setLoading(false);
+      dispatch(closedTrActions.resetClosedTrState());
+    }
+  }, [closedTrActionsState.serverResponded]);
+
+  useEffect(() => {
+    if (closedTrActionsState.error) {
+      setLoading(false);
+      const respError = closedTrActionsState.error;
+
+      if (respError?.code === "ERR_BAD_RESPONSE") {
+        displayToast("Error: Server error");
+      } else if (respError?.code === "ERR_BAD_REQUEST") {
+        displayToast("Error: Incomplete data");
+      } else if (respError?.code === "ERR_NETWORK") {
+        displayToast("Error: Network error");
+      } else {
+        displayToast("Something went wrong");
+      }
+
+      dispatch(closedTrActions.resetClosedTrState());
+    }
+  }, [closedTrActionsState.error]);
+
   useEffect(() => {
     let progress = (activeAudit / 11) * 100;
     setProgress(progress / 100);
@@ -106,6 +172,7 @@ export const AuditScreen = ({ route }) => {
     if (currentJob === "wetmill audit data saved") {
       displayToast(currentJob);
       navigation.navigate("WetmillHomeScreen");
+      setLoading(false);
     }
   }, [currentJob]);
 
@@ -115,7 +182,7 @@ export const AuditScreen = ({ route }) => {
         tableName: "wetmillaudit",
         syncData: [
           {
-            createdAt: getCurrentDate(),
+            created_at: getCurrentDate(),
             filepath: fileSaved.uri,
           },
         ],
@@ -146,11 +213,38 @@ export const AuditScreen = ({ route }) => {
   }, [isKeyboardActive]);
 
   useEffect(() => {
-    let parch_yield = reportedCherries / process.env.CHERRY_PARCHMENT_RATIO;
-    setParchYield(parseFloat(parch_yield));
-    setBucketsYield(11883);
-    setParchDayEstimate(2536);
-  }, []);
+    if (reportedCherries && !isNaN(reportedCherries)) {
+      let parch_yield = reportedCherries / process.env.CHERRY_PARCHMENT_RATIO;
+      let parch_per_day = parseFloat(parch_yield) / 31;
+      setParchYield(parseFloat(parch_yield));
+      setParchDayEstimate(parch_per_day);
+    }
+  }, [reportedCherries]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const initData = async () => {
+        const season_id = await SecureStore.getItemAsync("rtc-seasons-id");
+
+        if (season_id) {
+          setSeasonId(season_id);
+        }
+      };
+
+      initData();
+      return () => {
+        setAuditData({});
+        setActiveAudit(0);
+        setLoading(false);
+        setReportedCherries();
+        setParchYield(0);
+        setParchDayEstimate(0);
+        setCurrentJob();
+        setFileSaved({ status: false, uri: null });
+        dispatch(closedTrActions.resetClosedTrState());
+      };
+    }, [])
+  );
   return (
     <View
       style={{
@@ -247,6 +341,7 @@ export const AuditScreen = ({ route }) => {
                 setAudit={setAuditData}
                 cherriesSMS={reportedCherries}
                 responses={auditData}
+                computeReportedKgs={computeReportedKgs}
               />
             )}
             {activeAudit == 1 && (
@@ -272,7 +367,7 @@ export const AuditScreen = ({ route }) => {
               <ExpensesAudit
                 stationName={data?.Name}
                 setNextModal={setNextModal}
-                cherriesPurchased={auditData?.cherries_books || 416785}
+                cherriesPurchased={auditData?.cherries_books}
                 setAudit={setAuditData}
                 responses={auditData}
               />
@@ -281,7 +376,7 @@ export const AuditScreen = ({ route }) => {
               <StaffAudit
                 stationName={data?.Name}
                 setNextModal={setNextModal}
-                totalParchment={auditData?.parch_total || 78430}
+                totalParchment={auditData?.parch_total}
                 setAudit={setAuditData}
                 responses={auditData}
               />
@@ -347,6 +442,43 @@ export const AuditScreen = ({ route }) => {
           </View>
         </ScrollView>
       </View>
+
+      {/* page loader */}
+      {loading && (
+        <View
+          style={{
+            position: "absolute",
+            marginTop: screenHeight * 0.195,
+            width: "100%",
+            backgroundColor: "transparent",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <View
+            style={{
+              width: "auto",
+              backgroundColor: "white",
+              borderRadius: screenHeight * 0.5,
+              elevation: 4,
+            }}
+          >
+            <LottieView
+              style={{
+                height: screenHeight * 0.05,
+                width: screenHeight * 0.05,
+                alignSelf: "center",
+              }}
+              source={require("../../assets/lottie/spinner.json")}
+              autoPlay
+              speed={1}
+              loop={true}
+              resizeMode="cover"
+            />
+          </View>
+        </View>
+      )}
+
       {nextModal && (
         <SyncModal
           label={"Do you confirm the provided information?"}
