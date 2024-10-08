@@ -162,6 +162,7 @@ export const InspectionFarmerScreen = ({ route }) => {
         stationId: selectedGroup._kf_Station,
         groupID: selectedGroup.__kp_Group,
         setData: setFarmers,
+        queryArg: `SELECT * FROM rtc_farmers WHERE type = 'online' AND _kf_Station = '${selectedGroup._kf_Station}' AND _kf_Group = '${selectedGroup.__kp_Group}' AND deleted = 0`,
       });
     };
 
@@ -223,6 +224,7 @@ export const InspectionFarmerScreen = ({ route }) => {
         stationId: activeGroup._kf_Station,
         groupID: activeGroup.__kp_Group,
         setData: setFarmers,
+        queryArg: `SELECT * FROM rtc_farmers WHERE type = 'online' AND _kf_Station = '${activeGroup._kf_Station}' AND _kf_Group = '${activeGroup.__kp_Group}' AND deleted = 0`,
       });
     }
   }, [activeGroup]);
@@ -489,7 +491,7 @@ export const InspectionFarmerScreen = ({ route }) => {
               gap: screenHeight * 0.02,
             }}
           >
-            <Text style={{ textAlign: "center" }}>No farmers found</Text>
+            <Text style={{ textAlign: "center" }}>No active farmers found</Text>
             <TouchableOpacity onPress={handlePress}>
               <Text
                 style={{

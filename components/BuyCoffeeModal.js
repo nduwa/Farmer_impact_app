@@ -97,6 +97,7 @@ export const BuyCoffeeModal = ({ setIsBuyCoffeeModalOpen }) => {
               setIsBuyCoffeeModalOpen={setIsBuyCoffeeModalOpen}
               destination={"Unregistered_ATP_Farmer"}
               label={"Review Purchases"}
+              disabled={true}
             />
           </View>
         </Animated.View>
