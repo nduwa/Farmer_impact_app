@@ -6,32 +6,46 @@ import * as IntentLauncher from "expo-intent-launcher";
 export const openFile = async ({ fileName = null, filepath = null }) => {
   if (!fileName && !filepath) return;
 
-  let fileUri = null;
+  try {
+    let fileUri = null;
 
-  if (fileName) fileUri = `${FileSystem.documentDirectory}rtc_app/wetmill/${fileName}`;
+    if (fileName)
+      fileUri = `${FileSystem.documentDirectory}rtc_app/wetmill/${fileName}`;
 
-  if (filepath) fileUri = filepath;
+    if (filepath) fileUri = filepath;
 
-  FileSystem.getContentUriAsync(fileUri).then((cUri) => {
-    console.log(fileUri);
-    IntentLauncher.startActivityAsync("android.intent.action.VIEW", {
-      data: cUri,
-      flags: 1 | 268435456,
-      type: "application/pdf",
-    })
-      .then((result) => {
-        console.log("Intent result: ", result);
-        if (result.resultCode !== 0) {
-          Alert.alert(
-            "Error",
-            "Failed to open the PDF file. Please make sure a PDF viewer is installed."
-          );
+    let isIntentActive = false;
+    if (!isIntentActive) {
+      isIntentActive = true;
+
+      const cUri = await FileSystem.getContentUriAsync(fileUri);
+      console.log(fileUri);
+
+      const result = await IntentLauncher.startActivityAsync(
+        "android.intent.action.VIEW",
+        {
+          data: cUri,
+          flags: 1,
+          type: "application/pdf",
         }
-      })
-      .catch((error) => {
-        console.log("Error launching intent: ", error);
-      });
-  });
+      );
+
+      console.log("Intent result: ", result);
+
+      if (result.resultCode !== 0) {
+        Alert.alert(
+          "Error",
+          "Failed to open the PDF file. Please make sure a PDF viewer is installed."
+        );
+      }
+    } else {
+      console.log("Intent is still active, please wait for it to complete.");
+    }
+  } catch (error) {
+    console.log("Error launching intent: ", error);
+  } finally {
+    isIntentActive = false; // Reset the flag after the intent finishes or fails
+  }
 };
 
 const FileManager = () => {

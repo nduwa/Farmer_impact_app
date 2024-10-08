@@ -86,7 +86,6 @@ export const conclusionSchema = joi.object({
   drying_congestion: joi.string().required(),
   drying_congestion_comment: joi.string().required(),
   drying_congestion_photo1: joi.string().required(),
-  drying_congestion_photo2: joi.string().required(),
   drying_congestion_comment2: joi.string().required(),
 });
 

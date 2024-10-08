@@ -126,7 +126,7 @@ export const CheeriesAudit = ({
   useFocusEffect(
     React.useCallback(() => {
       formRef.current.setFieldValue("cherries_sms", cherriesSMS);
-      console.log(cherriesSMS)
+
       if (cherriesSMS > 0) setValidState(true);
       return () => {
         setDiscrepancy({

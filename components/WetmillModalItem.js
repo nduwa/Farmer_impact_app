@@ -8,6 +8,7 @@ export const WetmillModalItem = ({
   label,
   setIsWetmillModalOpen,
   icon,
+  disabled = false,
 }) => {
   const navigation = useNavigation();
 
@@ -18,6 +19,7 @@ export const WetmillModalItem = ({
 
   return (
     <TouchableOpacity
+      disabled={disabled}
       style={{
         flexDirection: "row",
         alignItems: "center",
@@ -26,6 +28,7 @@ export const WetmillModalItem = ({
         paddingVertical: 10,
         paddingHorizontal: 18,
         borderRadius: 12,
+        opacity: disabled ? 0.6 : 1,
         ...Platform.select({
           ios: {
             shadowColor: "black",

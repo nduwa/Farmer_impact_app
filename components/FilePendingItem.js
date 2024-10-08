@@ -14,10 +14,6 @@ export const FilePendingItem = ({ data, index, date, uploadFn, deleteFn }) => {
   const screenWidth = Dimensions.get("window").width;
   const navigation = useNavigation();
 
-  const readFile = async (uri) => {
-    await openFile({ filepath: uri });
-    // navigation.navigate("Filemanager");
-  };
   return (
     <View
       style={{
@@ -60,6 +56,22 @@ export const FilePendingItem = ({ data, index, date, uploadFn, deleteFn }) => {
               color: colors.black_letter,
             }}
           >
+            {data.station_name}
+          </Text>
+          <Text
+            style={{
+              fontSize: screenWidth * 0.035,
+              color: colors.black_letter,
+            }}
+          >
+            {data.user_name}
+          </Text>
+          <Text
+            style={{
+              fontSize: screenWidth * 0.035,
+              color: colors.black_letter,
+            }}
+          >
             File type: pdf
           </Text>
           <Text
@@ -85,7 +97,11 @@ export const FilePendingItem = ({ data, index, date, uploadFn, deleteFn }) => {
             labelColor="white"
             active={true}
             handlePress={() =>
-              deleteFn({ id: data.id, uri: data.filepath, open: true })
+              deleteFn({
+                id: data.id,
+                uri: data.filepath,
+                open: true,
+              })
             }
             icon={<Ionicons name="trash" size={24} color={"white"} />}
           />
@@ -103,13 +119,21 @@ export const FilePendingItem = ({ data, index, date, uploadFn, deleteFn }) => {
         }}
       >
         <SimpleIconButton
-          handlePress={async () => await readFile(data.filepath)}
+          handlePress={() => openFile({ filepath: data.filepath })}
           label={"Preview"}
           icon={<Ionicons name="reader" size={24} color="white" />}
           color={colors.black}
         />
         <SimpleIconButton
-          handlePress={() => uploadFn(data.filepath)}
+          handlePress={() =>
+            uploadFn({
+              open: true,
+              id: data.id,
+              uri: data.filepath,
+              station: data.station_name,
+              user: data.user_name,
+            })
+          }
           label={"Upload"}
           color={colors.blue_font}
           icon={<Ionicons name="cloud-upload" size={24} color="white" />}

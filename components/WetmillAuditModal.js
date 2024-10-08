@@ -23,7 +23,7 @@ export const WetmillAuditModal = ({ setIsWetmillModalOpen }) => {
   const handleClick = () => {
     setInitClose(true);
   };
-  
+
   const translateY = animation.interpolate({
     inputRange: [0, 1],
     outputRange: [
@@ -97,6 +97,7 @@ export const WetmillAuditModal = ({ setIsWetmillModalOpen }) => {
               setIsWetmillModalOpen={setIsWetmillModalOpen}
               type={"offseason"}
               label={"Off-season"}
+              disabled={true}
               icon={<MaterialIcons name="power-off" size={24} color="black" />}
             />
           </View>

@@ -73,7 +73,18 @@ export const PricingAudit = ({
         },
       };
 
-      if (!validateForm(bucketsObj, pricingSchema)) return;
+      if (bucketsYield > 0) {
+        if (!validateForm(bucketsObj, pricingSchema)) return;
+      } else {
+        bucketsObj = {
+          ...bucketsObj,
+          ...{
+            discrepancy_perc_pricing: "0",
+            discrepancy_buckets_pricing: "0",
+            buckets_theory: "0",
+          },
+        };
+      }
 
       setAudit((prevState) => ({ ...prevState, ...bucketsObj }));
       setNextModal(true);
@@ -249,7 +260,13 @@ export const PricingAudit = ({
                       gap: 5,
                     }}
                     selected={choice}
-                    onSelected={(value) => setChoice(value)}
+                    onSelected={(value) => {
+                      if (bucketsYield > 0) {
+                        setChoice(value);
+                      } else {
+                        setChoice(false);
+                      }
+                    }}
                     radioBackground={colors.secondary}
                   >
                     <RadioButtonItem

@@ -6,7 +6,7 @@ export const auditSubmission = createAsyncThunk(
   async (data) => {
     try {
       const response = await api.post(
-        `/sync/wetmill?filepath=${data.filepath}`,
+        `/sync/wetmill?filepath=${data.filepath}&station=${data.station}&user=${data.user}`,
         data.formData,
         {
           headers: {
@@ -16,7 +16,7 @@ export const auditSubmission = createAsyncThunk(
       );
 
       let resp = null;
-      if (response.status === 200) {
+      if (response.status == 200) {
         console.log("Wetmill audit session Submitted");
         resp = response.data;
       } else {

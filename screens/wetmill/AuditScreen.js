@@ -46,6 +46,7 @@ export const AuditScreen = ({ route }) => {
   const screenWidth = Dimensions.get("window").width;
   const navigation = useNavigation();
   const dispatch = useDispatch();
+  const userState = useSelector((state) => state.user);
   const closedTrActionsState = useSelector((state) => state.closedTransaction);
 
   const { data } = route.params;
@@ -68,11 +69,16 @@ export const AuditScreen = ({ route }) => {
   const [parchYield, setParchYield] = useState(0);
   const [bucketsYield, setBucketsYield] = useState(0);
   const [parchDayEstimate, setParchDayEstimate] = useState(0);
+  const [exitModalOpen, setExitModalOpen] = useState(false);
 
-  const congestionList = [{ id: 1, name: "A little" }];
+  const congestionList = [
+    { id: 1, name: "A little" },
+    { id: 2, name: "a lot" },
+    { id: 3, name: "none" },
+  ];
 
   const handleBackButton = () => {
-    navigation.navigate("WetmillHomeScreen", { data: null });
+    navigation.navigate("ChooseStationScreen", { data: null });
   };
 
   const getDate = () => {
@@ -102,7 +108,6 @@ export const AuditScreen = ({ route }) => {
         setFileSaved,
         location
       );
-      console.log(location);
     } else {
       displayToast("Could not get coordinates");
     }
@@ -136,8 +141,10 @@ export const AuditScreen = ({ route }) => {
 
       let totalkgs = total_kilograms + total_bad_kilograms;
 
-      setReportedCherries(parseInt(totalkgs));
-      setBucketsYield(parseInt(total_buckets));
+      if (isNaN(totalkgs) || !totalkgs) setExitModalOpen(true);
+
+      setReportedCherries(parseInt(totalkgs) || 0);
+      setBucketsYield(parseInt(total_buckets) || 0);
       setLoading(false);
       dispatch(closedTrActions.resetClosedTrState());
     }
@@ -184,6 +191,8 @@ export const AuditScreen = ({ route }) => {
           {
             created_at: getCurrentDate(),
             filepath: fileSaved.uri,
+            station_name: data.Name,
+            user_name: userState.userData.user.Name_Full,
           },
         ],
         setCurrentJob,
@@ -240,6 +249,7 @@ export const AuditScreen = ({ route }) => {
         setParchYield(0);
         setParchDayEstimate(0);
         setCurrentJob();
+        setExitModalOpen(false);
         setFileSaved({ status: false, uri: null });
         dispatch(closedTrActions.resetClosedTrState());
       };
@@ -484,6 +494,17 @@ export const AuditScreen = ({ route }) => {
           label={"Do you confirm the provided information?"}
           onYes={handleSave}
           OnNo={() => setNextModal(false)}
+        />
+      )}
+
+      {exitModalOpen && (
+        <SyncModal
+          label={
+            "This station doesn't have sufficient data for the audit to be done, contact support"
+          }
+          mandatory={true}
+          onYes={handleBackButton}
+          OnNo={() => setExitModalOpen(false)}
         />
       )}
 

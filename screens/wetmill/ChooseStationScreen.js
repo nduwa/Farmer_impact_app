@@ -116,6 +116,7 @@ export const ChooseStationScreen = ({ route }) => {
 
     if (stations.length > 0) {
       handleDataPagination(data);
+      scrollToTop();
     } else {
       setLoadingData(false);
       setLoadingPage(false);

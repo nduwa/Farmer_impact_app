@@ -311,9 +311,9 @@ const generateBulkValueString = (
   } else if (tableName === "wetmillaudit") {
     let bulkValues = "";
     for (let i = 0; i < data.length; i++) {
-      bulkValues += `('${data[i].created_at}','${data[i].filepath}',${
-        data[i].uploaded || 0
-      })`;
+      bulkValues += `('${data[i].created_at}','${data[i].filepath}','${
+        data[i].station_name
+      }','${data[i].user_name}',${data[i].uploaded || 0})`;
       if (i < data.length - 1) bulkValues += ",";
     }
 

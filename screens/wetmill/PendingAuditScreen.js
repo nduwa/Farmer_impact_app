@@ -13,7 +13,7 @@ import { StatusBar } from "expo-status-bar";
 import { AntDesign } from "@expo/vector-icons";
 import LottieView from "lottie-react-native";
 import { retrieveDBdata } from "../../helpers/retrieveDBdata";
-import { SurveyPendingCard } from "../../components/SurveyPendingCard";
+import * as SecureStore from "expo-secure-store";
 import { deleteDBdataAsync } from "../../helpers/deleteDBdataAsync";
 import { SyncModal } from "../../components/SyncModal";
 import { deleteFile } from "../../helpers/deleteFile";
@@ -34,13 +34,15 @@ export const PendingAuditScreen = () => {
   const auditState = useSelector((state) => state.audit);
 
   const [audits, setAudits] = useState([]);
-
+  const [stationName, setStationName] = useState("");
   const [currentJob, setCurrentJob] = useState(null);
   const [loading, setLoading] = useState(false);
   const [uploadModal, setUploadModal] = useState({
     open: false,
     id: null,
     uri: null,
+    station: null,
+    user: null,
   });
   const [deleteModal, setDeleteModal] = useState({
     open: false,
@@ -74,20 +76,34 @@ export const PendingAuditScreen = () => {
     setAudits(allAudits);
   };
 
+  const extractFileName = (uri) => {
+    let tmpArr = uri.split("/");
+
+    return tmpArr[tmpArr.length - 1];
+  };
   const handleUpload = () => {
     let fileUri = uploadModal.uri;
     setLoading(true);
 
     const formData = new FormData();
-    const fileName = generateFileName();
+    const fileName = extractFileName(fileUri);
 
+    // console.log(fileUri);
+    // return;
     formData.append("wetmillaudit_file", {
       uri: fileUri,
       name: fileName,
       type: "application/pdf",
     });
 
-    dispatch(auditSubmission(formData));
+    dispatch(
+      auditSubmission({
+        formData,
+        filepath: `wetmill/${stationName}/${fileName}`,
+        station: uploadModal.station,
+        user: uploadModal.user,
+      })
+    );
   };
 
   const handleDelete = async () => {
@@ -131,6 +147,7 @@ export const PendingAuditScreen = () => {
         displayToast("Something went wrong");
       }
 
+      dispatch(auditActions.resetAuditState());
       setUploadModal((prevState) => ({ ...prevState, open: false }));
     }
   }, [auditState.error]);
@@ -139,6 +156,7 @@ export const PendingAuditScreen = () => {
     if (auditState.serverResponded) {
       let surveyId = uploadModal.id;
 
+      setLoading(false);
       if (!surveyId) return;
 
       updateDBdata({
@@ -163,14 +181,26 @@ export const PendingAuditScreen = () => {
         setLoading(false);
         displayToast("Audit uploaded");
         dispatch(auditActions.resetAuditState());
-        setUploadModal({ open: false, id: null, uri: null });
+        setUploadModal({
+          open: false,
+          id: null,
+          uri: null,
+          station: null,
+          user: null,
+        });
         setCurrentJob();
       });
     } else if (currentJob === "Deletion failed") {
       setLoading(false);
       displayToast("Error: Deleting failed");
       dispatch(auditActions.resetAuditState());
-      setUploadModal({ open: false, id: null, uri: null });
+      setUploadModal({
+        open: false,
+        id: null,
+        uri: null,
+        station: null,
+        user: null,
+      });
       setCurrentJob();
     }
   }, [currentJob]);
@@ -179,6 +209,11 @@ export const PendingAuditScreen = () => {
     React.useCallback(() => {
       const fetchData = async () => {
         setLoading(true);
+        let station_name = await SecureStore.getItemAsync("rtc-station-name");
+
+        if (station_name) {
+          setStationName(station_name);
+        }
 
         retrieveDBdata({
           tableName: "tmp_wetmill_audit",
@@ -246,11 +281,11 @@ export const PendingAuditScreen = () => {
           initialNumToRender={10}
           renderItem={({ item, index }) => (
             <FilePendingItem
-              data={{ filepath: item.filepath, id: item.id }}
+              data={item}
               date={formatDate(item.created_at)}
               index={index}
               deleteFn={setDeleteModal}
-              uploadFn={handleUpload}
+              uploadFn={setUploadModal}
             />
           )}
           keyExtractor={(item) => item.id}
@@ -259,13 +294,15 @@ export const PendingAuditScreen = () => {
 
       {uploadModal.open && (
         <SyncModal
-          label={"You are about to upload this survey, proceed?"}
+          label={"You are about to upload this report file, proceed?"}
           onYes={handleUpload}
           OnNo={() => {
             setUploadModal({
               open: false,
               id: null,
               uri: null,
+              station: null,
+              user: null,
             });
             setLoading(false);
           }}
