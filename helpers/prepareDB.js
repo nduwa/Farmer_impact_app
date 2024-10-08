@@ -64,7 +64,7 @@ export const prepareTables = async () => {
         created_by varchar(255) NOT NULL,
         registered_at datetime NOT NULL,
         updated_at datetime NULL,
-        type VARCHAR(255) NOT NULL CHECK (type IN ('new','updated','offline','deleted')),
+        type VARCHAR(255) NOT NULL CHECK (type IN ('new','updated','offline','online','deleted')),
         sync_farmers int(11) NOT NULL,
         uploaded int(11) NOT NULL,
         uploaded_at datetime DEFAULT NULL,
@@ -669,8 +669,10 @@ export const prepareTables = async () => {
       id integer primary key AUTOINCREMENT,
       created_at datetime NOT NULL,
       filepath varchar(255) NOT NULL,
+      station_name varchar(255) NOT NULL,
+      user_name varchar(255) NOT NULL,
       uploaded integer NOT NULL
-    )`,
+      )`,
       [],
       () => console.log(`Table tmp_wetmill_audit created successfully`),
       (_, error) =>

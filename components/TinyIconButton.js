@@ -6,6 +6,7 @@ const TinyIconButton = ({
   label,
   handlePress,
   width = "45%",
+  heightRatio = 0.035,
   active = true,
   selected = false,
   color = colors.secondary,
@@ -26,7 +27,7 @@ const TinyIconButton = ({
         justifyContent: "center",
         gap: screenWidth * 0.01,
         backgroundColor: color,
-        height: screenHeight * 0.035,
+        height: screenHeight * heightRatio,
         borderRadius: screenHeight * 0.045,
         borderLeftWidth: screenWidth * 0.03,
         borderRightWidth: screenWidth * 0.03,
@@ -36,6 +37,7 @@ const TinyIconButton = ({
         width,
         elevation: 3,
         opacity: active ? 1 : 0.4,
+        zIndex: 15,
       }}
     >
       {icon && icon}

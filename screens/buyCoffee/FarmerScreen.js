@@ -77,6 +77,7 @@ export const FarmerScreen = () => {
         groupID: activeGroup.__kp_Group,
         setData: setFarmers,
         setEmpty: setEmptyResults,
+        queryArg: `SELECT * FROM rtc_farmers WHERE type = 'online' AND _kf_Station = '${activeGroup._kf_Station}' AND _kf_Group = '${activeGroup.__kp_Group}' AND deleted = 0`,
       });
     }
   }, [activeGroup]);
@@ -93,6 +94,7 @@ export const FarmerScreen = () => {
         groupID: selectedGroup.__kp_Group,
         setData: setFarmers,
         setEmpty: setEmptyResults,
+        queryArg: `SELECT * FROM rtc_farmers WHERE type = 'online' AND _kf_Station = '${selectedGroup._kf_Station}' AND _kf_Group = '${selectedGroup.__kp_Group}' AND deleted = 0`,
       });
     };
 
@@ -360,7 +362,7 @@ export const FarmerScreen = () => {
                 gap: screenHeight * 0.02,
               }}
             >
-              <Text style={{ textAlign: "center" }}>No farmers found</Text>
+              <Text style={{ textAlign: "center" }}>No active farmers found</Text>
               <TouchableOpacity onPress={handlePress}>
                 <Text
                   style={{
@@ -376,7 +378,7 @@ export const FarmerScreen = () => {
               </TouchableOpacity>
             </View>
           )}
-          
+
           {groups.length < 1 && !loadingData && (
             <View
               style={{

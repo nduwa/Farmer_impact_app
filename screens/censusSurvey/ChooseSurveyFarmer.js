@@ -91,7 +91,7 @@ export const ChooseSurveyFarmerScreen = ({ route }) => {
       retrieveDBdata({
         tableName: "farmers",
         setData: setFarmers,
-        queryArg: `SELECT farmer.*,household.* FROM rtc_farmers AS farmer INNER JOIN rtc_households AS household ON farmer._kf_Household = household.__kp_Household WHERE farmer.deleted = 0 AND household._kf_Group='${activeGroup.__kp_Group}'`,
+        queryArg: `SELECT farmer.*,household.* FROM rtc_farmers AS farmer INNER JOIN rtc_households AS household ON farmer._kf_Household = household.__kp_Household WHERE farmer.deleted = 0 AND household._kf_Group='${activeGroup.__kp_Group}' AND farmer.type = 'online'`,
       });
     }
   }, [activeGroup]);
@@ -103,7 +103,7 @@ export const ChooseSurveyFarmerScreen = ({ route }) => {
       retrieveDBdata({
         tableName: "farmers",
         setData: setFarmers,
-        queryArg: `SELECT farmer.*,household.* FROM rtc_farmers AS farmer INNER JOIN rtc_households AS household ON farmer._kf_Household = household.__kp_Household WHERE farmer.deleted = 0 AND farmer.sync = 1 AND household._kf_Group='${selectedGroup.__kp_Group}'`,
+        queryArg: `SELECT farmer.*,household.* FROM rtc_farmers AS farmer INNER JOIN rtc_households AS household ON farmer._kf_Household = household.__kp_Household WHERE farmer.deleted = 0 AND farmer.sync = 1 AND household._kf_Group='${selectedGroup.__kp_Group}' AND farmer.type = 'online'`,
       });
     };
 
@@ -367,7 +367,7 @@ export const ChooseSurveyFarmerScreen = ({ route }) => {
                 gap: screenHeight * 0.02,
               }}
             >
-              <Text style={{ textAlign: "center" }}>No farmers found</Text>
+              <Text style={{ textAlign: "center" }}>No active farmers found</Text>
               <TouchableOpacity onPress={handlePress}>
                 <Text
                   style={{

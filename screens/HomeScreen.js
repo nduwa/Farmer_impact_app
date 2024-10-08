@@ -447,7 +447,7 @@ export const HomeScreen = ({ route }) => {
           {isAccessable(["Wet mill audit"]) && (
             <OpCard
               name={t("homepage.audit")}
-              active={false}
+              active={isAccessable(["Wet mill audit"])}
               destination={"WetmillHomeScreen"}
             />
           )}

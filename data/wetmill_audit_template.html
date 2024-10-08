@@ -100,12 +100,27 @@
         column-gap: 8px;
         row-gap: 8px;
       }
+      .location {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        gap: 0.3rem;
+      }
+      .location a {
+        font-size: 0.9rem;
+        text-decoration: none;
+        color: #864100;
+      }
+      .img-icon {
+        height: 20px;
+      }
     </style>
   </head>
   <body>
     <div class="container">
       <div class="header">
-        <img src="../data/images/RTC Logo1.png" alt="logo" class="logo" />
+        <img src="../data/images/rtclogo.png" alt="logo" class="logo" />
         <div class="details">
           <label>Rwanda Trading Company</label>
           <label>Kigali, Masoro, PEZ Phase I</label>
@@ -331,6 +346,13 @@
         <div class="section-content">
           <div class="answer">> Approved</div>
         </div>
+      </div>
+
+      <div class="location">
+        <img src="../data/images/location.png" alt="" class="img-icon" />
+        <a href="http://maps.google.com/maps?z=12&t=m&q=loc:-1.866826+30.401445"
+          >http://maps.google.com/maps?z=12&t=m&q=loc:-1.866826+30.401445</a
+        >
       </div>
     </div>
   </body>

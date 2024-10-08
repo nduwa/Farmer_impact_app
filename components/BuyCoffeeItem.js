@@ -9,6 +9,7 @@ export const BuyCoffeeItem = ({
   destination,
   label,
   setIsBuyCoffeeModalOpen,
+  disabled = false,
 }) => {
   const navigation = useNavigation();
 
@@ -19,6 +20,7 @@ export const BuyCoffeeItem = ({
 
   return (
     <TouchableOpacity
+      disabled={disabled}
       style={{
         flexDirection: "row",
         gap: 20,
@@ -26,6 +28,7 @@ export const BuyCoffeeItem = ({
         paddingVertical: 10,
         paddingHorizontal: 18,
         borderRadius: 12,
+        opacity: disabled ? 0.6 : 1,
         ...Platform.select({
           ios: {
             shadowColor: "black",

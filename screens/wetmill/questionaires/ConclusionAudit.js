@@ -36,7 +36,6 @@ export const ConclusionAudit = ({
 
   const [selectedImage, setSelectedImage] = useState({
     drying_congestion_photo1: null,
-    drying_congestion_photo2: null,
   });
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
   const [errors, setErrors] = useState({}); // validation errors
@@ -88,11 +87,6 @@ export const ConclusionAudit = ({
         setSelectedImage((prevState) => ({
           ...prevState,
           drying_congestion_photo1: fileUri,
-        }));
-      } else if (use === "2") {
-        setSelectedImage((prevState) => ({
-          ...prevState,
-          drying_congestion_photo2: fileUri,
         }));
       }
 
@@ -165,9 +159,6 @@ export const ConclusionAudit = ({
           drying_congestion_photo1:
             responses.drying_congestion_photo1 ||
             selectedImage.drying_congestion_photo1,
-          drying_congestion_photo2:
-            responses.drying_congestion_photo2 ||
-            selectedImage.drying_congestion_photo2,
         },
       };
 
@@ -194,13 +185,6 @@ export const ConclusionAudit = ({
     let i = 0;
     if (Object.keys(errors).length > 0) {
       if (Object.keys(errors)[i] === "drying_congestion_photo1") {
-        setValidationError({
-          type: "emptyOrInvalidData",
-          message: `Not enough photos provided for drying tables congestion`,
-          inputBox: null,
-        });
-        i++;
-      } else if (Object.keys(errors)[i] === "drying_congestion_photo2") {
         setValidationError({
           type: "emptyOrInvalidData",
           message: `Not enough photos provided for drying tables congestion`,
@@ -245,7 +229,6 @@ export const ConclusionAudit = ({
       setChoice(responses.drying_congestion || null);
       setSelectedImage({
         drying_congestion_photo1: responses.drying_congestion_photo1 || null,
-        drying_congestion_photo2: responses.drying_congestion_photo2 || null,
       });
       return () => {
         if (formRef.current) {
@@ -260,8 +243,6 @@ export const ConclusionAudit = ({
           setSelectedImage({
             drying_congestion_photo1:
               responses.drying_congestion_photo1 || null,
-            drying_congestion_photo2:
-              responses.drying_congestion_photo2 || null,
           });
         }
       };
@@ -455,49 +436,6 @@ export const ConclusionAudit = ({
                 active={true}
                 error={errors.drying_congestion_comment2}
               />
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  width: "100%",
-                }}
-              >
-                <SimpleIconButton
-                  label={"Take picture"}
-                  width="60%"
-                  color={
-                    selectedImage.drying_congestion_photo2
-                      ? colors.green
-                      : colors.blue_font
-                  }
-                  labelColor="white"
-                  active={true}
-                  mv={screenHeight * 0.01}
-                  handlePress={() => openCamera("2")}
-                  icon={<Entypo name="camera" size={24} color="white" />}
-                />
-                <SimpleIconButton
-                  label={"Gallery"}
-                  width="38%"
-                  color={
-                    selectedImage.drying_congestion_photo2
-                      ? colors.green
-                      : colors.black
-                  }
-                  labelColor="white"
-                  active={true}
-                  mv={screenHeight * 0.01}
-                  handlePress={() => pickImage("2")}
-                  icon={
-                    <MaterialIcons
-                      name="photo-library"
-                      size={24}
-                      color="white"
-                    />
-                  }
-                />
-              </View>
 
               {androidVersion < 34 ? (
                 <>

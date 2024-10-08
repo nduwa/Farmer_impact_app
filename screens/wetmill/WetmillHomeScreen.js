@@ -85,7 +85,10 @@ export const WetmillHomeScreen = () => {
               label={"New Audit Report"}
               actionFn={setIsWetmillModalOpen}
             />
-            <WetmillItem label={"Pending Reports"} />
+            <WetmillItem
+              label={"Pending Reports"}
+              destination={"PendingAuditScreen"}
+            />
           </View>
         </ScrollView>
       </View>
