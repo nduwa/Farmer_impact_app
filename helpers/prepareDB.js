@@ -104,7 +104,7 @@ export const prepareTables = async () => {
         householdid varchar(255) NOT NULL,
         z_Farmer_Primary varchar(255) NOT NULL,
         created_at datetime NOT NULL,
-        type VARCHAR(255) NOT NULL CHECK (type IN ('new', 'offline')),
+        type VARCHAR(255) NOT NULL CHECK (type IN ('new', 'offline','online')),
         farmerid varchar(255) NOT NULL,
         group_id varchar(255) NOT NULL,
         STP_Weight double NOT NULL,
