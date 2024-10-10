@@ -492,7 +492,7 @@ export const InspectionFarmerScreen = ({ route }) => {
             }}
           >
             <Text style={{ textAlign: "center" }}>No active farmers found</Text>
-            <TouchableOpacity onPress={handlePress}>
+            <TouchableOpacity onPress={handleSync}>
               <Text
                 style={{
                   textAlign: "center",

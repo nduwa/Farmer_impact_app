@@ -271,9 +271,8 @@ export const TrainingFarmers = ({ route }) => {
   useEffect(() => {
     if (groups.length > 0) {
       setActiveGroup(groups[0]);
-    } else {
-      setLoadingData(false);
     }
+    setLoadingData(false);
   }, [groups]);
 
   useFocusEffect(
