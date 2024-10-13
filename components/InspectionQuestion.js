@@ -14,10 +14,12 @@ import { AntDesign } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { ItemPickerInput } from "./ItemPickerInput";
 import { getCurrentDate } from "../helpers/getCurrentDate";
+import { useTranslation } from "react-i18next";
 
 const InspectionQuestion = ({ data, question, setQnAnswer, currentAnswer }) => {
   const screenWidth = Dimensions.get("window").width;
   const screenHeight = Dimensions.get("window").height;
+  const { t } = useTranslation();
 
   const [date, setDate] = useState(currentAnswer?.complianceDate || new Date());
   const [answer, setAnswer] = useState({
@@ -238,7 +240,7 @@ const InspectionQuestion = ({ data, question, setQnAnswer, currentAnswer }) => {
                 <Text
                   style={{ fontSize: screenWidth * 0.04, fontWeight: "500" }}
                 >
-                  • When can the compliance be met?
+                  • {t("inspection.question_card.compliance_deadline")}
                 </Text>
                 <View
                   style={{
@@ -297,7 +299,7 @@ const InspectionQuestion = ({ data, question, setQnAnswer, currentAnswer }) => {
                   )}
                 </View>
                 <ItemPickerInput
-                  label={"Describe your observation on level of compliance"}
+                  label={t("inspection.question_card.observation_level")}
                   setChoice={(value) => {
                     handleAnswer({ ans: answer.answer, expl: value });
                   }}

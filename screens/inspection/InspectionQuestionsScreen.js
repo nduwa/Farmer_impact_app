@@ -21,6 +21,7 @@ import { useDispatch, useSelector } from "react-redux";
 import LottieView from "lottie-react-native";
 import { getCurrentDate } from "../../helpers/getCurrentDate";
 import { useTranslation } from "react-i18next";
+import ProgressBar from "../../components/ProgressBar";
 
 export const InspectionQuestionsScreen = ({ route }) => {
   const screenWidth = Dimensions.get("window").width;
@@ -53,8 +54,10 @@ export const InspectionQuestionsScreen = ({ route }) => {
   const [submitted, setSubmitted] = useState(false);
   const [loadingData, setLoadingData] = useState(false);
   const [loadingPage, setLoadingPage] = useState(false);
+  const [inspectionTitle, setInspectionTitle] = useState();
 
   const [info, setInfo] = useState({});
+  const [progress, setProgress] = useState(0);
 
   const handleSync = () => {
     navigation.navigate("Sync", { data: null });
@@ -68,8 +71,7 @@ export const InspectionQuestionsScreen = ({ route }) => {
     if (!submitted && questions.length > 0 && !exitModal.open) {
       setExitModal({
         open: true,
-        label:
-          "You haven't submitted the inspection, unsubmitted answers can not be recovered. are you sure?",
+        label: t("inspection.exit_inspection"),
       });
       return;
     }
@@ -98,7 +100,7 @@ export const InspectionQuestionsScreen = ({ route }) => {
     if (answers.length < questions.length) {
       setvalidationModal({
         open: true,
-        label: "Can't submit, this inspection contains unanswered questions.",
+        label: t("inspection.submit_error"),
       });
       return;
     }
@@ -207,10 +209,6 @@ export const InspectionQuestionsScreen = ({ route }) => {
   };
 
   useEffect(() => {
-    console.log(answers);
-  }, [answers]);
-
-  useEffect(() => {
     if (currentJob === "Responses saved") {
       displayToast("Responses saved");
       setSubmitted(true);
@@ -250,7 +248,14 @@ export const InspectionQuestionsScreen = ({ route }) => {
   useEffect(() => {
     handleQnsPagination();
     scrollToTop();
-  }, [currentPage]);
+
+    if (totalPages > 0) {
+      let ratio = currentPage / totalPages;
+      console.log(`${currentPage} / ${totalPages} = ${ratio}`);
+
+      setProgress(ratio);
+    }
+  }, [currentPage, totalPages]);
 
   useEffect(() => {
     if (displayQuestions.length > 0) {
@@ -269,16 +274,22 @@ export const InspectionQuestionsScreen = ({ route }) => {
       let inspectionStr = "";
       let query = null;
 
-      if (data.inspectionType.toLowerCase().includes("generic"))
+      if (data.inspectionType.toLowerCase().includes("generic")) {
         inspectionStr = "Generic";
-      else if (data.inspectionType.toLowerCase().includes("special"))
+        setInspectionTitle(t("inspection.inspection_list.generic_inspection"));
+      } else if (data.inspectionType.toLowerCase().includes("special")) {
         inspectionStr = "Special";
-      else if (data.inspectionType.toLowerCase().includes("cafe"))
+        setInspectionTitle(t("inspection.inspection_list.special_inspection"));
+      } else if (data.inspectionType.toLowerCase().includes("cafe")) {
         inspectionStr = "CAFE";
-      else if (data.inspectionType.toLowerCase().includes("rfa"))
+        setInspectionTitle(t("inspection.inspection_list.cafe_inspection"));
+      } else if (data.inspectionType.toLowerCase().includes("rfa")) {
         inspectionStr = "RFA";
-      else if (data.inspectionType.toLowerCase().includes("advanced"))
+        setInspectionTitle(t("inspection.inspection_list.rfa_inspection"));
+      } else if (data.inspectionType.toLowerCase().includes("advanced")) {
         inspectionStr = "Advanced";
+        setInspectionTitle(t("inspection.inspection_list.advanced_inspection"));
+      }
 
       if (inspectionStr === "") return;
 
@@ -323,6 +334,7 @@ export const InspectionQuestionsScreen = ({ route }) => {
       setInfo(userInfo);
 
       return () => {
+        setProgress(0);
         setAnswers([]);
         setQuestions([]);
         setCurrentPage(1);
@@ -370,7 +382,7 @@ export const InspectionQuestionsScreen = ({ route }) => {
             fontSize: 19,
           }}
         >
-          {data.inspectionType}
+          {inspectionTitle || data.inspectionType}
         </Text>
         <View
           style={{ width: screenWidth * 0.07, backgroundColor: "transparent" }}
@@ -381,6 +393,7 @@ export const InspectionQuestionsScreen = ({ route }) => {
           style={{
             justifyContent: "center",
             alignItems: "center",
+            gap: screenWidth * 0.025,
             backgroundColor: colors.white,
             padding: screenHeight * 0.02,
             borderRadius: screenHeight * 0.01,
@@ -391,6 +404,7 @@ export const InspectionQuestionsScreen = ({ route }) => {
           <Text style={{ fontSize: screenHeight * 0.02, fontWeight: "700" }}>
             {data.farmerId} / {data.farmerName}
           </Text>
+          <ProgressBar progress={progress} />
         </View>
         <View style={{ flex: 1 }}>
           {loadingData && (
@@ -448,7 +462,9 @@ export const InspectionQuestionsScreen = ({ route }) => {
                 gap: screenHeight * 0.02,
               }}
             >
-              <Text style={{ textAlign: "center" }}>No questions found</Text>
+              <Text style={{ textAlign: "center" }}>
+                {t("misc.sync_warning.no_questions_warning")}
+              </Text>
               <TouchableOpacity onPress={handleSync}>
                 <Text
                   style={{
@@ -459,7 +475,7 @@ export const InspectionQuestionsScreen = ({ route }) => {
                     textDecorationLine: "underline",
                   }}
                 >
-                  Perform data synchronization?
+                  {t("misc.sync_warning.sync_button")}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -478,7 +494,7 @@ export const InspectionQuestionsScreen = ({ route }) => {
 
       {submitModalOpen && (
         <SyncModal
-          label={`Are you sure you want to submit inspection now?`}
+          label={t("inspection.submit_inspection")}
           onYes={() => {
             setSubmitModalOpen(false);
             handleSubmit();
@@ -521,6 +537,7 @@ export const InspectionQuestionsScreen = ({ route }) => {
             backgroundColor: "transparent",
             alignItems: "center",
             justifyContent: "center",
+            zIndex: 20,
           }}
         >
           <View

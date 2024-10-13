@@ -3,13 +3,13 @@ import { Dimensions, Text, TouchableOpacity } from "react-native";
 import { colors } from "../data/colors";
 import { AntDesign } from "@expo/vector-icons";
 
-export const InspectionItem = ({ label }) => {
+export const InspectionItem = ({ label, destination }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const navigation = useNavigation();
 
   const handlePress = () => {
-    navigation.replace("inspectionFarmer", { data: label });
+    navigation.replace("inspectionFarmer", { data: destination });
   };
 
   return (

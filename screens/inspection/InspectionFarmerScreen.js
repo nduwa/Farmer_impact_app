@@ -24,12 +24,14 @@ import { GroupsModal } from "../../components/GroupsModal";
 import { InspectionHoverSubmitBtn } from "../../components/InspectionHoverSubmitBtn";
 import { InspectionHoverPrevBtn } from "../../components/InspectionHoverPrevBtn";
 import LottieView from "lottie-react-native";
+import { useTranslation } from "react-i18next";
 
 export const InspectionFarmerScreen = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const navigation = useNavigation();
   const flatListRef = useRef(null);
+  const { t } = useTranslation();
 
   const [farmers, setFarmers] = useState([]);
   const [farmersXhouseholdsData, setFarmersXhouseholdsData] = useState([]); // each farmer info is merged with their corresponding household data
@@ -212,6 +214,8 @@ export const InspectionFarmerScreen = ({ route }) => {
         });
       }
     } else {
+      setDisplayData([]);
+      setHouseholds([]);
       setLoadingData(false);
       setLoadingPage(false);
     }
@@ -316,7 +320,7 @@ export const InspectionFarmerScreen = ({ route }) => {
             fontSize: 19,
           }}
         >
-          Choose Farmer For Inspection
+          {t("inspection.farmerpage_title")}
         </Text>
         <View
           style={{ width: screenWidth * 0.07, backgroundColor: "transparent" }}
@@ -397,7 +401,7 @@ export const InspectionFarmerScreen = ({ route }) => {
 
                 <TextInput
                   placeholderTextColor={colors.black_a}
-                  placeholder="Farmer Name, Household or Farmer ID"
+                  placeholder={t("inspection.search_bar.placeholder")}
                   onChangeText={(text) => {
                     handleChange("search")(text);
                     handleSearch(text);
@@ -491,7 +495,9 @@ export const InspectionFarmerScreen = ({ route }) => {
               gap: screenHeight * 0.02,
             }}
           >
-            <Text style={{ textAlign: "center" }}>No active farmers found</Text>
+            <Text style={{ textAlign: "center" }}>
+              {t("misc.sync_warning.no_active_farmers_warning")}
+            </Text>
             <TouchableOpacity onPress={handleSync}>
               <Text
                 style={{
@@ -502,7 +508,7 @@ export const InspectionFarmerScreen = ({ route }) => {
                   textDecorationLine: "underline",
                 }}
               >
-                Perform data synchronization?
+                {t("misc.sync_warning.sync_button")}
               </Text>
             </TouchableOpacity>
           </View>
@@ -514,7 +520,9 @@ export const InspectionFarmerScreen = ({ route }) => {
               gap: screenHeight * 0.02,
             }}
           >
-            <Text style={{ textAlign: "center" }}>No active groups found</Text>
+            <Text style={{ textAlign: "center" }}>
+              {t("misc.sync_warning.no_active_groups_warning")}
+            </Text>
             <TouchableOpacity onPress={handleActivateGroups}>
               <Text
                 style={{
@@ -525,7 +533,7 @@ export const InspectionFarmerScreen = ({ route }) => {
                   textDecorationLine: "underline",
                 }}
               >
-                Activate groups?
+                {t("misc.sync_warning.activate_grps_button")}
               </Text>
             </TouchableOpacity>
           </View>

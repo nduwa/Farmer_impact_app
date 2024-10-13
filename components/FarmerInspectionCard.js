@@ -4,11 +4,13 @@ import { FarmerInfoItem } from "./FarmerInfoItem";
 import CustomButton from "./CustomButton";
 import { useNavigation } from "@react-navigation/native";
 import { memo, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 
 const FarmerInspectionCard = ({ data, setModal }) => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const navigation = useNavigation();
+  const { t } = useTranslation();
 
   const handleChildrenUpdate = () => {
     setModal({ open: true, data });
@@ -77,7 +79,7 @@ const FarmerInspectionCard = ({ data, setModal }) => {
             marginVertical: screenHeight * 0.006,
           }}
         >
-          {data.children} Children
+          {data.children} {t("inspection.farmer_card.children")}
         </Text>
         <View
           style={{
@@ -99,8 +101,14 @@ const FarmerInspectionCard = ({ data, setModal }) => {
             justifyContent: "space-between",
           }}
         >
-          <FarmerInfoItem label={"Cell"} info={data.cell} />
-          <FarmerInfoItem label={"Village"} info={data.village} />
+          <FarmerInfoItem
+            label={t("inspection.farmer_card.cell")}
+            info={data.cell}
+          />
+          <FarmerInfoItem
+            label={t("inspection.farmer_card.village")}
+            info={data.village}
+          />
         </View>
         <View
           style={{
@@ -109,8 +117,14 @@ const FarmerInspectionCard = ({ data, setModal }) => {
             justifyContent: "space-between",
           }}
         >
-          <FarmerInfoItem label={"Productive Trees"} info={data.prodTrees} />
-          <FarmerInfoItem label={"Total Trees"} info={data.totTrees} />
+          <FarmerInfoItem
+            label={t("inspection.farmer_card.prd_tree")}
+            info={data.prodTrees}
+          />
+          <FarmerInfoItem
+            label={t("inspection.farmer_card.tot_tree")}
+            info={data.totTrees}
+          />
         </View>
       </View>
       <View
@@ -126,8 +140,8 @@ const FarmerInspectionCard = ({ data, setModal }) => {
         <CustomButton
           bg={colors.black}
           color={"white"}
-          width="45%"
-          text="Update Children"
+          width="48%"
+          text={t("inspection.farmer_card.update_children")}
           bdcolor="transparent"
           mt={8}
           mb={8}
@@ -140,8 +154,8 @@ const FarmerInspectionCard = ({ data, setModal }) => {
         <CustomButton
           bg={colors.secondary}
           color={"white"}
-          width="45%"
-          text="New Inspection"
+          width="48%"
+          text={t("inspection.farmer_card.new_inspection_btn")}
           bdcolor="transparent"
           mt={8}
           mb={8}

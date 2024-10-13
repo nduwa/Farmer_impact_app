@@ -174,18 +174,18 @@ export const SideBar = ({ setsideBarScroll, setIsSidebarOpen }) => {
                   isActive={isAccessable("Register")}
                 />
               )}
-              {isAccessable("Register") && (
+              {isAccessable("Update Farmers") && (
                 <SideNav
                   name={"Updated Farmers"}
                   destination="PendingFarmerUpdatesScreen"
-                  isActive={isAccessable("Register")}
+                  isActive={isAccessable("Update Farmers")}
                 />
               )}
-              {isAccessable("Register") && (
+              {isAccessable("Update Farmers") && (
                 <SideNav
                   name={"Removed Farmers"}
                   destination="FarmerDeletedScreen"
-                  isActive={isAccessable("Register")}
+                  isActive={isAccessable("Update Farmers")}
                 />
               )}
               {isAccessable("Register") && (
@@ -202,11 +202,11 @@ export const SideBar = ({ setsideBarScroll, setIsSidebarOpen }) => {
                   isActive={isAccessable("Inspection")}
                 />
               )}
-              {isAccessable("Register") && (
+              {isAccessable("Training") && (
                 <SideNav
                   name={"Pending Weekly Reports"}
                   destination="PendingReportsScreen"
-                  isActive={isAccessable("Register")}
+                  isActive={isAccessable("Training")}
                 />
               )}
               {isAccessable("Training") && (

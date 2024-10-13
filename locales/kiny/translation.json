@@ -131,5 +131,47 @@
     "english": "Icyongereza",
     "french": "Igifaransa",
     "kinyarwanda": "Ikinyarwanda"
+  },
+  "inspection": {
+    "homepage_title": "Hitamo igenzura",
+    "farmerpage_title": "Umuhinzi ugenzurwa",
+    "inspection_list": {
+      "generic_inspection": "Ubugenzuzi rusange",
+      "advanced_inspection": "Ubugenzuzi bwisumbuye",
+      "special_inspection": "Ubugenzuzi bwihariye",
+      "cafe_inspection": "Ubugenzuzi bwa Cafe",
+      "rfa_inspection": "Ubugenzuzi bwa RFA"
+    },
+    "search_bar": {
+      "placeholder": "Amazina y'umuhinzi cyangwa nimero ye"
+    },
+    "farmer_card": {
+      "children": "(umubare w' abana)",
+      "cell": "Umudugudu",
+      "village": "Akagali",
+      "prd_tree": "Ibiti by' umusaruro",
+      "tot_tree": "Ibiti byose",
+      "update_children": "Umubare w'abana",
+      "new_inspection_btn": "Kora igenzura"
+    },
+    "question_card": {
+      "compliance_deadline": "Ni ryari bizaba byatunganye?",
+      "observation_level": "Tanga ijanisha uko iyi ngingo yubahirijwe"
+    },
+    "submit_inspection": "Igenzura kuri uyu muhinzi rirarangiye, yego?",
+    "exit_inspection": "Ntago iri genzura ryabitswe, komeza usohoke?",
+    "submit_error": "Hari ibibazo bitasubijwe",
+    "delete_inspection": "Icyitonderwa, Igenzura ryasibwe ntirigaruka."
+  },
+  "misc": {
+    "sync_warning": {
+      "no_active_farmers_warning": "Nta bahinzi bemerewe iki gikorwa babonetse",
+      "no_farmers_warning": "Nta bahinzi uruganda rufite",
+      "no_active_groups_warning": "Nta matsinda yemerewe iki gikorwa yabonetse",
+      "no_groups_warning": "Nta matsinda uruganda rufite",
+      "no_questions_warning": "Nta bibazo byabonetse",
+      "sync_button": "Shakisha ibitabonetse",
+      "activate_grps_button": "Emeza amatsinda"
+    }
   }
 }

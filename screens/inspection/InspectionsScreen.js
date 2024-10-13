@@ -25,6 +25,7 @@ import {
 import { updateDBdata } from "../../helpers/updateDBdata";
 import { getCurrentDate } from "../../helpers/getCurrentDate";
 import LottieView from "lottie-react-native";
+import { useTranslation } from "react-i18next";
 
 export const InspectionsScreen = () => {
   const screenHeight = Dimensions.get("window").height;
@@ -32,6 +33,7 @@ export const InspectionsScreen = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const inspectionState = useSelector((state) => state.inspection);
+  const { t } = useTranslation();
 
   const [inspections, setInspections] = useState([]);
   const [responses, setResponses] = useState([]);
@@ -294,7 +296,7 @@ export const InspectionsScreen = () => {
       {/* delete modal */}
       {deleteModal.open && (
         <SyncModal
-          label={"Are you sure you want to delete this inspection?"}
+          label={t("inspection.delete_inspection")}
           onYes={handleDelete}
           OnNo={() =>
             setDeleteModal((prevState) => ({ ...prevState, open: false }))
