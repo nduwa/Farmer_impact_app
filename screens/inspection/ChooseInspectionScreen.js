@@ -10,11 +10,13 @@ import { colors } from "../../data/colors";
 import { StatusBar } from "expo-status-bar";
 import { AntDesign } from "@expo/vector-icons";
 import { InspectionItem } from "../../components/InspectionItem";
+import { useTranslation } from "react-i18next";
 
 export const ChooseInspectionScreen = () => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const navigation = useNavigation();
+  const { t } = useTranslation();
 
   const handleBackButton = () => {
     navigation.navigate("Homepage", { data: null });
@@ -58,7 +60,7 @@ export const ChooseInspectionScreen = () => {
             fontSize: 19,
           }}
         >
-          Choose Inspection Type
+          {t("inspection.homepage_title")}
         </Text>
         <View
           style={{ width: screenWidth * 0.07, backgroundColor: "transparent" }}
@@ -77,19 +79,24 @@ export const ChooseInspectionScreen = () => {
             }}
           >
             <InspectionItem
-              label={"Generic Inspection"}
+              label={t("inspection.inspection_list.generic_inspection")}
+              destination={"Generic Inspection"}
             />
             <InspectionItem
-              label={"Advanced Inspection"}
+              label={t("inspection.inspection_list.advanced_inspection")}
+              destination={"Advanced Inspection"}
             />
             <InspectionItem
-              label={"Special Inspection"}
+              label={t("inspection.inspection_list.special_inspection")}
+              destination={"Special Inspection"}
             />
             <InspectionItem
-              label={"Cafe Inspection"}
+              label={t("inspection.inspection_list.cafe_inspection")}
+              destination={"Cafe Inspection"}
             />
             <InspectionItem
-              label={"RFA Inspection"}
+              label={t("inspection.inspection_list.rfa_inspection")}
+              destination={"RFA Inspection"}
             />
           </View>
         </ScrollView>

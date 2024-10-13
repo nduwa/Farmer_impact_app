@@ -105,7 +105,7 @@ export const ActiveGroupsScreen = ({ route }) => {
 
     if (text !== "") {
       text = text.toLowerCase();
-      const results = farmers.filter((item) => {
+      const results = groups.filter((item) => {
         return Object.values(item).some((value) => {
           return String(value).toLowerCase().includes(text);
         });

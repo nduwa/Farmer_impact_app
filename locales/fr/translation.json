@@ -132,5 +132,47 @@
     "english": "Anglais",
     "french": "Français",
     "kinyarwanda": "Kinyarwanda"
+  },
+  "inspection": {
+    "homepage_title": "Choisir le type d'inspection",
+    "farmerpage_title": "Choisir l'agriculteur à inspecter",
+    "inspection_list": {
+      "generic_inspection": "L'inspection générique",
+      "advanced_inspection": "Inspection avancée",
+      "special_inspection": "Inspéction spéciale",
+      "cafe_inspection": "Inspection des cafés",
+      "rfa_inspection": "Inspection de RFA"
+    },
+    "search_bar": {
+      "placeholder": "Nom de l'agriculteur ou ID"
+    },
+    "farmer_card": {
+      "children": "Enfants",
+      "cell": "Cellule",
+      "village": "Village",
+      "prd_tree": "Arbres productifs",
+      "tot_tree": "Arbres au total",
+      "update_children": "Enfants",
+      "new_inspection_btn": "Nouvelle inspection"
+    },
+    "question_card": {
+      "compliance_deadline": "Quand la conformité peut-elle être respectée ?",
+      "observation_level": "Décrivez vos observations sur le niveau de conformité"
+    },
+    "submit_inspection": "Êtes-vous sûr de vouloir soumettre l'inspection maintenant ?",
+    "exit_inspection": "Vous n'avez pas soumis l'inspection, les réponses non soumises ne peuvent pas être récupérées. êtes-vous sûr ?",
+    "submit_error": "Impossible de soumettre, cette inspection contient des questions sans réponse.",
+    "delete_inspection": "Êtes-vous sûr de vouloir supprimer cette inspection ?"
+  },
+  "misc": {
+    "sync_warning": {
+      "no_active_farmers_warning": "Pas d'agriculteurs actifs trouvés",
+      "no_farmers_warning": "Pas d'agriculteurs trouvés",
+      "no_active_groups_warning": "Pas de groupes actifs trouvés",
+      "no_groups_warning": "Pas de groupes trouvés",
+      "no_questions_warning": "Pas de questions trouvées",
+      "sync_button": "Effectuer la synchronisation des données ?",
+      "activate_grps_button": "Activer les groupes?"
+    }
   }
 }
