@@ -20,7 +20,9 @@ export const FarmerDetails = ({
   const screenWidth = Dimensions.get("window").width;
   const formRef = useRef(null);
 
-  const [gender, setGender] = useState(farmerData?.Gender || null);
+  const [gender, setGender] = useState(
+    farmerData?.Gender || responses?.gender || null
+  );
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
   const [errors, setErrors] = useState({}); // validation errors
   const [validationError, setValidationError] = useState({
@@ -54,10 +56,20 @@ export const FarmerDetails = ({
     try {
       let farmerObj = {
         ...values,
-        ...{ gender },
+        ...{
+          gender,
+        },
       };
 
       if (!validateForm(farmerObj, FarmerDetailsSchema)) return;
+
+      farmerObj = {
+        ...farmerObj,
+        ...{
+          national_id: values.national_id || "not applicable",
+          phone: values.phone || "not applicable",
+        },
+      };
 
       setSurvey((prevState) => ({ ...prevState, ...farmerObj }));
       setNextModal(true);
@@ -76,6 +88,7 @@ export const FarmerDetails = ({
 
   useEffect(() => {
     if (Object.keys(errors).length > 0) {
+      console.log(errors);
       setValidationError({
         type: "emptyOrInvalidData",
         message: `Invalid input at '${getInputLabel(
@@ -161,9 +174,11 @@ export const FarmerDetails = ({
           farmer_id: responses.farmer_id || farmerData.farmerid || "",
           group_id: responses.group_id || farmerData.farmerGroupID || "",
           national_id: responses.national_id || farmerData.National_ID_t,
-          year_of_birth: String(farmerData.Year_Birth || ""),
+          year_of_birth: String(
+            farmerData.Year_Birth || responses.year_of_birth || ""
+          ),
           gender,
-          phone: responses.phone || farmerData.Phone || "",
+          phone: responses.phone || farmerData.Phone,
         }}
         innerRef={formRef}
         onSubmit={async (values) => {

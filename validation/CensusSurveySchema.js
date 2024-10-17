@@ -19,7 +19,8 @@ export const FarmerDetailsSchema = joi.object({
     .string()
     .regex(/^[0-9\s]+$/)
     .length(16)
-    .required(),
+    .allow(["not applicable"])
+    .optional(),
   year_of_birth: joi
     .string()
     .regex(/^[0-9\s]+$/)
@@ -29,7 +30,8 @@ export const FarmerDetailsSchema = joi.object({
     .string()
     .regex(/^[0-9\s]+$/)
     .length(10)
-    .required(),
+    .allow(["not applicable"])
+    .optional(),
 });
 
 export const FarmDetailsSchema = joi.object({
