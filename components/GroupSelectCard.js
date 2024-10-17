@@ -15,6 +15,13 @@ const GroupSelectCard = ({
 
   const [selected, setSelected] = useState(isChecked);
 
+  const shortenStr = (str, maxLength) => {
+    if (str.length > maxLength) {
+      return str.slice(0, maxLength) + "...";
+    }
+    return str;
+  };
+
   const handleCheck = (value) => {
     if (value) {
       setChecked((prevState) => [
@@ -51,7 +58,7 @@ const GroupSelectCard = ({
         <Text
           style={{ fontSize: screenWidth * 0.035, color: colors.black_letter }}
         >
-          Name: {data?.Name.length > 0 ? data.Name : "N/A"}
+          Name: {data?.Name.length > 0 ? shortenStr(data.Name, 18) : "N/A"}
         </Text>
         <Text
           style={{ fontSize: screenWidth * 0.035, color: colors.black_letter }}
