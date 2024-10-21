@@ -12,7 +12,6 @@ import { colors } from "../../../data/colors";
 import { StatusBar } from "expo-status-bar";
 import { AntDesign } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
-import { FarmerTreesCard } from "../../../components/FarmerTreesCard";
 import { retrieveDBdata } from "../../../helpers/retrieveDBdata";
 import { useDispatch, useSelector } from "react-redux";
 import { updateDBdata } from "../../../helpers/updateDBdata";

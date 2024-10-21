@@ -29,6 +29,7 @@ export const AssignedFarmerDetailsScreen = ({ route }) => {
   const screenWidth = Dimensions.get("window").width;
   const navigation = useNavigation();
   const groupAssignState = useSelector((state) => state.groupAssign);
+  const userState = useSelector((state) => state.user);
   const dispatch = useDispatch();
 
   const { data } = route.params;
@@ -51,7 +52,7 @@ export const AssignedFarmerDetailsScreen = ({ route }) => {
     setLoadingData(true);
     deleteDBdataAsync({
       tableName: "tmp_farmer_group_assignment",
-      customQuery: `DELETE FROM tmp_farmer_group_assignment WHERE DATE(created_at)='${data?.insertion_date}'`,
+      customQuery: `DELETE FROM tmp_farmer_group_assignment WHERE _kf_station='${userState.userData.staff._kf_Station}' AND DATE(created_at)='${data?.insertion_date}'`,
     }).then((result) => {
       if (result.success) {
         displayToast("Changes reversed");
@@ -126,7 +127,7 @@ export const AssignedFarmerDetailsScreen = ({ route }) => {
         retrieveDBdata({
           tableName: "tmp_farmer_group_assignment",
           setData: setActivityDetails,
-          queryArg: `SELECT *,DATE(created_at) AS insertion_date FROM tmp_farmer_group_assignment WHERE uploaded = 0 AND insertion_date = '${data?.insertion_date}'`,
+          queryArg: `SELECT *,DATE(created_at) AS insertion_date FROM tmp_farmer_group_assignment WHERE _kf_station='${userState.userData.staff._kf_Station}' AND uploaded = 0 AND insertion_date = '${data?.insertion_date}'`,
         });
       };
 

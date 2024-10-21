@@ -33,6 +33,7 @@ export const InspectionsScreen = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const inspectionState = useSelector((state) => state.inspection);
+  const userState = useSelector((state) => state.user);
   const { t } = useTranslation();
 
   const [inspections, setInspections] = useState([]);
@@ -210,7 +211,7 @@ export const InspectionsScreen = () => {
         retrieveDBdata({
           tableName: "rtc_inspections",
           setData: setInspections,
-          queryArg: "SELECT * FROM rtc_inspections WHERE uploaded=0 ;",
+          queryArg: `SELECT * FROM rtc_inspections WHERE _kf_station='${userState.userData.staff._kf_Station}' AND uploaded=0 ;`,
         });
       };
 
