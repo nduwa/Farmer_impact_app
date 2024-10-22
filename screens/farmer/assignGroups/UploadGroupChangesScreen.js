@@ -30,6 +30,7 @@ export const UploadGroupChangesScreen = ({ route }) => {
   const screenWidth = Dimensions.get("window").width;
   const navigation = useNavigation();
   const groupChangeState = useSelector((state) => state.groupStatus);
+  const userState = useSelector((state) => state.user);
   const dispatch = useDispatch();
 
   const { data } = route.params;
@@ -225,7 +226,7 @@ export const UploadGroupChangesScreen = ({ route }) => {
         retrieveDBdata({
           tableName: "tmp_group_activate",
           setData: setGroupChanges,
-          queryArg: dbQueries.Q_TMP_GRP_ACTVT_LIST,
+          queryArg: `SELECT SUM(CASE WHEN active = 1 THEN 1 ELSE 0 END) AS active_count,SUM(CASE WHEN active = 0 THEN 1 ELSE 0 END) AS inactive_count,DATE(created_at) AS insertion_date,COUNT(*) OVER (PARTITION BY DATE(created_at)) AS record_count FROM tmp_group_activate WHERE _kf_station='${userState.userData.staff._kf_Station}' AND uploaded = 0 GROUP BY insertion_date ORDER BY insertion_date;`,
         });
       };
 

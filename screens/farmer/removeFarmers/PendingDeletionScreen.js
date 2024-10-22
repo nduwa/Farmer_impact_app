@@ -29,6 +29,7 @@ export const PendingDeletionScreen = () => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const deletionState = useSelector((state) => state.deletion);
+  const userState = useSelector((state) => state.user);
   const navigation = useNavigation();
   const dispatch = useDispatch();
 
@@ -155,7 +156,7 @@ export const PendingDeletionScreen = () => {
           retrieveDBdata({
             tableName: "tmp_farmer_updates",
             setData: setDeletions,
-            queryArg: `SELECT * FROM tmp_farmer_updates WHERE uploaded = 0 AND status = 'delete'`,
+            queryArg: `SELECT * FROM tmp_farmer_updates WHERE _kf_station='${userState.userData.staff._kf_Station}' AND uploaded = 0 AND status = 'delete'`,
           });
         }
       };

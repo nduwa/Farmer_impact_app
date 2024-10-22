@@ -14,11 +14,13 @@ import { GroupMgtHomeItem } from "../../../components/GroupMgtHomeItem";
 import React, { useEffect, useState } from "react";
 import { retrieveDBdata } from "../../../helpers/retrieveDBdata";
 import LottieView from "lottie-react-native";
+import { useSelector } from "react-redux";
 
 export const PendingGroupsScreen = () => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const navigation = useNavigation();
+  const userState = useSelector((state) => state.user);
 
   const handleBackButton = () => {
     navigation.navigate("Homepage", { data: null });
@@ -33,7 +35,7 @@ export const PendingGroupsScreen = () => {
     retrieveDBdata({
       tableName: "tmp_farmer_group_assignment",
       setData: setGroupAssignments,
-      queryArg: `SELECT * FROM tmp_farmer_group_assignment WHERE uploaded = 0`,
+      queryArg: `SELECT * FROM tmp_farmer_group_assignment WHERE _kf_station='${userState.userData.staff._kf_Station}' AND uploaded = 0`,
     });
   }, [groupChanges]);
   useFocusEffect(
@@ -43,7 +45,7 @@ export const PendingGroupsScreen = () => {
         retrieveDBdata({
           tableName: "tmp_group_activate",
           setData: setGroupChanges,
-          queryArg: `SELECT * FROM tmp_group_activate WHERE uploaded = 0`,
+          queryArg: `SELECT * FROM tmp_group_activate WHERE _kf_station='${userState.userData.staff._kf_Station}' AND uploaded = 0`,
         });
       };
 

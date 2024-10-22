@@ -16,12 +16,13 @@ import { StatusBar } from "expo-status-bar";
 import { AntDesign } from "@expo/vector-icons";
 import { ScRecordItem } from "../../components/ScRecordItem";
 import { retrieveDBdata } from "../../helpers/retrieveDBdata";
+import { useSelector } from "react-redux";
 
 export const ScJournal = () => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const navigation = useNavigation();
-  const isFocused = useIsFocused();
+  const userState = useSelector((state) => state.user);
 
   const [journals, setJournals] = useState([]);
 
@@ -45,8 +46,7 @@ export const ScJournal = () => {
         retrieveDBdata({
           tableName: "rtc_transactions",
           setData: setJournals,
-          queryArg:
-            "SELECT site_day_lot,SUM(kilograms) AS kgsGood,SUM(bad_kilograms) AS kgsBad, COUNT(*) AS recordCount FROM rtc_transactions WHERE uploaded='0' GROUP BY site_day_lot ORDER BY site_day_lot;",
+          queryArg: `SELECT site_day_lot,SUM(kilograms) AS kgsGood,SUM(bad_kilograms) AS kgsBad, COUNT(*) AS recordCount FROM rtc_transactions WHERE _kf_station='${userState.userData.staff._kf_Station}' AND uploaded='0' GROUP BY site_day_lot ORDER BY site_day_lot;`,
         });
       };
 

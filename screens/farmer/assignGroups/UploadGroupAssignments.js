@@ -1,5 +1,4 @@
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
-import * as SecureStore from "expo-secure-store";
 import {
   Dimensions,
   FlatList,
@@ -14,39 +13,24 @@ import { AntDesign } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
 import { retrieveDBdata } from "../../../helpers/retrieveDBdata";
 import LottieView from "lottie-react-native";
-import { GroupsStatusCard } from "../../../components/GroupsStatusCard";
-import { dbQueries } from "../../../data/dbQueries";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  GroupStatusAction,
-  groupStatusUpdate,
-} from "../../../redux/farmer/GroupStatusChangeSlice";
+import { GroupStatusAction } from "../../../redux/farmer/GroupStatusChangeSlice";
 import { updateDBdata } from "../../../helpers/updateDBdata";
 import { GroupAssignedFarmersItem } from "../../../components/GroupAssignedFarmersItem";
-import { deleteDBdataAsync } from "../../../helpers/deleteDBdataAsync";
 
-export const UploadGroupAssignments = ({ route }) => {
+export const UploadGroupAssignments = () => {
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
   const navigation = useNavigation();
   const groupChangeState = useSelector((state) => state.groupStatus);
+  const userState = useSelector((state) => state.user);
   const dispatch = useDispatch();
 
-  const { data } = route.params;
-
-  const [changesTobeSubmitted, setChangesTobeSubmitted] = useState([]);
   const [ids, setIds] = useState("");
   const [currentJob, setCurrentJob] = useState(null);
 
   const [groupAssignments, setGroupAssignments] = useState([]);
   const [loadingData, setLoadingData] = useState(false);
-
-  const formatDate = (str) => {
-    const date = new Date(str);
-    const formattedDate = date.toISOString().split("T")[0];
-
-    return formattedDate; // Output: 2018-09-24
-  };
 
   const handleActivityDetails = (insertion_date) => {
     navigation.navigate("AssignedFarmerDetailsScreen", {
@@ -111,7 +95,7 @@ export const UploadGroupAssignments = ({ route }) => {
         retrieveDBdata({
           tableName: "tmp_farmer_group_assignment",
           setData: setGroupAssignments,
-          queryArg: dbQueries.Q_TMP_GRP_ASSIGN_LIST,
+          queryArg: `SELECT DATE(created_at) as insertion_date,COUNT(DATE(created_at)) AS record_count FROM tmp_farmer_group_assignment WHERE _kf_station='${userState.userData.staff._kf_Station}' AND uploaded = 0 GROUP BY insertion_date`,
         });
       };
 

@@ -7,6 +7,7 @@ export const StationLocation = ({ data }) => {
   const screenWidth = Dimensions.get("window").width;
 
   const { location, name } = data;
+
   return (
     <View
       style={{
@@ -27,7 +28,7 @@ export const StationLocation = ({ data }) => {
           textShadowRadius: 5,
         }}
       >
-        {location}, {name}
+        {location?.trim()}, {name?.trim()}
       </Text>
     </View>
   );
