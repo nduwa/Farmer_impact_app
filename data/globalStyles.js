@@ -40,6 +40,18 @@ export const globalStyles = StyleSheet.create({
     justifyContent: "flex-start",
     alignItems: "center",
   },
+  inspectionMgtModalStyles: {
+    position: "absolute",
+    width: "100%",
+    height: screenHeight * 0.4,
+    padding: 20,
+    gap: 20,
+    backgroundColor: colors.bg_variant,
+    borderTopRightRadius: 50,
+    borderTopLeftRadius: 50,
+    justifyContent: "flex-start",
+    alignItems: "center",
+  },
   attendanceSheetModalStyles: {
     position: "absolute",
     width: "100%",

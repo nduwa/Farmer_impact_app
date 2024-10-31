@@ -24,7 +24,11 @@ export const OpCard = ({ name, action, destination = null, active = true }) => {
   const [factor, setFactor] = useState(1);
 
   const handlePress = () => {
-    if (name == t("homepage.buy_coffee") || name == t("homepage.farmer"))
+    if (
+      name == t("homepage.buy_coffee") ||
+      name == t("homepage.farmer") ||
+      name == t("homepage.inspection")
+    )
       action(true);
     if (destination) navigation.navigate(destination, { data: null });
   };
