@@ -197,6 +197,9 @@ export const RegisteredFarmerScreen = ({ route }) => {
         bad_unit_price: transactionData.priceBad,
         bad_kilograms: transactionData.kgBad,
         _kf_Season: seasonId,
+        deliveredBy_gender: deliveredGender,
+        deliveredBy_phone: transactionData.deliveredPhone,
+        deliveredBy_name: transactionData.deliveredName,
       };
 
       let priceGood = parseFloat(formData.unitprice) || 0;
@@ -427,8 +430,8 @@ export const RegisteredFarmerScreen = ({ route }) => {
             totalBad: "",
             cashTotal: "0",
             cashTotalMobile: "0",
-            deliveredName: "N/A",
-            deliveredPhone: "N/A",
+            deliveredName: "not applicable",
+            deliveredPhone: "not applicable",
             deliveredGender: deliveredGender,
           }}
           onSubmit={async (values) => {

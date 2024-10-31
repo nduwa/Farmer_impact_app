@@ -37,7 +37,7 @@ export const EditTransactionScreen = ({ route }) => {
   const [currentCertificationType, setCurrentCertificationType] =
     useState("Cafe Practices");
   const [currentCoffeeType, setCurrentCoffeeType] = useState("Cherry");
-  const [indicatorVisible, setIndicatorVisibility] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
   const [date, setDate] = useState(new Date());
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
   const [currentJob, setCurrentJob] = useState(null);
@@ -151,6 +151,7 @@ export const EditTransactionScreen = ({ route }) => {
         total_mobile_money_payment: transactionData.cashTotalMobile,
         bad_unit_price: transactionData.priceBad,
         bad_kilograms: transactionData.kgBad,
+        deliveredBy_gender: deliveredGender,
       };
 
       let priceGood = parseFloat(editedData.unitprice) || 0;
@@ -163,7 +164,7 @@ export const EditTransactionScreen = ({ route }) => {
       setValidationError({ message: null, type: null });
 
       if (validateInputs(transactionData)) {
-        let query = `UPDATE rtc_transactions SET coffee_type='${editedData.coffee_type}', kilograms=${editedData.kilograms}, unitprice=${editedData.unitprice}, certification='${editedData.certification}', certified=${editedData.certified}, edited=${editedData.edited}, cash_paid=${editedData.cash_paid}, total_mobile_money_payment=${editedData.total_mobile_money_payment}, bad_unit_price=${editedData.bad_unit_price}, bad_kilograms=${editedData.bad_kilograms} WHERE paper_receipt=${data.receiptId}`;
+        let query = `UPDATE rtc_transactions SET coffee_type='${editedData.coffee_type}', kilograms=${editedData.kilograms}, unitprice=${editedData.unitprice}, certification='${editedData.certification}', certified=${editedData.certified}, edited=${editedData.edited}, cash_paid=${editedData.cash_paid}, total_mobile_money_payment=${editedData.total_mobile_money_payment}, bad_unit_price=${editedData.bad_unit_price}, bad_kilograms=${editedData.bad_kilograms}, deliveredBy_gender='${editedData.deliveredBy_gender}' WHERE paper_receipt=${data.receiptId}`;
 
         setUpdateQuery(query);
         validateTransaction({
@@ -235,6 +236,10 @@ export const EditTransactionScreen = ({ route }) => {
   useEffect(() => {
     if (currentJob) {
       ToastAndroid.show(currentJob, ToastAndroid.SHORT);
+
+      if (currentJob === "Transaction updated") {
+        setSubmitted(true);
+      }
     }
   }, [currentJob]);
 
@@ -264,6 +269,8 @@ export const EditTransactionScreen = ({ route }) => {
           .then((result) => {
             transaction = result[0];
             setcurrentTransactionData(transaction);
+            setDeliveredGender(transaction.deliveredBy_gender);
+
             const dateString = result[0].transaction_date;
             const dateObj = new Date(dateString);
             const isoDateString = dateObj.toISOString();
@@ -369,8 +376,10 @@ export const EditTransactionScreen = ({ route }) => {
               cashTotal: currentTransactionData.cash_paid,
               cashTotalMobile:
                 currentTransactionData.total_mobile_money_payment,
-              deliveredName: currentTransactionData.deliveredName || "N/A",
-              deliveredPhone: currentTransactionData.deliveredPhone || "N/A",
+              deliveredName:
+                currentTransactionData.deliveredName || "not applicable",
+              deliveredPhone:
+                currentTransactionData.deliveredPhone || "not applicable",
               deliveredGender: currentTransactionData.deliveredGender,
             }}
             onSubmit={async (values) => {
@@ -1018,7 +1027,7 @@ export const EditTransactionScreen = ({ route }) => {
                         : screenHeight * 0.03
                     }
                     radius={10}
-                    disabled={indicatorVisible}
+                    disabled={submitted}
                     onPress={handleSubmit}
                   />
                 </ScrollView>
