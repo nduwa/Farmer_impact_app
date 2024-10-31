@@ -37,6 +37,7 @@ export const BuyCoffeeInput = ({
           fontSize: screenWidth * 0.04,
           color: colors.black,
           marginLeft: screenWidth * 0.02,
+          opacity: active ? 1 : 0.8,
         }}
       >
         {label}
@@ -106,6 +107,7 @@ export const BuyCoffeeInput = ({
                 : screenWidth * font_lg,
             color: colors.blue_font,
             textAlign: "left",
+            opacity: active ? 1 : 0.8,
           }}
         />
       )}
