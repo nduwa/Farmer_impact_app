@@ -272,6 +272,28 @@ export const LoginScreen = ({ navigation }) => {
             defaultValue: "",
           });
 
+          //create delivery info columns in transactions table
+          addColumnIfNotExists({
+            tableName: "rtc_transactions",
+            columnName: "deliveredBy_name",
+            columnType: "text",
+            defaultValue: "",
+          });
+
+          addColumnIfNotExists({
+            tableName: "rtc_transactions",
+            columnName: "deliveredBy_phone",
+            columnType: "text",
+            defaultValue: "",
+          });
+
+          addColumnIfNotExists({
+            tableName: "rtc_transactions",
+            columnName: "deliveredBy_gender",
+            columnType: "text",
+            defaultValue: "",
+          });
+
           await SplashScreen.hideAsync();
         }
       };

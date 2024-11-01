@@ -25,6 +25,8 @@ import { retrieveDBdataAsync } from "../../helpers/retrieveDBdataAsync";
 import { updateDBdataAsync } from "../../helpers/updateDBdataAsync";
 import { validateTransaction } from "../../helpers/validateTransaction";
 import { retrieveDBdata } from "../../helpers/retrieveDBdata";
+import { FontAwesome5 } from "@expo/vector-icons";
+import { CoffeePurchaseSchema } from "../../validation/CoffeePurchaseSchema";
 
 export const EditTransactionScreen = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
@@ -35,7 +37,7 @@ export const EditTransactionScreen = ({ route }) => {
   const [currentCertificationType, setCurrentCertificationType] =
     useState("Cafe Practices");
   const [currentCoffeeType, setCurrentCoffeeType] = useState("Cherry");
-  const [indicatorVisible, setIndicatorVisibility] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
   const [date, setDate] = useState(new Date());
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
   const [currentJob, setCurrentJob] = useState(null);
@@ -52,6 +54,16 @@ export const EditTransactionScreen = ({ route }) => {
   const [updateQuery, setUpdateQuery] = useState("");
 
   const [displayDate, setDisplayDate] = useState("");
+
+  const [deliveredGender, setDeliveredGender] = useState(
+    currentTransactionData.deliveredGender
+  );
+  const [folded, setFolded] = useState(true);
+  const [errors, setErrors] = useState({}); // validation errors
+
+  const toggleFold = () => {
+    setFolded(!folded);
+  };
 
   const onChange = (event, selectedDate) => {
     const currentDate = selectedDate;
@@ -83,16 +95,37 @@ export const EditTransactionScreen = ({ route }) => {
     showMode("date");
   };
 
+  const validateForm = (data, schema) => {
+    const { error } = schema.validate(data, { abortEarly: false });
+    if (!error) {
+      setErrors({});
+      setValidationError({
+        type: null,
+        message: null,
+        inputBox: null,
+      });
+
+      return true;
+    }
+
+    const newErrors = {};
+    error.details.forEach((detail) => {
+      newErrors[detail.path[0]] = detail.message;
+    });
+    setErrors(newErrors);
+    return false;
+  };
+
+  const getInputLabel = (input) => {
+    let output = "";
+    let tmp = input.split("_");
+    output = tmp.join(" ");
+
+    return output;
+  };
+
   const validateInputs = (values) => {
-    if (
-      !values.certificationType ||
-      values.certificationType === "" ||
-      !values.coffeeType ||
-      values.coffeeType === "" ||
-      !values.cashTotal ||
-      values.cashTotal === "" ||
-      values.cashTotalMobile === ""
-    ) {
+    if (!validateForm(values, CoffeePurchaseSchema)) {
       setValidationError({
         type: "emptyOrInvalidData",
         message: "Invalid inputs detected",
@@ -118,6 +151,7 @@ export const EditTransactionScreen = ({ route }) => {
         total_mobile_money_payment: transactionData.cashTotalMobile,
         bad_unit_price: transactionData.priceBad,
         bad_kilograms: transactionData.kgBad,
+        deliveredBy_gender: deliveredGender,
       };
 
       let priceGood = parseFloat(editedData.unitprice) || 0;
@@ -130,7 +164,7 @@ export const EditTransactionScreen = ({ route }) => {
       setValidationError({ message: null, type: null });
 
       if (validateInputs(transactionData)) {
-        let query = `UPDATE rtc_transactions SET coffee_type='${editedData.coffee_type}', kilograms=${editedData.kilograms}, unitprice=${editedData.unitprice}, certification='${editedData.certification}', certified=${editedData.certified}, edited=${editedData.edited}, cash_paid=${editedData.cash_paid}, total_mobile_money_payment=${editedData.total_mobile_money_payment}, bad_unit_price=${editedData.bad_unit_price}, bad_kilograms=${editedData.bad_kilograms} WHERE paper_receipt=${data.receiptId}`;
+        let query = `UPDATE rtc_transactions SET coffee_type='${editedData.coffee_type}', kilograms=${editedData.kilograms}, unitprice=${editedData.unitprice}, certification='${editedData.certification}', certified=${editedData.certified}, edited=${editedData.edited}, cash_paid=${editedData.cash_paid}, total_mobile_money_payment=${editedData.total_mobile_money_payment}, bad_unit_price=${editedData.bad_unit_price}, bad_kilograms=${editedData.bad_kilograms}, deliveredBy_gender='${editedData.deliveredBy_gender}' WHERE paper_receipt=${data.receiptId}`;
 
         setUpdateQuery(query);
         validateTransaction({
@@ -147,6 +181,19 @@ export const EditTransactionScreen = ({ route }) => {
       console.log(error);
     }
   };
+
+  useEffect(() => {
+    if (Object.keys(errors).length > 0) {
+      console.log(errors);
+      setValidationError({
+        type: "emptyOrInvalidData",
+        message: `Invalid input at '${getInputLabel(
+          Object.keys(errors)[0]
+        )}', also check for any other highlighted input box`,
+        inputBox: null,
+      });
+    }
+  }, [errors]);
 
   useEffect(() => {
     if (transValidated) {
@@ -189,6 +236,10 @@ export const EditTransactionScreen = ({ route }) => {
   useEffect(() => {
     if (currentJob) {
       ToastAndroid.show(currentJob, ToastAndroid.SHORT);
+
+      if (currentJob === "Transaction updated") {
+        setSubmitted(true);
+      }
     }
   }, [currentJob]);
 
@@ -218,6 +269,8 @@ export const EditTransactionScreen = ({ route }) => {
           .then((result) => {
             transaction = result[0];
             setcurrentTransactionData(transaction);
+            setDeliveredGender(transaction.deliveredBy_gender);
+
             const dateString = result[0].transaction_date;
             const dateObj = new Date(dateString);
             const isoDateString = dateObj.toISOString();
@@ -323,6 +376,11 @@ export const EditTransactionScreen = ({ route }) => {
               cashTotal: currentTransactionData.cash_paid,
               cashTotalMobile:
                 currentTransactionData.total_mobile_money_payment,
+              deliveredName:
+                currentTransactionData.deliveredName || "not applicable",
+              deliveredPhone:
+                currentTransactionData.deliveredPhone || "not applicable",
+              deliveredGender: currentTransactionData.deliveredGender,
             }}
             onSubmit={async (values) => {
               submitTransaction(values);
@@ -382,6 +440,7 @@ export const EditTransactionScreen = ({ route }) => {
                       label={"Farmer ID"}
                       value={values.farmerID}
                       active={false}
+                      error={errors.farmerID}
                     />
                     <BuyCoffeeInput
                       values={values}
@@ -390,6 +449,7 @@ export const EditTransactionScreen = ({ route }) => {
                       label={"Farmer Name"}
                       value={values.farmerName}
                       active={false}
+                      error={errors.farmerName}
                     />
                     <BuyCoffeeInput
                       values={values}
@@ -398,6 +458,7 @@ export const EditTransactionScreen = ({ route }) => {
                       label={"Receipt Number"}
                       value={values.receiptNumber}
                       active={false}
+                      error={errors.receiptNumber}
                     />
                     <View
                       style={{
@@ -659,6 +720,7 @@ export const EditTransactionScreen = ({ route }) => {
                           label={"Kgs(Good)"}
                           radius={4}
                           value={values.kgGood.toString()}
+                          error={errors.kgGood}
                         />
                         <View
                           style={{
@@ -687,6 +749,7 @@ export const EditTransactionScreen = ({ route }) => {
                           label={"Kgs(Bad)"}
                           radius={4}
                           value={values.kgBad.toString()}
+                          error={errors.kgBad}
                         />
                       </View>
                       <View
@@ -716,6 +779,7 @@ export const EditTransactionScreen = ({ route }) => {
                           label={"Price/Kg"}
                           radius={4}
                           value={values.priceGood.toString()}
+                          error={errors.priceGood}
                         />
                         <View
                           style={{
@@ -744,6 +808,7 @@ export const EditTransactionScreen = ({ route }) => {
                           label={"Price/Kg"}
                           radius={4}
                           value={values.priceBad.toString()}
+                          error={errors.priceBad}
                         />
                       </View>
                     </View>
@@ -779,6 +844,7 @@ export const EditTransactionScreen = ({ route }) => {
                       radius={4}
                       active={false}
                       value={values.cashTotal.toString()}
+                      error={errors.cashTotal}
                     />
                     <BuyCoffeeInput
                       values={values}
@@ -787,7 +853,128 @@ export const EditTransactionScreen = ({ route }) => {
                       label={"Total Paid By Mobile Payment"}
                       radius={4}
                       value={values.cashTotalMobile.toString()}
+                      error={errors.cashTotalMobile}
                     />
+                  </View>
+
+                  {/* delivery */}
+                  <View
+                    style={{
+                      width: "95%",
+                      backgroundColor: colors.white,
+                      elevation: 2,
+                      borderRadius: 15,
+                      paddingHorizontal: screenWidth * 0.04,
+                      paddingVertical: screenHeight * 0.03,
+                      gap: screenHeight * 0.01,
+                    }}
+                  >
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <Text
+                        style={{
+                          fontWeight: "400",
+                          fontSize: screenWidth * 0.05,
+                          color: colors.secondary,
+                          marginLeft: screenWidth * 0.02,
+                        }}
+                      >
+                        Delivered by (optional)
+                      </Text>
+                      {folded ? (
+                        <TouchableOpacity onPress={toggleFold}>
+                          <FontAwesome5
+                            name="angle-down"
+                            size={screenWidth * 0.07}
+                            color="black"
+                          />
+                        </TouchableOpacity>
+                      ) : (
+                        <TouchableOpacity onPress={toggleFold}>
+                          <FontAwesome5
+                            name="angle-up"
+                            size={screenWidth * 0.07}
+                            color="black"
+                          />
+                        </TouchableOpacity>
+                      )}
+                    </View>
+
+                    {!folded && (
+                      <>
+                        <BuyCoffeeInput
+                          values={values}
+                          handleChange={handleChange("deliveredName")}
+                          handleBlur={handleBlur("deliveredName")}
+                          label={"Names"}
+                          radius={4}
+                          value={values.deliveredName}
+                          active={false}
+                          error={errors.deliveredName}
+                        />
+                        <BuyCoffeeInput
+                          values={values}
+                          handleChange={handleChange("deliveredPhone")}
+                          handleBlur={handleBlur("deliveredPhone")}
+                          label={"Phone number"}
+                          radius={4}
+                          value={values.deliveredPhone}
+                          active={false}
+                          error={errors.deliveredPhone}
+                        />
+                        <Text
+                          style={{
+                            fontWeight: "400",
+                            fontSize: screenWidth * 0.04,
+                            color: colors.black,
+                            marginLeft: screenWidth * 0.02,
+                          }}
+                        >
+                          Gender
+                        </Text>
+                        <RadioButtonGroup
+                          containerStyle={{ marginBottom: 10, gap: 5 }}
+                          selected={deliveredGender}
+                          onSelected={(value) => setDeliveredGender(value)}
+                          radioBackground={colors.blue_font}
+                        >
+                          <RadioButtonItem
+                            value="M"
+                            label={
+                              <Text
+                                style={{
+                                  fontWeight: "600",
+                                  fontSize: 16,
+                                  marginLeft: 8,
+                                  color: colors.black,
+                                }}
+                              >
+                                Male
+                              </Text>
+                            }
+                          />
+                          <RadioButtonItem
+                            value="F"
+                            label={
+                              <Text
+                                style={{
+                                  fontWeight: "600",
+                                  fontSize: 16,
+                                  marginLeft: 8,
+                                  color: colors.black,
+                                }}
+                              >
+                                Female
+                              </Text>
+                            }
+                          />
+                        </RadioButtonGroup>
+                      </>
+                    )}
                   </View>
 
                   {/* validation error */}
@@ -840,7 +1027,7 @@ export const EditTransactionScreen = ({ route }) => {
                         : screenHeight * 0.03
                     }
                     radius={10}
-                    disabled={indicatorVisible}
+                    disabled={submitted}
                     onPress={handleSubmit}
                   />
                 </ScrollView>

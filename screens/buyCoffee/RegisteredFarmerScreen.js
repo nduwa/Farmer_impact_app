@@ -23,6 +23,8 @@ import { retrieveDBdata } from "../../helpers/retrieveDBdata";
 import { dataTodb } from "../../helpers/dataTodb";
 import { validateTransaction } from "../../helpers/validateTransaction";
 import { getCurrentDate } from "../../helpers/getCurrentDate";
+import { FontAwesome5 } from "@expo/vector-icons";
+import { CoffeePurchaseSchema } from "../../validation/CoffeePurchaseSchema";
 
 export const RegisteredFarmerScreen = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
@@ -55,6 +57,13 @@ export const RegisteredFarmerScreen = ({ route }) => {
   const [farmerCertified, setFarmerCertified] = useState(false);
   const [certifications, setCertifications] = useState([]);
   const [submitted, setSubmitted] = useState(false);
+  const [deliveredGender, setDeliveredGender] = useState();
+  const [folded, setFolded] = useState(true);
+  const [errors, setErrors] = useState({}); // validation errors
+
+  const toggleFold = () => {
+    setFolded(!folded);
+  };
 
   const onChange = (event, selectedDate) => {
     const currentDate = selectedDate;
@@ -81,25 +90,37 @@ export const RegisteredFarmerScreen = ({ route }) => {
     showMode("date");
   };
 
+  const validateForm = (data, schema) => {
+    const { error } = schema.validate(data, { abortEarly: false });
+    if (!error) {
+      setErrors({});
+      setValidationError({
+        type: null,
+        message: null,
+        inputBox: null,
+      });
+
+      return true;
+    }
+
+    const newErrors = {};
+    error.details.forEach((detail) => {
+      newErrors[detail.path[0]] = detail.message;
+    });
+    setErrors(newErrors);
+    return false;
+  };
+
+  const getInputLabel = (input) => {
+    let output = "";
+    let tmp = input.split("_");
+    output = tmp.join(" ");
+
+    return output;
+  };
+
   const validateInputs = (values) => {
-    if (
-      !values.farmerID ||
-      values.farmerID === "" ||
-      !values.farmerName ||
-      values.farmerName === "" ||
-      !values.receiptNumber ||
-      values.receiptNumber === "" ||
-      !values.transactionDate ||
-      values.transactionDate === "" ||
-      !values.certificationType ||
-      values.certificationType === "" ||
-      !values.coffeeType ||
-      values.coffeeType === "" ||
-      !values.cashTotal ||
-      values.cashTotal === "" ||
-      !values.cashTotalMobile ||
-      values.cashTotalMobile === ""
-    ) {
+    if (!validateForm(values, CoffeePurchaseSchema)) {
       setValidationError({
         type: "emptyOrInvalidData",
         message: "Invalid inputs detected",
@@ -176,6 +197,9 @@ export const RegisteredFarmerScreen = ({ route }) => {
         bad_unit_price: transactionData.priceBad,
         bad_kilograms: transactionData.kgBad,
         _kf_Season: seasonId,
+        deliveredBy_gender: deliveredGender,
+        deliveredBy_phone: transactionData.deliveredPhone,
+        deliveredBy_name: transactionData.deliveredName,
       };
 
       let priceGood = parseFloat(formData.unitprice) || 0;
@@ -203,6 +227,19 @@ export const RegisteredFarmerScreen = ({ route }) => {
       console.log(error);
     }
   };
+
+  useEffect(() => {
+    if (Object.keys(errors).length > 0) {
+      console.log(errors);
+      setValidationError({
+        type: "emptyOrInvalidData",
+        message: `Invalid input at '${getInputLabel(
+          Object.keys(errors)[0]
+        )}', also check for any other highlighted input box`,
+        inputBox: null,
+      });
+    }
+  }, [errors]);
 
   useEffect(() => {
     if (transValidated) {
@@ -393,6 +430,9 @@ export const RegisteredFarmerScreen = ({ route }) => {
             totalBad: "",
             cashTotal: "0",
             cashTotalMobile: "0",
+            deliveredName: "not applicable",
+            deliveredPhone: "not applicable",
+            deliveredGender: deliveredGender,
           }}
           onSubmit={async (values) => {
             submitTransaction(values);
@@ -452,6 +492,7 @@ export const RegisteredFarmerScreen = ({ route }) => {
                     label={"Farmer ID"}
                     value={values.farmerID}
                     active={false}
+                    error={errors.farmerID}
                   />
                   <BuyCoffeeInput
                     values={values}
@@ -460,6 +501,7 @@ export const RegisteredFarmerScreen = ({ route }) => {
                     label={"Farmer Name"}
                     value={values.farmerName}
                     active={false}
+                    error={errors.farmerName}
                   />
                   <BuyCoffeeInput
                     values={values}
@@ -467,7 +509,10 @@ export const RegisteredFarmerScreen = ({ route }) => {
                     handleBlur={handleBlur("receiptNumber")}
                     label={"Receipt Number"}
                     value={values.receiptNumber}
-                    error={validationError.inputBox === "receiptNumber"}
+                    error={
+                      validationError.inputBox === "receiptNumber" ||
+                      errors.receiptNumber
+                    }
                   />
                   <View
                     style={{
@@ -709,6 +754,7 @@ export const RegisteredFarmerScreen = ({ route }) => {
                         label={"Kgs(Good)"}
                         radius={4}
                         value={values.kgGood}
+                        keyboardType={"numeric"}
                       />
                       <View
                         style={{
@@ -737,6 +783,7 @@ export const RegisteredFarmerScreen = ({ route }) => {
                         label={"Kgs(Bad)"}
                         radius={4}
                         value={values.kgBad}
+                        keyboardType={"numeric"}
                       />
                     </View>
                     <View
@@ -766,6 +813,7 @@ export const RegisteredFarmerScreen = ({ route }) => {
                         label={"Price/Kg"}
                         radius={4}
                         value={values.priceGood}
+                        keyboardType={"numeric"}
                       />
                       <View
                         style={{
@@ -794,6 +842,7 @@ export const RegisteredFarmerScreen = ({ route }) => {
                         label={"Price/Kg"}
                         radius={4}
                         value={values.priceBad}
+                        keyboardType={"numeric"}
                       />
                     </View>
                   </View>
@@ -829,6 +878,8 @@ export const RegisteredFarmerScreen = ({ route }) => {
                     radius={4}
                     active={false}
                     value={values.cashTotal}
+                    keyboardType={"numeric"}
+                    error={errors.cashTotal}
                   />
                   <BuyCoffeeInput
                     values={values}
@@ -837,7 +888,129 @@ export const RegisteredFarmerScreen = ({ route }) => {
                     label={"Total Paid By Mobile Payment"}
                     radius={4}
                     value={values.cashTotalMobile}
+                    keyboardType={"numeric"}
+                    error={errors.cashTotalMobile}
                   />
+                </View>
+
+                {/* delivery */}
+                <View
+                  style={{
+                    width: "95%",
+                    backgroundColor: colors.white,
+                    elevation: 2,
+                    borderRadius: 15,
+                    paddingHorizontal: screenWidth * 0.04,
+                    paddingVertical: screenHeight * 0.03,
+                    gap: screenHeight * 0.01,
+                  }}
+                >
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontWeight: "400",
+                        fontSize: screenWidth * 0.05,
+                        color: colors.secondary,
+                        marginLeft: screenWidth * 0.02,
+                      }}
+                    >
+                      Delivered by (optional)
+                    </Text>
+                    {folded ? (
+                      <TouchableOpacity onPress={toggleFold}>
+                        <FontAwesome5
+                          name="angle-down"
+                          size={screenWidth * 0.07}
+                          color="black"
+                        />
+                      </TouchableOpacity>
+                    ) : (
+                      <TouchableOpacity onPress={toggleFold}>
+                        <FontAwesome5
+                          name="angle-up"
+                          size={screenWidth * 0.07}
+                          color="black"
+                        />
+                      </TouchableOpacity>
+                    )}
+                  </View>
+
+                  {!folded && (
+                    <>
+                      <BuyCoffeeInput
+                        values={values}
+                        handleChange={handleChange("deliveredName")}
+                        handleBlur={handleBlur("deliveredName")}
+                        label={"Names"}
+                        radius={4}
+                        value={values.deliveredName}
+                        active={false}
+                        error={errors.deliveredName}
+                      />
+                      <BuyCoffeeInput
+                        values={values}
+                        handleChange={handleChange("deliveredPhone")}
+                        handleBlur={handleBlur("deliveredPhone")}
+                        label={"Phone number"}
+                        radius={4}
+                        value={values.deliveredPhone}
+                        active={false}
+                        error={errors.deliveredPhone}
+                      />
+                      <Text
+                        style={{
+                          fontWeight: "400",
+                          fontSize: screenWidth * 0.04,
+                          color: colors.black,
+                          marginLeft: screenWidth * 0.02,
+                        }}
+                      >
+                        Gender
+                      </Text>
+                      <RadioButtonGroup
+                        containerStyle={{ marginBottom: 10, gap: 5 }}
+                        selected={deliveredGender}
+                        onSelected={(value) => setDeliveredGender(value)}
+                        radioBackground={colors.blue_font}
+                      >
+                        <RadioButtonItem
+                          value="M"
+                          label={
+                            <Text
+                              style={{
+                                fontWeight: "600",
+                                fontSize: 16,
+                                marginLeft: 8,
+                                color: colors.black,
+                              }}
+                            >
+                              Male
+                            </Text>
+                          }
+                        />
+                        <RadioButtonItem
+                          value="F"
+                          label={
+                            <Text
+                              style={{
+                                fontWeight: "600",
+                                fontSize: 16,
+                                marginLeft: 8,
+                                color: colors.black,
+                              }}
+                            >
+                              Female
+                            </Text>
+                          }
+                        />
+                      </RadioButtonGroup>
+                    </>
+                  )}
                 </View>
 
                 {/* validation error */}

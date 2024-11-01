@@ -162,7 +162,7 @@ const generateBulkValueString = (
         .replace("T", " ")
         .replace(/\.\d{3}Z$/, "");
 
-      bulkValues += `('${formattedDateString}','${data[i].farmerid}','${data[i].farmername}','${data[i].coffee_type}','${data[i].kilograms}','${data[i].unitprice}','${data[i].lotnumber}','${formattedDateString}','${data[i].certification}','${data[i]._kf_Staff}','${data[i]._kf_Station}','${data[i]._kf_Supplier}','${data[i].uploaded}','${data[i].uploaded_at}','${data[i].site_day_lot}','${data[i].paper_receipt}','${data[i].certified}','${data[i].edited}','${data[i].cash_paid}','${data[i].cherry_lot_id}','${data[i].parchment_lot_id}','${data[i].traceable}','${data[i].total_mobile_money_payment}','${data[i].bad_unit_price}','${data[i].bad_kilograms}','${data[i].bad_cherry_lot_id}','${data[i].bad_parch_lot_id}','${data[i]._kf_Season}')`;
+      bulkValues += `('${formattedDateString}','${data[i].farmerid}','${data[i].farmername}','${data[i].coffee_type}','${data[i].kilograms}','${data[i].unitprice}','${data[i].lotnumber}','${formattedDateString}','${data[i].certification}','${data[i]._kf_Staff}','${data[i]._kf_Station}','${data[i]._kf_Supplier}','${data[i].uploaded}','${data[i].uploaded_at}','${data[i].site_day_lot}','${data[i].paper_receipt}','${data[i].certified}','${data[i].edited}','${data[i].cash_paid}','${data[i].cherry_lot_id}','${data[i].parchment_lot_id}','${data[i].traceable}','${data[i].total_mobile_money_payment}','${data[i].bad_unit_price}','${data[i].bad_kilograms}','${data[i].bad_cherry_lot_id}','${data[i].bad_parch_lot_id}','${data[i]._kf_Season}','${data[i].deliveredBy_name}','${data[i].deliveredBy_phone}','${data[i].deliveredBy_gender}')`;
       if (i < data.length - 1) bulkValues += ",";
     }
 

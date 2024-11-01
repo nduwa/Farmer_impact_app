@@ -123,7 +123,7 @@ export const FarmerScreen = () => {
             tableName: "rtc_groups",
             stationId,
             setData: setGroups,
-            queryArg: `SELECT * FROM rtc_groups WHERE _kf_Station='${stationId}' AND active = "1"`,
+            queryArg: `SELECT DISTINCT g.* FROM rtc_groups AS g JOIN rtc_farmers AS f ON g.__kp_Group = f._kf_Group WHERE g._kf_Station = '${stationId}' AND g.active = "1" AND f.type = 'online' AND f.deleted = 0 AND f.sync = 1;`,
           });
         }
       };
@@ -362,7 +362,9 @@ export const FarmerScreen = () => {
                 gap: screenHeight * 0.02,
               }}
             >
-              <Text style={{ textAlign: "center" }}>No active farmers found</Text>
+              <Text style={{ textAlign: "center" }}>
+                No active farmers found
+              </Text>
               <TouchableOpacity onPress={handlePress}>
                 <Text
                   style={{

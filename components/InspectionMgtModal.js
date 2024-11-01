@@ -9,25 +9,17 @@ import {
 } from "react-native";
 import { colors } from "../data/colors";
 import { globalStyles } from "../data/globalStyles";
-import { FarmerMgtItem } from "./FarmerMgtItem";
-import { useSelector } from "react-redux";
-import { useTranslation } from "react-i18next";
+import { ModalMenuItem } from "./ModalMenuItem";
+import Foundation from "@expo/vector-icons/Foundation";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
-export const FarmerMgtModal = ({ setIsFarmerModalOpen }) => {
+export const InspectionMgtModal = ({ setIsInspectionModalOpen }) => {
   const [initClose, setInitClose] = useState(false);
-  const userState = useSelector((state) => state.user);
-  const { t } = useTranslation();
 
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
-  const modalHeight = screenHeight * 0.6;
+  const modalHeight = screenHeight * 0.4;
   const animation = new Animated.Value(0);
-
-  const isAccessable = (mod) => {
-    return userState.accessModules?.some(
-      (module) => module.module_name === mod
-    );
-  };
 
   const handleClick = () => {
     setInitClose(true);
@@ -45,7 +37,7 @@ export const FarmerMgtModal = ({ setIsFarmerModalOpen }) => {
       duration: 200,
       useNativeDriver: true,
     }).start(() => {
-      if (initClose) setIsFarmerModalOpen(false);
+      if (initClose) setIsInspectionModalOpen(false);
     });
   }, [initClose]);
 
@@ -66,7 +58,7 @@ export const FarmerMgtModal = ({ setIsFarmerModalOpen }) => {
       >
         <Animated.View
           style={[
-            globalStyles.buyCoffeeModalStyles,
+            globalStyles.inspectionMgtModalStyles,
             { transform: [{ translateY }] },
           ]}
         >
@@ -88,40 +80,37 @@ export const FarmerMgtModal = ({ setIsFarmerModalOpen }) => {
                 color: colors.secondary,
               }}
             >
-              {t("homepage.farmer_modal.title")}
+              Inspection
             </Text>
           </View>
 
-          <View style={{ flex: 1, gap: 16 }}>
-            <FarmerMgtItem
-              setIsFarmerModalOpen={setIsFarmerModalOpen}
-              destination={"FarmerRegistration"}
-              label={t("homepage.farmer_modal.register")}
-              isActive={isAccessable("Register")}
+          <View
+            style={{
+              flex: 1,
+              gap: 16,
+              width: "80%",
+            }}
+          >
+            <ModalMenuItem
+              setIsModalOpen={setIsInspectionModalOpen}
+              destination={"chooseInspection"}
+              label={"New Inspection"}
+              icon={
+                <Foundation name="clipboard-notes" size={24} color="black" />
+              }
             />
-            <FarmerMgtItem
-              setIsFarmerModalOpen={setIsFarmerModalOpen}
-              destination={"AssignGroupsHome"}
-              label={t("homepage.farmer_modal.groups")}
-              isActive={isAccessable("Groups")}
-            />
-            <FarmerMgtItem
-              setIsFarmerModalOpen={setIsFarmerModalOpen}
-              destination={"FarmerUpdateHome"}
-              label={t("homepage.farmer_modal.update")}
-              isActive={isAccessable("Update Farmers")}
-            />
-            <FarmerMgtItem
-              setIsFarmerModalOpen={setIsFarmerModalOpen}
-              destination={"SelectFarmerDeleteScreen"}
-              label={t("homepage.farmer_modal.remove")}
-              isActive={isAccessable("Remove farmers")}
-            />
-            <FarmerMgtItem
-              setIsFarmerModalOpen={setIsFarmerModalOpen}
-              destination={"WeeklyReportScreen"}
-              label={t("homepage.farmer_modal.report")}
-              isActive={isAccessable("Training")}
+            <ModalMenuItem
+              setIsModalOpen={setIsInspectionModalOpen}
+              destination={"chooseInspection"}
+              label={"Re-inspection"}
+              isActive={false}
+              icon={
+                <MaterialCommunityIcons
+                  name="reload-alert"
+                  size={24}
+                  color="black"
+                />
+              }
             />
           </View>
         </Animated.View>

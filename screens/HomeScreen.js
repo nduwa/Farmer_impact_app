@@ -32,6 +32,7 @@ import { FarmerMgtModal } from "../components/FarmerMgtModal";
 import { AccessControlModal } from "../components/AccessControlModal";
 import { retrieveDBdataAsync } from "../helpers/retrieveDBdataAsync";
 import { useTranslation } from "react-i18next";
+import { InspectionMgtModal } from "../components/InspectionMgtModal";
 
 export const HomeScreen = ({ route }) => {
   const userState = useSelector((state) => state.user);
@@ -49,6 +50,7 @@ export const HomeScreen = ({ route }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [sidebarScrolled, setsideBarScroll] = useState(false);
   const [isBuyCoffeeModalOpen, setIsBuyCoffeeModalOpen] = useState(false);
+  const [isInspectionModalOpen, setIsInspectionModalOpen] = useState(false);
   const [isFarmerMgtModalOpen, setIsFarmerModalOpen] = useState(false);
 
   const [accessableModules, setAccessableModules] = useState([]);
@@ -407,17 +409,29 @@ export const HomeScreen = ({ route }) => {
             padding: screenWidth * 0.05,
           }}
         >
-          {isAccessable(["Register", "Training", "Update Farmers"]) && (
+          {isAccessable([
+            "Register",
+            "Training",
+            "Update Farmers",
+            "Remove farmers",
+            "Groups",
+          ]) && (
             <OpCard
               name={t("homepage.farmer")}
               action={setIsFarmerModalOpen}
-              active={isAccessable(["Register", "Training", "Update Farmers"])}
+              active={isAccessable([
+                "Register",
+                "Training",
+                "Update Farmers",
+                "Remove farmers",
+                "Groups",
+              ])}
             />
           )}
           {isAccessable(["Inspection"]) && (
             <OpCard
               name={t("homepage.inspection")}
-              destination={"chooseInspection"}
+              action={setIsInspectionModalOpen}
               active={isAccessable(["Inspection"])}
             />
           )}
@@ -461,6 +475,12 @@ export const HomeScreen = ({ route }) => {
           )}
         </View>
       </View>
+
+      {isInspectionModalOpen && (
+        <InspectionMgtModal
+          setIsInspectionModalOpen={setIsInspectionModalOpen}
+        />
+      )}
 
       {isBuyCoffeeModalOpen && (
         <BuyCoffeeModal setIsBuyCoffeeModalOpen={setIsBuyCoffeeModalOpen} />
