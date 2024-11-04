@@ -15,7 +15,6 @@ import React, { useEffect, useState } from "react";
 import { retrieveDBdata } from "../../../helpers/retrieveDBdata";
 import LottieView from "lottie-react-native";
 import { GroupsStatusCard } from "../../../components/GroupsStatusCard";
-import { dbQueries } from "../../../data/dbQueries";
 import { useDispatch, useSelector } from "react-redux";
 import {
   GroupStatusAction,
@@ -35,7 +34,6 @@ export const UploadGroupChangesScreen = ({ route }) => {
 
   const { data } = route.params;
 
-  const [changesTobeSubmitted, setChangesTobeSubmitted] = useState([]);
   const [ids, setIds] = useState("");
   const [currentInactiveIDs, setCurrentInactiveIDs] = useState("");
   const [currentActiveIDs, setCurrentActiveIDs] = useState("");
@@ -47,6 +45,7 @@ export const UploadGroupChangesScreen = ({ route }) => {
 
   const [groupChanges, setGroupChanges] = useState([]);
   const [loadingData, setLoadingData] = useState(false);
+  const [token, setToken] = useState();
 
   const formatDate = (str) => {
     const date = new Date(str);
@@ -62,20 +61,20 @@ export const UploadGroupChangesScreen = ({ route }) => {
     let tmp = [];
     let strIDs = "";
     let i = 0;
+    let tmpFilter = data.filter(
+      (item) => formatDate(item.created_at) === submitModal.id
+    );
 
-    for (const change of data) {
-      if (formatDate(change.created_at) === submitModal.id) {
-        tmp.push(change);
-        strIDs += `'${change.id}'`;
-        if (i < data.length - 1) strIDs += ",";
-        i++;
-      }
+    for (const change of tmpFilter) {
+      tmp.push(change);
+      strIDs += `'${change.id}'`;
+      if (i < tmpFilter.length - 1) strIDs += ",";
+      i++;
     }
 
     setIds(strIDs);
 
-    setChangesTobeSubmitted(tmp);
-    dispatch(groupStatusUpdate({ groupChanges: tmp }));
+    dispatch(groupStatusUpdate({ groupChanges: tmp, token }));
   };
 
   const handleReverse = () => {
@@ -164,12 +163,14 @@ export const UploadGroupChangesScreen = ({ route }) => {
     if (currentJob === "Groups changes saved") {
       displayToast("Groups changes submitted");
       setCurrentJob("");
+      setIds("");
       setLoadingData(false);
       navigation.navigate("PendingGroupsScreen", { data: null });
     } else if (currentJob === "Groups changes not saved") {
       displayToast("Error: Groups changes not submitted");
       setCurrentJob("");
       setLoadingData(false);
+      setIds("");
     } else if (currentJob === "Inactive status restored") {
       if (currentInactiveIDs.length > 0) {
         query = `UPDATE rtc_groups SET active = 1 WHERE __kp_Group IN(${currentInactiveIDs})`;
@@ -223,6 +224,13 @@ export const UploadGroupChangesScreen = ({ route }) => {
     React.useCallback(() => {
       const fetchData = async () => {
         setLoadingData(true);
+
+        const authToken = await SecureStore.getItemAsync("rtc-token");
+
+        if (authToken) {
+          setToken(authToken);
+        }
+
         retrieveDBdata({
           tableName: "tmp_group_activate",
           setData: setGroupChanges,
@@ -234,7 +242,6 @@ export const UploadGroupChangesScreen = ({ route }) => {
       return () => {
         setLoadingData(false);
         setGroupChanges([]);
-        setChangesTobeSubmitted([]);
         setCurrentInactiveIDs("");
         setCurrentJob("");
         setUndoModal({ open: false, id: null });

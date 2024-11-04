@@ -40,6 +40,7 @@ export const SyncScreen = ({ navigation, route }) => {
   const [syncStarted, setSyncStarted] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [token, setToken] = useState();
   const [sycnList, setSyncList] = useState([
     { table: "stations", label: "Stations", status: false },
     { table: "groups", label: "Groups", status: false },
@@ -121,7 +122,7 @@ export const SyncScreen = ({ navigation, route }) => {
         ? "all"
         : null;
 
-    dispatch(sync({ tableName: currentTable, specialId, queryParam }));
+    dispatch(sync({ tableName: currentTable, specialId, queryParam, token }));
     setSyncStarted(true);
     setIsSyncing(true);
   };
@@ -153,6 +154,7 @@ export const SyncScreen = ({ navigation, route }) => {
         tableName: restartTable,
         specialId,
         queryParam,
+        token,
       })
     );
     setSyncStarted(true);
@@ -263,6 +265,13 @@ export const SyncScreen = ({ navigation, route }) => {
         }
 
         setLoading(true);
+
+        const authToken = await SecureStore.getItemAsync("rtc-token");
+
+        if (authToken) {
+          setToken(authToken);
+        }
+
         const tableExistenceResults = await checkTableExistence();
 
         if (tableExistenceResults) {

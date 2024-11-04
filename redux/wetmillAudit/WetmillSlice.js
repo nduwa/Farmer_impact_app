@@ -5,12 +5,15 @@ export const auditSubmission = createAsyncThunk(
   "audit/submit",
   async (data) => {
     try {
+      const { formData, filepath, station, user, token } = data;
+
       const response = await api.post(
-        `/sync/wetmill?filepath=${data.filepath}&station=${data.station}&user=${data.user}`,
-        data.formData,
+        `/sync/wetmill?filepath=${filepath}&station=${station}&user=${user}`,
+        formData,
         {
           headers: {
             "Content-Type": "multipart/form-data",
+            auth_token: `${token}`,
           },
         }
       );

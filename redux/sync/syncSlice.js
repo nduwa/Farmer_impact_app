@@ -4,13 +4,13 @@ import api from "../axiosInstance";
 
 export const sync = createAsyncThunk("data/sync", async (data) => {
   try {
-    const { tableName } = data;
+    const { tableName, specialId, queryParam, token } = data;
     let id = null;
     let queryStr = null;
 
     if (tableName === "stations") {
-      id = data.specialId || (await SecureStore.getItemAsync("rtc-user-id"));
-      queryStr = data.queryParam || null;
+      id = specialId || (await SecureStore.getItemAsync("rtc-user-id"));
+      queryStr = queryParam || null;
     } else if (
       tableName === "groups" ||
       tableName === "farmers" ||
@@ -26,7 +26,9 @@ export const sync = createAsyncThunk("data/sync", async (data) => {
       queryStr ? "?" + queryStr + "=1" : ""
     }`;
 
-    const response = await api.get(routeString);
+    const response = await api.get(routeString, {
+      headers: { auth_token: `${token}` },
+    });
 
     if (response.status === 200) {
       console.log(`Data received for ${tableName}`);

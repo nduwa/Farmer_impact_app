@@ -38,6 +38,7 @@ export const PendingFarmScreen = () => {
   const [loading, setLoading] = useState(false);
   const [submitModal, setSubmitModal] = useState(false);
   const [deleteModal, setDeleteModal] = useState({ open: false, id: null });
+  const [token, setToken] = useState();
 
   const handleBackButton = () => {
     navigation.navigate("Homepage", { data: null });
@@ -61,7 +62,7 @@ export const PendingFarmScreen = () => {
 
   const handleUpload = () => {
     setLoading(true);
-    dispatch(farmSubmit({ farms: farmRecords }));
+    dispatch(farmSubmit({ farms: farmRecords, token }));
     setSubmitModal(false);
   };
 
@@ -143,6 +144,11 @@ export const PendingFarmScreen = () => {
     React.useCallback(() => {
       const fetchData = async () => {
         const currentUser = await SecureStore.getItemAsync("rtc-name-full");
+        const authToken = await SecureStore.getItemAsync("rtc-token");
+
+        if (authToken) {
+          setToken(authToken);
+        }
 
         if (currentUser) {
           setLoading(true);

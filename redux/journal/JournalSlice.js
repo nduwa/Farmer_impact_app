@@ -5,7 +5,14 @@ export const scJournalSubmission = createAsyncThunk(
   "journal/submit",
   async (data) => {
     try {
-      const response = await api.post(`/sync/journal`, data);
+      const { journalId, transactions, additional, token } = data;
+      const response = await api.post(
+        `/sync/journal`,
+        { journalId, transactions, additional },
+        {
+          headers: { auth_token: `${token}` },
+        }
+      );
 
       let resp = null;
       if (response.status === 200) {

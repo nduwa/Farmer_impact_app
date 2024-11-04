@@ -5,7 +5,14 @@ export const groupStatusUpdate = createAsyncThunk(
   "groups/status",
   async (data) => {
     try {
-      const response = await api.post(`/sync/groups/status`, data);
+      const { groupChanges, token } = data;
+      const response = await api.post(
+        `/sync/groups/status`,
+        { groupChanges },
+        {
+          headers: { auth_token: `${token}` },
+        }
+      );
 
       let resp = null;
       if (response.status === 200) {

@@ -5,12 +5,14 @@ export const trainingSubmission = createAsyncThunk(
   "training/submit",
   async (data) => {
     try {
+      const { formData, filepath, token } = data;
       const response = await api.post(
-        `/sync/training?filepath=${data.filepath}`,
-        data.formData,
+        `/sync/training?filepath=${filepath}`,
+        formData,
         {
           headers: {
             "Content-Type": "multipart/form-data",
+            auth_token: `${token}`,
           },
         }
       );

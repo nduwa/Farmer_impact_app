@@ -5,7 +5,14 @@ export const inspectionSubmission = createAsyncThunk(
   "inspection/submit",
   async (data) => {
     try {
-      const response = await api.post(`/sync/inspection`, data);
+      const { inspection, responses, token } = data;
+      const response = await api.post(
+        `/sync/inspection`,
+        { inspection, responses },
+        {
+          headers: { auth_token: `${token}` },
+        }
+      );
 
       let resp = null;
       if (response.status === 200) {

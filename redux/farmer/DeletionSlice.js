@@ -5,7 +5,10 @@ export const farmerDeletion = createAsyncThunk(
   "farmers/delete",
   async (data) => {
     try {
-      const response = await api.post(`/sync/farmer/update`, data);
+      const { submitData, token } = data;
+      const response = await api.post(`/sync/farmer/update`, submitData, {
+        headers: { auth_token: `${token}` },
+      });
 
       let resp = null;
       if (response.status === 200) {

@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import * as SecureStore from "expo-secure-store";
 import { StatusBar } from "expo-status-bar";
 import { AntDesign } from "@expo/vector-icons";
 import { retrieveDBdata } from "../../helpers/retrieveDBdata";
@@ -47,6 +48,7 @@ export const InspectionsScreen = () => {
   const [currentJob, setCurrentJob] = useState(null);
   const [loading, setLoading] = useState(false);
   const [inspectionDeleted, setInspectionDeleted] = useState(false);
+  const [token, setToken] = useState();
 
   const handleBackButton = () => {
     navigation.navigate("Homepage", { data: null });
@@ -195,6 +197,7 @@ export const InspectionsScreen = () => {
         inspectionSubmission({
           inspection: inspectionModal.data,
           responses: responses,
+          token,
         })
       );
     }
@@ -208,6 +211,12 @@ export const InspectionsScreen = () => {
     React.useCallback(() => {
       const fetchData = async () => {
         setLoading(true);
+        const authToken = await SecureStore.getItemAsync("rtc-token");
+
+        if (authToken) {
+          setToken(authToken);
+        }
+
         retrieveDBdata({
           tableName: "rtc_inspections",
           setData: setInspections,
