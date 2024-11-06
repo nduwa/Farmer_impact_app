@@ -5,7 +5,15 @@ export const weeklyReportSubmit = createAsyncThunk(
   "farmer/report",
   async (data) => {
     try {
-      const response = await api.post(`/sync/farmer/report`, data);
+      const { reports, token } = data;
+
+      const response = await api.post(
+        `/sync/farmer/report`,
+        { reports },
+        {
+          headers: { auth_token: `${token}` },
+        }
+      );
 
       let resp = null;
       if (response.status === 200) {

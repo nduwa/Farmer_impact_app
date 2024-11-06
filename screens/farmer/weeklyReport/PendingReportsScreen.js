@@ -40,6 +40,7 @@ const PendingReportsScreen = () => {
   const [deleteModal, setDeleteModal] = useState({ open: false, id: null });
 
   const [reports, setReports] = useState([]);
+  const [token, setToken] = useState();
 
   const handleBackButton = () => {
     navigation.navigate("Homepage", { data: null });
@@ -51,7 +52,7 @@ const PendingReportsScreen = () => {
 
   const handleUpload = () => {
     setLoading(true);
-    dispatch(weeklyReportSubmit({ reports }));
+    dispatch(weeklyReportSubmit({ reports, token }));
     setSubmitModal(false);
   };
 
@@ -143,6 +144,11 @@ const PendingReportsScreen = () => {
     React.useCallback(() => {
       const fetchData = async () => {
         const currentUser = await SecureStore.getItemAsync("rtc-name-full");
+        const authToken = await SecureStore.getItemAsync("rtc-token");
+
+        if (authToken) {
+          setToken(authToken);
+        }
 
         if (currentUser) {
           setLoading(true);

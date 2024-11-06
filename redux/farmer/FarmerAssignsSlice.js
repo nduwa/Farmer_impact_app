@@ -5,7 +5,14 @@ export const groupAssignUpdate = createAsyncThunk(
   "farmer/assign",
   async (data) => {
     try {
-      const response = await api.post(`/sync/farmer/assign`, data);
+      const { groupChanges, token } = data;
+      const response = await api.post(
+        `/sync/farmer/assign`,
+        { groupChanges },
+        {
+          headers: { auth_token: `${token}` },
+        }
+      );
 
       let resp = null;
       if (response.status === 200) {

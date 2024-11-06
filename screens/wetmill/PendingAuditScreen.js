@@ -19,7 +19,6 @@ import { SyncModal } from "../../components/SyncModal";
 import { deleteFile } from "../../helpers/deleteFile";
 import { useDispatch, useSelector } from "react-redux";
 import { updateDBdata } from "../../helpers/updateDBdata";
-import { generateFileName } from "../../helpers/prepareWetmillReport";
 import {
   auditActions,
   auditSubmission,
@@ -33,6 +32,7 @@ export const PendingAuditScreen = () => {
   const dispatch = useDispatch();
   const auditState = useSelector((state) => state.audit);
 
+  const [token, setToken] = useState();
   const [audits, setAudits] = useState([]);
   const [stationName, setStationName] = useState("");
   const [currentJob, setCurrentJob] = useState(null);
@@ -102,6 +102,7 @@ export const PendingAuditScreen = () => {
         filepath: `wetmill/${stationName}/${fileName}`,
         station: uploadModal.station,
         user: uploadModal.user,
+        token,
       })
     );
   };
@@ -210,6 +211,11 @@ export const PendingAuditScreen = () => {
       const fetchData = async () => {
         setLoading(true);
         let station_name = await SecureStore.getItemAsync("rtc-station-name");
+        const authToken = await SecureStore.getItemAsync("rtc-token");
+
+        if (authToken) {
+          setToken(authToken);
+        }
 
         if (station_name) {
           setStationName(station_name);

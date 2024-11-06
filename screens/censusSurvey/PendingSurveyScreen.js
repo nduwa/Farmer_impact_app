@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import * as SecureStore from "expo-secure-store";
 import { StatusBar } from "expo-status-bar";
 import { AntDesign } from "@expo/vector-icons";
 import LottieView from "lottie-react-native";
@@ -36,6 +37,7 @@ export const PendingSurveyScreen = () => {
 
   const [currentJob, setCurrentJob] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [token, setToken] = useState();
   const [uploadModal, setUploadModal] = useState({
     open: false,
     id: null,
@@ -79,7 +81,7 @@ export const PendingSurveyScreen = () => {
 
     readDataFromFile(fileUri).then((data) => {
       if (data) {
-        dispatch(surveyUpload(data));
+        dispatch(surveyUpload({ surveydata: data, token }));
         console.log("data extracted from the file successfully");
       }
     });
@@ -168,6 +170,11 @@ export const PendingSurveyScreen = () => {
     React.useCallback(() => {
       const fetchData = async () => {
         setLoading(true);
+        const authToken = await SecureStore.getItemAsync("rtc-token");
+
+        if (authToken) {
+          setToken(authToken);
+        }
 
         retrieveDBdata({
           tableName: "tmp_census_survey",

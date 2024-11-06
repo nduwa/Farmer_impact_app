@@ -40,10 +40,11 @@ export const PendingDeletionScreen = () => {
 
   const [loading, setLoading] = useState(false);
   const [submitModal, setSubmitModal] = useState(false);
+  const [token, setToken] = useState();
 
   const handleUpload = () => {
     setLoading(true);
-    dispatch(farmerDeletion(deletions));
+    dispatch(farmerDeletion({ submitData: deletions, token }));
     setSubmitModal(false);
   };
 
@@ -150,6 +151,11 @@ export const PendingDeletionScreen = () => {
     React.useCallback(() => {
       const fetchData = async () => {
         const currentUser = await SecureStore.getItemAsync("rtc-name-full");
+        const authToken = await SecureStore.getItemAsync("rtc-token");
+
+        if (authToken) {
+          setToken(authToken);
+        }
 
         if (currentUser) {
           setLoading(true);

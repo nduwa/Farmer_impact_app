@@ -36,6 +36,7 @@ export const PendingTreesScreen = () => {
   const [currentJob, setCurrentJob] = useState();
   const [loading, setLoading] = useState(false);
   const [submitModal, setSubmitModal] = useState(false);
+  const [token, setToken] = useState();
 
   const handleBackButton = () => {
     navigation.navigate("Homepage", { data: null });
@@ -59,7 +60,7 @@ export const PendingTreesScreen = () => {
 
   const handleUpload = () => {
     setLoading(true);
-    dispatch(treesSubmit({ trees: treeRecords }));
+    dispatch(treesSubmit({ trees: treeRecords, token }));
     setSubmitModal(false);
   };
 
@@ -121,6 +122,11 @@ export const PendingTreesScreen = () => {
     React.useCallback(() => {
       const fetchData = async () => {
         const currentUser = await SecureStore.getItemAsync("rtc-name-full");
+        const authToken = await SecureStore.getItemAsync("rtc-token");
+
+        if (authToken) {
+          setToken(authToken);
+        }
 
         if (currentUser) {
           setLoading(true);

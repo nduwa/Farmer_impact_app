@@ -3,7 +3,15 @@ import api from "../axiosInstance";
 
 export const farmSubmit = createAsyncThunk("farmer/farm", async (data) => {
   try {
-    const response = await api.post(`/sync/farmer/farms`, data);
+    const { farms, token } = data;
+
+    const response = await api.post(
+      `/sync/farmer/farms`,
+      { farms },
+      {
+        headers: { auth_token: `${token}` },
+      }
+    );
 
     let resp = null;
     if (response.status === 200) {

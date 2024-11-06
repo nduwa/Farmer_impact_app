@@ -5,7 +5,14 @@ export const farmerSubmission = createAsyncThunk(
   "farmers/submit",
   async (data) => {
     try {
-      const response = await api.post(`/sync/farmers/registration`, data);
+      const { registrations, token } = data;
+      const response = await api.post(
+        `/sync/farmers/registration`,
+        registrations,
+        {
+          headers: { auth_token: `${token}` },
+        }
+      );
 
       let resp = null;
       if (response.status === 200) {

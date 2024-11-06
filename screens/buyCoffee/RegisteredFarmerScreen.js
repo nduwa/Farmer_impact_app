@@ -587,6 +587,126 @@ export const RegisteredFarmerScreen = ({ route }) => {
                   </View>
                 </View>
 
+                {/* delivery */}
+                <View
+                  style={{
+                    width: "95%",
+                    backgroundColor: colors.white,
+                    elevation: 2,
+                    borderRadius: 15,
+                    paddingHorizontal: screenWidth * 0.04,
+                    paddingVertical: screenHeight * 0.03,
+                    gap: screenHeight * 0.01,
+                  }}
+                >
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontWeight: "400",
+                        fontSize: screenWidth * 0.05,
+                        color: colors.secondary,
+                        marginLeft: screenWidth * 0.02,
+                      }}
+                    >
+                      Delivered by (optional)
+                    </Text>
+                    {folded ? (
+                      <TouchableOpacity onPress={toggleFold}>
+                        <FontAwesome5
+                          name="angle-down"
+                          size={screenWidth * 0.07}
+                          color="black"
+                        />
+                      </TouchableOpacity>
+                    ) : (
+                      <TouchableOpacity onPress={toggleFold}>
+                        <FontAwesome5
+                          name="angle-up"
+                          size={screenWidth * 0.07}
+                          color="black"
+                        />
+                      </TouchableOpacity>
+                    )}
+                  </View>
+
+                  {!folded && (
+                    <>
+                      <BuyCoffeeInput
+                        values={values}
+                        handleChange={handleChange("deliveredName")}
+                        handleBlur={handleBlur("deliveredName")}
+                        label={"Names"}
+                        radius={4}
+                        value={values.deliveredName}
+                        active={false}
+                        error={errors.deliveredName}
+                      />
+                      <BuyCoffeeInput
+                        values={values}
+                        handleChange={handleChange("deliveredPhone")}
+                        handleBlur={handleBlur("deliveredPhone")}
+                        label={"Phone number"}
+                        radius={4}
+                        value={values.deliveredPhone}
+                        active={false}
+                        error={errors.deliveredPhone}
+                      />
+                      <Text
+                        style={{
+                          fontWeight: "400",
+                          fontSize: screenWidth * 0.04,
+                          color: colors.black,
+                          marginLeft: screenWidth * 0.02,
+                        }}
+                      >
+                        Gender
+                      </Text>
+                      <RadioButtonGroup
+                        containerStyle={{ marginBottom: 10, gap: 5 }}
+                        selected={deliveredGender}
+                        onSelected={(value) => setDeliveredGender(value)}
+                        radioBackground={colors.blue_font}
+                      >
+                        <RadioButtonItem
+                          value="M"
+                          label={
+                            <Text
+                              style={{
+                                fontWeight: "600",
+                                fontSize: 16,
+                                marginLeft: 8,
+                                color: colors.black,
+                              }}
+                            >
+                              Male
+                            </Text>
+                          }
+                        />
+                        <RadioButtonItem
+                          value="F"
+                          label={
+                            <Text
+                              style={{
+                                fontWeight: "600",
+                                fontSize: 16,
+                                marginLeft: 8,
+                                color: colors.black,
+                              }}
+                            >
+                              Female
+                            </Text>
+                          }
+                        />
+                      </RadioButtonGroup>
+                    </>
+                  )}
+                </View>
+
                 {/* Certification type */}
                 <View
                   style={{
@@ -891,126 +1011,6 @@ export const RegisteredFarmerScreen = ({ route }) => {
                     keyboardType={"numeric"}
                     error={errors.cashTotalMobile}
                   />
-                </View>
-
-                {/* delivery */}
-                <View
-                  style={{
-                    width: "95%",
-                    backgroundColor: colors.white,
-                    elevation: 2,
-                    borderRadius: 15,
-                    paddingHorizontal: screenWidth * 0.04,
-                    paddingVertical: screenHeight * 0.03,
-                    gap: screenHeight * 0.01,
-                  }}
-                >
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      justifyContent: "space-between",
-                    }}
-                  >
-                    <Text
-                      style={{
-                        fontWeight: "400",
-                        fontSize: screenWidth * 0.05,
-                        color: colors.secondary,
-                        marginLeft: screenWidth * 0.02,
-                      }}
-                    >
-                      Delivered by (optional)
-                    </Text>
-                    {folded ? (
-                      <TouchableOpacity onPress={toggleFold}>
-                        <FontAwesome5
-                          name="angle-down"
-                          size={screenWidth * 0.07}
-                          color="black"
-                        />
-                      </TouchableOpacity>
-                    ) : (
-                      <TouchableOpacity onPress={toggleFold}>
-                        <FontAwesome5
-                          name="angle-up"
-                          size={screenWidth * 0.07}
-                          color="black"
-                        />
-                      </TouchableOpacity>
-                    )}
-                  </View>
-
-                  {!folded && (
-                    <>
-                      <BuyCoffeeInput
-                        values={values}
-                        handleChange={handleChange("deliveredName")}
-                        handleBlur={handleBlur("deliveredName")}
-                        label={"Names"}
-                        radius={4}
-                        value={values.deliveredName}
-                        active={false}
-                        error={errors.deliveredName}
-                      />
-                      <BuyCoffeeInput
-                        values={values}
-                        handleChange={handleChange("deliveredPhone")}
-                        handleBlur={handleBlur("deliveredPhone")}
-                        label={"Phone number"}
-                        radius={4}
-                        value={values.deliveredPhone}
-                        active={false}
-                        error={errors.deliveredPhone}
-                      />
-                      <Text
-                        style={{
-                          fontWeight: "400",
-                          fontSize: screenWidth * 0.04,
-                          color: colors.black,
-                          marginLeft: screenWidth * 0.02,
-                        }}
-                      >
-                        Gender
-                      </Text>
-                      <RadioButtonGroup
-                        containerStyle={{ marginBottom: 10, gap: 5 }}
-                        selected={deliveredGender}
-                        onSelected={(value) => setDeliveredGender(value)}
-                        radioBackground={colors.blue_font}
-                      >
-                        <RadioButtonItem
-                          value="M"
-                          label={
-                            <Text
-                              style={{
-                                fontWeight: "600",
-                                fontSize: 16,
-                                marginLeft: 8,
-                                color: colors.black,
-                              }}
-                            >
-                              Male
-                            </Text>
-                          }
-                        />
-                        <RadioButtonItem
-                          value="F"
-                          label={
-                            <Text
-                              style={{
-                                fontWeight: "600",
-                                fontSize: 16,
-                                marginLeft: 8,
-                                color: colors.black,
-                              }}
-                            >
-                              Female
-                            </Text>
-                          }
-                        />
-                      </RadioButtonGroup>
-                    </>
-                  )}
                 </View>
 
                 {/* validation error */}

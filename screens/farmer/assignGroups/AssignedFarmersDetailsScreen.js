@@ -40,6 +40,7 @@ export const AssignedFarmerDetailsScreen = ({ route }) => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [currentJob, setCurrentJob] = useState(null);
   const [submitted, setSubmitted] = useState(false);
+  const [token, setToken] = useState();
 
   const handleBackButton = () => {
     navigation.navigate("UploadGroupAssignments", { data: null });
@@ -68,7 +69,7 @@ export const AssignedFarmerDetailsScreen = ({ route }) => {
   const handleUpload = () => {
     setLoadingData(true);
     setSubmitModalOpen(false);
-    dispatch(groupAssignUpdate({ groupChanges: activityDetails }));
+    dispatch(groupAssignUpdate({ groupChanges: activityDetails, token }));
   };
 
   useEffect(() => {
@@ -124,6 +125,11 @@ export const AssignedFarmerDetailsScreen = ({ route }) => {
     React.useCallback(() => {
       const fetchData = async () => {
         setLoadingData(true);
+        const authToken = await SecureStore.getItemAsync("rtc-token");
+
+        if (authToken) {
+          setToken(authToken);
+        }
         retrieveDBdata({
           tableName: "tmp_farmer_group_assignment",
           setData: setActivityDetails,

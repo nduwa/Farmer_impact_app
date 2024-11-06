@@ -55,6 +55,7 @@ export const ScJournalsSummary = ({ route }) => {
   const [dateAll, setDateAll] = useState(null);
   const [recordsAll, setRecordsAll] = useState(0);
   const [userName, setUserName] = useState("");
+  const [token, setToken] = useState();
 
   const { data = null } = route.params;
 
@@ -85,6 +86,7 @@ export const ScJournalsSummary = ({ route }) => {
         journalId,
         transactions: journalDataUploadable,
         additional: { username: userName, password: "", DayLotNumber },
+        token,
       })
     );
   };
@@ -237,6 +239,11 @@ export const ScJournalsSummary = ({ route }) => {
       const fetchData = async () => {
         let transactions = [];
         let uName = await SecureStore.getItemAsync("rtc-user-name");
+        const authToken = await SecureStore.getItemAsync("rtc-token");
+
+        if (authToken) {
+          setToken(authToken);
+        }
 
         setUserName(uName);
         setLoadingData(true);

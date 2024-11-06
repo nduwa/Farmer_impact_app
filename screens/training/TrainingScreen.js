@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import * as SecureStore from "expo-secure-store";
 import LottieView from "lottie-react-native";
 import { StatusBar } from "expo-status-bar";
 import { AntDesign } from "@expo/vector-icons";
@@ -38,7 +39,8 @@ export const TrainingScreen = () => {
   const [currentJob, setCurrentJob] = useState(null);
   const [language, setLanguage] = useState("eng");
   const [deleteModal, setDeleteModal] = useState({ open: false, id: null });
-  
+  const [token, setToken] = useState();
+
   const [attendanceSubmitted, setAttendanceSubmitted] = useState(false);
 
   const [submitting, setSubmitting] = useState(false);
@@ -136,6 +138,7 @@ export const TrainingScreen = () => {
       trainingSubmission({
         formData,
         filepath: attendanceData[0].filepath,
+        token,
       })
     );
   };
@@ -215,6 +218,12 @@ export const TrainingScreen = () => {
   useFocusEffect(
     React.useCallback(() => {
       const fetchData = async () => {
+        const authToken = await SecureStore.getItemAsync("rtc-token");
+
+        if (authToken) {
+          setToken(authToken);
+        }
+
         retrieveDBdata({
           tableName: "rtc_training_attendance",
           setData: setTrainings,
