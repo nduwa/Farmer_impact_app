@@ -293,6 +293,7 @@ export const InspectionsScreen = () => {
                 date: formatDate(item.inspection_at),
                 type: item.Score_n,
                 householdid: item._kf_Household,
+                conductor: item.created_by,
               }}
               handlePress={() =>
                 setInspectionModal({ open: true, id: item.id, data: item })
