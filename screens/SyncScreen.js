@@ -260,17 +260,17 @@ export const SyncScreen = ({ navigation, route }) => {
   useEffect(() => {
     const refreshSyncList = async () => {
       try {
-        if (data?.newUser) {
-          return;
-        }
-
-        setLoading(true);
-
         const authToken = await SecureStore.getItemAsync("rtc-token");
 
         if (authToken) {
           setToken(authToken);
         }
+
+        if (data?.newUser) {
+          return;
+        }
+
+        setLoading(true);
 
         const tableExistenceResults = await checkTableExistence();
 
