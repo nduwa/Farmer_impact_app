@@ -81,7 +81,8 @@ export const PendingSurveyScreen = () => {
 
     readDataFromFile(fileUri).then((data) => {
       if (data) {
-        dispatch(surveyUpload({ surveydata: data, token }));
+        dispatch(surveyUpload({ surveyData: data, token }));
+
         console.log("data extracted from the file successfully");
       }
     });
@@ -135,8 +136,6 @@ export const PendingSurveyScreen = () => {
       let surveyId = uploadModal.id;
 
       if (!surveyId) return;
-
-      console.log(surveyState);
 
       updateDBdata({
         msgNo: "Upload failed",

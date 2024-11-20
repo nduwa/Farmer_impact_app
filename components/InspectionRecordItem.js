@@ -8,7 +8,8 @@ export const InspectionRecordItems = ({ data, handlePress }) => {
   const screenWidth = Dimensions.get("window").width;
 
   return (
-    <View
+    <TouchableOpacity
+      onPress={handlePress}
       style={{
         flexDirection: "row",
         alignContent: "center",
@@ -31,7 +32,7 @@ export const InspectionRecordItems = ({ data, handlePress }) => {
             color: colors.black_letter,
           }}
         >
-          {data.type}
+          Inspection type: {data.type}
         </Text>
         <View style={{ flexDirection: "row", gap: 2, alignItems: "center" }}>
           <Text
@@ -41,29 +42,28 @@ export const InspectionRecordItems = ({ data, handlePress }) => {
               color: colors.black_letter,
             }}
           >
-            Household:
+            Conducted by:
           </Text>
           <Text
             style={{
-              fontSize: screenWidth * 0.03,
+              fontSize: screenWidth * 0.035,
               fontWeight: "500",
               color: colors.black_letter,
             }}
           >
             {" "}
-            {data.householdid}
+            {data.conductor}
           </Text>
         </View>
       </View>
-      <TouchableOpacity
-        onPress={handlePress}
+      <View
         style={{
           alignItems: "center",
           justifyContent: "center",
         }}
       >
         <AntDesign name="right" size={screenHeight * 0.034} color="black" />
-      </TouchableOpacity>
-    </View>
+      </View>
+    </TouchableOpacity>
   );
 };
