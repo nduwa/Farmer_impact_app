@@ -31,7 +31,7 @@ export const retrieveDBdataAsync = ({
       query = `SELECT questions.*,GROUP_CONCAT(answers.Eng_answer) AS answers_eng,GROUP_CONCAT(answers.Kiny_answer) AS answers_kiny,GROUP_CONCAT(answers.id) AS answers_ids FROM inspection_questions questions INNER JOIN inspection_answers answers ON questions.id = answers.question_id AND questions.evaluation_mode='Advanced' AND questions.${filterCol} = '${filterValue}' GROUP BY questions.id;`;
     }
   } else if (tableName === "trainingModules") {
-    query = `SELECT * FROM rtc_training;`;
+    query = `SELECT * FROM rtc_training WHERE status='1';`;
   } else if (tableName === "inspection_responses") {
     query = `SELECT * FROM inspection_responses WHERE ${filterCol}='${filterValue}';`;
   } else if (tableName === "rtc_inspections") {
