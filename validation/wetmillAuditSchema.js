@@ -3,7 +3,7 @@ import joi from "joi";
 
 export const cherriesSchema = joi.object({
   cherries_sms: joi.string().regex(/^[0-9]*(\.[0-9]+)?$/),
-  cherries_books: joi.string().regex(/^[0-9]*(\.[0-9]+)?$/),
+  cherries_books: joi.number().greater(0),
   discrepancy_perc_cherries: joi.string().regex(/^[0-9]*(\.[0-9]+)?$/),
   discrepancy_kgs_cherries: joi.string().regex(/^[0-9]*(\.[0-9]+)?$/),
   discrepancy_reason_cherries: joi.string().required(),

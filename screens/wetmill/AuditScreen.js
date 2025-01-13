@@ -40,6 +40,7 @@ import {
 import { getCurrentLocation } from "../../helpers/getCurrentLocation";
 import * as SecureStore from "expo-secure-store";
 import LottieView from "lottie-react-native";
+import { WetmillDetailsModal } from "../../components/WetmillDetailsModals";
 
 export const AuditScreen = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
@@ -64,6 +65,7 @@ export const AuditScreen = ({ route }) => {
   const [progress, setProgress] = useState(0);
   const [loading, setLoading] = useState(false);
   const [seasonId, setSeasonId] = useState();
+  const [token, setToken] = useState();
 
   const [reportedCherries, setReportedCherries] = useState();
   const [parchYield, setParchYield] = useState(0);
@@ -129,7 +131,9 @@ export const AuditScreen = ({ route }) => {
 
   const computeReportedKgs = () => {
     setLoading(true);
-    dispatch(getClosedTransactions({ stationId: data.__kp_Station, seasonId }));
+    dispatch(
+      getClosedTransactions({ stationId: data.__kp_Station, seasonId, token })
+    );
   };
 
   useEffect(() => {
@@ -234,6 +238,11 @@ export const AuditScreen = ({ route }) => {
     React.useCallback(() => {
       const initData = async () => {
         const season_id = await SecureStore.getItemAsync("rtc-seasons-id");
+        const authToken = await SecureStore.getItemAsync("rtc-token");
+
+        if (authToken) {
+          setToken(authToken);
+        }
 
         if (season_id) {
           setSeasonId(season_id);
@@ -498,13 +507,15 @@ export const AuditScreen = ({ route }) => {
       )}
 
       {exitModalOpen && (
-        <SyncModal
+        <WetmillDetailsModal
           label={
-            "This station doesn't have sufficient data for the audit to be done, contact support"
+            "Couldn't retrieve the necessary information for this station, please fill in the form below to resume the audit"
           }
-          mandatory={true}
-          onYes={handleBackButton}
-          OnNo={() => setExitModalOpen(false)}
+          setDetails={(values) => {
+            setReportedCherries(parseInt(values.total_kgs) || 0);
+            setBucketsYield(parseInt(values.total_buckets) || 0);
+          }}
+          CloseFn={setExitModalOpen}
         />
       )}
 

@@ -249,7 +249,7 @@ export const CheeriesAudit = ({
                     handleChange("cherries_books")(text);
 
                     let diff = parseFloat(cherriesSMS) - parseFloat(text) || 0;
-                    let perc = (diff / cherriesSMS) * 100;
+                    let perc = diff ? (diff / cherriesSMS) * 100 : 100;
                     setDiscrepancy({
                       percentage: isNaN(perc) ? 0 : perc.toFixed(2),
                       kgs: isNaN(diff) ? 0 : diff,

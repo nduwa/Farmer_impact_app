@@ -5,8 +5,13 @@ export const getClosedTransactions = createAsyncThunk(
   "wetmill/closed_transaction",
   async (data) => {
     try {
+      const { seasonId, stationId, token } = data;
+
       const response = await api.get(
-        `/sync/transactions/closed/${data.stationId}/${data.seasonId}`
+        `/sync/transactions/closed/${stationId}/${seasonId}`,
+        {
+          headers: { auth_token: `${token}` },
+        }
       );
 
       let resp = null;
