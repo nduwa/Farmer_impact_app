@@ -301,7 +301,7 @@ export const SyncScreen = ({ navigation, route }) => {
         let allowedList = ["stations", "groups", "farmers", "households"];
         setListedForSync(allowedList);
       } else if (isOnlyAccess("Wet mill audit", allAssignedModules)) {
-        let allowedList = ["stations"];
+        let allowedList = ["stations", "seasons"];
         setListedForSync(allowedList);
       } else {
         let allowedList = [];
