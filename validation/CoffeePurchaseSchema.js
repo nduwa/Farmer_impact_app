@@ -10,7 +10,7 @@ export const CoffeePurchaseSchema = joi.object({
     .string()
     .regex(/^[a-zA-Z0-9 \s]+$/)
     .required(),
-  certificationType: joi.string().required(),
+  certification: joi.string().required(),
   coffeeType: joi.string().required(),
   phone: joi
     .string()
@@ -31,7 +31,7 @@ export const CoffeePurchaseSchema = joi.object({
   priceBad: joi.number().optional(),
   totalBad: joi.optional(),
   transactionDate: joi.date().required(),
-  deliveredGender: joi.string().optional(),
+  deliveredGender: joi.string().valid("F", "M").required(),
   deliveredName: joi.string().optional(),
   deliveredPhone: joi.string().optional(),
 });

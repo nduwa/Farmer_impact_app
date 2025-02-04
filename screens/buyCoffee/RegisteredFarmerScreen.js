@@ -31,7 +31,7 @@ export const RegisteredFarmerScreen = ({ route }) => {
   const screenWidth = Dimensions.get("window").width;
 
   const [currentCertificationType, setCurrentCertificationType] =
-    useState("CP");
+    useState("NC");
   const [currentCoffeeType, setCurrentCoffeeType] = useState("Cherry");
   const [date, setDate] = useState(new Date());
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
@@ -54,11 +54,9 @@ export const RegisteredFarmerScreen = ({ route }) => {
   const [farmerSeasonTransactions, setFarmerSeasonTransactions] = useState(0);
   const [farmerSeasonWeight, setFarmerSeasonWeight] = useState(0);
   const [currentHousehold, setCurrentHousehold] = useState(null);
-  const [farmerCertified, setFarmerCertified] = useState(false);
-  const [certifications, setCertifications] = useState([]);
   const [submitted, setSubmitted] = useState(false);
   const [deliveredGender, setDeliveredGender] = useState();
-  const [folded, setFolded] = useState(true);
+  const [folded, setFolded] = useState(false);
   const [errors, setErrors] = useState({}); // validation errors
 
   const toggleFold = () => {
@@ -168,28 +166,32 @@ export const RegisteredFarmerScreen = ({ route }) => {
         supplierId: supplierData[0].Supplier_ID_t,
       });
 
+      let transaction_certified = currentCertificationType !== "NC";
+
       let formData = {
         lotnumber,
         site_day_lot,
-        cherry_lot_id,
-        parchment_lot_id,
+        cherry_lot_id: `${cherry_lot_id}${transaction_certified ? "C" : "UC"}`,
+        parchment_lot_id: `${parchment_lot_id}${
+          transaction_certified ? "C" : "UC"
+        }`,
         bad_cherry_lot_id,
         bad_parch_lot_id,
         created_at: getCurrentDate(transactionData.transactionDate),
         farmerid: transactionData.farmerID,
         farmername: transactionData.farmerName,
-        coffee_type: transactionData.coffeeType,
+        coffee_type: currentCoffeeType,
         kilograms: transactionData.kgGood,
         unitprice: transactionData.priceGood,
         transaction_date: getCurrentDate(transactionData.transactionDate),
-        certification: transactionData.certificationType,
+        certification: currentCertificationType,
         _kf_Staff: staffKf,
         _kf_Station: stationId,
         _kf_Supplier: supplierData[0].__kp_Supplier,
         uploaded: 0,
         uploaded_at: "0000-00-00",
         paper_receipt: transactionData.receiptNumber,
-        certified: transactionData.certificationType === "NC" ? 0 : 1,
+        certified: currentCertificationType === "NC" ? 0 : 1,
         edited: 0,
         cash_paid: transactionData.cashTotal,
         traceable: 1,
@@ -212,7 +214,12 @@ export const RegisteredFarmerScreen = ({ route }) => {
       setSubmitData(formData);
       setValidationError({ message: null, type: null });
 
-      if (validateInputs(transactionData)) {
+      if (
+        validateInputs({
+          ...transactionData,
+          ...{ certification: currentCertificationType, deliveredGender },
+        })
+      ) {
         validateTransaction({
           farmerid: formData.farmerid,
           kgsBad: formData.bad_kilograms,
@@ -300,25 +307,6 @@ export const RegisteredFarmerScreen = ({ route }) => {
       setFarmerSeasonWeight(weight);
     }
   }, [farmerSeasonTransactions.length]);
-
-  useEffect(() => {
-    if (currentHousehold) {
-      let certs = [{ label: "Not Certified", value: "NC" }];
-      if (currentHousehold[0].InspectionStatus === "Active") {
-        setFarmerCertified(true);
-
-        certs = [
-          { label: "Cafe Practices", value: "CP" },
-          { label: "Rain Forest", value: "RF" },
-          ...certs,
-        ];
-      } else {
-        setCurrentCertificationType("NC");
-      }
-
-      setCertifications(certs);
-    }
-  }, [currentHousehold]);
 
   useEffect(() => {
     const fetchIds = async () => {
@@ -420,7 +408,6 @@ export const RegisteredFarmerScreen = ({ route }) => {
             farmerName: data.Name,
             receiptNumber: "",
             transactionDate: date,
-            certificationType: currentCertificationType,
             coffeeType: currentCoffeeType,
             kgGood: "0",
             priceGood: "0",
@@ -729,33 +716,61 @@ export const RegisteredFarmerScreen = ({ route }) => {
                   >
                     Certification Type
                   </Text>
-                  {certifications.length > 0 && (
-                    <RadioButtonGroup
-                      containerStyle={{ marginBottom: 10, gap: 5 }}
-                      selected={currentCertificationType}
-                      onSelected={(value) => setCurrentCertificationType(value)}
-                      radioBackground={colors.blue_font}
-                    >
-                      {certifications.map((item) => (
-                        <RadioButtonItem
-                          key={item.value}
-                          value={item.value}
-                          label={
-                            <Text
-                              style={{
-                                fontWeight: "600",
-                                fontSize: 16,
-                                marginLeft: 8,
-                                color: colors.black,
-                              }}
-                            >
-                              {item.label}
-                            </Text>
-                          }
-                        />
-                      ))}
-                    </RadioButtonGroup>
-                  )}
+                  <RadioButtonGroup
+                    containerStyle={{ marginBottom: 10, gap: 5 }}
+                    selected={currentCertificationType}
+                    onSelected={(value) => setCurrentCertificationType(value)}
+                    radioBackground={colors.blue_font}
+                  >
+                    <RadioButtonItem
+                      key={"CP"}
+                      value={"CP"}
+                      label={
+                        <Text
+                          style={{
+                            fontWeight: "600",
+                            fontSize: 16,
+                            marginLeft: 8,
+                            color: colors.black,
+                          }}
+                        >
+                          Cafe Practices
+                        </Text>
+                      }
+                    />
+                    <RadioButtonItem
+                      key={"RF"}
+                      value={"RF"}
+                      label={
+                        <Text
+                          style={{
+                            fontWeight: "600",
+                            fontSize: 16,
+                            marginLeft: 8,
+                            color: colors.black,
+                          }}
+                        >
+                          Rain Forest
+                        </Text>
+                      }
+                    />
+                    <RadioButtonItem
+                      key={"NC"}
+                      value={"NC"}
+                      label={
+                        <Text
+                          style={{
+                            fontWeight: "600",
+                            fontSize: 16,
+                            marginLeft: 8,
+                            color: colors.black,
+                          }}
+                        >
+                          Not Certified
+                        </Text>
+                      }
+                    />
+                  </RadioButtonGroup>
                 </View>
 
                 {/* coffee type */}
