@@ -183,7 +183,7 @@ export const RegisteredFarmerScreen = ({ route }) => {
         coffee_type: currentCoffeeType,
         kilograms: transactionData.kgGood,
         unitprice: transactionData.priceGood,
-        transaction_date: getCurrentDate(transactionData.transactionDate),
+        transaction_date: getCurrentDate(date),
         certification: currentCertificationType,
         _kf_Staff: staffKf,
         _kf_Station: stationId,
@@ -600,7 +600,7 @@ export const RegisteredFarmerScreen = ({ route }) => {
                         marginLeft: screenWidth * 0.02,
                       }}
                     >
-                      Delivered by (optional)
+                      Delivered by
                     </Text>
                     {folded ? (
                       <TouchableOpacity onPress={toggleFold}>
