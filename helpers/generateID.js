@@ -4,10 +4,11 @@ export const generateID = ({
   supplierId = null,
   username = null,
   userID = null,
+  date = null,
 }) => {
   try {
     let id;
-    const currentDate = new Date();
+    const currentDate = date || new Date();
     const twoDigitYear = currentDate.getFullYear().toString().slice(-2);
     const twoDigitMonth = ("0" + (currentDate.getMonth() + 1)).slice(-2);
     const twoDigitDay = ("0" + currentDate.getDate()).slice(-2);
@@ -32,6 +33,8 @@ export const generateID = ({
     } else if (type === "bad_parch_lot_id") {
       if (!supplierId) return;
       id = `${twoDigitYear}${supplierId}P${twoDigitDay}${twoDigitMonth}F`;
+    } else if (type === "day_lot_number") {
+      id = `${twoDigitDay}${twoDigitMonth}${twoDigitYear}`;
     } else if (type === "uuid") {
       const timestamp = Math.floor(Date.now() / 1000);
       id = `${username}${timestamp}${userID}`;

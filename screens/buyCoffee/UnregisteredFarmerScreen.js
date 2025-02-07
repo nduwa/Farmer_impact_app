@@ -143,23 +143,27 @@ export const UnRegisteredFarmerScreen = () => {
 
   const submitTransaction = async (transactionData) => {
     try {
-      let lotnumber = generateID({ type: "lotnumber", staffId });
-      let site_day_lot = generateID({ type: "site_day_lot", staffId });
+      let lotnumber = generateID({ type: "lotnumber", staffId, date });
+      let site_day_lot = generateID({ type: "site_day_lot", staffId, date });
       let cherry_lot_id = generateID({
         type: "cherry_lot_id",
         supplierId: supplierData[0].Supplier_ID_t,
+        date,
       });
       let parchment_lot_id = generateID({
         type: "parchment_lot_id",
         supplierId: supplierData[0].Supplier_ID_t,
+        date,
       });
       let bad_cherry_lot_id = generateID({
         type: "bad_cherry_lot_id",
         supplierId: supplierData[0].Supplier_ID_t,
+        date,
       });
       let bad_parch_lot_id = generateID({
         type: "bad_parch_lot_id",
         supplierId: supplierData[0].Supplier_ID_t,
+        date,
       });
 
       let transaction_certified = currentCertificationType !== "NC";
@@ -171,9 +175,10 @@ export const UnRegisteredFarmerScreen = () => {
         parchment_lot_id: `${parchment_lot_id}${
           transaction_certified ? "C" : "UC"
         }`,
+        DayLotNumber: generateID({ type: "day_lot_number", date }),
         bad_cherry_lot_id,
         bad_parch_lot_id,
-        created_at: getCurrentDate(transactionData.transactionDate),
+        created_at: getCurrentDate(date),
         farmerid: "",
         farmername: transactionData.farmerName,
         coffee_type: currentCoffeeType,
