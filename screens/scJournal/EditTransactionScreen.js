@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import * as SecureStore from "expo-secure-store";
 import { colors } from "../../data/colors";
 import { AntDesign } from "@expo/vector-icons";
 import { Formik } from "formik";
@@ -27,6 +28,9 @@ import { validateTransaction } from "../../helpers/validateTransaction";
 import { retrieveDBdata } from "../../helpers/retrieveDBdata";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { CoffeePurchaseSchema } from "../../validation/CoffeePurchaseSchema";
+import { generateID } from "../../helpers/generateID";
+import { getCurrentDate } from "../../helpers/getCurrentDate";
+import { EditTransactionSchema } from "../../validation/EditTransactionSchema";
 
 export const EditTransactionScreen = ({ route }) => {
   const screenHeight = Dimensions.get("window").height;
@@ -50,6 +54,9 @@ export const EditTransactionScreen = ({ route }) => {
   const [farmerSeasonTransactions, setFarmerSeasonTransactions] = useState(0);
   const [farmerSeasonWeight, setFarmerSeasonWeight] = useState(0);
 
+  const [supplierData, setSupplierData] = useState(null);
+  const [staffId, setStaffId] = useState(null);
+
   const [currentTransactionData, setcurrentTransactionData] = useState({});
   const [updateQuery, setUpdateQuery] = useState("");
 
@@ -61,6 +68,8 @@ export const EditTransactionScreen = ({ route }) => {
   const [folded, setFolded] = useState(true);
   const [errors, setErrors] = useState({}); // validation errors
 
+  const [isDateEdited, setIsDateEdited] = useState(false);
+
   const toggleFold = () => {
     setFolded(!folded);
   };
@@ -69,8 +78,9 @@ export const EditTransactionScreen = ({ route }) => {
     const currentDate = selectedDate;
     setShow(false);
     setDate(currentDate);
+    setIsDateEdited(true);
     setDisplayDate(
-      date.toLocaleString("en-US", {
+      currentDate.toLocaleString("en-US", {
         weekday: "long",
         day: "numeric",
         month: "long",
@@ -125,7 +135,7 @@ export const EditTransactionScreen = ({ route }) => {
   };
 
   const validateInputs = (values) => {
-    if (!validateForm(values, CoffeePurchaseSchema)) {
+    if (!validateForm(values, EditTransactionSchema)) {
       setValidationError({
         type: "emptyOrInvalidData",
         message: "Invalid inputs detected",
@@ -140,6 +150,8 @@ export const EditTransactionScreen = ({ route }) => {
 
   const submitTransaction = async (transactionData) => {
     try {
+      let query = "";
+
       let editedData = {
         coffee_type: currentCoffeeType,
         kilograms: transactionData.kgGood,
@@ -161,11 +173,58 @@ export const EditTransactionScreen = ({ route }) => {
       if (priceGood < 1) editedData.kilograms = 0;
       if (priceBad < 1) editedData.bad_kilograms = 0;
 
+      if (isDateEdited) {
+        let lotnumber = generateID({ type: "lotnumber", staffId, date });
+
+        let site_day_lot = generateID({ type: "site_day_lot", staffId, date });
+        let cherry_lot_id = generateID({
+          type: "cherry_lot_id",
+          supplierId: supplierData.Supplier_ID_t,
+          date,
+        });
+
+        let parchment_lot_id = generateID({
+          type: "parchment_lot_id",
+          supplierId: supplierData.Supplier_ID_t,
+          date,
+        });
+        let bad_cherry_lot_id = generateID({
+          type: "bad_cherry_lot_id",
+          supplierId: supplierData.Supplier_ID_t,
+          date,
+        });
+        let bad_parch_lot_id = generateID({
+          type: "bad_parch_lot_id",
+          supplierId: supplierData.Supplier_ID_t,
+          date,
+        });
+
+        let transaction_certified = currentCertificationType !== "NC";
+
+        let regeneratedDatesAndIds = {
+          lotnumber,
+          site_day_lot,
+          cherry_lot_id: `${cherry_lot_id}${
+            transaction_certified ? "C" : "UC"
+          }`,
+          parchment_lot_id: `${parchment_lot_id}${
+            transaction_certified ? "C" : "UC"
+          }`,
+          DayLotNumber: generateID({ type: "day_lot_number", date }),
+          bad_cherry_lot_id,
+          bad_parch_lot_id,
+          created_at: getCurrentDate(date),
+          transaction_date: getCurrentDate(date),
+        };
+
+        query = `UPDATE rtc_transactions SET lotnumber='${regeneratedDatesAndIds.lotnumber}', site_day_lot='${regeneratedDatesAndIds.site_day_lot}', cherry_lot_id='${regeneratedDatesAndIds.cherry_lot_id}', parchment_lot_id='${regeneratedDatesAndIds.parchment_lot_id}', bad_cherry_lot_id='${regeneratedDatesAndIds.bad_cherry_lot_id}', bad_parch_lot_id='${regeneratedDatesAndIds.bad_parch_lot_id}', transaction_date='${regeneratedDatesAndIds.transaction_date}', created_at='${regeneratedDatesAndIds.created_at}', coffee_type='${editedData.coffee_type}', kilograms=${editedData.kilograms}, unitprice=${editedData.unitprice}, certification='${editedData.certification}', certified=${editedData.certified}, edited=${editedData.edited}, cash_paid=${editedData.cash_paid}, total_mobile_money_payment=${editedData.total_mobile_money_payment}, bad_unit_price=${editedData.bad_unit_price}, bad_kilograms=${editedData.bad_kilograms}, deliveredBy_gender='${editedData.deliveredBy_gender}' WHERE paper_receipt=${data.receiptId}`;
+      } else {
+        query = `UPDATE rtc_transactions SET coffee_type='${editedData.coffee_type}', kilograms=${editedData.kilograms}, unitprice=${editedData.unitprice}, certification='${editedData.certification}', certified=${editedData.certified}, edited=${editedData.edited}, cash_paid=${editedData.cash_paid}, total_mobile_money_payment=${editedData.total_mobile_money_payment}, bad_unit_price=${editedData.bad_unit_price}, bad_kilograms=${editedData.bad_kilograms}, deliveredBy_gender='${editedData.deliveredBy_gender}' WHERE paper_receipt=${data.receiptId}`;
+      }
+
       setValidationError({ message: null, type: null });
 
-      if (validateInputs(transactionData)) {
-        let query = `UPDATE rtc_transactions SET coffee_type='${editedData.coffee_type}', kilograms=${editedData.kilograms}, unitprice=${editedData.unitprice}, certification='${editedData.certification}', certified=${editedData.certified}, edited=${editedData.edited}, cash_paid=${editedData.cash_paid}, total_mobile_money_payment=${editedData.total_mobile_money_payment}, bad_unit_price=${editedData.bad_unit_price}, bad_kilograms=${editedData.bad_kilograms}, deliveredBy_gender='${editedData.deliveredBy_gender}' WHERE paper_receipt=${data.receiptId}`;
-
+      if (validateInputs({ ...editedData })) {
         setUpdateQuery(query);
         validateTransaction({
           farmerid: currentTransactionData.farmerid,
@@ -261,6 +320,27 @@ export const EditTransactionScreen = ({ route }) => {
     React.useCallback(() => {
       const fetchData = async () => {
         let transaction = {};
+
+        let staffID = await SecureStore.getItemAsync("rtc-user-staff-id");
+        let supplierID = await SecureStore.getItemAsync("rtc-supplier-id");
+
+        if (supplierID) {
+          retrieveDBdataAsync({
+            tableName: "rtc_supplier",
+            filterValue: supplierID,
+            filterCol: "__kp_Supplier",
+          })
+            .then((result) => {
+              setSupplierData(result);
+            })
+            .catch((error) => {
+              console.log("Error loading data for this transaction: ", error);
+              setCurrentJob("loading data for this transaction failed");
+            });
+        }
+
+        setStaffId(staffID);
+
         retrieveDBdataAsync({
           tableName: "rtc_transactions",
           filterValue: data.receiptId,
@@ -274,7 +354,8 @@ export const EditTransactionScreen = ({ route }) => {
             const dateString = result[0].transaction_date;
             const dateObj = new Date(dateString);
             const isoDateString = dateObj.toISOString();
-            setDate(isoDateString);
+            setDate(dateObj);
+
             setCurrentCertificationType(result[0].certification);
             setCurrentCoffeeType(result[0].coffee_type);
             setDisplayDate(
@@ -304,7 +385,10 @@ export const EditTransactionScreen = ({ route }) => {
 
       fetchData();
       return () => {
-        // Cleanup code if needed
+        setIsDateEdited(false);
+        setStaffId(null);
+        setSupplierData(null);
+        setSubmitted(false);
       };
     }, [route.params.data])
   );
@@ -361,7 +445,6 @@ export const EditTransactionScreen = ({ route }) => {
               farmerName: currentTransactionData.farmername,
               receiptNumber: currentTransactionData.paper_receipt,
               transactionDate: currentTransactionData.transaction_date,
-              certificationType: currentTransactionData.certification,
               coffeeType: currentTransactionData.coffee_type,
               kgGood: currentTransactionData.kilograms,
               priceGood: currentTransactionData.unitprice,
@@ -490,7 +573,6 @@ export const EditTransactionScreen = ({ route }) => {
                             backgroundColor: colors.white_variant,
                             elevation: 4,
                           }}
-                          disabled={true}
                           onPress={showDatepicker}
                         >
                           <AntDesign
@@ -572,7 +654,7 @@ export const EditTransactionScreen = ({ route }) => {
                         }
                       />
                       <RadioButtonItem
-                        value="RA"
+                        value={"RF"}
                         label={
                           <Text
                             style={{

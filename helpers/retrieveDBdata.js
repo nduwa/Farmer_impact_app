@@ -5,6 +5,7 @@ const db = SQLite.openDatabase(DB_NAME);
 
 export const retrieveDBdata = ({
   stationId = null,
+  supplierID = null,
   groupID = null,
   queryArg = null,
   tableName,
@@ -21,7 +22,9 @@ export const retrieveDBdata = ({
       queryArg ||
       `SELECT * FROM ${tableName} WHERE _kf_Station='${stationId}' AND _kf_Group='${groupID}' AND deleted = 0`;
   } else if (tableName === "rtc_supplier") {
-    query = queryArg || `SELECT * FROM ${tableName}`;
+    query =
+      queryArg ||
+      `SELECT * FROM ${tableName} WHERE __kp_Supplier='${supplierID}'`;
   } else if (tableName === "rtc_transactions") {
     query = queryArg || `SELECT * FROM ${tableName}`;
   } else if (tableName === "rtc_households") {
