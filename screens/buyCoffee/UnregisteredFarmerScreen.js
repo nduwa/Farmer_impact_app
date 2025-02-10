@@ -32,7 +32,6 @@ export const UnRegisteredFarmerScreen = () => {
   const [currentCertificationType, setCurrentCertificationType] =
     useState("NC");
   const [currentCoffeeType, setCurrentCoffeeType] = useState("Cherry");
-  const [indicatorVisible, setIndicatorVisibility] = useState(false);
   const [date, setDate] = useState(new Date());
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
   const [currentJob, setCurrentJob] = useState(null);
@@ -51,7 +50,7 @@ export const UnRegisteredFarmerScreen = () => {
   const [stationId, setStationId] = useState(null);
   const [supplierData, setSupplierData] = useState(null);
   const [submitData, setSubmitData] = useState(null);
-  const [folded, setFolded] = useState(true);
+  const [folded, setFolded] = useState(false);
   const [errors, setErrors] = useState({}); // validation errors
   const [deliveredGender, setDeliveredGender] = useState();
 
@@ -144,47 +143,56 @@ export const UnRegisteredFarmerScreen = () => {
 
   const submitTransaction = async (transactionData) => {
     try {
-      let lotnumber = generateID({ type: "lotnumber", staffId });
-      let site_day_lot = generateID({ type: "site_day_lot", staffId });
+      let lotnumber = generateID({ type: "lotnumber", staffId, date });
+      let site_day_lot = generateID({ type: "site_day_lot", staffId, date });
       let cherry_lot_id = generateID({
         type: "cherry_lot_id",
         supplierId: supplierData[0].Supplier_ID_t,
+        date,
       });
       let parchment_lot_id = generateID({
         type: "parchment_lot_id",
         supplierId: supplierData[0].Supplier_ID_t,
+        date,
       });
       let bad_cherry_lot_id = generateID({
         type: "bad_cherry_lot_id",
         supplierId: supplierData[0].Supplier_ID_t,
+        date,
       });
       let bad_parch_lot_id = generateID({
         type: "bad_parch_lot_id",
         supplierId: supplierData[0].Supplier_ID_t,
+        date,
       });
+
+      let transaction_certified = currentCertificationType !== "NC";
 
       let formData = {
         lotnumber,
         site_day_lot,
-        cherry_lot_id,
-        parchment_lot_id,
+        cherry_lot_id: `${cherry_lot_id}${transaction_certified ? "C" : "UC"}`,
+        parchment_lot_id: `${parchment_lot_id}${
+          transaction_certified ? "C" : "UC"
+        }`,
+        DayLotNumber: generateID({ type: "day_lot_number", date }),
         bad_cherry_lot_id,
         bad_parch_lot_id,
-        created_at: getCurrentDate(transactionData.transactionDate),
+        created_at: getCurrentDate(date),
         farmerid: "",
         farmername: transactionData.farmerName,
-        coffee_type: transactionData.coffeeType,
+        coffee_type: currentCoffeeType,
         kilograms: transactionData.kgGood,
         unitprice: transactionData.priceGood,
-        transaction_date: getCurrentDate(transactionData.transactionDate),
-        certification: transactionData.certificationType,
+        transaction_date: getCurrentDate(date),
+        certification: currentCertificationType,
         _kf_Staff: staffKf,
         _kf_Station: stationId,
         _kf_Supplier: supplierData[0].__kp_Supplier,
         uploaded: 0,
         uploaded_at: "0000-00-00",
         paper_receipt: transactionData.receiptNumber,
-        certified: transactionData.certificationType === "NC" ? 0 : 1,
+        certified: currentCertificationType === "NC" ? 0 : 1,
         edited: 0,
         cash_paid: transactionData.cashTotal,
         traceable: 0,
@@ -207,7 +215,12 @@ export const UnRegisteredFarmerScreen = () => {
       setSubmitData(formData);
       setValidationError({ message: null, type: null });
 
-      if (validateInputs(transactionData)) {
+      if (
+        validateInputs({
+          ...transactionData,
+          ...{ certification: currentCertificationType, deliveredGender },
+        })
+      ) {
         setTransValidate(true);
       }
     } catch (error) {
@@ -356,7 +369,6 @@ export const UnRegisteredFarmerScreen = () => {
             farmerID: "not applicable",
             receiptNumber: "",
             transactionDate: date,
-            certificationType: currentCertificationType,
             coffeeType: currentCoffeeType,
             kgGood: "0",
             priceGood: "0",
@@ -865,7 +877,7 @@ export const UnRegisteredFarmerScreen = () => {
                         marginLeft: screenWidth * 0.02,
                       }}
                     >
-                      Delivered by (optional)
+                      Delivered by
                     </Text>
                     {folded ? (
                       <TouchableOpacity onPress={toggleFold}>

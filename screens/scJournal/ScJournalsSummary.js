@@ -74,18 +74,13 @@ export const ScJournalsSummary = ({ route }) => {
 
   const handleSubmitJournal = () => {
     const journalId = data.site_day_lot;
-    const currentDate = new Date();
-    const twoDigitYear = currentDate.getFullYear().toString().slice(-2);
-    const twoDigitMonth = ("0" + (currentDate.getMonth() + 1)).slice(-2);
-    const twoDigitDay = ("0" + currentDate.getDate()).slice(-2);
-    let DayLotNumber = `${twoDigitDay}${twoDigitMonth}${twoDigitYear}`;
 
     setLoadingData(true);
     dispatch(
       scJournalSubmission({
         journalId,
         transactions: journalDataUploadable,
-        additional: { username: userName, password: "", DayLotNumber },
+        additional: { username: userName, password: "" },
         token,
       })
     );
