@@ -188,7 +188,9 @@ export const prepareReportFile = async (
     <div class="container">
       <div class="header">
         <img
-          src="${Asset.fromModule(require("../data/images/rtclogo.png")).uri}"
+          src="${await uritoBase64(
+            Asset.fromModule(require("../data/images/rtclogo.png")).uri
+          )}"
           alt="logo"
           class="logo"
         />
@@ -473,15 +475,15 @@ export const prepareReportFile = async (
       </div>
 
       <div class="location">
-        <img src="${
+        <img src="${await uritoBase64(
           Asset.fromModule(require("../data/images/location.png")).uri
-        }" alt="" class="img-icon" />
+        )}" alt="" class="img-icon" />
         <a href="http://maps.google.com/maps?z=12&t=m&q=loc:${
           location?.coords?.latitude
         }+${location?.coords?.longitude}"
-          >http://maps.google.com/maps?z=12&t=m&q=loc:${location?.coords?.latitude}+${
-    location?.coords?.longitude
-  }</a
+          >http://maps.google.com/maps?z=12&t=m&q=loc:${
+            location?.coords?.latitude
+          }+${location?.coords?.longitude}</a
         >
       </div>
     </div>
