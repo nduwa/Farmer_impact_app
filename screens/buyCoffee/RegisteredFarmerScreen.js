@@ -318,15 +318,20 @@ export const RegisteredFarmerScreen = ({ route }) => {
       let staffID = await SecureStore.getItemAsync("rtc-user-staff-id");
       let staffKF = await SecureStore.getItemAsync("rtc-user-staff-kf");
       let stationID = await SecureStore.getItemAsync("rtc-station-id");
+      let supplierID = await SecureStore.getItemAsync("rtc-supplier-id");
       let names = await SecureStore.getItemAsync("rtc-name-full");
       let seasonID = await SecureStore.getItemAsync("rtc-seasons-id");
 
-      if (stationID) {
+      if (supplierID) {
         retrieveDBdata({
-          stationId,
+          supplierID,
           tableName: "rtc_supplier",
           setData: setSupplierData,
         });
+      }
+
+      if (stationID) {
+        setStationId(stationID);
       }
 
       if (seasonID) {
@@ -345,7 +350,7 @@ export const RegisteredFarmerScreen = ({ route }) => {
 
       setStaffId(staffID);
       setStaffKf(staffKF);
-      setStationId(stationID);
+
       setUserName(names);
       setSeasonId(seasonID);
     };

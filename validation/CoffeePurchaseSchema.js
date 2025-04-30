@@ -4,7 +4,7 @@ import joi from "joi";
 export const CoffeePurchaseSchema = joi.object({
   farmerName: joi
     .string()
-    .regex(/^[a-zA-Z \s]+$/)
+    .regex(/^[a-zA-Z\s.'’]+$/)
     .required(),
   farmerID: joi
     .string()

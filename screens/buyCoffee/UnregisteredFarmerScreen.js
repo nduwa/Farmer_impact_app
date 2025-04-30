@@ -293,13 +293,18 @@ export const UnRegisteredFarmerScreen = () => {
       let stationID = await SecureStore.getItemAsync("rtc-station-id");
       let names = await SecureStore.getItemAsync("rtc-name-full");
       let seasonID = await SecureStore.getItemAsync("rtc-seasons-id");
+      let supplierID = await SecureStore.getItemAsync("rtc-supplier-id");
 
-      if (stationID) {
+      if (supplierID) {
         retrieveDBdata({
-          stationId,
+          supplierID,
           tableName: "rtc_supplier",
           setData: setSupplierData,
         });
+      }
+
+      if (stationID) {
+        setStationId(stationID);
       }
 
       retrieveDBdata({
@@ -310,7 +315,6 @@ export const UnRegisteredFarmerScreen = () => {
 
       setStaffId(staffID);
       setStaffKf(staffKF);
-      setStationId(stationID);
       setUserName(names);
       setSeasonId(seasonID);
     };

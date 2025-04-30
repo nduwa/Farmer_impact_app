@@ -37,11 +37,11 @@ export const newFarmerSchema = joi.object({
     .required(),
   farmer_name: joi
     .string()
-    .regex(/^[a-zA-Z0-9 \s]+$/)
+    .regex(/^[a-zA-Z\s.'’]+$/)
     .required(),
   full_name: joi
     .string()
-    .regex(/^[a-zA-Z0-9 \s]+$/)
+    .regex(/^[a-zA-Z\s.'’]+$/)
     .required(),
   National_ID: joi
     .string()
